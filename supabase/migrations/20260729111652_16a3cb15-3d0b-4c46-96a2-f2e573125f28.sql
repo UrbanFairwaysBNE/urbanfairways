@@ -1,1 +1,0 @@
-UPDATE public.recording_sessions SET round_number = 1 WHERE trigger_source = 'local_comp' AND round_number IS DISTINCT FROM 1;

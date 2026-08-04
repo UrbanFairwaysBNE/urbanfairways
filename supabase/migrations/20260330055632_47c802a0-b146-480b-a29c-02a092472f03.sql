@@ -1,1 +1,0 @@
-DELETE FROM marketing_campaigns WHERE id = '0482c24c-e40f-49bb-8197-aa5e1b25be19'

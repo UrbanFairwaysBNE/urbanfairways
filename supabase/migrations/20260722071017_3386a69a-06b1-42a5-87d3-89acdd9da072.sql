@@ -1,1 +1,0 @@
-UPDATE public.recording_sessions SET mkv_path = id || '/session-' || id || '.mkv' WHERE id = 'a44007bb-06f1-4ca2-9522-202251542b97' AND mkv_path IS NULL;

@@ -1,1 +1,0 @@
-UPDATE public.door_access_settings SET tuya_device_id = 'bfa3d7dafeea0fd8a8k9va', tuya_region = 'eu' WHERE id = 'global';

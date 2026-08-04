@@ -1,1 +1,0 @@
-ALTER TABLE public.recording_holes ADD COLUMN IF NOT EXISTS pre_existing boolean NOT NULL DEFAULT false;

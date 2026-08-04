@@ -1,1 +1,0 @@
-UPDATE public.gift_cards SET status='pending', paid_at=now(), sent_at=now() WHERE id='5e7f5ca7-c810-45bd-b8ea-fd8f71e9c6e4';

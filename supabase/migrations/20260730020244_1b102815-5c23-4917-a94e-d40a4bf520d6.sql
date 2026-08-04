@@ -1,1 +1,0 @@
-update public.recording_sessions set stream_status = 'ready', stream_error = null where id = '3bda7655-5232-4446-abeb-6da53b59ff6b';

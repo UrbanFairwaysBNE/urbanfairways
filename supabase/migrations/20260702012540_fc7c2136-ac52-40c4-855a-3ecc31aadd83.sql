@@ -1,1 +1,0 @@
-CREATE POLICY "Users delete own range sessions" ON public.range_sessions FOR DELETE USING ((auth.uid() = user_id) OR has_role(auth.uid(), 'admin'::app_role));

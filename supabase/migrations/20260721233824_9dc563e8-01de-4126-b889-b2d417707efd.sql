@@ -1,1 +1,0 @@
-ALTER TABLE public.system_settings ADD COLUMN IF NOT EXISTS highlight_retention_days integer NOT NULL DEFAULT 14;

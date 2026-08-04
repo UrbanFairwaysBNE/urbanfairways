@@ -1,1 +1,0 @@
-DELETE FROM comp_survey_responses WHERE id IN ('3c10c7f4-ec28-418c-884a-32c0be4e9b10', '65887894-d0ba-4ac0-9d58-845f43d1eb1f');

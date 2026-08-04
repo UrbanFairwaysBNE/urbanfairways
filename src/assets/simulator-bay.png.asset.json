@@ -1,11 +1,11 @@
 {
-  "version": 1,
   "asset_id": "8d05a7fd-aaa8-4a22-a5b0-15e052d4a88b",
-  "project_id": "2dd031ea-6dc9-4817-8f32-786da51fac0d",
-  "url": "/__l5e/assets-v1/8d05a7fd-aaa8-4a22-a5b0-15e052d4a88b/simulator-bay.png",
-  "r2_key": "a/v1/2dd031ea-6dc9-4817-8f32-786da51fac0d/8d05a7fd-aaa8-4a22-a5b0-15e052d4a88b/simulator-bay.png",
-  "original_filename": "simulator-bay.png",
-  "size": 2632249,
   "content_type": "image/png",
-  "created_at": "2026-06-24T03:32:41Z"
+  "created_at": "2026-06-24T03:32:41Z",
+  "original_filename": "simulator-bay.png",
+  "project_id": "8d478dd7-ef93-415d-8b99-fbbc568646b2",
+  "r2_key": "a/v1/8d478dd7-ef93-415d-8b99-fbbc568646b2/8d05a7fd-aaa8-4a22-a5b0-15e052d4a88b/simulator-bay.png",
+  "size": 2632249,
+  "url": "/__l5e/assets-v1/8d05a7fd-aaa8-4a22-a5b0-15e052d4a88b/simulator-bay.png",
+  "version": 1
 }

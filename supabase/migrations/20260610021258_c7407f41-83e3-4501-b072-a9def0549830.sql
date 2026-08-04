@@ -1,1 +1,0 @@
-DROP TRIGGER IF EXISTS trg_block_booking_on_payment_failure ON public.bookings;

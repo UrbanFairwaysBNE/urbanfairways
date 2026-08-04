@@ -1,1 +1,0 @@
-UPDATE public.bookings SET status='cancelled', cancellation_reason='Duplicate accidental booking - refunded to card (bug: Eagle→Birdie signup flow double-fired)', updated_at=now() WHERE id='ae740e88-dbf1-45fc-8f9f-4fecc390a751';

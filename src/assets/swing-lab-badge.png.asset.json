@@ -1,11 +1,11 @@
 {
-  "version": 1,
   "asset_id": "1403e41b-82e0-410c-82df-5fcd80806581",
-  "project_id": "2dd031ea-6dc9-4817-8f32-786da51fac0d",
-  "url": "/__l5e/assets-v1/1403e41b-82e0-410c-82df-5fcd80806581/swing-lab-badge.png",
-  "r2_key": "a/v1/2dd031ea-6dc9-4817-8f32-786da51fac0d/1403e41b-82e0-410c-82df-5fcd80806581/swing-lab-badge.png",
-  "original_filename": "swing-lab-badge.png",
-  "size": 289438,
   "content_type": "image/png",
-  "created_at": "2026-07-16T00:41:47Z"
+  "created_at": "2026-07-16T00:41:47Z",
+  "original_filename": "swing-lab-badge.png",
+  "project_id": "8d478dd7-ef93-415d-8b99-fbbc568646b2",
+  "r2_key": "a/v1/8d478dd7-ef93-415d-8b99-fbbc568646b2/1403e41b-82e0-410c-82df-5fcd80806581/swing-lab-badge.png",
+  "size": 289438,
+  "url": "/__l5e/assets-v1/1403e41b-82e0-410c-82df-5fcd80806581/swing-lab-badge.png",
+  "version": 1
 }

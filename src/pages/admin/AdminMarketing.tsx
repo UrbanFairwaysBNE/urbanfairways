@@ -41,14 +41,11 @@ import {
   Search,
   Pencil,
   Zap,
-  Star,
   MessageSquare,
   Frown,
   Meh,
   Smile,
-  ClipboardList,
 } from "lucide-react";
-import { ReviewApprovals } from "@/components/admin/ReviewApprovals";
 import { EmailPreviewFrame } from "@/components/admin/EmailPreviewFrame";
 
 interface Campaign {
@@ -566,17 +563,9 @@ export default function AdminMarketing() {
               <FileText className="h-4 w-4" />
               Templates
             </TabsTrigger>
-            <TabsTrigger value="reviews" className="flex items-center gap-2">
-              <Star className="h-4 w-4" />
-              Review Approvals
-            </TabsTrigger>
             <TabsTrigger value="feedback" className="flex items-center gap-2">
               <MessageSquare className="h-4 w-4" />
               Feedback
-            </TabsTrigger>
-            <TabsTrigger value="comp-survey" className="flex items-center gap-2">
-              <ClipboardList className="h-4 w-4" />
-              Comp Survey
             </TabsTrigger>
           </TabsList>
 
@@ -763,16 +752,9 @@ export default function AdminMarketing() {
               })}
             </div>
           </TabsContent>
-          {/* Review Approvals Tab */}
-          <TabsContent value="reviews" className="mt-4">
-            <ReviewApprovals />
-          </TabsContent>
-
           {/* Feedback Tab Content */}
           <FeedbackTab activeTab={activeTab} />
 
-          {/* Comp Survey Tab */}
-          <CompSurveyTab activeTab={activeTab} />
         </Tabs>
 
         {/* Composer Dialog */}
@@ -1212,159 +1194,6 @@ function FeedbackTab({ activeTab }: { activeTab: string }) {
                     {response.email && (
                       <p className="text-xs text-muted-foreground/70 mt-1">{response.email}</p>
                     )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </TabsContent>
-  );
-}
-
-// ───── Comp Survey Tab Component ─────
-function CompSurveyTab({ activeTab }: { activeTab: string }) {
-  const [responses, setResponses] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (activeTab === "comp-survey") {
-      fetchResponses();
-    }
-  }, [activeTab]);
-
-  const fetchResponses = async () => {
-    setIsLoading(true);
-    const { data, error } = await supabase
-      .from("comp_survey_responses")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (!error && data) {
-      setResponses(data);
-    }
-    setIsLoading(false);
-  };
-
-  // Tally helpers
-  const tally = (field: string) => {
-    const counts: Record<string, number> = {};
-    responses.forEach((r: any) => {
-      const val = r[field];
-      if (val) counts[val] = (counts[val] || 0) + 1;
-    });
-    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
-  };
-
-  const dayTally = tally("preferred_day");
-  const timeTally = tally("preferred_time");
-  const feeTally = tally("preferred_entry_fee");
-
-  if (activeTab !== "comp-survey") return null;
-
-  return (
-    <TabsContent value="comp-survey" className="mt-4 space-y-4" forceMount>
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Day Preferences */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Preferred Day</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {dayTally.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No responses yet</p>
-            ) : dayTally.map(([day, count]) => (
-              <div key={day} className="flex items-center justify-between">
-                <span className="text-sm font-medium text-foreground">{day}</span>
-                <div className="flex items-center gap-2">
-                  <Progress value={(count / responses.length) * 100} className="w-20 h-2" />
-                  <span className="text-sm font-bold text-primary w-6 text-right">{count}</span>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-
-        {/* Time Preferences */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Preferred Time</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {timeTally.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No responses yet</p>
-            ) : timeTally.map(([time, count]) => (
-              <div key={time} className="flex items-center justify-between">
-                <span className="text-sm font-medium text-foreground">{time}</span>
-                <div className="flex items-center gap-2">
-                  <Progress value={(count / responses.length) * 100} className="w-20 h-2" />
-                  <span className="text-sm font-bold text-primary w-6 text-right">{count}</span>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-
-        {/* Fee Preferences */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Preferred Entry Fee</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {feeTally.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No responses yet</p>
-            ) : feeTally.map(([fee, count]) => (
-              <div key={fee} className="flex items-center justify-between">
-                <span className="text-sm font-medium text-foreground">{fee}</span>
-                <div className="flex items-center gap-2">
-                  <Progress value={(count / responses.length) * 100} className="w-20 h-2" />
-                  <span className="text-sm font-bold text-primary w-6 text-right">{count}</span>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Total responses */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Individual Responses</CardTitle>
-          <CardDescription>
-            {responses.length} response{responses.length !== 1 ? "s" : ""} received
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex items-center justify-center h-32">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : responses.length === 0 ? (
-            <div className="text-center py-8">
-              <ClipboardList className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground">No survey responses yet. Send the campaign!</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {responses.map((r: any) => (
-                <div
-                  key={r.id}
-                  className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card text-sm"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium text-foreground">{r.name || r.email || "Anonymous"}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {format(new Date(r.created_at), "MMM d, h:mm a")}
-                      </span>
-                    </div>
-                    <div className="flex gap-3 mt-1 text-muted-foreground text-xs">
-                      <span>📅 {r.preferred_day}</span>
-                      <span>🕐 {r.preferred_time}</span>
-                      <span>💰 {r.preferred_entry_fee}</span>
-                    </div>
                   </div>
                 </div>
               ))}

@@ -24,7 +24,6 @@ const EXEMPT_PREFIXES = [
   "/privacy",
   "/compete",
   "/gift",
-  "/comp-survey",
 ];
 
 export function TermsGate() {

@@ -49,8 +49,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="bg-primary py-4 px-6 safe-area-top">
-        <img src={venueLogo} alt={tenant.venue_name} className="h-10" />
+      <header className="bg-primary py-6 px-6 safe-area-top flex justify-center">
+        <img src={venueLogo} alt={tenant.venue_name} className="h-8" />
       </header>
 
       <main className="flex-1 flex items-center justify-center p-6">

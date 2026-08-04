@@ -281,6 +281,8 @@ const App = () => {
             <Route path="/staffed-hours" element={<MarketingStaffedHours />} />
             <Route path="/gate-access" element={<MarketingGateAccess />} />
             <Route path="/whats-on" element={<MarketingWhatsOn />} />
+            <Route path="/coaching" element={<MarketingCoaching />} />
+
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/analytics" element={<AdminAnalytics />} />

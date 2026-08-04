@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useTenant, formatTenantAddress, bookingUrl, type TenantSettings } from "@/config/tenant";
+import { EmailPreviewFrame } from "@/components/admin/EmailPreviewFrame";
 
 // Kept in sync with supabase/functions/_shared/email-wrapper.ts DEFAULTS.
 const buildDefaultHeaderHtml = (t: TenantSettings) => `<tr>
@@ -244,15 +245,11 @@ export const EmailLayoutEditor = () => {
         )}
 
         <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Email preview</DialogTitle>
             </DialogHeader>
-            <iframe
-              srcDoc={previewSrc}
-              title="Email preview"
-              className="w-full h-[70vh] border rounded-md bg-white"
-            />
+            <EmailPreviewFrame html={previewSrc} maxHeightClassName="max-h-[70vh]" />
           </DialogContent>
         </Dialog>
       </CardContent>

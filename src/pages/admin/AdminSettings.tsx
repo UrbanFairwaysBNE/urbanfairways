@@ -42,6 +42,7 @@ import { SmsTemplatesSection } from "@/components/admin/SmsTemplatesSection";
 import { DoorAccessSection } from "@/components/admin/DoorAccessSection";
 
 import { EmailLayoutEditor } from "@/components/admin/EmailLayoutEditor";
+import { EmailPreviewFrame } from "@/components/admin/EmailPreviewFrame";
 import { format } from "date-fns";
 
 // Template types and their available placeholder tags
@@ -1415,17 +1416,11 @@ export default function AdminSettings() {
 
         {/* Email Template Preview Dialog */}
         <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-          <DialogContent className="max-w-2xl max-h-[90vh]">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Email Preview</DialogTitle>
             </DialogHeader>
-            <div className="border rounded-lg overflow-hidden bg-white">
-              <iframe
-                srcDoc={previewHtml}
-                className="w-full h-[500px] border-0"
-                title="Email Preview"
-              />
-            </div>
+            <EmailPreviewFrame html={previewHtml} />
           </DialogContent>
         </Dialog>
 

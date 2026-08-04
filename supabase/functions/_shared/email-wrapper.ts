@@ -137,13 +137,20 @@ export function buildEmailTemplate(
   <title>${tenant.venue_name} Email</title>
   <style>
     @import url("https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Manrope:wght@400;600&display=swap");
+    img { max-width:100% !important; height:auto !important; }
+    table { max-width:100% !important; }
+    td, th, p, div, li, a { word-break:break-word; overflow-wrap:break-word; }
+    @media only screen and (max-width:620px) {
+      .uf-shell { width:100% !important; }
+      h1 { font-size:26px !important; line-height:1.2 !important; }
+    }
   </style>
 </head>
 <body style="margin:0; padding:0; background-color:#F5F3EF;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F5F3EF;">
     <tr>
       <td align="center" style="padding:24px 12px;">
-        <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px; width:100%;">
+        <table role="presentation" class="uf-shell" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px; width:100%;">
           ${header}
           <tr>
             <td style="background-color:#F5F3EF; padding:26px 22px; border-left:1px solid rgba(47,49,52,0.12); border-right:1px solid rgba(47,49,52,0.12);">

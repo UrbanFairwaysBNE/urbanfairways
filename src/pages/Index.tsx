@@ -8,17 +8,14 @@ import MarketingHome from "./marketing/MarketingHome";
 
 /**
  * Hostname routing:
- *  - hub.birdiesbayside.com.au  → existing Hub login (AuthForm)
+ *  - any `hub.*` host (e.g. hub.myvenue.com.au) → Hub login (AuthForm)
+ *  - `/hub` or `?hub=1` on any host            → Hub login (baseline/testing)
  *  - everything else (main domain, lovable preview, localhost)
  *      → public marketing site
  *
  * Hub can still be reached from any host via deep links (/dashboard, /booking, …).
  */
-const isHubHost = () => {
-  if (typeof window === "undefined") return false;
-  const h = window.location.hostname;
-  return h.startsWith("hub.") || h === "hub.birdiesbayside.com.au";
-};
+
 
 const Index = () => {
   const { isAuthenticated, isLoading: authLoading } = useAuth();

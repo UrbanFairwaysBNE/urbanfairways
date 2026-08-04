@@ -27,8 +27,10 @@ const Eyebrow = ({ children }: { children: React.ReactNode }) => (
   </p>
 );
 
-const Tile = ({ children }: { children: React.ReactNode }) => (
-  <section className="bg-card border border-border rounded-2xl shadow-sm p-6 sm:p-10">{children}</section>
+const Tile = ({ id, children }: { id?: string; children: React.ReactNode }) => (
+  <section id={id} className="scroll-mt-24 bg-card border border-border rounded-2xl shadow-sm p-6 sm:p-10">
+    {children}
+  </section>
 );
 
 const MarketingCoaching = () => {

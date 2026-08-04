@@ -2,7 +2,18 @@ import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
-import { calculateHourlyRate, isPeakTime, isOffPeakTime, defaultPeakRate, formatLocalDateKey } from "@/lib/pricing-utils";
+import {
+  calculateHourlyRate,
+  isPeakTime,
+  isOffPeakTime,
+  defaultPeakRate,
+  formatLocalDateKey,
+  calculateBookingTotal,
+  addDurationToTime,
+  durationOptions,
+  type PricingSpecial,
+} from "@/lib/pricing-utils";
+
 import { TierConfig, TIER_SELECT, findTier, normaliseTier, hasSingleBayPeakLimit, isOffPeakOnlyTier } from "@/lib/tier-config";
 import { Capacitor } from "@capacitor/core";
 import { QUERY_KEYS, STALE_TIMES } from "@/lib/query-keys";

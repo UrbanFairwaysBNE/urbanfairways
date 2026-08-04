@@ -28,8 +28,8 @@ const FIELDS: { key: keyof TenantSettings; label: string; placeholder?: string }
   { key: "suburb", label: "Suburb", placeholder: "Suburb" },
   { key: "state", label: "State", placeholder: "QLD" },
   { key: "postcode", label: "Postcode", placeholder: "4000" },
-  { key: "timezone", label: "Timezone", placeholder: "Australia/Brisbane" },
 ];
+
 
 const SOCIAL_KEYS = ["instagram", "facebook", "tiktok", "youtube"] as const;
 
@@ -52,7 +52,9 @@ export default function VenueDetailsSection() {
   const save = async () => {
     setIsSaving(true);
     try {
-      const payload = { ...form };
+      // Timezone is hardcoded for this venue — never editable from the UI.
+      const payload = { ...form, timezone: "Australia/Brisbane" };
+
       delete (payload as { id?: string }).id;
 
       const { error } = form.id

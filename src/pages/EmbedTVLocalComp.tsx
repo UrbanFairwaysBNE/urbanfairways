@@ -143,7 +143,7 @@ export default function EmbedTVLocalComp() {
               <div
                 key={team.id}
                 className={`grid grid-cols-12 gap-2 px-6 py-4 items-center ${
-                  isWinner ? "bg-[hsl(37,100%,97%)]" : ""
+                  isWinner ? "bg-[hsl(40,20%,97%)]" : ""
                 }`}
               >
                 <div className="col-span-1 text-center text-2xl font-bold">

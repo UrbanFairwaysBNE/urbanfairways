@@ -156,7 +156,7 @@ export default function EmbedTVStandings() {
                   key={standing.player_id}
                   className={cn(
                     "grid grid-cols-12 gap-4 px-6 py-4 items-center",
-                    position <= 3 && "bg-[hsl(37,100%,97%)]"
+                    position <= 3 && "bg-[hsl(40,20%,97%)]"
                   )}
                 >
                   <div className="col-span-1 flex items-center justify-center gap-2">

@@ -200,8 +200,8 @@ export default function EmbedLocalCompLeaderboard() {
                 <div
                   key={team.id}
                   className={cn(
-                    "grid grid-cols-12 gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 items-center hover:bg-[hsl(37,100%,97%)] transition-colors",
-                    isWinner && "bg-[hsl(37,100%,97%)]"
+                    "grid grid-cols-12 gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 items-center hover:bg-[hsl(40,20%,97%)] transition-colors",
+                    isWinner && "bg-[hsl(40,20%,97%)]"
                   )}
                 >
                   <div className="col-span-1 flex items-center justify-center gap-0.5 sm:gap-1">

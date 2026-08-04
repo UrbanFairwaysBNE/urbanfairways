@@ -98,7 +98,7 @@ export default function EmbedTVLastWeek() {
                 key={result.playerName}
                 className={cn(
                   "grid grid-cols-12 gap-4 px-6 py-4 items-center",
-                  result.position <= 3 && "bg-[hsl(37,100%,97%)]"
+                  result.position <= 3 && "bg-[hsl(40,20%,97%)]"
                 )}
               >
                 <div className="col-span-1 flex items-center justify-center gap-2">

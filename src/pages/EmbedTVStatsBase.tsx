@@ -88,7 +88,7 @@ function MiniTable({
           return (
             <div
               key={`${r.user_name}-${i}`}
-              className={i === 0 ? "grid grid-cols-12 gap-2 items-center px-4 py-2.5 bg-[hsl(37,100%,97%)]" : "grid grid-cols-12 gap-2 items-center px-4 py-2.5"}
+              className={i === 0 ? "grid grid-cols-12 gap-2 items-center px-4 py-2.5 bg-[hsl(40,20%,97%)]" : "grid grid-cols-12 gap-2 items-center px-4 py-2.5"}
             >
               <div className="col-span-1 text-center font-bold text-[hsl(128,20%,40%)]">{i + 1}</div>
               <div className="col-span-7 font-semibold text-[hsl(220,4%,20%)] truncate">

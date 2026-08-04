@@ -3069,42 +3069,6 @@ export type Database = {
         }
         Relationships: []
       }
-      sim_centre_submissions: {
-        Row: {
-          brand_guide_url: string | null
-          completed_at: string | null
-          contact_email: string | null
-          created_at: string
-          current_section: number
-          data: Json
-          id: string
-          trading_name: string | null
-          updated_at: string
-        }
-        Insert: {
-          brand_guide_url?: string | null
-          completed_at?: string | null
-          contact_email?: string | null
-          created_at?: string
-          current_section?: number
-          data?: Json
-          id?: string
-          trading_name?: string | null
-          updated_at?: string
-        }
-        Update: {
-          brand_guide_url?: string | null
-          completed_at?: string | null
-          contact_email?: string | null
-          created_at?: string
-          current_section?: number
-          data?: Json
-          id?: string
-          trading_name?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
       sms_templates: {
         Row: {
           created_at: string

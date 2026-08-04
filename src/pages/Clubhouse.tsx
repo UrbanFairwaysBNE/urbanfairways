@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, Plus, ThumbsUp, MessageCircle, Trash2, Image as ImageIcon, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
-import birdiesLogo from "@/assets/venue-logo.png";
+import venueLogo from "@/assets/venue-logo.png";
 import { useTenant } from "@/config/tenant";
 
 interface Post {
@@ -423,7 +423,7 @@ const Clubhouse = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
-          <img src={birdiesLogo} alt={tenant.venue_name} className="h-10 w-auto" />
+          <img src={venueLogo} alt={tenant.venue_name} className="h-10 w-auto" />
         </header>
         <main className="flex-1 flex items-center justify-center p-6">
           <Card className="max-w-md text-center">
@@ -456,7 +456,7 @@ const Clubhouse = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
-          <img src={birdiesLogo} alt={tenant.venue_name} className="h-10 w-auto" />
+          <img src={venueLogo} alt={tenant.venue_name} className="h-10 w-auto" />
         </div>
         <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
           <DialogTrigger asChild>

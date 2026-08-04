@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import birdiesLogo from "@/assets/venue-logo.png";
+import venueLogo from "@/assets/venue-logo.png";
 import { useTenant } from "@/config/tenant";
 import { Loader2, ArrowLeft, CheckCircle2, Eye, EyeOff, UserPlus } from "lucide-react";
 
@@ -135,7 +135,7 @@ export default function LeagueRegister() {
       <div className="min-h-screen bg-background flex flex-col">
         <header className="bg-primary py-4 px-4 safe-area-top">
           <div className="container flex items-center gap-3">
-            <img src={birdiesLogo} alt={tenant.venue_name} className="h-8 w-auto" />
+            <img src={venueLogo} alt={tenant.venue_name} className="h-8 w-auto" />
           </div>
         </header>
         <main className="flex-1 flex items-center justify-center px-4 py-8">
@@ -165,7 +165,7 @@ export default function LeagueRegister() {
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <img src={birdiesLogo} alt={tenant.venue_name} className="h-8 w-auto" />
+          <img src={venueLogo} alt={tenant.venue_name} className="h-8 w-auto" />
         </div>
       </header>
 

@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Eye, EyeOff, Lock, Check, AlertCircle, Loader2, Mail } from "lucide-react";
-import birdieLogo from "@/assets/venue-logo.png";
+import venueLogo from "@/assets/venue-logo.png";
 import { useTenant } from "@/config/tenant";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -239,7 +239,7 @@ export default function ResetPassword() {
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <img src={birdieLogo} alt={tenant.venue_name} className="h-12 mx-auto mb-4" />
+            <img src={venueLogo} alt={tenant.venue_name} className="h-12 mx-auto mb-4" />
             <CardTitle className="font-display text-xl uppercase tracking-wide">
               Reset Your Password
             </CardTitle>
@@ -302,7 +302,7 @@ export default function ResetPassword() {
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <img src={birdieLogo} alt={tenant.venue_name} className="h-12 mx-auto mb-4" />
+            <img src={venueLogo} alt={tenant.venue_name} className="h-12 mx-auto mb-4" />
             <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
               <AlertCircle className="h-8 w-8 text-destructive" />
             </div>
@@ -404,7 +404,7 @@ export default function ResetPassword() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <img src={birdieLogo} alt={tenant.venue_name} className="h-12 mx-auto mb-4" />
+          <img src={venueLogo} alt={tenant.venue_name} className="h-12 mx-auto mb-4" />
           <CardTitle className="font-display text-2xl uppercase tracking-wide">
             Set Your Password
           </CardTitle>

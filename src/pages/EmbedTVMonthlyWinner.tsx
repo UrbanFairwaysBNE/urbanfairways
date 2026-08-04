@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Trophy, Medal, Award, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import birdiesLogo from "@/assets/venue-logo-mark.png";
+import venueLogo from "@/assets/venue-logo-mark.png";
 import { getCurrentBlockLabel } from "@/lib/league-block";
 import { useTenant } from "@/config/tenant";
 
@@ -106,7 +106,7 @@ export default function EmbedTVStandings() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-6">
-          <img src={birdiesLogo} alt={tenant.venue_name} className="h-16" />
+          <img src={venueLogo} alt={tenant.venue_name} className="h-16" />
           <div>
             <h1 className="font-bold text-4xl text-[hsl(128,42%,21%)] tracking-tight">
               MONTHLY WINNER

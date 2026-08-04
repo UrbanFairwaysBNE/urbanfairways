@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { format } from "date-fns";
-import birdiesB from "@/assets/venue-logo-mark.png";
+import venueMark from "@/assets/venue-logo-mark.png";
 import { useIframeAutoResize } from "@/hooks/useIframeAutoResize";
 import { useTenant } from "@/config/tenant";
 
@@ -112,7 +112,7 @@ export default function EmbedLocalCompLeaderboard() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <img src={birdiesB} alt={tenant.venue_name} className="h-10" />
+          <img src={venueMark} alt={tenant.venue_name} className="h-10" />
           <div>
             <h1 className="font-bold text-xl text-[hsl(128,42%,21%)]">AMBROSE COMP</h1>
             <p className="text-sm text-[hsl(128,20%,40%)]">2-Man Ambrose Results</p>

@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveTourData } from "@/hooks/useActiveTourData";
 import type { StatsResponse } from "@/components/sgt/TournamentStatsView";
-import birdiesLogo from "@/assets/venue-logo-mark.png";
+import venueLogo from "@/assets/venue-logo-mark.png";
 import { useTenant } from "@/config/tenant";
 
 type PlayerRow = Record<string, unknown> & { user_name?: string; numrounds?: number };
@@ -163,7 +163,7 @@ export default function EmbedTVStats({ variant }: { variant: "current" | "previo
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <img src={birdiesLogo} alt={tenant.venue_name} className="h-16" />
+          <img src={venueLogo} alt={tenant.venue_name} className="h-16" />
           <div>
             <h1 className="font-bold text-4xl text-[hsl(128,42%,21%)] tracking-tight">
               {tournament?.name || (isCurrent ? "This Week" : "Previous Week")}

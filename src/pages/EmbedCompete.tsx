@@ -6,7 +6,7 @@ import { useActiveTourData } from "@/hooks/useActiveTourData";
 import { useSGTTournamentStandings } from "@/hooks/useSGTEmbedData";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import birdiesB from "@/assets/venue-logo-mark.png";
+import venueMark from "@/assets/venue-logo-mark.png";
 import { useIframeAutoResize } from "@/hooks/useIframeAutoResize";
 import { TournamentStatsView } from "@/components/sgt/TournamentStatsView";
 import { useTenant, hubUrl } from "@/config/tenant";
@@ -173,7 +173,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
           />
           <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
             <div className="flex items-center gap-3 mb-4">
-              <img src={birdiesB} alt="" className="h-8 sm:h-10" />
+              <img src={venueMark} alt="" className="h-8 sm:h-10" />
               <span className="text-white/70 font-semibold tracking-[0.2em] text-xs sm:text-sm uppercase">
                 {tenant.venue_name}
               </span>

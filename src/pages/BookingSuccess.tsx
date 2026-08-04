@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { CheckCircle, Calendar, Clock, MapPin, CreditCard, Loader2, XCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import birdieLogo from "@/assets/venue-logo-mark.png";
+import venueLogo from "@/assets/venue-logo-mark.png";
 import { useTenant } from "@/config/tenant";
 
 interface BookingDetails {
@@ -130,7 +130,7 @@ const BookingSuccess = () => {
       <div className="min-h-screen bg-background flex flex-col">
         <header className="bg-primary text-primary-foreground py-4 px-4 safe-area-top">
           <div className="container mx-auto flex items-center justify-center">
-            <img src={birdieLogo} alt={`${tenant.venue_name} Logo`} className="h-10 w-auto" />
+            <img src={venueLogo} alt={`${tenant.venue_name} Logo`} className="h-10 w-auto" />
           </div>
         </header>
 
@@ -192,7 +192,7 @@ const BookingSuccess = () => {
       <div className="min-h-screen bg-background flex flex-col">
         <header className="bg-primary text-primary-foreground py-4 px-4 safe-area-top">
           <div className="container mx-auto flex items-center justify-center">
-            <img src={birdieLogo} alt={`${tenant.venue_name} Logo`} className="h-10 w-auto" />
+            <img src={venueLogo} alt={`${tenant.venue_name} Logo`} className="h-10 w-auto" />
           </div>
         </header>
 
@@ -241,7 +241,7 @@ const BookingSuccess = () => {
       {/* Header */}
       <header className="bg-primary text-primary-foreground py-4 px-4 safe-area-top">
         <div className="container mx-auto flex items-center justify-center">
-          <img src={birdieLogo} alt={`${tenant.venue_name} Logo`} className="h-10 w-auto" />
+          <img src={venueLogo} alt={`${tenant.venue_name} Logo`} className="h-10 w-auto" />
         </div>
       </header>
 

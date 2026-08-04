@@ -20,7 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import birdieLogo from "@/assets/venue-logo.png";
+import venueLogo from "@/assets/venue-logo.png";
 import { AdminOrderNotifications } from "./AdminOrderNotifications";
 import { useTenant } from "@/config/tenant";
 
@@ -75,7 +75,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         <div className="p-4 border-b border-sidebar-border">
           <div className="flex items-center justify-between">
             <Link to="/admin" className="flex items-center gap-3">
-              <img src={birdieLogo} alt={tenant.venue_name} className="h-8" />
+              <img src={venueLogo} alt={tenant.venue_name} className="h-8" />
               <span className="font-display text-xl text-sidebar-foreground uppercase tracking-wide">
                 Admin
               </span>
@@ -139,7 +139,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             </span>
           </div>
           <Link to="/admin" className="flex items-center gap-2">
-            <img src={birdieLogo} alt={tenant.venue_name} className="h-7" />
+            <img src={venueLogo} alt={tenant.venue_name} className="h-7" />
             <AdminOrderNotifications />
           </Link>
         </div>

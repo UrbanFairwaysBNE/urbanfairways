@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Frown, Meh, Smile, CheckCircle2 } from "lucide-react";
-import birdiesLogo from "@/assets/venue-logo.png";
+import venueLogo from "@/assets/venue-logo.png";
 import { useTenant, formatTenantAddress } from "@/config/tenant";
 
 type Score = "bad" | "ok" | "good";
@@ -104,7 +104,7 @@ export default function Feedback() {
     return (
       <div className="min-h-screen bg-[#FFF5E4] flex items-center justify-center p-4">
         <div className="max-w-md w-full text-center space-y-6">
-          <img src={birdiesLogo} alt={tenant.venue_name} className="h-14 mx-auto" />
+          <img src={venueLogo} alt={tenant.venue_name} className="h-14 mx-auto" />
           <div className="bg-white rounded-2xl p-8 shadow-sm border border-[#1F4C25]/10">
             <CheckCircle2 className="h-16 w-16 text-emerald-600 mx-auto mb-4" />
             <h1 className="text-2xl font-bold text-[#1F4C25] mb-2">Thanks for your feedback!</h1>
@@ -121,7 +121,7 @@ export default function Feedback() {
     <div className="min-h-screen bg-[#FFF5E4] flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-6">
         <div className="text-center">
-          <img src={birdiesLogo} alt={tenant.venue_name} className="h-14 mx-auto mb-4" />
+          <img src={venueLogo} alt={tenant.venue_name} className="h-14 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-[#1F4C25]">How was your visit?</h1>
           <p className="text-[#1F4C25]/70 mt-1">We'd love to hear about your experience at {tenant.venue_name}</p>
         </div>

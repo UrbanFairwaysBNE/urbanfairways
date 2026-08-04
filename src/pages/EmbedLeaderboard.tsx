@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSGTTournamentStandings } from "@/hooks/useSGTEmbedData";
 import { useActiveTourData } from "@/hooks/useActiveTourData";
 import { supabase } from "@/integrations/supabase/client";
-import birdiesB from "@/assets/venue-logo-mark.png";
+import venueMark from "@/assets/venue-logo-mark.png";
 import { useIframeAutoResize } from "@/hooks/useIframeAutoResize";
 import { useTenant } from "@/config/tenant";
 
@@ -141,7 +141,7 @@ export default function EmbedLeaderboard() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <img src={birdiesB} alt={tenant.venue_name} className="h-10" />
+          <img src={venueMark} alt={tenant.venue_name} className="h-10" />
           <div>
             <h1 className="font-bold text-xl text-[hsl(128,42%,21%)]">LEADERBOARD</h1>
             <p className="text-sm text-[hsl(128,20%,40%)]">{activeTour?.name || `${tenant.venue_name} Tour`}</p>

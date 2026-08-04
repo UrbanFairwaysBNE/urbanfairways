@@ -1943,6 +1943,45 @@ export type Database = {
         }
         Relationships: []
       }
+      pricing_specials: {
+        Row: {
+          applies_off_peak: boolean
+          applies_peak: boolean
+          created_at: string
+          display_order: number
+          duration_minutes: number
+          id: string
+          is_active: boolean
+          name: string
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          applies_off_peak?: boolean
+          applies_peak?: boolean
+          created_at?: string
+          display_order?: number
+          duration_minutes: number
+          id?: string
+          is_active?: boolean
+          name: string
+          price: number
+          updated_at?: string
+        }
+        Update: {
+          applies_off_peak?: boolean
+          applies_peak?: boolean
+          created_at?: string
+          display_order?: number
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           booking_flag_enabled: boolean

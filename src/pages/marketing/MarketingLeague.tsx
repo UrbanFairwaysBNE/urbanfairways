@@ -59,7 +59,7 @@ const MarketingLeague = () => {
       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${venueInterior})` }} />
       <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/80 to-primary/40" />
       <div className="relative container mx-auto px-4 pb-8">
-        <p className="text-accent font-display tracking-[0.25em] uppercase text-xs mb-1.5">Members Only</p>
+        <p className="text-accent font-display font-bold tracking-[0.25em] uppercase text-xs mb-1.5">Members Only</p>
         <h1 className="font-display text-3xl sm:text-5xl text-primary-foreground leading-none">
           Welcome to the<br /><span className="text-accent">{tenant.venue_name} League</span>
         </h1>
@@ -98,14 +98,14 @@ const MarketingLeague = () => {
 
     <section className="py-12 sm:py-20">
       <div className="container mx-auto px-4 max-w-3xl">
-        <p className="text-accent font-display tracking-[0.2em] uppercase text-sm mb-3 text-center">How does it work?</p>
+        <p className="text-accent font-display font-bold tracking-[0.2em] uppercase text-sm mb-3 text-center">How does it work?</p>
         <h2 className="font-display text-4xl sm:text-5xl text-primary text-center leading-tight mb-12">
           Everything you need to know.
         </h2>
 
         {faqs.map((group) => (
           <div key={group.section} className="mb-10">
-            <h3 className="font-display text-sm uppercase tracking-[0.2em] text-accent mb-4">{group.section}</h3>
+            <h3 className="font-display font-bold text-sm uppercase tracking-[0.2em] text-accent mb-4">{group.section}</h3>
             <Accordion type="single" collapsible className="space-y-2">
               {group.items.map((item, i) => (
                 <AccordionItem

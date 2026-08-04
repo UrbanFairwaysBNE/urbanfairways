@@ -40,7 +40,7 @@ const MarketingMembership = () => {
       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${venueInterior})` }} />
       <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/70 to-primary/30" />
       <div className="relative container mx-auto px-4 pb-8">
-        <p className="text-accent font-display tracking-[0.25em] uppercase text-xs mb-1.5">Membership</p>
+        <p className="text-accent font-display font-bold tracking-[0.25em] uppercase text-xs mb-1.5">Membership</p>
         <h1 className="font-display text-3xl sm:text-5xl text-primary-foreground leading-none">
           Play More.<br />Save More.
         </h1>
@@ -103,7 +103,7 @@ const MarketingMembership = () => {
     <section className="py-12 sm:py-20">
       <div className="container mx-auto px-4 max-w-5xl">
         <div className="text-center mb-10">
-          <p className="text-accent font-display tracking-[0.2em] uppercase text-sm mb-3">Pay As You Go</p>
+          <p className="text-accent font-display font-bold tracking-[0.2em] uppercase text-sm mb-3">Pay As You Go</p>
           <h2 className="font-display text-4xl sm:text-5xl text-primary leading-tight mb-4">
             Not ready to commit? Just pay to play.
           </h2>

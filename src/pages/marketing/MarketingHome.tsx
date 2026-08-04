@@ -97,7 +97,7 @@ const MarketingHome = () => {
       <section className="py-12 sm:py-28">
         <div className="container mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <p className="text-accent font-display tracking-[0.2em] uppercase text-sm mb-3">What is {tenant.venue_name}?</p>
+            <p className="text-accent font-display font-bold tracking-[0.2em] uppercase text-sm mb-3">What is {tenant.venue_name}?</p>
             <h2 className="font-display text-4xl sm:text-5xl text-primary leading-tight mb-6">
               A premier indoor golf centre in the West End of Brisbane.
             </h2>
@@ -122,7 +122,7 @@ const MarketingHome = () => {
       <section className="bg-primary text-primary-foreground py-12 sm:py-24">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-14">
-            <p className="text-accent font-display tracking-[0.2em] uppercase text-sm mb-3">Why {tenant.venue_name}</p>
+            <p className="text-accent font-display font-bold tracking-[0.2em] uppercase text-sm mb-3">Why {tenant.venue_name}</p>
             <h2 className="font-display text-4xl sm:text-5xl leading-tight">
               Tour-level tech. Local prices. Zero excuses.
             </h2>
@@ -162,7 +162,7 @@ const MarketingHome = () => {
               className="h-28 sm:h-36 w-auto mx-auto mb-6 object-contain"
               loading="lazy"
             />
-            <p className="text-accent font-display tracking-[0.2em] uppercase text-sm mb-3">Swing Lab</p>
+            <p className="text-accent font-display font-bold tracking-[0.2em] uppercase text-sm mb-3">Swing Lab</p>
             <h2 className="font-display text-4xl sm:text-5xl text-primary leading-tight">
               Your Personal Driving Range Coach.
             </h2>
@@ -198,7 +198,7 @@ const MarketingHome = () => {
       <section className="py-12 sm:py-24">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <p className="text-accent font-display tracking-[0.2em] uppercase text-sm mb-3">Pricing</p>
+            <p className="text-accent font-display font-bold tracking-[0.2em] uppercase text-sm mb-3">Pricing</p>
             <h2 className="font-display text-4xl sm:text-5xl text-primary leading-tight">
               Pay as you go, or save with a membership.
             </h2>

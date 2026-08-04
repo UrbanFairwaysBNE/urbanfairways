@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { CheckCircle, Calendar, Clock, MapPin, CreditCard, Loader2, XCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import birdieLogo from "@/assets/birdies-b-logo.png";
+import venueLogo from "@/assets/venue-logo-mark.png";
 import { useTenant } from "@/config/tenant";
 
 interface BookingDetails {
@@ -130,7 +130,7 @@ const BookingSuccess = () => {
       <div className="min-h-screen bg-background flex flex-col">
         <header className="bg-primary text-primary-foreground py-4 px-4 safe-area-top">
           <div className="container mx-auto flex items-center justify-center">
-            <img src={birdieLogo} alt={`${tenant.venue_name} Logo`} className="h-10 w-auto" />
+            <img src={venueLogo} alt={`${tenant.venue_name} Logo`} className="h-10 w-auto" />
           </div>
         </header>
 
@@ -192,7 +192,7 @@ const BookingSuccess = () => {
       <div className="min-h-screen bg-background flex flex-col">
         <header className="bg-primary text-primary-foreground py-4 px-4 safe-area-top">
           <div className="container mx-auto flex items-center justify-center">
-            <img src={birdieLogo} alt={`${tenant.venue_name} Logo`} className="h-10 w-auto" />
+            <img src={venueLogo} alt={`${tenant.venue_name} Logo`} className="h-10 w-auto" />
           </div>
         </header>
 
@@ -241,7 +241,7 @@ const BookingSuccess = () => {
       {/* Header */}
       <header className="bg-primary text-primary-foreground py-4 px-4 safe-area-top">
         <div className="container mx-auto flex items-center justify-center">
-          <img src={birdieLogo} alt={`${tenant.venue_name} Logo`} className="h-10 w-auto" />
+          <img src={venueLogo} alt={`${tenant.venue_name} Logo`} className="h-10 w-auto" />
         </div>
       </header>
 
@@ -321,7 +321,7 @@ const BookingSuccess = () => {
                 Check out our guide for everything you need to know about accessing the facility and using the simulators.
               </p>
               <a 
-                href="/birdies-guide" 
+                href="/quick-start-guide" 
                 className="inline-block px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
               >
                 View the Guide

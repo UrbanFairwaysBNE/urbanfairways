@@ -1582,17 +1582,17 @@ async function showWelcomeWindows(firstName) {
     <head>
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Manrope:wght@300;400;500&display=swap" rel="stylesheet">
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-          background: #fff5e4;
+          font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+          background: #f5f3ef;
           display: flex;
           align-items: center;
           justify-content: center;
           height: 100vh;
-          color: #1f4c25;
+          color: #2f3134;
           overflow: hidden;
         }
         .container {
@@ -1609,28 +1609,28 @@ async function showWelcomeWindows(firstName) {
           filter: drop-shadow(0 10px 30px rgba(31, 76, 37, 0.15));
         }
         h1 {
-          font-family: 'Anton', sans-serif;
+          font-family: 'Archivo', system-ui, sans-serif;
           font-size: 96px;
           font-weight: 400;
-          color: #1f4c25;
+          color: #2f3134;
           margin-bottom: 10px;
           text-transform: uppercase;
           letter-spacing: 2px;
         }
         h2 {
-          font-family: 'Anton', sans-serif;
+          font-family: 'Archivo', system-ui, sans-serif;
           font-size: 56px;
           font-weight: 400;
-          color: #ec622d;
+          color: #b5772a;
           margin-bottom: 60px;
           text-transform: uppercase;
           letter-spacing: 1px;
         }
         p {
-          font-family: 'Inter', sans-serif;
+          font-family: 'Manrope', system-ui, sans-serif;
           font-size: 28px;
           font-weight: 400;
-          color: #1f4c25;
+          color: #2f3134;
           opacity: 0.85;
           margin-bottom: 12px;
         }
@@ -1643,7 +1643,7 @@ async function showWelcomeWindows(firstName) {
         .loading span {
           width: 18px;
           height: 18px;
-          background: #ec622d;
+          background: #b5772a;
           border-radius: 50%;
           animation: pulse 1.4s infinite ease-in-out;
         }
@@ -1664,10 +1664,10 @@ async function showWelcomeWindows(firstName) {
           text-align: left;
         }
         .etiquette h3 {
-          font-family: 'Anton', sans-serif;
+          font-family: 'Archivo', system-ui, sans-serif;
           font-size: 36px;
           font-weight: 400;
-          color: #1f4c25;
+          color: #2f3134;
           letter-spacing: 2px;
           text-transform: uppercase;
           text-align: center;
@@ -1682,9 +1682,9 @@ async function showWelcomeWindows(firstName) {
           display: flex;
           align-items: flex-start;
           gap: 12px;
-          font-family: 'Inter', sans-serif;
+          font-family: 'Manrope', system-ui, sans-serif;
           font-size: 22px;
-          color: #1f4c25;
+          color: #2f3134;
           opacity: 0.85;
           margin-bottom: 12px;
         }
@@ -1693,7 +1693,7 @@ async function showWelcomeWindows(firstName) {
           flex-shrink: 0;
           width: 32px;
           height: 32px;
-          background: #ec622d;
+          background: #b5772a;
           color: #fff;
           border-radius: 50%;
           display: flex;
@@ -2161,7 +2161,7 @@ ipcMain.handle('show-notification-popup', async (event, { message, displayLabel,
             padding: 20px;
           }
           .notification {
-            background: linear-gradient(135deg, #ec622d, #d55627);
+            background: linear-gradient(135deg, #b5772a, #d55627);
             color: white;
             padding: 24px 28px;
             border-radius: 16px;
@@ -2199,7 +2199,7 @@ ipcMain.handle('show-notification-popup', async (event, { message, displayLabel,
             gap: 6px;
           }
           .qr { width: 180px; height: 180px; display: block; }
-          .qr-caption { color: #1F4C25; font-size: 12px; font-weight: 600; text-align: center; line-height: 1.2; }
+          .qr-caption { color: #2F3134; font-size: 12px; font-weight: 600; text-align: center; line-height: 1.2; }
         </style>
       </head>
       <body>
@@ -2379,12 +2379,12 @@ async function showSgtInfoOverlay(displayLabel) {
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           html, body {
             background: transparent;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
           }
           .overlay {
             background: white;
@@ -2415,7 +2415,7 @@ async function showSgtInfoOverlay(displayLabel) {
           .title {
             font-size: 15px;
             font-weight: 700;
-            color: #1f4c25;
+            color: #2f3134;
           }
           .close-btn {
             -webkit-app-region: no-drag;
@@ -2440,7 +2440,7 @@ async function showSgtInfoOverlay(displayLabel) {
           .customer-name {
             font-size: 16px;
             font-weight: 600;
-            color: #1f4c25;
+            color: #2f3134;
             margin-bottom: 10px;
           }
           .field {
@@ -2481,9 +2481,9 @@ async function showSgtInfoOverlay(displayLabel) {
             transition: all 0.2s;
             flex: 1;
           }
-          .copy-btn { background: #1f4c25; }
+          .copy-btn { background: #2f3134; }
           .copy-btn:hover { background: #2d6a34; }
-          .paste-btn { background: #ec622d; }
+          .paste-btn { background: #b5772a; }
           .paste-btn:hover { background: #d55627; }
           .paste-btn.pasting { background: #28a745; }
           .copy-btn.copied, .paste-btn.pasted { background: #28a745; }
@@ -2493,13 +2493,13 @@ async function showSgtInfoOverlay(displayLabel) {
             background: #e8f4fd;
             border-radius: 8px;
             font-size: 11.5px;
-            color: #1f4c25;
+            color: #2f3134;
             line-height: 1.5;
           }
           .instructions-title {
             font-weight: 700;
             margin-bottom: 6px;
-            color: #1f4c25;
+            color: #2f3134;
           }
           .instructions ol {
             margin: 0;
@@ -2508,17 +2508,17 @@ async function showSgtInfoOverlay(displayLabel) {
           .instructions li {
             margin-bottom: 3px;
           }
-          .instructions strong { color: #ec622d; }
+          .instructions strong { color: #b5772a; }
           .tip {
             margin-top: 8px;
             padding: 8px 10px;
-            background: #fff5e4;
+            background: #f5f3ef;
             border-radius: 6px;
             font-size: 11px;
-            color: #1f4c25;
+            color: #2f3134;
             text-align: center;
           }
-          .tip strong { color: #ec622d; }
+          .tip strong { color: #b5772a; }
         </style>
       </head>
       <body>
@@ -2683,12 +2683,12 @@ async function showSgtHideConfirmation(displayLabel) {
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           html, body {
             background: transparent;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
             width: 100%;
             height: 100%;
           }
@@ -2702,7 +2702,7 @@ async function showSgtHideConfirmation(displayLabel) {
           .title {
             font-size: 20px;
             font-weight: 600;
-            color: #1f4c25;
+            color: #2f3134;
             margin-bottom: 16px;
           }
           .text {
@@ -2713,10 +2713,10 @@ async function showSgtHideConfirmation(displayLabel) {
           }
           .tip {
             font-size: 14px;
-            color: #ec622d;
+            color: #b5772a;
             margin-bottom: 24px;
             padding: 14px;
-            background: #fff5e4;
+            background: #f5f3ef;
             border-radius: 10px;
             line-height: 1.5;
           }
@@ -2742,7 +2742,7 @@ async function showSgtHideConfirmation(displayLabel) {
             background: #e0e0e0;
           }
           .btn.confirm {
-            background: #ec622d;
+            background: #b5772a;
             color: white;
           }
           .btn.confirm:hover {
@@ -2884,7 +2884,7 @@ ipcMain.handle('show-sgt-icon-overlay', async (event, { displayLabel, position, 
           }
           .sgt-button:hover {
             transform: scale(1.1);
-            border-color: #ec622d;
+            border-color: #b5772a;
             box-shadow: 0 6px 25px rgba(236, 98, 45, 0.4);
           }
           .sgt-button img {
@@ -2895,7 +2895,7 @@ ipcMain.handle('show-sgt-icon-overlay', async (event, { displayLabel, position, 
           .sgt-button .fallback {
             font-size: 20px;
             font-weight: bold;
-            color: #ec622d;
+            color: #b5772a;
           }
           .close-btn {
             position: absolute;

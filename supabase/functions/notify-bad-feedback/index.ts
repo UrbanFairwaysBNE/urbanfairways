@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
         <div style="background: #DC2626; color: white; padding: 16px 20px; border-radius: 12px 12px 0 0; text-align: center;">
           <h2 style="margin: 0;">⚠️ Bad Feedback Received</h2>
         </div>
-        <div style="background: #FFF5E4; padding: 20px; border: 1px solid #e5e5e5; border-top: none; border-radius: 0 0 12px 12px;">
+        <div style="background: #F5F3EF; padding: 20px; border: 1px solid #e5e5e5; border-top: none; border-radius: 0 0 12px 12px;">
           <p style="margin: 0 0 12px;"><strong>Customer:</strong> ${customerName}</p>
           <p style="margin: 0 0 12px;"><strong>Email:</strong> ${customerEmail}</p>
           <p style="margin: 0 0 12px;"><strong>Rating:</strong> 😟 Bad</p>

@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { Trophy, Award, Calendar, DollarSign, Mail, CheckCircle2, Clock, User, ChevronDown, ChevronUp, Send } from "lucide-react";
 import { format } from "date-fns";
 import { getRecentBlockLabels } from "@/lib/league-block";
-import { useTenant, formatTenantAddress, type TenantSettings } from "@/config/tenant";
+import { useTenant, formatTenantAddress, bookingUrl, type TenantSettings } from "@/config/tenant";
 import {
   Select,
   SelectContent,
@@ -92,39 +92,39 @@ const buildDefaultMonthlyEmailTemplate = (t: TenantSettings) => `<!doctype html>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>${t.venue_name} Email</title>
   <style>
-    @import url("https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600&display=swap");
+    @import url("https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Manrope:wght@400;600&display=swap");
   </style>
 </head>
-<body style="margin:0; padding:0; background-color:#FFF5E4;">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#FFF5E4;">
+<body style="margin:0; padding:0; background-color:#F5F3EF;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F5F3EF;">
 <tr><td align="center" style="padding:24px 12px;">
 <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px; width:100%;">
   <!-- HEADER -->
   <tr>
-    <td align="center" style="background-color:#1F4C25; padding:18px; border-radius:16px 16px 0 0;">
-      <img src="https://cdn.shopify.com/s/files/1/0758/7030/6550/files/NO-BG_BIRDIES-LOGOS_WORK-DOC_AMENDED-9.7.25-01.png?v=1761536603" width="140" alt="${t.venue_name}" style="display:block; width:140px; height:auto; border:0;" />
+    <td align="center" style="background-color:#2F3134; padding:18px; border-radius:16px 16px 0 0;">
+      <img src="${bookingUrl(t, "/__l5e/assets-v1/9691088f-3b4b-41b4-bcb3-d4cd4de1540c/venue-logo-email.png")}" width="140" alt="${t.venue_name}" style="display:block; width:140px; height:auto; border:0;" />
     </td>
   </tr>
   <!-- BODY -->
   <tr>
-    <td style="background-color:#FFF5E4; padding:26px 22px; border-left:1px solid rgba(31,76,37,0.12); border-right:1px solid rgba(31,76,37,0.12);">
-      <h1 style="margin:0 0 18px; font-family:Anton, Impact, Arial Black, sans-serif; font-size:34px; line-height:1.1; color:#1F4C25; text-align:center;">
+    <td style="background-color:#F5F3EF; padding:26px 22px; border-left:1px solid rgba(47,49,52,0.12); border-right:1px solid rgba(47,49,52,0.12);">
+      <h1 style="margin:0 0 18px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:34px; line-height:1.1; color:#2F3134; text-align:center;">
         🏆 MONTHLY WINNER!
       </h1>
-      <p style="margin:0 0 14px; font-family:Inter, Arial, sans-serif; font-size:18px; color:#1F4C25;">
+      <p style="margin:0 0 14px; font-family:Manrope, Arial, sans-serif; font-size:18px; color:#2F3134;">
         Congratulations <strong>{{first_name}}</strong>!
       </p>
-      <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25;">
+      <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134;">
         You've been crowned the <strong>{{month}}</strong> ${t.venue_name} Tour Champion! Your consistent play throughout the month has earned you this well-deserved recognition.
       </p>
-      <div style="background-color:#ffffff; border:1px solid rgba(31,76,37,0.15); border-radius:12px; padding:20px; margin:22px 0; text-align:center;">
-        <p style="font-size:14px; color:#1F4C25; margin:0 0 8px 0; font-family:Inter, Arial, sans-serif; opacity:0.75;">Your Prize</p>
-        <p style="font-family:Anton, Impact, Arial Black, sans-serif; font-size:28px; color:#EC622D; margin:0;">{{prize_description}}</p>
+      <div style="background-color:#ffffff; border:1px solid rgba(47,49,52,0.15); border-radius:12px; padding:20px; margin:22px 0; text-align:center;">
+        <p style="font-size:14px; color:#2F3134; margin:0 0 8px 0; font-family:Manrope, Arial, sans-serif; opacity:0.75;">Your Prize</p>
+        <p style="font-family:Archivo, Impact, Arial Black, sans-serif; font-size:28px; color:#B5772A; margin:0;">{{prize_description}}</p>
       </div>
-      <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25;">
+      <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134;">
         Pop in next time you're at ${t.venue_name} to collect your prize. Keep up the great golf!
       </p>
-      <p style="margin:24px 0 0; font-family:Inter, Arial, sans-serif; font-size:16px; color:#1F4C25;">
+      <p style="margin:24px 0 0; font-family:Manrope, Arial, sans-serif; font-size:16px; color:#2F3134;">
         See you on the virtual fairways,<br>
         <strong>The ${t.venue_name} Team</strong>
       </p>
@@ -132,7 +132,7 @@ const buildDefaultMonthlyEmailTemplate = (t: TenantSettings) => `<!doctype html>
   </tr>
   <!-- FOOTER -->
   <tr>
-    <td style="background-color:#1F4C25; padding:22px; border-radius:0 0 16px 16px;">
+    <td style="background-color:#2F3134; padding:22px; border-radius:0 0 16px 16px;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td align="center" style="padding-bottom:14px;">
@@ -145,7 +145,7 @@ const buildDefaultMonthlyEmailTemplate = (t: TenantSettings) => `<!doctype html>
           </td>
         </tr>
         <tr>
-          <td align="center" style="font-family:Inter, Arial, sans-serif; font-size:14px; line-height:1.7; color:#FFFFFF;">
+          <td align="center" style="font-family:Manrope, Arial, sans-serif; font-size:14px; line-height:1.7; color:#FFFFFF;">
             <div><a href="https://maps.google.com/?q=${encodeURIComponent(formatTenantAddress(t))}" style="color:#FFFFFF; text-decoration:underline;">${formatTenantAddress(t)}</a></div>
             <div><a href="tel:${t.support_phone}" style="color:#FFFFFF; text-decoration:underline;">${t.support_phone}</a></div>
             <div><a href="https://${t.booking_domain}" style="color:#FFFFFF; text-decoration:underline;">${t.booking_domain}</a></div>

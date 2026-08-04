@@ -27,7 +27,7 @@ export default function LeagueRounds() {
   if (authLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 text-birdies-orange animate-spin" />
+        <Loader2 className="h-8 w-8 text-brand-accent animate-spin" />
       </div>
     );
   }
@@ -39,7 +39,7 @@ export default function LeagueRounds() {
   return (
     <LeagueLayout>
       <div className="mb-6 animate-fade-in">
-        <h1 className="font-anton text-2xl md:text-3xl text-primary mb-1">
+        <h1 className="font-display text-2xl md:text-3xl text-primary mb-1">
           ROUND HISTORY
         </h1>
         <p className="font-inter text-muted-foreground text-sm">
@@ -49,11 +49,11 @@ export default function LeagueRounds() {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 text-birdies-orange animate-spin" />
+          <Loader2 className="h-8 w-8 text-brand-accent animate-spin" />
         </div>
       ) : rounds.length === 0 ? (
         <div className="bg-white rounded-2xl border border-border/50 p-12 text-center shadow-sm animate-fade-in">
-          <h3 className="font-anton text-xl text-primary mb-2">NO ROUNDS YET</h3>
+          <h3 className="font-display text-xl text-primary mb-2">NO ROUNDS YET</h3>
           <p className="text-muted-foreground font-inter">
             Your round history will appear here once you've played some rounds.
           </p>

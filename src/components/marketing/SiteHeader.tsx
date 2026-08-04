@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ChevronDown } from "lucide-react";
-import birdiesLogo from "@/assets/birdies-logo.png";
+import venueLogo from "@/assets/venue-logo.png";
 import { useTenant, hubUrl } from "@/config/tenant";
 
 const playLinks = [
@@ -78,7 +78,7 @@ const SiteHeader = () => {
         </button>
 
         <Link to="/" className="flex items-center gap-2 lg:order-first">
-          <img src={birdiesLogo} alt={`${tenant.venue_name}, Indoor Golf Redefined`} className="h-10 sm:h-12" />
+          <img src={venueLogo} alt={`${tenant.venue_name}, Indoor Golf Redefined`} className="h-10 sm:h-12 brightness-0 invert" />
         </Link>
 
         {/* Desktop: full nav */}
@@ -157,7 +157,7 @@ const SiteHeader = () => {
           }`}
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-primary-foreground/10">
-            <img src={birdiesLogo} alt={tenant.venue_name} className="h-10" />
+            <img src={venueLogo} alt={tenant.venue_name} className="h-10" />
             <button
               className="p-2 -mr-2"
               onClick={() => setOpen(false)}

@@ -68,7 +68,7 @@ export default function LeagueHighlights() {
   return (
     <LeagueLayout>
       <div className="mb-6 animate-fade-in">
-        <h1 className="font-anton text-2xl md:text-3xl text-primary mb-1">YOUR HIGHLIGHTS</h1>
+        <h1 className="font-display text-2xl md:text-3xl text-primary mb-1">YOUR HIGHLIGHTS</h1>
         <p className="font-inter text-muted-foreground text-sm">
           Recorded sessions from your bookings. Open a session to view and download your clips.
         </p>
@@ -76,7 +76,7 @@ export default function LeagueHighlights() {
 
       {loading ? (
         <div className="flex justify-center py-20">
-          <Loader2 className="h-8 w-8 text-birdies-orange animate-spin" />
+          <Loader2 className="h-8 w-8 text-brand-accent animate-spin" />
         </div>
       ) : sessions.length === 0 ? (
         <Card>
@@ -95,7 +95,7 @@ export default function LeagueHighlights() {
               <Link
                 key={s.id}
                 to={`/league/highlights/${s.id}`}
-                className="block bg-white rounded-2xl border border-border/50 p-4 shadow-sm hover:border-birdies-orange/50 transition-colors"
+                className="block bg-white rounded-2xl border border-border/50 p-4 shadow-sm hover:border-brand-accent/50 transition-colors"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
@@ -106,9 +106,9 @@ export default function LeagueHighlights() {
                     <div className="flex items-center gap-2 flex-wrap mb-2">
                       <Badge variant="outline">Bay {s.bay_number}</Badge>
                       {s.trigger_source === "local_comp" && (
-                        <Badge variant="outline" className="border-birdies-orange/40 text-birdies-orange">Local Comp</Badge>
+                        <Badge variant="outline" className="border-brand-accent/40 text-brand-accent">Local Comp</Badge>
                       )}
-                      <Badge className="bg-birdies-orange/10 text-birdies-orange border-birdies-orange/30">
+                      <Badge className="bg-brand-accent/10 text-brand-accent border-brand-accent/30">
                         {s.clip_count} clip{s.clip_count === 1 ? "" : "s"}
                       </Badge>
                     </div>

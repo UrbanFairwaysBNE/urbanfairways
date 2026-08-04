@@ -2,7 +2,7 @@ import { ReactNode, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useTenant } from "@/config/tenant";
-import birdiesBLogo from "@/assets/birdies-b-logo.png";
+import venueMark from "@/assets/venue-logo-mark.png";
 import {
   LayoutDashboard,
   History,
@@ -53,7 +53,7 @@ export function LeagueLayout({ children }: LeagueLayoutProps) {
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <Link to="/league" className="flex items-center">
-              <img src={birdiesBLogo} alt={tenant.venue_name} className="h-10 w-auto" />
+              <img src={venueMark} alt={tenant.venue_name} className="h-10 w-auto" />
             </Link>
           </div>
 
@@ -79,7 +79,7 @@ export function LeagueLayout({ children }: LeagueLayoutProps) {
                   className={cn(
                     "flex items-center gap-3 px-4 py-4 font-inter text-base",
                     isActive
-                      ? "bg-birdies-orange text-white rounded-lg mx-4 my-1"
+                      ? "bg-brand-accent text-white rounded-lg mx-4 my-1"
                       : "text-primary-foreground/90"
                   )}
                 >

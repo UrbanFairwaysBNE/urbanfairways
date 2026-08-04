@@ -91,18 +91,18 @@ serve(async (req) => {
       logStep("Using custom email template with wrapper");
     } else {
       const bodyContent = `
-              <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+              <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 Hi ${first_name}, welcome to ${tenant.venue_name}! We're excited to have you join our community of golf enthusiasts.
               </p>
               
-              <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+              <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 Your account has been created and you're ready to start booking sessions on our state-of-the-art golf simulators.
               </p>
               
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #EC622D;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #B5772A;">
                 <tr>
-                  <td style="padding:20px; font-family:Inter, Arial, sans-serif; font-size:15px; color:#1F4C25;">
-                    <h3 style="margin:0 0 10px 0; font-family:Anton, Impact, Arial Black, sans-serif; color:#1F4C25;">What's Next?</h3>
+                  <td style="padding:20px; font-family:Manrope, Arial, sans-serif; font-size:15px; color:#2F3134;">
+                    <h3 style="margin:0 0 10px 0; font-family:Archivo, Impact, Arial Black, sans-serif; color:#2F3134;">What's Next?</h3>
                     <ul style="margin:0; padding-left:20px;">
                       <li style="margin-bottom:8px;">Book your first session</li>
                       <li style="margin-bottom:8px;">Explore our membership options for discounted rates</li>
@@ -112,7 +112,7 @@ serve(async (req) => {
                 </tr>
               </table>
               
-              <p style="margin:18px 0 0; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+              <p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 See you on the course!<br/>
                 <strong>The ${tenant.venue_name} Team</strong>
               </p>

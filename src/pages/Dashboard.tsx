@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { LogOut, Calendar, Settings, ClipboardList, Trophy, Lock, Users, Info, Megaphone, Plus, Trash2, CalendarDays } from "lucide-react";
-import birdiesLogo from "@/assets/birdies-logo.png";
+import venueLogo from "@/assets/venue-logo.png";
 import { useTenant } from "@/config/tenant";
 import swingLabBadge from "@/assets/swing-lab-badge.png.asset.json";
 import { supabase } from "@/integrations/supabase/client";
@@ -196,7 +196,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="bg-primary py-4 px-6 flex items-center justify-between safe-area-top">
-        <img src={birdiesLogo} alt={tenant.venue_name} className="h-10 w-auto" />
+        <img src={venueLogo} alt={tenant.venue_name} className="h-10 w-auto" />
         <div className="flex items-center gap-2 sm:gap-4">
           <NotificationBell />
           {isAdmin && (
@@ -477,8 +477,8 @@ const Dashboard = () => {
             <li>Click <span className="font-semibold">Tournaments</span>. Your league rounds will show up.</li>
             <li>Next time you book a session at {tenant.venue_name}, you'll be automatically logged in with your SGT details.</li>
           </ol>
-          <div className="mt-4 rounded-lg border border-birdies-orange/30 bg-birdies-orange/10 p-3">
-            <p className="text-xs font-semibold text-birdies-orange mb-1">TOP TIP</p>
+          <div className="mt-4 rounded-lg border border-brand-accent/30 bg-brand-accent/10 p-3">
+            <p className="text-xs font-semibold text-brand-accent mb-1">TOP TIP</p>
             <p className="text-sm text-foreground">
               If you don't complete a full round, quit while you're on the <span className="font-semibold">tee box</span> of any hole. Quitting midway through a hole can cause bugs.
             </p>

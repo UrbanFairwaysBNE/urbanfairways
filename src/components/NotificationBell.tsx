@@ -194,7 +194,7 @@ export function NotificationBell() {
             <p className="text-sm text-muted-foreground whitespace-pre-wrap">
               {selectedAnnouncement?.content?.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
                 /^https?:\/\//.test(part) ? (
-                  <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-birdies-orange underline break-all">
+                  <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-brand-accent underline break-all">
                     {part}
                   </a>
                 ) : part

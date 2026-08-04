@@ -2,9 +2,8 @@ import Seo from "@/components/Seo";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Globe, CalendarDays, Zap, Trophy, ArrowRight } from "lucide-react";
+import venueInterior from "@/assets/venue-interior.jpg";
 import { useTenant, hubUrl } from "@/config/tenant";
-
-const HERO = "https://cdn.shopify.com/s/files/1/0758/7030/6550/files/Untitled_design_42.png?v=1760070483&width=3840";
 
 const features = [
   { icon: Globe, title: "Web Portal Access", body: "See every stat, every shot, every round on the go with our SGT web portal." },
@@ -18,7 +17,7 @@ const getFaqs = (venueName: string) => [
     section: "General Information",
     items: [
       { q: `What is the ${venueName} League?`, a: `The ${venueName} League is a members-only golf sim league that allows competitive play, tournament rounds, leaderboards, competitions and prizes.` },
-      { q: "How much does it cost to join?", a: `Access to the ${venueName} League is included with your membership. You must be a Birdie member or higher to take part, Weekday members can still join our Wednesday local comp.` },
+      { q: "How much does it cost to join?", a: `Access to the ${venueName} League is included with your membership. Higher membership tiers include full access, entry-level members can still join our local weekly comp.` },
     ],
   },
   {
@@ -55,9 +54,9 @@ const MarketingLeague = () => {
   const faqs = getFaqs(tenant.venue_name);
   return (
   <MarketingLayout>
-    <Seo title={`The ${tenant.venue_name} League | Weekly Simulator Golf`} description={`Play the ${tenant.venue_name} League each week: handicapped simulator tournaments, live leaderboards, monthly winners and prizes at Redland Bay.`} path="/league-info" />
+    <Seo title={`The ${tenant.venue_name} League | Weekly Sim Golf`} description={`Play the ${tenant.venue_name} League each week: handicapped simulator tournaments, live leaderboards, monthly winners and prizes.`} path="/league-info" />
     <section className="relative h-[19vh] min-h-[130px] flex items-end overflow-hidden">
-      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${HERO})` }} />
+      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${venueInterior})` }} />
       <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/80 to-primary/40" />
       <div className="relative container mx-auto px-4 pb-8">
         <p className="text-accent font-display tracking-[0.25em] uppercase text-xs mb-1.5">Members Only</p>
@@ -70,8 +69,8 @@ const MarketingLeague = () => {
     <section className="py-12 sm:py-20">
       <div className="container mx-auto px-4 max-w-3xl text-center">
         <p className="text-lg text-foreground/80 leading-relaxed mb-8">
-          The {tenant.venue_name} League is the ultimate place to be for golfers looking to show off their skills. A perk of Birdie
-          and Eagle membership, it creates a great community and healthy competition. It's competitive, social, and the
+          The {tenant.venue_name} League is the ultimate place to be for golfers looking to show off their skills. A perk of
+          eligible membership tiers, it creates a great community and healthy competition. It's competitive, social, and the
           best way to get more out of every swing.
         </p>
         <a

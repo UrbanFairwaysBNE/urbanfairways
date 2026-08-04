@@ -1,5 +1,5 @@
 import { Phone, Mail, MapPin, Facebook, Instagram } from "lucide-react";
-import birdiesLogo from "@/assets/birdies-logo.png";
+import venueLogo from "@/assets/venue-logo.png";
 import googlePlayBadge from "@/assets/google-play-badge.svg";
 import { useTenant, hubUrl, formatTenantAddress } from "@/config/tenant";
 
@@ -12,9 +12,9 @@ const SiteFooter = () => {
     <footer className="bg-primary text-primary-foreground mt-20">
       <div className="container mx-auto px-4 py-14 grid gap-10 md:grid-cols-3">
         <div>
-          <img src={birdiesLogo} alt={tenant.venue_name} className="h-14 mb-4" />
+          <img src={venueLogo} alt={tenant.venue_name} className="h-14 mb-4" />
           <p className="text-primary-foreground/70 text-sm leading-relaxed">
-            {tenant.venue_name}'s premier indoor golf centre. Play, practice and compete, rain or shine.
+            {tenant.venue_name}, an indoor golf centre. Play, practice and compete, rain or shine.
           </p>
           <div className="flex gap-3 mt-5">
             {tenant.socials.facebook && (

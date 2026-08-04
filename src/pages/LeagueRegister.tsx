@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import birdiesLogo from "@/assets/birdies-logo.png";
+import venueLogo from "@/assets/venue-logo.png";
 import { useTenant } from "@/config/tenant";
 import { Loader2, ArrowLeft, CheckCircle2, Eye, EyeOff, UserPlus } from "lucide-react";
 
@@ -125,7 +125,7 @@ export default function LeagueRegister() {
   if (authLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 text-birdies-orange animate-spin" />
+        <Loader2 className="h-8 w-8 text-brand-accent animate-spin" />
       </div>
     );
   }
@@ -135,19 +135,19 @@ export default function LeagueRegister() {
       <div className="min-h-screen bg-background flex flex-col">
         <header className="bg-primary py-4 px-4 safe-area-top">
           <div className="container flex items-center gap-3">
-            <img src={birdiesLogo} alt={tenant.venue_name} className="h-8 w-auto" />
+            <img src={venueLogo} alt={tenant.venue_name} className="h-8 w-auto" />
           </div>
         </header>
         <main className="flex-1 flex items-center justify-center px-4 py-8">
           <div className="text-center">
             <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <h1 className="font-anton text-2xl text-primary mb-2">
+            <h1 className="font-display text-2xl text-primary mb-2">
               WELCOME TO THE LEAGUE!
             </h1>
             <p className="font-inter text-muted-foreground">
               Redirecting you to the League Hub...
             </p>
-            <Loader2 className="h-6 w-6 text-birdies-orange animate-spin mx-auto mt-4" />
+            <Loader2 className="h-6 w-6 text-brand-accent animate-spin mx-auto mt-4" />
           </div>
         </main>
       </div>
@@ -165,7 +165,7 @@ export default function LeagueRegister() {
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <img src={birdiesLogo} alt={tenant.venue_name} className="h-8 w-auto" />
+          <img src={venueLogo} alt={tenant.venue_name} className="h-8 w-auto" />
         </div>
       </header>
 
@@ -173,7 +173,7 @@ export default function LeagueRegister() {
       <main className="flex-1 flex flex-col">
         <div className="bg-white border-b border-border/50 px-4 py-4">
           <div className="container max-w-md">
-            <h1 className="font-anton text-xl text-primary mb-1">
+            <h1 className="font-display text-xl text-primary mb-1">
               JOIN {tenant.venue_name.toUpperCase()} LEAGUE
             </h1>
             <p className="font-inter text-sm text-muted-foreground">
@@ -277,7 +277,7 @@ export default function LeagueRegister() {
               <Button
                 onClick={handleRegister}
                 disabled={isRegistering || !username || !password || usernameAvailable === false}
-                className="w-full bg-birdies-orange hover:bg-birdies-orange/90 text-white font-inter font-semibold"
+                className="w-full bg-brand-accent hover:bg-brand-accent/90 text-white font-inter font-semibold"
               >
                 {isRegistering ? (
                   <>

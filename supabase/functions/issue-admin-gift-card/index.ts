@@ -53,19 +53,19 @@ serve(async (req: Request): Promise<Response> => {
     const heading = "You've Been Issued a Gift Card";
 
     const amountBlock = `
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1F4C25; border-radius:12px; margin:18px 0;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#2F3134; border-radius:12px; margin:18px 0;">
         <tr>
           <td style="padding:30px; text-align:center;">
-            <p style="margin:0 0 8px; font-family:Inter, Arial, sans-serif; font-size:14px; color:#FFF5E4; opacity:0.9; letter-spacing:1px; text-transform:uppercase;">Gift Card Value</p>
-            <p style="margin:0; font-family:Anton, Impact, Arial Black, sans-serif; font-size:56px; color:#EC622D;">$${amount.toFixed(2)}</p>
+            <p style="margin:0 0 8px; font-family:Manrope, Arial, sans-serif; font-size:14px; color:#F5F3EF; opacity:0.9; letter-spacing:1px; text-transform:uppercase;">Gift Card Value</p>
+            <p style="margin:0; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:56px; color:#B5772A;">$${amount.toFixed(2)}</p>
           </td>
         </tr>
       </table>
     `;
 
-    const intro = `<p style="margin:0 0 14px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">Hi ${escapeHtml(recipientName)}, ${tenant.venue_name} has issued you a gift card to enjoy a session with us.</p>`;
+    const intro = `<p style="margin:0 0 14px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">Hi ${escapeHtml(recipientName)}, ${tenant.venue_name} has issued you a gift card to enjoy a session with us.</p>`;
 
-    const footer = `<p style="margin:18px 0 0; font-family:Inter, Arial, sans-serif; font-size:15px; line-height:1.6; color:#1F4C25; text-align:center;">Create your free account using <strong>this email address</strong> and your credit applies automatically at checkout.</p>`;
+    const footer = `<p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:15px; line-height:1.6; color:#2F3134; text-align:center;">Create your free account using <strong>this email address</strong> and your credit applies automatically at checkout.</p>`;
 
     const html = await renderBrandedEmail(supabase, heading, intro + amountBlock + footer, {
       text: "Activate Your Gift",

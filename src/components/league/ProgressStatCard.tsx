@@ -32,10 +32,10 @@ export function ProgressStatCard({
           onClick={() => setOpen(true)}
           className={`rounded-xl p-4 text-center transition-all hover:scale-[1.02] hover:shadow-md cursor-pointer ${className}`}
         >
-          <p className={`font-anton text-2xl ${valueClassName}`}>{value}</p>
+          <p className={`font-display text-2xl ${valueClassName}`}>{value}</p>
           <p className="text-xs font-inter text-muted-foreground">{label}</p>
           {subValue && (
-            <p className="text-xs font-inter text-birdies-orange font-medium mt-1">{subValue}</p>
+            <p className="text-xs font-inter text-brand-accent font-medium mt-1">{subValue}</p>
           )}
         </button>
 
@@ -45,7 +45,7 @@ export function ProgressStatCard({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   {icon && icon}
-                  <DialogTitle className="font-anton text-xl text-primary">
+                  <DialogTitle className="font-display text-xl text-primary">
                     {label}
                   </DialogTitle>
                 </div>
@@ -55,7 +55,7 @@ export function ProgressStatCard({
               </DialogDescription>
             </DialogHeader>
             <div className="bg-muted rounded-xl p-5 text-center">
-              <p className={`font-anton text-5xl ${valueClassName}`}>{value}</p>
+              <p className={`font-display text-5xl ${valueClassName}`}>{value}</p>
               {subValue && (
                 <p className="text-sm font-inter text-muted-foreground mt-2">{subValue}</p>
               )}
@@ -74,7 +74,7 @@ export function ProgressStatCard({
       >
         {icon}
         <div>
-          <p className={`font-anton text-2xl ${valueClassName}`}>{value}</p>
+          <p className={`font-display text-2xl ${valueClassName}`}>{value}</p>
           <p className="text-sm font-inter text-muted-foreground">{label}</p>
         </div>
       </button>
@@ -84,7 +84,7 @@ export function ProgressStatCard({
           <DialogHeader>
             <div className="flex items-center gap-3">
               {icon}
-              <DialogTitle className="font-anton text-xl text-primary">
+              <DialogTitle className="font-display text-xl text-primary">
                 {label}
               </DialogTitle>
             </div>
@@ -93,7 +93,7 @@ export function ProgressStatCard({
             </DialogDescription>
           </DialogHeader>
           <div className="bg-muted rounded-xl p-5 text-center">
-            <p className={`font-anton text-5xl ${valueClassName}`}>{value}</p>
+            <p className={`font-display text-5xl ${valueClassName}`}>{value}</p>
           </div>
         </DialogContent>
       </Dialog>

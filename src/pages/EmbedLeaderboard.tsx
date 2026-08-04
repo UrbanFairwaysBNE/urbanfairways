@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSGTTournamentStandings } from "@/hooks/useSGTEmbedData";
 import { useActiveTourData } from "@/hooks/useActiveTourData";
 import { supabase } from "@/integrations/supabase/client";
-import birdiesB from "@/assets/birdies-b-icon.png";
+import venueMark from "@/assets/venue-logo-mark.png";
 import { useIframeAutoResize } from "@/hooks/useIframeAutoResize";
 import { useTenant } from "@/config/tenant";
 
@@ -137,13 +137,13 @@ export default function EmbedLeaderboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[hsl(37,100%,95%)] p-4 md:p-6">
+    <div className="min-h-screen bg-[hsl(40,20%,95%)] p-4 md:p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <img src={birdiesB} alt={tenant.venue_name} className="h-10" />
+          <img src={venueMark} alt={tenant.venue_name} className="h-10" />
           <div>
-            <h1 className="font-bold text-xl text-[hsl(128,42%,21%)]">LEADERBOARD</h1>
+            <h1 className="font-bold text-xl text-[hsl(220,4%,20%)]">LEADERBOARD</h1>
             <p className="text-sm text-[hsl(128,20%,40%)]">{activeTour?.name || `${tenant.venue_name} Tour`}</p>
           </div>
         </div>
@@ -159,13 +159,13 @@ export default function EmbedLeaderboard() {
         <TabsList className="grid w-full max-w-sm grid-cols-2 bg-[hsl(37,40%,90%)]">
           <TabsTrigger 
             value="monthly" 
-            className="data-[state=active]:bg-[hsl(128,42%,21%)] data-[state=active]:text-white"
+            className="data-[state=active]:bg-[hsl(220,4%,20%)] data-[state=active]:text-white"
           >
             Monthly Winner
           </TabsTrigger>
           <TabsTrigger 
             value="weekly"
-            className="data-[state=active]:bg-[hsl(128,42%,21%)] data-[state=active]:text-white"
+            className="data-[state=active]:bg-[hsl(220,4%,20%)] data-[state=active]:text-white"
           >
             Weekly Results
           </TabsTrigger>
@@ -177,7 +177,7 @@ export default function EmbedLeaderboard() {
           <div className="flex flex-col sm:flex-row gap-3 mb-4">
             <div className="flex items-center gap-2 px-4 py-2 bg-white border border-[hsl(128,20%,85%)] rounded-lg">
               <Calendar className="h-4 w-4 text-[hsl(128,20%,40%)]" />
-              <span className="text-[hsl(128,42%,21%)]">{currentMonth}</span>
+              <span className="text-[hsl(220,4%,20%)]">{currentMonth}</span>
             </div>
 
             <div className="flex-1 flex justify-center sm:justify-end">
@@ -187,8 +187,8 @@ export default function EmbedLeaderboard() {
                   className={cn(
                     "px-4 py-2 text-sm font-medium transition-colors rounded-full",
                     scoreType === "gross"
-                      ? "bg-[hsl(128,42%,21%)] text-white"
-                      : "text-[hsl(128,20%,40%)] hover:text-[hsl(128,42%,21%)]"
+                      ? "bg-[hsl(220,4%,20%)] text-white"
+                      : "text-[hsl(128,20%,40%)] hover:text-[hsl(220,4%,20%)]"
                   )}
                 >
                   Gross
@@ -198,8 +198,8 @@ export default function EmbedLeaderboard() {
                   className={cn(
                     "px-4 py-2 text-sm font-medium transition-colors rounded-full",
                     scoreType === "net"
-                      ? "bg-[hsl(128,42%,21%)] text-white"
-                      : "text-[hsl(128,20%,40%)] hover:text-[hsl(128,42%,21%)]"
+                      ? "bg-[hsl(220,4%,20%)] text-white"
+                      : "text-[hsl(128,20%,40%)] hover:text-[hsl(220,4%,20%)]"
                   )}
                 >
                   Net
@@ -211,17 +211,17 @@ export default function EmbedLeaderboard() {
           {/* Monthly Content */}
           {monthlyLoading ? (
             <div className="flex items-center justify-center py-16">
-              <Loader2 className="h-8 w-8 text-[hsl(18,84%,55%)] animate-spin" />
+              <Loader2 className="h-8 w-8 text-[hsl(32,62%,44%)] animate-spin" />
             </div>
           ) : monthlyStandings.length === 0 ? (
             <div className="bg-white rounded-xl border border-[hsl(128,20%,85%)] p-12 text-center">
-              <h3 className="font-bold text-lg text-[hsl(128,42%,21%)] mb-2">NO RESULTS YET</h3>
+              <h3 className="font-bold text-lg text-[hsl(220,4%,20%)] mb-2">NO RESULTS YET</h3>
               <p className="text-[hsl(128,20%,40%)]">Monthly standings will appear once tournaments are completed</p>
             </div>
           ) : (
             <div className="bg-white rounded-xl border border-[hsl(128,20%,85%)] overflow-hidden shadow-sm">
               {/* Table Header */}
-              <div className="grid grid-cols-12 gap-2 px-4 py-3 bg-[hsl(128,42%,21%)] text-sm font-medium text-white">
+              <div className="grid grid-cols-12 gap-2 px-4 py-3 bg-[hsl(220,4%,20%)] text-sm font-medium text-white">
                 <div className="col-span-1 text-center">#</div>
                 <div className="col-span-4">Player</div>
                 <div className="col-span-2 text-center">HCP</div>
@@ -237,20 +237,20 @@ export default function EmbedLeaderboard() {
                   return (
                     <div
                       key={standing.id}
-                      className="grid grid-cols-12 gap-2 px-4 py-3 items-center hover:bg-[hsl(37,100%,97%)] transition-colors"
+                      className="grid grid-cols-12 gap-2 px-4 py-3 items-center hover:bg-[hsl(40,20%,97%)] transition-colors"
                     >
                       <div className="col-span-1 flex items-center justify-center gap-1">
                         {getPositionIcon(position || index + 1)}
                         <span className={cn(
                           "font-bold",
-                          (position || 0) <= 3 ? "text-[hsl(128,42%,21%)]" : "text-[hsl(128,20%,40%)]"
+                          (position || 0) <= 3 ? "text-[hsl(220,4%,20%)]" : "text-[hsl(128,20%,40%)]"
                         )}>
                           {position || index + 1}
                         </span>
                       </div>
 
                       <div className="col-span-4">
-                        <p className="font-semibold text-[hsl(128,42%,21%)] truncate">
+                        <p className="font-semibold text-[hsl(220,4%,20%)] truncate">
                           {standing.player_name}
                         </p>
                       </div>
@@ -263,7 +263,7 @@ export default function EmbedLeaderboard() {
                         {standing.tournaments_played}
                       </div>
 
-                      <div className="col-span-3 text-center font-bold text-[hsl(18,84%,55%)]">
+                      <div className="col-span-3 text-center font-bold text-[hsl(32,62%,44%)]">
                         {points ?? "-"}
                       </div>
                     </div>
@@ -292,7 +292,7 @@ export default function EmbedLeaderboard() {
                       <div className="flex items-center gap-2">
                         <span>{tournament.name}</span>
                         {currentTournament && tournament.tournament_id === currentTournament.tournament_id && (
-                          <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-[hsl(18,84%,55%)] text-white rounded">
+                          <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-[hsl(32,62%,44%)] text-white rounded">
                             CURRENT
                           </span>
                         )}
@@ -310,8 +310,8 @@ export default function EmbedLeaderboard() {
                   className={cn(
                     "px-4 py-2 text-sm font-medium transition-colors rounded-full",
                     scoreType === "gross"
-                      ? "bg-[hsl(128,42%,21%)] text-white"
-                      : "text-[hsl(128,20%,40%)] hover:text-[hsl(128,42%,21%)]"
+                      ? "bg-[hsl(220,4%,20%)] text-white"
+                      : "text-[hsl(128,20%,40%)] hover:text-[hsl(220,4%,20%)]"
                   )}
                 >
                   Gross
@@ -321,8 +321,8 @@ export default function EmbedLeaderboard() {
                   className={cn(
                     "px-4 py-2 text-sm font-medium transition-colors rounded-full",
                     scoreType === "net"
-                      ? "bg-[hsl(128,42%,21%)] text-white"
-                      : "text-[hsl(128,20%,40%)] hover:text-[hsl(128,42%,21%)]"
+                      ? "bg-[hsl(220,4%,20%)] text-white"
+                      : "text-[hsl(128,20%,40%)] hover:text-[hsl(220,4%,20%)]"
                   )}
                 >
                   Net
@@ -334,17 +334,17 @@ export default function EmbedLeaderboard() {
           {/* Weekly Content */}
           {tournamentLoading ? (
             <div className="flex items-center justify-center py-16">
-              <Loader2 className="h-8 w-8 text-[hsl(18,84%,55%)] animate-spin" />
+              <Loader2 className="h-8 w-8 text-[hsl(32,62%,44%)] animate-spin" />
             </div>
           ) : tournamentStandings.length === 0 ? (
             <div className="bg-white rounded-xl border border-[hsl(128,20%,85%)] p-12 text-center">
-              <h3 className="font-bold text-lg text-[hsl(128,42%,21%)] mb-2">NO RESULTS YET</h3>
+              <h3 className="font-bold text-lg text-[hsl(220,4%,20%)] mb-2">NO RESULTS YET</h3>
               <p className="text-[hsl(128,20%,40%)]">No results available for this tournament</p>
             </div>
           ) : (
             <div className="bg-white rounded-xl border border-[hsl(128,20%,85%)] overflow-hidden shadow-sm">
               {/* Table Header */}
-              <div className="hidden sm:grid grid-cols-12 gap-2 px-4 py-3 bg-[hsl(128,42%,21%)] text-sm font-medium text-white">
+              <div className="hidden sm:grid grid-cols-12 gap-2 px-4 py-3 bg-[hsl(220,4%,20%)] text-sm font-medium text-white">
                 <div className="col-span-1 text-center">#</div>
                 <div className="col-span-3">Player</div>
                 <div className="col-span-1 text-center">HCP</div>
@@ -355,7 +355,7 @@ export default function EmbedLeaderboard() {
               </div>
 
               {/* Mobile Header */}
-              <div className="grid sm:hidden grid-cols-12 gap-1 px-3 py-2 bg-[hsl(128,42%,21%)] text-xs font-medium text-white">
+              <div className="grid sm:hidden grid-cols-12 gap-1 px-3 py-2 bg-[hsl(220,4%,20%)] text-xs font-medium text-white">
                 <div className="col-span-1 text-center">#</div>
                 <div className="col-span-3">Player</div>
                 <div className="col-span-2 text-center">Rd1</div>
@@ -368,20 +368,20 @@ export default function EmbedLeaderboard() {
                 {tournamentStandings.map((result) => (
                   <div
                     key={result.playerName}
-                    className="grid grid-cols-12 gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 items-center hover:bg-[hsl(37,100%,97%)] transition-colors"
+                    className="grid grid-cols-12 gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 items-center hover:bg-[hsl(40,20%,97%)] transition-colors"
                   >
                     <div className="col-span-1 flex items-center justify-center gap-0.5 sm:gap-1">
                       <span className="hidden sm:inline">{getPositionIcon(result.position)}</span>
                       <span className={cn(
                         "font-bold text-xs sm:text-base",
-                        result.position <= 3 ? "text-[hsl(128,42%,21%)]" : "text-[hsl(128,20%,40%)]"
+                        result.position <= 3 ? "text-[hsl(220,4%,20%)]" : "text-[hsl(128,20%,40%)]"
                       )}>
                         {result.position}
                       </span>
                     </div>
 
                     <div className="col-span-3">
-                      <p className="font-semibold text-[hsl(128,42%,21%)] text-xs sm:text-base truncate">
+                      <p className="font-semibold text-[hsl(220,4%,20%)] text-xs sm:text-base truncate">
                         {result.playerName}
                       </p>
                       <p className="hidden sm:block text-xs text-[hsl(128,20%,40%)]">
@@ -411,7 +411,7 @@ export default function EmbedLeaderboard() {
                       )}
                     </div>
 
-                    <div className="col-span-2 sm:col-span-1 text-center font-bold text-xs sm:text-base text-[hsl(128,42%,21%)]">
+                    <div className="col-span-2 sm:col-span-1 text-center font-bold text-xs sm:text-base text-[hsl(220,4%,20%)]">
                       {result.total}
                     </div>
 

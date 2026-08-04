@@ -1347,7 +1347,7 @@ export default function AdminCustomers() {
                           variant="ghost"
                           size="icon"
                           onClick={() => toggleBookingFlag(selectedCustomer)}
-                          className={selectedCustomer.booking_flag_enabled ? "text-birdies-orange hover:text-birdies-orange" : "text-muted-foreground"}
+                          className={selectedCustomer.booking_flag_enabled ? "text-brand-accent hover:text-brand-accent" : "text-muted-foreground"}
                           aria-label="Toggle booking flag"
                         >
                           <Flag className={`h-5 w-5 ${selectedCustomer.booking_flag_enabled ? "fill-current" : ""}`} />

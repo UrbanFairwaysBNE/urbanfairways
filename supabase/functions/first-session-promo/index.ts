@@ -312,7 +312,7 @@ serve(async (req: Request): Promise<Response> => {
 <head><meta charset="utf-8"><title>First Session Promo Report</title></head>
 <body style="font-family:Arial,sans-serif;margin:0;padding:20px;background:#f5f5f5;">
   <div style="max-width:600px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
-    <div style="background:#1F4C25;color:#fff;padding:20px;text-align:center;">
+    <div style="background:#2F3134;color:#fff;padding:20px;text-align:center;">
       <h1 style="margin:0;font-size:24px;">First Session Promo Report</h1>
     </div>
     <div style="padding:24px;">
@@ -322,10 +322,10 @@ serve(async (req: Request): Promise<Response> => {
         <p style="margin:0 0 8px;"><strong>Successful:</strong> ${results.success}</p>
         <p style="margin:0;"><strong>Failed:</strong> ${results.failed}</p>
       </div>
-      <h3 style="color:#1F4C25;margin:0 0 12px;">Customers Included:</h3>
+      <h3 style="color:#2F3134;margin:0 0 12px;">Customers Included:</h3>
       <table style="width:100%;border-collapse:collapse;">
         <thead>
-          <tr style="background:#1F4C25;color:#fff;">
+          <tr style="background:#2F3134;color:#fff;">
             <th style="padding:10px;text-align:left;">Name</th>
             <th style="padding:10px;text-align:left;">Email</th>
           </tr>
@@ -386,37 +386,37 @@ function getDefaultTemplate(tenant: TenantConfig): string {
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Your Free Hour</title>
 </head>
-<body style="margin:0; padding:0; background-color:#FFF5E4;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#FFF5E4;">
+<body style="margin:0; padding:0; background-color:#F5F3EF;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F5F3EF;">
     <tr>
       <td align="center" style="padding:24px 12px;">
         <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px; width:100%;">
           <tr>
-            <td align="center" style="background-color:#1F4C25; padding:18px; border-radius:16px 16px 0 0;">
-              <div style="font-family:Anton, Impact, Arial Black, sans-serif; font-size:26px; color:#FFFFFF; text-align:center; letter-spacing:0.5px;">${tenant.venue_name}</div>
+            <td align="center" style="background-color:#2F3134; padding:18px; border-radius:16px 16px 0 0;">
+              <div style="font-family:Archivo, Impact, Arial Black, sans-serif; font-size:26px; color:#FFFFFF; text-align:center; letter-spacing:0.5px;">${tenant.venue_name}</div>
             </td>
           </tr>
           <tr>
-            <td style="background-color:#FFF5E4; padding:26px 22px; border-left:1px solid rgba(31,76,37,0.12); border-right:1px solid rgba(31,76,37,0.12);">
-              <h1 style="margin:0 0 14px; font-family:Arial, sans-serif; font-size:34px; line-height:1.1; color:#1F4C25; text-align:center;">A Gift From Us To You!</h1>
-              <p style="margin:0 0 18px; font-family:Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+            <td style="background-color:#F5F3EF; padding:26px 22px; border-left:1px solid rgba(47,49,52,0.12); border-right:1px solid rgba(47,49,52,0.12);">
+              <h1 style="margin:0 0 14px; font-family:Arial, sans-serif; font-size:34px; line-height:1.1; color:#2F3134; text-align:center;">A Gift From Us To You!</h1>
+              <p style="margin:0 0 18px; font-family:Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 Hi {first_name}, we noticed you haven't booked your first session yet. We'd love to see you at ${tenant.venue_name}, so we've added credit to your account!
               </p>
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1F4C25; border-radius:12px; margin:18px 0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#2F3134; border-radius:12px; margin:18px 0;">
                 <tr>
                   <td style="padding:30px; text-align:center;">
-                    <p style="margin:0 0 8px; font-family:Arial, sans-serif; font-size:14px; color:#FFF5E4; opacity:0.9;">Your Account Credit</p>
-                    <p style="margin:0; font-family:Arial, sans-serif; font-size:52px; font-weight:bold; color:#EC622D;">$35.00</p>
-                    <p style="margin:8px 0 0; font-family:Arial, sans-serif; font-size:14px; color:#FFF5E4; opacity:0.9;">Enough for 1 hour off-peak!</p>
+                    <p style="margin:0 0 8px; font-family:Arial, sans-serif; font-size:14px; color:#F5F3EF; opacity:0.9;">Your Account Credit</p>
+                    <p style="margin:0; font-family:Arial, sans-serif; font-size:52px; font-weight:bold; color:#B5772A;">$35.00</p>
+                    <p style="margin:8px 0 0; font-family:Arial, sans-serif; font-size:14px; color:#F5F3EF; opacity:0.9;">Enough for 1 hour off-peak!</p>
                   </td>
                 </tr>
               </table>
-              <p style="margin:18px 0; font-family:Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+              <p style="margin:18px 0; font-family:Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 This credit has been automatically added to your account and will be applied at checkout. No code needed!
               </p>
               <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:22px auto 0;">
                 <tr>
-                  <td bgcolor="#EC622D" style="border-radius:12px;">
+                  <td bgcolor="#B5772A" style="border-radius:12px;">
                     <a href="${tenantHubUrl(tenant, "/booking")}" style="display:inline-block; padding:14px 28px; font-family:Arial, sans-serif; font-size:18px; font-weight:bold; color:#FFFFFF; text-decoration:none;">Book Your Free Session</a>
                   </td>
                 </tr>
@@ -424,9 +424,9 @@ function getDefaultTemplate(tenant: TenantConfig): string {
             </td>
           </tr>
           <tr>
-            <td style="background-color:#1F4C25; padding:22px; border-radius:0 0 16px 16px;">
-              <p style="margin:0; font-family:Arial, sans-serif; font-size:13px; color:#FFF5E4; text-align:center; opacity:0.85;">
-                ${tenant.venue_name} | <a href="mailto:${tenant.support_email}" style="color:#EC622D; text-decoration:none;">${tenant.support_email}</a>
+            <td style="background-color:#2F3134; padding:22px; border-radius:0 0 16px 16px;">
+              <p style="margin:0; font-family:Arial, sans-serif; font-size:13px; color:#F5F3EF; text-align:center; opacity:0.85;">
+                ${tenant.venue_name} | <a href="mailto:${tenant.support_email}" style="color:#B5772A; text-decoration:none;">${tenant.support_email}</a>
               </p>
             </td>
           </tr>

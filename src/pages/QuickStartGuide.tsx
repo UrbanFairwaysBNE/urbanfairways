@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useTenant } from "@/config/tenant";
 
-export default function BirdiesGuide() {
+export default function QuickStartGuide() {
   const { tenant } = useTenant();
   useEffect(() => {
     // Scroll to top when component mounts
@@ -10,9 +10,9 @@ export default function BirdiesGuide() {
 
   return (
     <iframe
-      src="/birdies-guide.html"
+      src="/quick-start-guide.html"
       className="w-full h-screen border-0"
-      title={`How to Use ${tenant.venue_name} Guide`}
+      title={`Quick Start Guide for ${tenant.venue_name}`}
     />
   );
 }

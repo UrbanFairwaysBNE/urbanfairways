@@ -28,41 +28,41 @@ function buildNewMemberEmail(data: { username: string; email: string; sgtUserId:
   <meta name="x-apple-disable-message-reformatting" />
   <title>New League Member - Action Required</title>
   <style>
-    @import url("https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600&display=swap");
+    @import url("https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Manrope:wght@400;600&display=swap");
   </style>
 </head>
-<body style="margin:0; padding:0; background-color:#FFF5E4;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#FFF5E4;">
+<body style="margin:0; padding:0; background-color:#F5F3EF;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F5F3EF;">
     <tr>
       <td align="center" style="padding:24px 12px;">
         <!-- CONTAINER -->
         <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px; width:100%;">
           <!-- HEADER -->
           <tr>
-            <td align="center" style="background-color:#1F4C25; padding:18px; border-radius:16px 16px 0 0;">
-              <div style="font-family:Anton, Impact, Arial Black, sans-serif; font-size:24px; letter-spacing:0.5px; color:#FFFFFF;">
+            <td align="center" style="background-color:#2F3134; padding:18px; border-radius:16px 16px 0 0;">
+              <div style="font-family:Archivo, Impact, Arial Black, sans-serif; font-size:24px; letter-spacing:0.5px; color:#FFFFFF;">
                 ${tenant.venue_name}
               </div>
             </td>
           </tr>
           <!-- BODY -->
           <tr>
-            <td style="background-color:#FFF5E4; padding:26px 22px; border-left:1px solid rgba(31,76,37,0.12); border-right:1px solid rgba(31,76,37,0.12);">
-              <h1 style="margin:0 0 14px; font-family:Anton, Impact, Arial Black, sans-serif; font-size:34px; line-height:1.1; color:#1F4C25; text-align:center;">
+            <td style="background-color:#F5F3EF; padding:26px 22px; border-left:1px solid rgba(47,49,52,0.12); border-right:1px solid rgba(47,49,52,0.12);">
+              <h1 style="margin:0 0 14px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:34px; line-height:1.1; color:#2F3134; text-align:center;">
                 🆕 New League Member!
               </h1>
-              <p style="margin:0 0 8px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+              <p style="margin:0 0 8px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 A new member has joined the ${tenant.venue_name} League via the app.
               </p>
-              <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:14px; line-height:1.6; color:#EC622D; text-align:center; font-weight:600;">
+              <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:14px; line-height:1.6; color:#B5772A; text-align:center; font-weight:600;">
                 ⚠️ Action Required: Set their handicap to complete onboarding
               </p>
               
               <!-- MEMBER DETAILS BOX -->
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #EC622D;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #B5772A;">
                 <tr>
-                  <td style="padding:20px; font-family:Inter, Arial, sans-serif; font-size:15px; color:#1F4C25;">
-                    <h3 style="margin:0 0 16px 0; font-family:Anton, Impact, Arial Black, sans-serif; color:#1F4C25;">Member Details</h3>
+                  <td style="padding:20px; font-family:Manrope, Arial, sans-serif; font-size:15px; color:#2F3134;">
+                    <h3 style="margin:0 0 16px 0; font-family:Archivo, Impact, Arial Black, sans-serif; color:#2F3134;">Member Details</h3>
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                       <tr>
                         <td style="padding:8px 0; border-bottom:1px solid #eee;">
@@ -77,7 +77,7 @@ function buildNewMemberEmail(data: { username: string; email: string; sgtUserId:
                           <strong>Email:</strong>
                         </td>
                         <td style="padding:8px 0; border-bottom:1px solid #eee; text-align:right;">
-                          <a href="mailto:${data.email}" style="color:#1F4C25;">${data.email}</a>
+                          <a href="mailto:${data.email}" style="color:#2F3134;">${data.email}</a>
                         </td>
                       </tr>
                       <tr>
@@ -114,14 +114,14 @@ function buildNewMemberEmail(data: { username: string; email: string; sgtUserId:
                 <tr>
                   <td align="center" style="padding:10px 0 20px;">
                     <a href="${data.onboardingUrl}" 
-                       style="display:inline-block; background-color:#EC622D; color:#FFFFFF; font-family:Anton, Impact, Arial Black, sans-serif; font-size:18px; padding:14px 32px; text-decoration:none; border-radius:8px; letter-spacing:0.5px;">
+                       style="display:inline-block; background-color:#B5772A; color:#FFFFFF; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:18px; padding:14px 32px; text-decoration:none; border-radius:8px; letter-spacing:0.5px;">
                       ONBOARD PLAYER →
                     </a>
                   </td>
                 </tr>
               </table>
               
-              <p style="margin:18px 0 0; font-family:Inter, Arial, sans-serif; font-size:13px; line-height:1.6; color:#666; text-align:center;">
+              <p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:13px; line-height:1.6; color:#666; text-align:center;">
                 The member will be held in a "pending" state until you set their handicap.<br/>
                 Once onboarded, they'll be automatically registered for all active tours and tournaments.
               </p>
@@ -129,10 +129,10 @@ function buildNewMemberEmail(data: { username: string; email: string; sgtUserId:
           </tr>
           <!-- FOOTER -->
           <tr>
-            <td style="background-color:#1F4C25; padding:22px; border-radius:0 0 16px 16px;">
+            <td style="background-color:#2F3134; padding:22px; border-radius:0 0 16px 16px;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
-                  <td align="center" style="font-family:Inter, Arial, sans-serif; font-size:12px; color:#FFFFFF; opacity:0.75;">
+                  <td align="center" style="font-family:Manrope, Arial, sans-serif; font-size:12px; color:#FFFFFF; opacity:0.75;">
                     © ${tenant.venue_name}
                   </td>
                 </tr>

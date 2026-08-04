@@ -7,9 +7,9 @@ const WelcomePreview = () => {
   const firstName = searchParams.get("name") || "Guest";
 
   return (
-    <div className="min-h-screen flex items-center justify-center overflow-hidden" style={{ backgroundColor: '#fff5e4' }}>
+    <div className="min-h-screen flex items-center justify-center overflow-hidden" style={{ backgroundColor: '#f5f3ef' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Manrope:wght@300;400;500&display=swap');
         
         @keyframes fadeIn {
           from { opacity: 0; transform: scale(0.95); }
@@ -35,7 +35,7 @@ const WelcomePreview = () => {
       
       <div className="welcome-container text-center">
         <img 
-          src="/birdies-welcome-logo.png" 
+          src="/venue-welcome-logo.png" 
           alt={tenant.venue_name} 
           className="w-[210px] mx-auto mb-12"
           style={{ filter: 'drop-shadow(0 10px 30px rgba(31, 76, 37, 0.15))' }}
@@ -44,8 +44,8 @@ const WelcomePreview = () => {
         <h1 
           className="text-[96px] mb-2 uppercase tracking-wide"
           style={{ 
-            fontFamily: 'Anton, sans-serif', 
-            color: '#1f4c25',
+            fontFamily: 'Archivo, system-ui, sans-serif', 
+            color: '#2f3134',
             fontWeight: 400,
             letterSpacing: '2px'
           }}
@@ -56,8 +56,8 @@ const WelcomePreview = () => {
         <h2 
           className="text-[56px] mb-16 uppercase"
           style={{ 
-            fontFamily: 'Anton, sans-serif', 
-            color: '#ec622d',
+            fontFamily: 'Archivo, system-ui, sans-serif', 
+            color: '#b5772a',
             fontWeight: 400,
             letterSpacing: '1px'
           }}
@@ -68,8 +68,8 @@ const WelcomePreview = () => {
         <p 
           className="text-[28px] mb-3"
           style={{ 
-            fontFamily: 'Inter, sans-serif', 
-            color: '#1f4c25',
+            fontFamily: 'Manrope, system-ui, sans-serif', 
+            color: '#2f3134',
             opacity: 0.85,
             fontWeight: 400
           }}
@@ -80,8 +80,8 @@ const WelcomePreview = () => {
         <p 
           className="text-[28px]"
           style={{ 
-            fontFamily: 'Inter, sans-serif', 
-            color: '#1f4c25',
+            fontFamily: 'Manrope, system-ui, sans-serif', 
+            color: '#2f3134',
             opacity: 0.85,
             fontWeight: 400
           }}
@@ -101,15 +101,15 @@ const WelcomePreview = () => {
           <h3 
             className="text-[36px] mb-5 uppercase text-center"
             style={{ 
-              fontFamily: 'Anton, sans-serif', 
-              color: '#1f4c25',
+              fontFamily: 'Archivo, system-ui, sans-serif', 
+              color: '#2f3134',
               fontWeight: 400,
               letterSpacing: '2px'
             }}
           >
             {tenant.venue_name} Etiquette
           </h3>
-          <ol className="space-y-3" style={{ fontFamily: 'Inter, sans-serif', color: '#1f4c25' }}>
+          <ol className="space-y-3" style={{ fontFamily: 'Manrope, system-ui, sans-serif', color: '#2f3134' }}>
             {[
               "Use a different ball after every shot, this prevents a ball cracking on you!",
               "If you keep skying your drives, tee it down lower",
@@ -119,7 +119,7 @@ const WelcomePreview = () => {
               <li key={i} className="flex gap-3 items-start text-[22px]" style={{ opacity: 0.85 }}>
                 <span 
                   className="flex-shrink-0 w-[32px] h-[32px] rounded-full flex items-center justify-center text-[16px] font-semibold mt-[2px]"
-                  style={{ backgroundColor: '#ec622d', color: '#fff' }}
+                  style={{ backgroundColor: '#b5772a', color: '#fff' }}
                 >
                   {i + 1}
                 </span>
@@ -132,15 +132,15 @@ const WelcomePreview = () => {
         <div className="mt-10 flex gap-4 justify-center">
           <span 
             className="loading-dot w-[18px] h-[18px] rounded-full"
-            style={{ backgroundColor: '#ec622d' }}
+            style={{ backgroundColor: '#b5772a' }}
           />
           <span 
             className="loading-dot w-[18px] h-[18px] rounded-full"
-            style={{ backgroundColor: '#ec622d' }}
+            style={{ backgroundColor: '#b5772a' }}
           />
           <span 
             className="loading-dot w-[18px] h-[18px] rounded-full"
-            style={{ backgroundColor: '#ec622d' }}
+            style={{ backgroundColor: '#b5772a' }}
           />
         </div>
       </div>

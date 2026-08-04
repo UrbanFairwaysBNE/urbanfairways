@@ -175,7 +175,7 @@ export default function LeagueLeaderboard() {
   return (
     <LeagueLayout>
       <div className="mb-6 animate-fade-in">
-        <h1 className="font-anton text-3xl md:text-4xl text-foreground mb-2">
+        <h1 className="font-display text-3xl md:text-4xl text-foreground mb-2">
           LEADERBOARD
         </h1>
         <p className="font-inter text-muted-foreground">
@@ -232,7 +232,7 @@ export default function LeagueLeaderboard() {
             </div>
           ) : monthlyStandings.length === 0 ? (
             <div className="bg-card rounded-xl border border-border p-12 text-center animate-fade-in">
-              <h3 className="font-anton text-xl text-foreground mb-2">NO RESULTS YET</h3>
+              <h3 className="font-display text-xl text-foreground mb-2">NO RESULTS YET</h3>
               <p className="text-muted-foreground font-inter">
                 Monthly standings will appear once tournaments are completed this month
               </p>
@@ -240,7 +240,7 @@ export default function LeagueLeaderboard() {
           ) : (
             <div className="bg-card rounded-xl border border-border overflow-hidden animate-slide-up">
               <div className="px-4 py-3 bg-primary/10 border-b border-border">
-                <h3 className="font-anton text-lg text-foreground">
+                <h3 className="font-display text-lg text-foreground">
                   {currentMonth} - Monthly Medal
                 </h3>
               </div>
@@ -309,7 +309,7 @@ export default function LeagueLeaderboard() {
                       </div>
 
                       <div className="col-span-2 text-center">
-                        <span className="font-display text-lg text-birdies-orange">
+                        <span className="font-display text-lg text-brand-accent">
                           {points ?? "-"}
                         </span>
                       </div>
@@ -438,7 +438,7 @@ export default function LeagueLeaderboard() {
             </div>
           ) : tournamentStandings.length === 0 ? (
             <div className="bg-card rounded-xl border border-border p-12 text-center animate-fade-in">
-              <h3 className="font-anton text-xl text-foreground mb-2">NO RESULTS YET</h3>
+              <h3 className="font-display text-xl text-foreground mb-2">NO RESULTS YET</h3>
               <p className="text-muted-foreground font-inter">
                 {filteredTournaments.length === 0
                   ? "No tournaments available yet"
@@ -451,7 +451,7 @@ export default function LeagueLeaderboard() {
               {/* Tournament Info Header */}
               {selectedTournament && filteredTournaments.find(t => t.tournament_id === selectedTournament) && (
                 <div className="px-4 py-3 bg-primary/10 border-b border-border">
-                  <h3 className="font-anton text-lg text-foreground">
+                  <h3 className="font-display text-lg text-foreground">
                     {filteredTournaments.find(t => t.tournament_id === selectedTournament)?.name}
                   </h3>
                   <p className="font-inter text-sm text-muted-foreground">

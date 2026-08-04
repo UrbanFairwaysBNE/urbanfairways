@@ -15,7 +15,7 @@ const MarketingStaffedHours = () => {
   const { tenant } = useTenant();
   return (
     <MarketingLayout>
-    <Seo title={`Staffed Hours & Opening Times | ${tenant.venue_name}`} description={`Current staffed hours and automated bay access times for ${tenant.venue_name} indoor golf in Redland Bay. Bays open 5am to 11pm.`} path="/staffed-hours" />
+    <Seo title={`Staffed Hours & Opening Times | ${tenant.venue_name}`} description={`Current staffed hours and automated bay access times for ${tenant.venue_name} indoor golf.`} path="/staffed-hours" />
       {/* Hero */}
       <section className="bg-primary text-primary-foreground py-10 md:py-14">
         <div className="container mx-auto px-4 text-center">
@@ -23,7 +23,7 @@ const MarketingStaffedHours = () => {
             Staffed Hours
           </h1>
           <p className="mt-4 text-primary-foreground/80 max-w-2xl mx-auto">
-            Open every day from <span className="text-accent font-semibold">5am – 11pm</span> for
+            Open every day during <span className="text-accent font-semibold">extended access hours</span> for
             visitors and members.
           </p>
         </div>
@@ -37,7 +37,7 @@ const MarketingStaffedHours = () => {
               <Clock className="h-6 w-6 text-accent" />
               <h2 className="font-display text-2xl uppercase tracking-wide">Opening Hours</h2>
             </div>
-            <p className="text-4xl font-display tracking-wide text-primary">5AM – 11PM</p>
+            <p className="text-4xl font-display tracking-wide text-primary">Extended Hours</p>
             <p className="text-muted-foreground mt-2">Every day, for visitors and members*.</p>
           </div>
 

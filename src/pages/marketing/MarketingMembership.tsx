@@ -1,30 +1,29 @@
 import Seo from "@/components/Seo";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { ArrowRight, Check, Clock } from "lucide-react";
+import venueInterior from "@/assets/venue-interior.jpg";
 import { useTenant, hubUrl } from "@/config/tenant";
-
-const HERO = "https://cdn.shopify.com/s/files/1/0758/7030/6550/files/Birdies_Golf.jpg?v=1751956878&width=3840";
 
 const tiers = [
   {
-    name: "Weekday",
-    price: "$15",
-    rate: "$10/hr",
-    tag: "Mon-Thu before 4pm only",
+    name: "Starter",
+    price: "$XX",
+    rate: "From $X/hr",
+    tag: "Off-peak weekdays only",
     perks: ["Swing Lab access", "Cancel any time", "Peak times charged at visitor rate"],
   },
   {
-    name: "Birdie",
-    price: "$27",
-    rate: "$10/hr",
+    name: "Standard",
+    price: "$XX",
+    rate: "From $X/hr",
     tag: "Most popular",
     highlight: true,
     perks: ["Play anytime", "League access", "Swing Lab access", "Cancel any time"],
   },
   {
-    name: "Eagle",
-    price: "$35",
-    rate: "$8/hr",
+    name: "Premium",
+    price: "$XX",
+    rate: "From $X/hr",
     tag: "Best value per round",
     perks: ["Play anytime", "League access", "Swing Lab access", "Priority booking", "Cancel any time"],
   },
@@ -34,9 +33,9 @@ const MarketingMembership = () => {
   const { tenant } = useTenant();
   return (
   <MarketingLayout>
-    <Seo title={`Golf Memberships | ${tenant.venue_name}`} description={`Compare ${tenant.venue_name} membership tiers, included simulator hours, member pricing and 24/7 automated bay access in Redland Bay.`} path="/membership-info" />
+    <Seo title={`Golf Memberships | ${tenant.venue_name}`} description={`Compare ${tenant.venue_name} membership tiers, included simulator hours, member pricing and automated bay access.`} path="/membership-info" />
     <section className="relative h-[28vh] min-h-[220px] flex items-end overflow-hidden">
-      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${HERO})` }} />
+      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${venueInterior})` }} />
       <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/70 to-primary/30" />
       <div className="relative container mx-auto px-4 pb-8">
         <p className="text-accent font-display tracking-[0.25em] uppercase text-xs mb-1.5">Membership</p>
@@ -117,11 +116,11 @@ const MarketingMembership = () => {
             <div className="mb-5">
               <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold bg-accent/10 text-accent border border-accent/20">
                 <Clock className="h-3.5 w-3.5" />
-                $30/hr
+                $XX/hr
               </span>
             </div>
-            <p className="text-sm text-foreground/60 mb-2">Mon-Thu before 4pm</p>
-            <p className="text-sm text-foreground/60 mb-6">Per bay, up to 4 players</p>
+            <p className="text-sm text-foreground/60 mb-2">Off-peak hours</p>
+            <p className="text-sm text-foreground/60 mb-6">Per bay, small groups welcome</p>
             <a href={hubUrl(tenant, "/")} className="block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors bg-accent hover:bg-accent/90 text-accent-foreground">
               Book Now
             </a>
@@ -132,11 +131,11 @@ const MarketingMembership = () => {
             <div className="mb-5">
               <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold bg-accent/10 text-accent border border-accent/20">
                 <Clock className="h-3.5 w-3.5" />
-                $35/hr
+                $XX/hr
               </span>
             </div>
-            <p className="text-sm text-foreground/60 mb-2">Fri-Sun & Mon-Thu 4pm+</p>
-            <p className="text-sm text-foreground/60 mb-6">Per bay, up to 4 players</p>
+            <p className="text-sm text-foreground/60 mb-2">Peak hours</p>
+            <p className="text-sm text-foreground/60 mb-6">Per bay, small groups welcome</p>
             <a href={hubUrl(tenant, "/")} className="block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors bg-accent hover:bg-accent/90 text-accent-foreground">
               Book Now
             </a>

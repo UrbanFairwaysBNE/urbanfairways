@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Calendar, Clock, MapPin, X, RefreshCw, Plus } from "lucide-react";
 import { format, parseISO, isPast, isToday } from "date-fns";
 import { toast } from "sonner";
-import birdiesLogo from "@/assets/birdies-logo.png";
+import venueLogo from "@/assets/venue-logo.png";
 import { useTenant } from "@/config/tenant";
 import {
   AlertDialog,
@@ -239,7 +239,7 @@ const MyBookings = () => {
           </span>
         </div>
         <img 
-          src={birdiesLogo} 
+          src={venueLogo} 
           alt={tenant.venue_name} 
           className="h-10 w-auto"
         />

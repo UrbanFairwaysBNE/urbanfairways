@@ -357,19 +357,19 @@ serve(async (req) => {
                 ? `Hi ${firstName}, your membership has been <strong>upgraded from ${previousTierName} to ${tierName}</strong>. Your new benefits are active immediately.`
                 : `Hi ${firstName}, your membership has been changed from <strong>${previousTierName}</strong> to <strong>${tierName}</strong>. Your new plan is active immediately.`;
               const bodyContent = `
-                <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+                <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                   ${changeCopy}
                 </p>
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #EC622D;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #B5772A;">
                   <tr>
-                    <td style="padding:20px; font-family:Inter, Arial, sans-serif; font-size:15px; color:#1F4C25; text-align:center;">
+                    <td style="padding:20px; font-family:Manrope, Arial, sans-serif; font-size:15px; color:#2F3134; text-align:center;">
                       <p style="margin:5px 0;"><strong>Previous:</strong> ${previousTierName}</p>
                       <p style="margin:5px 0;"><strong>New Membership:</strong> ${tierName}</p>
                       <p style="margin:5px 0;"><strong>Weekly Price:</strong> ${weeklyPrice}</p>
                     </td>
                   </tr>
                 </table>
-                <p style="margin:18px 0 0; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+                <p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                   Your old plan has been cancelled and any duplicate charges from the switch are handled automatically. If anything doesn't look right, just reply to this email.
                 </p>
               `;
@@ -379,18 +379,18 @@ serve(async (req) => {
               });
             } else {
               const bodyContent = `
-                <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+                <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                   Hi ${firstName}, congratulations! Your <strong>${tierName}</strong> membership is now active.
                 </p>
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #EC622D;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #B5772A;">
                   <tr>
-                    <td style="padding:20px; font-family:Inter, Arial, sans-serif; font-size:15px; color:#1F4C25; text-align:center;">
+                    <td style="padding:20px; font-family:Manrope, Arial, sans-serif; font-size:15px; color:#2F3134; text-align:center;">
                       <p style="margin:5px 0;"><strong>Membership:</strong> ${tierName}</p>
                       <p style="margin:5px 0;"><strong>Weekly Price:</strong> ${weeklyPrice}</p>
                     </td>
                   </tr>
                 </table>
-                <p style="margin:18px 0 0; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+                <p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                   You now have access to discounted bay rates and exclusive member benefits including the ${tenant.venue_name} League!
                 </p>
               `;
@@ -552,13 +552,13 @@ serve(async (req) => {
             htmlContent = await renderBrandedEmail(supabaseAdmin, 
               "Payment Failed",
               `
-              <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+              <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 Hi ${firstName}, unfortunately your card payment for your <strong>${previousTier}</strong> membership could not be processed.
               </p>
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #EC622D;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #B5772A;">
                 <tr>
-                  <td style="padding:20px; font-family:Inter, Arial, sans-serif; font-size:15px; color:#1F4C25;">
-                    <h3 style="margin:0 0 10px 0; font-family:Anton, Impact, Arial Black, sans-serif; color:#1F4C25;">What happened?</h3>
+                  <td style="padding:20px; font-family:Manrope, Arial, sans-serif; font-size:15px; color:#2F3134;">
+                    <h3 style="margin:0 0 10px 0; font-family:Archivo, Impact, Arial Black, sans-serif; color:#2F3134;">What happened?</h3>
                     <ul style="margin:0; padding-left:20px;">
                       <li style="margin-bottom:8px;">Your card on file was declined when we tried to take your membership payment</li>
                       <li style="margin-bottom:8px;">Your membership has been cancelled and your account has been moved to <strong>Visitor</strong> status</li>
@@ -567,10 +567,10 @@ serve(async (req) => {
                   </td>
                 </tr>
               </table>
-              <p style="margin:18px 0 0; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+              <p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 To get your membership back, simply update your payment method and re-register through your account.
               </p>
-              <p style="margin:18px 0 0; font-family:Inter, Arial, sans-serif; font-size:14px; line-height:1.6; color:#1F4C25; text-align:center; opacity:0.8;">
+              <p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:14px; line-height:1.6; color:#2F3134; text-align:center; opacity:0.8;">
                 If you believe this was an error, please contact us and we'll help sort it out.
               </p>
               `,
@@ -582,16 +582,16 @@ serve(async (req) => {
             htmlContent = await renderBrandedEmail(supabaseAdmin, 
               "Membership Cancelled",
               `
-              <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+              <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 Hi ${firstName}, your <strong>${previousTier}</strong> membership has been cancelled.
               </p>
-              <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+              <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 Your account has been reverted to Visitor status. You can still book sessions at our standard visitor rates.
               </p>
-              <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+              <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 If you'd like to rejoin, simply re-register for a membership through your account.
               </p>
-              <p style="margin:18px 0 0; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+              <p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 We hope to see you back soon!<br/>
                 <strong>The ${tenant.venue_name} Team</strong>
               </p>

@@ -1177,7 +1177,16 @@ export default function AdminSettings() {
                 </CardContent>
               </Card>
             </CollapsibleSection>
+
+            <CollapsibleSection
+              title="Visitor Loyalty Promo"
+              description="Reward visitors with credit after booking milestones"
+              icon={Gift}
+            >
+              <LoyaltyPromoSettings />
+            </CollapsibleSection>
           </TabsContent>
+
 
           {/* POS Settings */}
           <TabsContent value="pos" className="space-y-4">
@@ -1306,13 +1315,6 @@ export default function AdminSettings() {
               </Card>
             </CollapsibleSection>
 
-            <CollapsibleSection
-              title="Visitor Loyalty Promo"
-              description="Reward visitors with credit after booking milestones"
-              icon={Gift}
-            >
-              <LoyaltyPromoSettings />
-            </CollapsibleSection>
 
             <CollapsibleSection
               title="SMS Templates"

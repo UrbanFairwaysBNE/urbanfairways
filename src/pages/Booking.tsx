@@ -49,6 +49,10 @@ export default function Booking() {
     savedCard,
     getHourlyRate,
     getRateInfo,
+    getBookingTotal,
+    isPeakSlot,
+    availableDurations,
+
     checkMultiBayRestriction,
     getHolidaySurchargeForDate,
     fetchBookingsForDate,

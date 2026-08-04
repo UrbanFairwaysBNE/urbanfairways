@@ -166,7 +166,7 @@ export function sortClubs(clubs: string[]): string[] {
 
 // Deterministic color per club — brand-adjacent palette
 const CLUB_PALETTE = [
-  "#2F3134", "#B5772A", "#4A4D52", "#8C5A1F", "#6E7278", "#D9A867",
+  "#1C1F24", "#5F6F52", "#4A4D52", "#8C5A1F", "#6E7278", "#D9A867",
   "#2E623A", "#D24E1F", "#7BB682", "#8B5CF6", "#0EA5E9", "#F59E0B",
 ];
 export function clubColor(club: string): string {

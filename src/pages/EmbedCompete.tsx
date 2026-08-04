@@ -13,9 +13,9 @@ import { useTenant, hubUrl } from "@/config/tenant";
 
 
 // Brand tokens (locked to iframe so it renders consistently inside Shopify)
-const GREEN = "hsl(220,4%,20%)";
-const ORANGE = "hsl(32,62%,44%)";
-const CREAM = "hsl(40,20%,95%)";
+const GREEN = "hsl(218,13%,13%)";
+const ORANGE = "hsl(93,15%,38%)";
+const CREAM = "hsl(40,29%,94%)";
 const CREAM_DEEP = "hsl(37,40%,90%)";
 const MUTED = "hsl(128,20%,40%)";
 const BORDER = "hsl(128,20%,85%)";
@@ -159,7 +159,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
   }, [ambroseTeams]);
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: CREAM, fontFamily: "Manrope, system-ui, sans-serif" }}>
+    <div className="min-h-screen" style={{ backgroundColor: CREAM, fontFamily: "Montserrat, system-ui, sans-serif" }}>
       {/* HERO */}
       {!hideHero && (
         <section className="relative overflow-hidden" style={{ backgroundColor: GREEN }}>
@@ -196,7 +196,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
           <div className="text-[11px] uppercase tracking-widest font-bold" style={{ color: ORANGE }}>
             Three ways to play
           </div>
-          <h3 className="font-black text-3xl sm:text-4xl" style={{ color: GREEN, fontFamily: "'Archivo', system-ui, sans-serif" }}>
+          <h3 className="font-black text-3xl sm:text-4xl" style={{ color: GREEN, fontFamily: "'Montserrat', system-ui, sans-serif" }}>
             HOW TO COMPETE
           </h3>
         </div>
@@ -253,7 +253,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
         <div className="bg-white rounded-2xl border shadow-sm overflow-hidden" style={{ borderColor: BORDER }}>
           <button
             onClick={() => setWeeklyOpen(!weeklyOpen)}
-            className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-[hsl(40,20%,97%)] transition-colors"
+            className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-[hsl(40,29%,97%)] transition-colors"
           >
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: CREAM_DEEP, color: GREEN }}>
@@ -263,7 +263,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
                 <span className="inline-block text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded text-white mb-1" style={{ backgroundColor: ORANGE }}>
                   Weekly
                 </span>
-                <h3 className="font-black text-lg leading-tight" style={{ color: GREEN, fontFamily: "'Archivo', system-ui, sans-serif" }}>
+                <h3 className="font-black text-lg leading-tight" style={{ color: GREEN, fontFamily: "'Montserrat', system-ui, sans-serif" }}>
                   {tenant.venue_name} League
                 </h3>
                 <p className="text-xs mt-0.5 truncate" style={{ color: MUTED }}>
@@ -383,7 +383,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
         <div className="bg-white rounded-2xl border shadow-sm overflow-hidden" style={{ borderColor: BORDER }}>
           <button
             onClick={() => setMonthlyOpen(!monthlyOpen)}
-            className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-[hsl(40,20%,97%)] transition-colors"
+            className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-[hsl(40,29%,97%)] transition-colors"
           >
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: CREAM_DEEP, color: GREEN }}>
@@ -393,7 +393,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
                 <span className="inline-block text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded text-white mb-1" style={{ backgroundColor: GREEN }}>
                   Monthly
                 </span>
-                <h3 className="font-black text-lg leading-tight" style={{ color: GREEN, fontFamily: "'Archivo', system-ui, sans-serif" }}>
+                <h3 className="font-black text-lg leading-tight" style={{ color: GREEN, fontFamily: "'Montserrat', system-ui, sans-serif" }}>
                   Monthly Winner Race
                 </h3>
                 <p className="text-xs mt-0.5 truncate" style={{ color: MUTED }}>
@@ -448,7 +448,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
         <div className="bg-white rounded-2xl border shadow-sm overflow-hidden" style={{ borderColor: BORDER }}>
           <button
             onClick={() => setAmbroseOpen(!ambroseOpen)}
-            className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-[hsl(40,20%,97%)] transition-colors"
+            className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-[hsl(40,29%,97%)] transition-colors"
           >
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: CREAM_DEEP, color: GREEN }}>
@@ -458,7 +458,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
                 <span className="inline-block text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded text-white mb-1" style={{ backgroundColor: ORANGE }}>
                   Wednesday Nights
                 </span>
-                <h3 className="font-black text-lg leading-tight" style={{ color: GREEN, fontFamily: "'Archivo', system-ui, sans-serif" }}>
+                <h3 className="font-black text-lg leading-tight" style={{ color: GREEN, fontFamily: "'Montserrat', system-ui, sans-serif" }}>
                   2-Man Ambrose
                 </h3>
                 <p className="text-xs mt-0.5 truncate" style={{ color: MUTED }}>
@@ -481,7 +481,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
                   <div className="relative grid lg:grid-cols-5 gap-8 items-start">
                     <div className="lg:col-span-2">
                       <h2 className="text-white font-black text-3xl sm:text-4xl leading-none mb-3"
-                        style={{ fontFamily: "'Archivo', 'Impact', sans-serif" }}>
+                        style={{ fontFamily: "'Montserrat', 'Impact', sans-serif" }}>
                         2-MAN AMBROSE
                       </h2>
                       <p className="text-white/75 mb-6">
@@ -567,7 +567,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
       <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-12">
         <div className="rounded-3xl p-8 sm:p-12 text-center" style={{ backgroundColor: GREEN }}>
           <h3 className="text-white font-black text-3xl sm:text-5xl mb-3"
-            style={{ fontFamily: "'Archivo', system-ui, sans-serif" }}>
+            style={{ fontFamily: "'Montserrat', system-ui, sans-serif" }}>
             READY TO TEE IT UP?
           </h3>
           <p className="text-white/70 mb-6 max-w-xl mx-auto">
@@ -598,7 +598,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
 
 function FooterCTA({ href, label }: { href: string; label: string }) {
   return (
-    <a href={href} className="block px-5 py-3 border-t text-xs font-bold uppercase tracking-widest text-center transition-colors hover:bg-[hsl(40,20%,97%)]"
+    <a href={href} className="block px-5 py-3 border-t text-xs font-bold uppercase tracking-widest text-center transition-colors hover:bg-[hsl(40,29%,97%)]"
       style={{ borderColor: BORDER, color: ORANGE }}>
       {label} →
     </a>
@@ -629,7 +629,7 @@ function HowCard({ icon, tag, title, desc, prize }: { icon: React.ReactNode; tag
         {icon}
       </div>
       <div className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: ORANGE }}>{tag}</div>
-      <h4 className="font-black text-xl mb-2" style={{ color: GREEN, fontFamily: "'Archivo', system-ui, sans-serif" }}>{title}</h4>
+      <h4 className="font-black text-xl mb-2" style={{ color: GREEN, fontFamily: "'Montserrat', system-ui, sans-serif" }}>{title}</h4>
       <p className="text-sm mb-4 leading-relaxed" style={{ color: MUTED }}>{desc}</p>
       <div className="text-sm font-bold pt-3 border-t" style={{ borderColor: BORDER, color: GREEN }}>
         🏆 {prize}

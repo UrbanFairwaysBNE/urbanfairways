@@ -130,17 +130,17 @@ function GiftContent() {
   if (success) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center p-4">
-        <Card className="p-8 text-center max-w-md bg-white border-[#2F3134]/15">
-          <div className="h-16 w-16 bg-[#2F3134] rounded-full flex items-center justify-center mx-auto mb-5">
-            <Check className="h-9 w-9 text-[#B5772A]" />
+        <Card className="p-8 text-center max-w-md bg-white border-[#1C1F24]/15">
+          <div className="h-16 w-16 bg-[#1C1F24] rounded-full flex items-center justify-center mx-auto mb-5">
+            <Check className="h-9 w-9 text-[#5F6F52]" />
           </div>
-          <h1 className="font-display text-3xl text-[#2F3134] mb-2 tracking-wide" style={{ fontFamily: "Archivo, system-ui, sans-serif" }}>
+          <h1 className="font-display text-3xl text-[#1C1F24] mb-2 tracking-wide" style={{ fontFamily: "Montserrat, system-ui, sans-serif" }}>
             GIFT ON ITS WAY!
           </h1>
-          <p className="text-[#2F3134]/80 mb-6">
+          <p className="text-[#1C1F24]/80 mb-6">
             Thank you, your payment is confirmed. We'll email the gift card per your delivery choice.
           </p>
-          <Button asChild className="bg-[#B5772A] hover:bg-[#B5772A]/90 text-white">
+          <Button asChild className="bg-[#5F6F52] hover:bg-[#5F6F52]/90 text-white">
             <Link to="/gift">Send Another</Link>
           </Button>
         </Card>
@@ -149,27 +149,27 @@ function GiftContent() {
   }
 
   return (
-    <div className="bg-[#F5F3EF]">
+    <div className="bg-[#F4F1EB]">
       <main className="max-w-2xl mx-auto px-4 py-8 pb-16">
         <div className="text-center mb-8">
-          <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#B5772A]/10 mb-3">
-            <GiftIcon className="h-7 w-7 text-[#B5772A]" />
+          <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#5F6F52]/10 mb-3">
+            <GiftIcon className="h-7 w-7 text-[#5F6F52]" />
           </div>
           <h1
-            className="text-4xl md:text-5xl text-[#2F3134] mb-2 tracking-wide"
-            style={{ fontFamily: "Archivo, system-ui, sans-serif" }}
+            className="text-4xl md:text-5xl text-[#1C1F24] mb-2 tracking-wide"
+            style={{ fontFamily: "Montserrat, system-ui, sans-serif" }}
           >
             GIVE THE GIFT OF {tenant.venue_name.toUpperCase()}
           </h1>
-          <p className="text-[#2F3134]/75 text-base">
+          <p className="text-[#1C1F24]/75 text-base">
             Indoor golf simulator credit, redeemable on any bay booking, food or drink.
           </p>
         </div>
 
-        <Card className="p-6 md:p-8 bg-white border-[#2F3134]/15 space-y-7">
+        <Card className="p-6 md:p-8 bg-white border-[#1C1F24]/15 space-y-7">
           {/* Amount */}
           <div>
-            <Label className="text-[#2F3134] font-semibold mb-3 block">Gift Amount</Label>
+            <Label className="text-[#1C1F24] font-semibold mb-3 block">Gift Amount</Label>
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-3">
               {PRESET_AMOUNTS.map((a) => (
                 <button
@@ -182,8 +182,8 @@ function GiftContent() {
                   className={cn(
                     "py-3 rounded-lg border-2 font-semibold transition-all",
                     amount === a && !customAmount
-                      ? "border-[#B5772A] bg-[#B5772A] text-white"
-                      : "border-[#2F3134]/20 text-[#2F3134] hover:border-[#B5772A]/50"
+                      ? "border-[#5F6F52] bg-[#5F6F52] text-white"
+                      : "border-[#1C1F24]/20 text-[#1C1F24] hover:border-[#5F6F52]/50"
                   )}
                 >
                   ${a}
@@ -191,9 +191,9 @@ function GiftContent() {
               ))}
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[#2F3134]/60 text-sm">Or custom:</span>
+              <span className="text-[#1C1F24]/60 text-sm">Or custom:</span>
               <div className="relative flex-1">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#2F3134]/60">$</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#1C1F24]/60">$</span>
                 <Input
                   type="number"
                   min={10}
@@ -201,7 +201,7 @@ function GiftContent() {
                   placeholder="Other amount"
                   value={customAmount}
                   onChange={(e) => setCustomAmount(e.target.value)}
-                  className="pl-7 border-[#2F3134]/20"
+                  className="pl-7 border-[#1C1F24]/20"
                 />
               </div>
             </div>
@@ -209,7 +209,7 @@ function GiftContent() {
 
           {/* Delivery method */}
           <div>
-            <Label className="text-[#2F3134] font-semibold mb-3 block">How should we deliver it?</Label>
+            <Label className="text-[#1C1F24] font-semibold mb-3 block">How should we deliver it?</Label>
             <div className="space-y-2">
               {[
                 { v: "email_recipient" as const, icon: Mail, title: "Email the recipient", sub: "We email them directly on the chosen date" },
@@ -223,19 +223,19 @@ function GiftContent() {
                   className={cn(
                     "w-full text-left p-4 rounded-lg border-2 transition-all flex items-start gap-3",
                     deliveryMethod === v
-                      ? "border-[#B5772A] bg-[#B5772A]/5"
-                      : "border-[#2F3134]/15 hover:border-[#B5772A]/40"
+                      ? "border-[#5F6F52] bg-[#5F6F52]/5"
+                      : "border-[#1C1F24]/15 hover:border-[#5F6F52]/40"
                   )}
                 >
                   <Icon
                     className={cn(
                       "h-5 w-5 mt-0.5 flex-shrink-0",
-                      deliveryMethod === v ? "text-[#B5772A]" : "text-[#2F3134]/60"
+                      deliveryMethod === v ? "text-[#5F6F52]" : "text-[#1C1F24]/60"
                     )}
                   />
                   <div className="flex-1">
-                    <div className="font-semibold text-[#2F3134]">{title}</div>
-                    <div className="text-sm text-[#2F3134]/70">{sub}</div>
+                    <div className="font-semibold text-[#1C1F24]">{title}</div>
+                    <div className="text-sm text-[#1C1F24]/70">{sub}</div>
                   </div>
                 </button>
               ))}
@@ -245,18 +245,18 @@ function GiftContent() {
           {/* Recipient */}
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="recipient_name" className="text-[#2F3134] font-semibold">Recipient Name</Label>
+              <Label htmlFor="recipient_name" className="text-[#1C1F24] font-semibold">Recipient Name</Label>
               <Input
                 id="recipient_name"
                 value={recipientName}
                 onChange={(e) => setRecipientName(e.target.value)}
                 placeholder="Jane Doe"
-                className="mt-1 border-[#2F3134]/20"
+                className="mt-1 border-[#1C1F24]/20"
               />
             </div>
             <div>
-              <Label htmlFor="recipient_email" className="text-[#2F3134] font-semibold">
-                Recipient Email {deliveryMethod === "print_to_sender" && <span className="text-[#2F3134]/50 text-xs">(optional)</span>}
+              <Label htmlFor="recipient_email" className="text-[#1C1F24] font-semibold">
+                Recipient Email {deliveryMethod === "print_to_sender" && <span className="text-[#1C1F24]/50 text-xs">(optional)</span>}
               </Label>
               <Input
                 id="recipient_email"
@@ -264,7 +264,7 @@ function GiftContent() {
                 value={recipientEmail}
                 onChange={(e) => setRecipientEmail(e.target.value)}
                 placeholder="jane@email.com"
-                className="mt-1 border-[#2F3134]/20"
+                className="mt-1 border-[#1C1F24]/20"
               />
             </div>
           </div>
@@ -272,32 +272,32 @@ function GiftContent() {
           {/* Sender */}
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="sender_name" className="text-[#2F3134] font-semibold">Your Name</Label>
+              <Label htmlFor="sender_name" className="text-[#1C1F24] font-semibold">Your Name</Label>
               <Input
                 id="sender_name"
                 value={senderName}
                 onChange={(e) => setSenderName(e.target.value)}
                 placeholder="John Smith"
-                className="mt-1 border-[#2F3134]/20"
+                className="mt-1 border-[#1C1F24]/20"
               />
             </div>
             <div>
-              <Label htmlFor="sender_email" className="text-[#2F3134] font-semibold">Your Email</Label>
+              <Label htmlFor="sender_email" className="text-[#1C1F24] font-semibold">Your Email</Label>
               <Input
                 id="sender_email"
                 type="email"
                 value={senderEmail}
                 onChange={(e) => setSenderEmail(e.target.value)}
                 placeholder="john@email.com"
-                className="mt-1 border-[#2F3134]/20"
+                className="mt-1 border-[#1C1F24]/20"
               />
             </div>
           </div>
 
           {/* Message */}
           <div>
-            <Label htmlFor="message" className="text-[#2F3134] font-semibold">
-              Personal Message <span className="text-[#2F3134]/50 text-xs">(optional, 280 chars)</span>
+            <Label htmlFor="message" className="text-[#1C1F24] font-semibold">
+              Personal Message <span className="text-[#1C1F24]/50 text-xs">(optional, 280 chars)</span>
             </Label>
             <Textarea
               id="message"
@@ -305,21 +305,21 @@ function GiftContent() {
               onChange={(e) => setMessage(e.target.value.slice(0, 280))}
               placeholder="Happy birthday! Enjoy a session on me."
               rows={3}
-              className="mt-1 border-[#2F3134]/20"
+              className="mt-1 border-[#1C1F24]/20"
             />
-            <div className="text-xs text-[#2F3134]/50 mt-1 text-right">{message.length}/280</div>
+            <div className="text-xs text-[#1C1F24]/50 mt-1 text-right">{message.length}/280</div>
           </div>
 
           {/* Delivery date */}
           <div>
-            <Label className="text-[#2F3134] font-semibold mb-1 block">Delivery Date</Label>
+            <Label className="text-[#1C1F24] font-semibold mb-1 block">Delivery Date</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   className={cn(
-                    "w-full justify-start text-left font-normal border-[#2F3134]/20",
-                    !date && "text-[#2F3134]/60"
+                    "w-full justify-start text-left font-normal border-[#1C1F24]/20",
+                    !date && "text-[#1C1F24]/60"
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
@@ -341,7 +341,7 @@ function GiftContent() {
               <button
                 type="button"
                 onClick={() => setDate(undefined)}
-                className="text-xs text-[#B5772A] mt-2 hover:underline"
+                className="text-xs text-[#5F6F52] mt-2 hover:underline"
               >
                 Clear date (send immediately)
               </button>
@@ -349,10 +349,10 @@ function GiftContent() {
           </div>
 
           {/* Total + CTA */}
-          <div className="pt-4 border-t border-[#2F3134]/10">
+          <div className="pt-4 border-t border-[#1C1F24]/10">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-[#2F3134]/70">Total</span>
-              <span className="text-3xl font-bold text-[#2F3134]" style={{ fontFamily: "Archivo, system-ui, sans-serif" }}>
+              <span className="text-[#1C1F24]/70">Total</span>
+              <span className="text-3xl font-bold text-[#1C1F24]" style={{ fontFamily: "Montserrat, system-ui, sans-serif" }}>
                 ${finalAmount ? finalAmount.toFixed(2) : "0.00"}
               </span>
             </div>
@@ -360,7 +360,7 @@ function GiftContent() {
               onClick={handleSubmit}
               disabled={submitting}
               size="lg"
-              className="w-full bg-[#B5772A] hover:bg-[#B5772A]/90 text-white text-base h-12"
+              className="w-full bg-[#5F6F52] hover:bg-[#5F6F52]/90 text-white text-base h-12"
             >
               {submitting ? (
                 <>
@@ -371,7 +371,7 @@ function GiftContent() {
                 "Continue to Payment"
               )}
             </Button>
-            <p className="text-xs text-[#2F3134]/60 text-center mt-3">
+            <p className="text-xs text-[#1C1F24]/60 text-center mt-3">
               Secure payment via Stripe. You'll be charged ${finalAmount ? finalAmount.toFixed(2) : "0.00"} AUD.
             </p>
           </div>

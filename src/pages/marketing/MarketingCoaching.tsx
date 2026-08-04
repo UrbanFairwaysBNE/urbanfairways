@@ -41,41 +41,25 @@ const MarketingCoaching = () => {
         </div>
       </section>
 
-      {/* TPI */}
-      <section className="py-12 sm:py-20">
+      {/* TPI teaser */}
+      <section className="py-12 sm:py-16">
         <div className="container mx-auto px-4 max-w-5xl">
           <p className="text-accent font-display tracking-[0.2em] uppercase text-sm mb-3">Sam Brooks</p>
-          <h2 className="font-display text-3xl sm:text-4xl text-primary leading-tight mb-6">
+          <h2 className="font-display text-3xl sm:text-4xl text-primary leading-tight mb-4">
             TPI Assessment Screening
           </h2>
-          <div className="space-y-4 text-foreground/80 leading-relaxed max-w-3xl">
-            <p>
-              I'm a dedicated golf coach specializing in a results-driven blend of TPI (Titleist Performance
-              Institute) methods, traditional coaching principles, and advanced swing analysis.
-            </p>
-            <p>
-              My approach goes beyond simply fixing your swing — I focus on how your body moves, identifying
-              physical limitations and movement patterns that directly impact performance.
-            </p>
-            <p>
-              Using TPI screening, I assess mobility, stability, and biomechanics to build a swing that works with
-              your body, not against it. Combined with proven traditional coaching techniques and detailed video
-              analysis, I help golfers of all levels develop more efficient, consistent, and powerful swings.
-            </p>
-            <p>
-              Whether you're looking to improve accuracy, increase distance all whilst playing pain free golf, my
-              coaching is tailored to your individual needs, goals, and physical capabilities.
-            </p>
-            <p>The result is a smarter, more sustainable path to better golf.</p>
-            <p className="font-display text-primary text-xl tracking-wide uppercase">
-              Train with purpose. Move better. Play better.
-            </p>
-          </div>
-          <div className="mt-8">
-            <EnquiryButton label="Book a TPI screening" />
-          </div>
+          <p className="text-foreground/80 leading-relaxed max-w-3xl mb-6">
+            Mobility, stability and biomechanics screening to build a swing that works with your body, not against it.
+          </p>
+          <Link
+            to="/tpi-assessment"
+            className="inline-block bg-accent hover:bg-accent/90 text-accent-foreground font-display tracking-wide text-sm uppercase px-6 py-3 rounded-md transition-colors"
+          >
+            Learn about TPI
+          </Link>
         </div>
       </section>
+
 
       {/* PGA Pro 1-on-1 */}
       <section className="py-12 sm:py-20 bg-secondary/40">

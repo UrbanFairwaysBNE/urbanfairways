@@ -4,36 +4,56 @@ import { Menu, X, ChevronDown } from "lucide-react";
 import venueLogo from "@/assets/venue-logo.png";
 import { useTenant, hubUrl } from "@/config/tenant";
 
-const playLinks = [
-  { to: "/about", label: "About" },
-  { to: "/staffed-hours", label: "Staffed Hours" },
-  { to: "/faqs", label: "FAQs" },
+type NavGroup = { key: string; label: string; links: { to: string; label: string }[] };
+
+const navGroups: NavGroup[] = [
+  {
+    key: "play",
+    label: "PLAY",
+    links: [
+      { to: "/about", label: "About" },
+      { to: "/staffed-hours", label: "Staffed Hours" },
+      { to: "/faqs", label: "FAQs" },
+    ],
+  },
+  {
+    key: "improve",
+    label: "IMPROVE",
+    links: [
+      { to: "/coaching", label: "Coaching" },
+      { to: "/tpi-assessment", label: "TPI Assessment" },
+    ],
+  },
+  {
+    key: "elevate",
+    label: "ELEVATE",
+    links: [{ to: "/compete-info", label: "Compete" }],
+  },
 ];
 
 const topNav = [
-  { to: "/coaching", label: "Coaching" },
-  { to: "/compete-info", label: "COMPETE" },
   { to: "/membership-info", label: "JOIN" },
   { to: "/gift", label: "Gift cards" },
   { to: "/whats-on", label: "What's On" },
   { to: "/contact", label: "Contact" },
 ];
 
-const isPlayActive = (pathname: string) =>
-  playLinks.some((l) => l.to === pathname);
+const isGroupActive = (group: NavGroup, pathname: string) =>
+  group.links.some((l) => l.to === pathname);
+
 
 const SiteHeader = () => {
   const { tenant } = useTenant();
   const [open, setOpen] = useState(false);
-  const [playOpen, setPlayOpen] = useState(false);
-  const [mobilePlayOpen, setMobilePlayOpen] = useState(false);
-  const playRef = useRef<HTMLDivElement>(null);
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
+  const [mobileGroup, setMobileGroup] = useState<string | null>(null);
+  const navRef = useRef<HTMLElement>(null);
   const { pathname } = useLocation();
 
   useEffect(() => {
     setOpen(false);
-    setPlayOpen(false);
-    setMobilePlayOpen(false);
+    setOpenGroup(null);
+    setMobileGroup(null);
   }, [pathname]);
 
 
@@ -44,16 +64,17 @@ const SiteHeader = () => {
     };
   }, [open]);
 
-  // Close PLAY dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
-      if (playRef.current && !playRef.current.contains(e.target as Node)) {
-        setPlayOpen(false);
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        setOpenGroup(null);
       }
     };
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
+
 
   return (
     <header className="sticky top-0 z-50 bg-primary text-primary-foreground shadow-sm">
@@ -83,33 +104,38 @@ const SiteHeader = () => {
         </Link>
 
         {/* Desktop: full nav */}
-        <nav className="hidden lg:flex items-center gap-6 xl:gap-7">
-          {/* PLAY dropdown */}
-          <div ref={playRef} className="relative">
-            <button
-              onClick={() => setPlayOpen((p) => !p)}
-              className={`font-display tracking-wide text-sm uppercase transition-colors whitespace-nowrap flex items-center gap-1 ${
-                isPlayActive(pathname) ? "text-accent" : "text-primary-foreground hover:text-accent"
-              }`}
-            >
-              PLAY <ChevronDown className={`h-3.5 w-3.5 transition-transform ${playOpen ? "rotate-180" : ""}`} />
-            </button>
-            {playOpen && (
-              <div className="absolute top-full left-0 mt-2 w-48 bg-primary border border-primary-foreground/10 rounded-md shadow-xl py-1 z-50">
-                {playLinks.map((l) => (
-                  <Link
-                    key={l.to}
-                    to={l.to}
-                    className={`block px-4 py-2.5 text-sm font-display tracking-wide uppercase transition-colors ${
-                      pathname === l.to ? "text-accent" : "text-primary-foreground hover:text-accent"
-                    }`}
-                  >
-                    {l.label}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
+        <nav ref={navRef} className="hidden lg:flex items-center gap-6 xl:gap-7">
+          {navGroups.map((group) => (
+            <div key={group.key} className="relative">
+              <button
+                onClick={() => setOpenGroup((p) => (p === group.key ? null : group.key))}
+                className={`font-display tracking-wide text-sm uppercase transition-colors whitespace-nowrap flex items-center gap-1 ${
+                  isGroupActive(group, pathname) ? "text-accent" : "text-primary-foreground hover:text-accent"
+                }`}
+              >
+                {group.label}{" "}
+                <ChevronDown
+                  className={`h-3.5 w-3.5 transition-transform ${openGroup === group.key ? "rotate-180" : ""}`}
+                />
+              </button>
+              {openGroup === group.key && (
+                <div className="absolute top-full left-0 mt-2 w-52 bg-primary border border-primary-foreground/10 rounded-md shadow-xl py-1 z-50">
+                  {group.links.map((l) => (
+                    <Link
+                      key={l.to}
+                      to={l.to}
+                      className={`block px-4 py-2.5 text-sm font-display tracking-wide uppercase transition-colors ${
+                        pathname === l.to ? "text-accent" : "text-primary-foreground hover:text-accent"
+                      }`}
+                    >
+                      {l.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+
 
           {topNav.map((n) => {
             const active = pathname === n.to;
@@ -168,33 +194,37 @@ const SiteHeader = () => {
             </button>
           </div>
           <nav className="flex flex-col px-4 py-4 gap-1">
-            {/* PLAY expandable */}
-            <div>
-              <button
-                onClick={() => setMobilePlayOpen((p) => !p)}
-                className={`w-full flex items-center justify-between font-display tracking-wide uppercase py-3 border-b border-primary-foreground/10 ${
-                  isPlayActive(pathname) ? "text-accent" : "text-primary-foreground"
-                }`}
-              >
-                <span>PLAY</span>
-                <ChevronDown className={`h-4 w-4 transition-transform ${mobilePlayOpen ? "rotate-180" : ""}`} />
-              </button>
-              {mobilePlayOpen && (
-                <div className="pl-4 flex flex-col gap-1">
-                  {playLinks.map((l) => (
-                    <Link
-                      key={l.to}
-                      to={l.to}
-                      className={`font-display tracking-wide uppercase py-2 text-sm ${
-                        pathname === l.to ? "text-accent" : "text-primary-foreground/80"
-                      }`}
-                    >
-                      {l.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
+            {navGroups.map((group) => (
+              <div key={group.key}>
+                <button
+                  onClick={() => setMobileGroup((p) => (p === group.key ? null : group.key))}
+                  className={`w-full flex items-center justify-between font-display tracking-wide uppercase py-3 border-b border-primary-foreground/10 ${
+                    isGroupActive(group, pathname) ? "text-accent" : "text-primary-foreground"
+                  }`}
+                >
+                  <span>{group.label}</span>
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${mobileGroup === group.key ? "rotate-180" : ""}`}
+                  />
+                </button>
+                {mobileGroup === group.key && (
+                  <div className="pl-4 flex flex-col gap-1">
+                    {group.links.map((l) => (
+                      <Link
+                        key={l.to}
+                        to={l.to}
+                        className={`font-display tracking-wide uppercase py-2 text-sm ${
+                          pathname === l.to ? "text-accent" : "text-primary-foreground/80"
+                        }`}
+                      >
+                        {l.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+
 
 
             {topNav.map((n) => (

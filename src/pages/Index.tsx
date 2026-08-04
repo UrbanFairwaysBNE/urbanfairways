@@ -6,6 +6,7 @@ import { isHubHost } from "@/lib/hub-host";
 import birdiesLogo from "@/assets/birdies-logo.png";
 import birdiesAppIcon from "@/assets/birdies-app-icon.png";
 import MarketingHome from "./marketing/MarketingHome";
+import { useTenant } from "@/config/tenant";
 
 
 /**
@@ -20,6 +21,7 @@ import MarketingHome from "./marketing/MarketingHome";
 
 
 const Index = () => {
+  const { tenant } = useTenant();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const hubHost = isHubHost();
@@ -39,7 +41,7 @@ const Index = () => {
   if (authLoading || isAuthenticated) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background safe-area-top safe-area-bottom">
-        <img src={birdiesAppIcon} alt="Birdies" className="h-20 mb-6" />
+        <img src={birdiesAppIcon} alt={tenant.venue_name} className="h-20 mb-6" />
         <div className="animate-pulse text-muted-foreground">Loading...</div>
       </div>
     );
@@ -48,7 +50,7 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="bg-primary py-4 px-6 safe-area-top">
-        <img src={birdiesLogo} alt="Birdies" className="h-10" />
+        <img src={birdiesLogo} alt={tenant.venue_name} className="h-10" />
       </header>
 
       <main className="flex-1 flex items-center justify-center p-6">
@@ -59,7 +61,7 @@ const Index = () => {
 
       <footer className="bg-primary py-4 px-6 text-center">
         <p className="text-primary-foreground/60 text-sm">
-          © {new Date().getFullYear()} Birdies. All rights reserved.
+          © {new Date().getFullYear()} {tenant.venue_name}. All rights reserved.
         </p>
       </footer>
     </div>

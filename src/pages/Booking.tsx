@@ -25,6 +25,7 @@ import { BayAvailabilityGrid } from "@/components/booking/BayAvailabilityGrid";
 import { toast } from "@/hooks/use-toast";
 import birdiesLogo from "@/assets/birdies-logo.png";
 import { MembershipPaymentIssueDialog } from "@/components/membership/MembershipPaymentIssueDialog";
+import { useTenant } from "@/config/tenant";
 
 const MEMBERSHIP_DISPLAY: Record<string, string> = {
   visitor: "Visitor",
@@ -38,6 +39,7 @@ const PENDING_BOOKING_KEY = "bb:pendingBookingId";
 export default function Booking() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { tenant } = useTenant();
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
   const {
     bays,
@@ -566,7 +568,7 @@ export default function Booking() {
           </div>
           <img 
             src={birdiesLogo} 
-            alt="Birdies" 
+            alt={tenant.venue_name} 
             className="h-10 w-auto"
           />
         </div>

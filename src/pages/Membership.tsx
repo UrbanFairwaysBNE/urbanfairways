@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import birdiesLogo from "@/assets/birdies-logo.png";
+import { useTenant } from "@/config/tenant";
 import { usePricing, PricingTier } from "@/hooks/usePricing";
 import { VISITOR_PEAK_RATE, VISITOR_OFF_PEAK_RATE } from "@/lib/pricing-utils";
 import { useSavedCard } from "@/hooks/useSavedCard";
@@ -30,19 +31,20 @@ const TIER_CONFIG: Record<string, MembershipTierConfig> = {
     restrictions: "Peak times charged at visitor rate",
   },
   birdie: {
-    features: ["Play anytime", "Birdies League Access", "Swing Lab access", "Cancel any time"],
+    features: ["Play anytime", "League Access", "Swing Lab access", "Cancel any time"],
     color: "border-blue-500",
     badgeColor: "bg-blue-100 text-blue-800",
     popular: true,
   },
   eagle: {
-    features: ["Play anytime", "Birdies League Access", "Swing Lab access", "Priority booking", "Cancel any time"],
+    features: ["Play anytime", "League Access", "Swing Lab access", "Priority booking", "Cancel any time"],
     color: "border-purple-500",
     badgeColor: "bg-purple-100 text-purple-800",
   },
 };
 
 const Membership = () => {
+  const { tenant } = useTenant();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -203,7 +205,7 @@ const Membership = () => {
         </div>
         <img 
           src={birdiesLogo} 
-          alt="Birdies" 
+          alt={tenant.venue_name} 
           className="h-10 w-auto"
         />
       </header>
@@ -238,7 +240,7 @@ const Membership = () => {
               {hasActiveMembership ? "UPGRADE YOUR MEMBERSHIP" : "BECOME A MEMBER"}
             </h1>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Join the Birdies family and enjoy discounted hourly rates, exclusive access to leagues, and more perks. 
+              Join the {tenant.venue_name} family and enjoy discounted hourly rates, exclusive access to leagues, and more perks. 
               All memberships are billed weekly with no lock-in contracts.
             </p>
           </div>
@@ -374,7 +376,7 @@ const Membership = () => {
 
           {/* Footer note */}
           <p className="text-center text-sm text-muted-foreground mt-8">
-            Need to cancel or make changes? Email us at info@birdiesbayside.com.au and we'll help you out.
+            Need to cancel or make changes? Email us at {tenant.support_email} and we'll help you out.
           </p>
         </div>
       </main>

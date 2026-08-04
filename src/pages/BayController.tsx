@@ -1774,7 +1774,7 @@ export default function BayController() {
               // Always use the public Hub URL — the controller runs inside Electron
               // where window.location.origin is a file:// path that phones can't open.
               const extendUrl = notification.showExtendQr && activeBooking?.id
-                ? `https://hub.birdiesbayside.com.au/my-bookings?extend=${activeBooking.id}`
+                ? hubUrl(tenant, `/my-bookings?extend=${activeBooking.id}`)
                 : undefined;
               await window.electronAPI.showNotificationPopup(
                 message,

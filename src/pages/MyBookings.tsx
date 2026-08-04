@@ -7,6 +7,7 @@ import { ArrowLeft, Calendar, Clock, MapPin, X, RefreshCw, Plus } from "lucide-r
 import { format, parseISO, isPast, isToday } from "date-fns";
 import { toast } from "sonner";
 import birdiesLogo from "@/assets/birdies-logo.png";
+import { useTenant } from "@/config/tenant";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,6 +40,7 @@ interface Booking {
 }
 
 const MyBookings = () => {
+  const { tenant } = useTenant();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -200,7 +202,7 @@ const MyBookings = () => {
             </h1>
             <p className="text-sm text-muted-foreground">
               {extendId
-                ? "Sign in to your Birdies account to extend your current session."
+                ? `Sign in to your ${tenant.venue_name} account to extend your current session.`
                 : "Sign in to view your bookings."}
             </p>
           </div>
@@ -238,7 +240,7 @@ const MyBookings = () => {
         </div>
         <img 
           src={birdiesLogo} 
-          alt="Birdies" 
+          alt={tenant.venue_name} 
           className="h-10 w-auto"
         />
       </header>
@@ -462,7 +464,7 @@ const MyBookings = () => {
       {/* Footer */}
       <footer className="bg-primary py-4 px-6 text-center">
         <p className="text-primary-foreground/60 text-sm">
-          © {new Date().getFullYear()} Birdies. All rights reserved.
+          © {new Date().getFullYear()} {tenant.venue_name}. All rights reserved.
         </p>
       </footer>
 

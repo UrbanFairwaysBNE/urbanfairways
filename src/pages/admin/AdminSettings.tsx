@@ -232,53 +232,25 @@ export default function AdminSettings() {
     setBayDeviceForm(initial);
   }, [bayDevices]);
 
-  // Load timezone and highlight settings from database on mount
+  // Load highlight settings from database on mount
   useEffect(() => {
     const loadSettings = async () => {
       const { data } = await supabase
         .from("system_settings")
-        .select("timezone, highlight_recording_enabled")
+        .select("highlight_recording_enabled")
         .eq("id", "global")
         .single();
-      
-      if (data?.timezone) {
-        setTimezone(data.timezone);
-      }
+
       if (data?.highlight_recording_enabled !== undefined) {
         setHighlightRecordingEnabled(data.highlight_recording_enabled);
       }
-      setIsLoadingTimezone(false);
     };
-    
+
     if (isAdmin) {
       loadSettings();
     }
   }, [isAdmin]);
 
-  // Save timezone to database when it changes
-  const handleTimezoneChange = async (value: string) => {
-    setTimezone(value);
-    
-    const { error } = await supabase
-      .from("system_settings")
-      .update({ timezone: value })
-      .eq("id", "global");
-    
-    if (error) {
-      toast({
-        title: "Error saving timezone",
-        description: error.message,
-        variant: "destructive",
-        duration: 4000,
-      });
-    } else {
-      toast({
-        title: "Settings saved",
-        description: `Timezone updated to ${value}. Bay controllers will sync on next refresh.`,
-        duration: 3000,
-      });
-    }
-  };
 
   // POS Products
   const [products, setProducts] = useState<POSProduct[]>([]);

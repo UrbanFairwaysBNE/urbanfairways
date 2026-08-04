@@ -4,7 +4,7 @@ import { AuthForm } from "@/components/auth/AuthForm";
 import { useAuth } from "@/hooks/useAuth";
 import { isHubHost } from "@/lib/hub-host";
 import venueLogo from "@/assets/venue-logo-dark.png";
-import { BrandLoader } from "@/components/brand/BrandLoader";
+import BrandLoader from "@/components/brand/BrandLoader";
 import MarketingHome from "./marketing/MarketingHome";
 import { useTenant } from "@/config/tenant";
 

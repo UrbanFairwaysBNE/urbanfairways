@@ -78,7 +78,7 @@ const SiteHeader = () => {
         </button>
 
         <Link to="/" className="flex items-center gap-2 lg:order-first">
-          <img src={venueLogo} alt={`${tenant.venue_name}, Indoor Golf Redefined`} className="h-10 sm:h-12" />
+          <img src={venueLogo} alt={`${tenant.venue_name}, Indoor Golf Redefined`} className="h-[34px] sm:h-[41px]" />
         </Link>
 
         {/* Desktop: full nav */}

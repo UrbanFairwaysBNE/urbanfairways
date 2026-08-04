@@ -102,13 +102,13 @@ export default function Feedback() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-[#FFF5E4] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#F5F3EF] flex items-center justify-center p-4">
         <div className="max-w-md w-full text-center space-y-6">
           <img src={venueLogo} alt={tenant.venue_name} className="h-14 mx-auto" />
-          <div className="bg-white rounded-2xl p-8 shadow-sm border border-[#1F4C25]/10">
+          <div className="bg-white rounded-2xl p-8 shadow-sm border border-[#2F3134]/10">
             <CheckCircle2 className="h-16 w-16 text-emerald-600 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-[#1F4C25] mb-2">Thanks for your feedback!</h1>
-            <p className="text-[#1F4C25]/70">
+            <h1 className="text-2xl font-bold text-[#2F3134] mb-2">Thanks for your feedback!</h1>
+            <p className="text-[#2F3134]/70">
               We really appreciate you taking the time. Your feedback helps us make {tenant.venue_name} even better.
             </p>
           </div>
@@ -118,18 +118,18 @@ export default function Feedback() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFF5E4] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#F5F3EF] flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-6">
         <div className="text-center">
           <img src={venueLogo} alt={tenant.venue_name} className="h-14 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-[#1F4C25]">How was your visit?</h1>
-          <p className="text-[#1F4C25]/70 mt-1">We'd love to hear about your experience at {tenant.venue_name}</p>
+          <h1 className="text-2xl font-bold text-[#2F3134]">How was your visit?</h1>
+          <p className="text-[#2F3134]/70 mt-1">We'd love to hear about your experience at {tenant.venue_name}</p>
         </div>
 
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#1F4C25]/10 space-y-5">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#2F3134]/10 space-y-5">
           {/* Score selection */}
           <div>
-            <label className="block text-sm font-medium text-[#1F4C25] mb-3">
+            <label className="block text-sm font-medium text-[#2F3134] mb-3">
               How would you rate your experience?
             </label>
             <div className="grid grid-cols-3 gap-3">
@@ -158,28 +158,28 @@ export default function Feedback() {
 
           {/* Name */}
           <div>
-            <label className="block text-sm font-medium text-[#1F4C25] mb-1.5">
-              Your name <span className="text-[#1F4C25]/40">(optional)</span>
+            <label className="block text-sm font-medium text-[#2F3134] mb-1.5">
+              Your name <span className="text-[#2F3134]/40">(optional)</span>
             </label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter your name"
-              className="border-[#1F4C25]/15 focus:border-[#1F4C25]/30"
+              className="border-[#2F3134]/15 focus:border-[#2F3134]/30"
             />
           </div>
 
           {/* Comment */}
           <div>
-            <label className="block text-sm font-medium text-[#1F4C25] mb-1.5">
-              Any feedback? <span className="text-[#1F4C25]/40">(optional)</span>
+            <label className="block text-sm font-medium text-[#2F3134] mb-1.5">
+              Any feedback? <span className="text-[#2F3134]/40">(optional)</span>
             </label>
             <Textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="Tell us what you loved, or what we could improve..."
               rows={4}
-              className="border-[#1F4C25]/15 focus:border-[#1F4C25]/30 resize-none"
+              className="border-[#2F3134]/15 focus:border-[#2F3134]/30 resize-none"
             />
           </div>
 
@@ -187,13 +187,13 @@ export default function Feedback() {
           <Button
             onClick={handleSubmit}
             disabled={!score || submitting}
-            className="w-full bg-[#EC622D] hover:bg-[#d4551f] text-white font-semibold py-3 rounded-xl text-base"
+            className="w-full bg-[#B5772A] hover:bg-[#d4551f] text-white font-semibold py-3 rounded-xl text-base"
           >
             {submitting ? "Sending..." : "Submit Feedback"}
           </Button>
         </div>
 
-        <p className="text-center text-xs text-[#1F4C25]/40">
+        <p className="text-center text-xs text-[#2F3134]/40">
           {tenant.venue_name} · {formatTenantAddress(tenant)}
         </p>
       </div>

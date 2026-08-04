@@ -1322,8 +1322,8 @@ function SessionTrendChart({
         <YAxis />
         <Tooltip />
         <Legend />
-        <Line type="monotone" dataKey="carry" stroke="#1F4C25" name={`Avg carry (${dLbl})`} strokeWidth={2} dot={false} />
-        <Line type="monotone" dataKey="ball" stroke="#EC622D" name={`Avg ball spd (${sLbl})`} strokeWidth={2} dot={false} />
+        <Line type="monotone" dataKey="carry" stroke="#2F3134" name={`Avg carry (${dLbl})`} strokeWidth={2} dot={false} />
+        <Line type="monotone" dataKey="ball" stroke="#B5772A" name={`Avg ball spd (${sLbl})`} strokeWidth={2} dot={false} />
       </LineChart>
     </ResponsiveContainer>
   );

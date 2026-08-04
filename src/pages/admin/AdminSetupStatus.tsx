@@ -81,13 +81,13 @@ export default function AdminSetupStatus() {
   const dataQuery = useQuery({
     queryKey: ["setup-status-data"],
     queryFn: fetchSetupData,
-    enabled: isAdmin,
+    enabled: Boolean(isAdmin),
   });
 
   const secretsQuery = useQuery({
     queryKey: ["setup-status-secrets"],
     queryFn: fetchSecretStatus,
-    enabled: isAdmin,
+    enabled: Boolean(isAdmin),
     retry: false,
   });
 

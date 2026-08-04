@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Birdies Hub</string>
-    <string name="title_activity_main">Birdies Hub</string>
-    <string name="package_name">com.birdiesbayside.hub</string>
-    <string name="custom_url_scheme">com.birdiesbayside.hub</string>
+    <string name="app_name">Venue Hub</string>
+    <string name="title_activity_main">Venue Hub</string>
+    <string name="package_name">com.venue.hub</string>
+    <string name="custom_url_scheme">com.venue.hub</string>
 </resources>

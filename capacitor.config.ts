@@ -1,11 +1,13 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.birdiesbayside.hub',
-  appName: 'Birdies Hub',
+  // Per-venue: set these when wiring up a client remix.
+  appId: 'com.venue.hub',
+  appName: 'Venue Hub',
   webDir: 'dist',
   server: {
-    url: 'https://hub.birdiesbayside.com.au',
+    // Per-venue: the published Hub domain, e.g. https://hub.example.com
+    url: 'https://hub.example.com',
     cleartext: false
   },
   plugins: {

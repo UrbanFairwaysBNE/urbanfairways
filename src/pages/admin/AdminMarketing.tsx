@@ -947,17 +947,11 @@ export default function AdminMarketing() {
 
         {/* Preview Dialog */}
         <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-          <DialogContent className="max-w-2xl max-h-[90vh]">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Email Preview</DialogTitle>
             </DialogHeader>
-            <div className="border rounded-lg overflow-hidden bg-white">
-              <iframe
-                srcDoc={previewHtml}
-                className="w-full h-[500px] border-0"
-                title="Email Preview"
-              />
-            </div>
+            <EmailPreviewFrame html={previewHtml} />
           </DialogContent>
         </Dialog>
 

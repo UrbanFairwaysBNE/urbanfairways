@@ -124,6 +124,7 @@ export function defaultOffPeakRate(tiers: TierConfig[]): number {
  *   - `off_peak_hourly_rate` is used outside peak hours when set
  *   - `restricted_to_off_peak` tiers pay the walk-in peak rate during peak
  *   - unknown/unconfigured tiers fall back to the walk-in tier's rate
+ *   - public holidays are charged at the peak rate all day
  * Returns 0 when the venue has no pricing configured at all.
  */
 export function calculateHourlyRate(
@@ -131,10 +132,15 @@ export function calculateHourlyRate(
   date: Date,
   startTime: string,
   tiers: TierConfig[],
-  options?: { segment?: string | null; holidaySurchargePercent?: number }
+  options?: {
+    segment?: string | null;
+    holidaySurchargePercent?: number;
+    isPublicHoliday?: boolean;
+  }
 ): number {
-  const isPeak = isPeakTime(date, startTime);
+  const isPeak = isPeakTime(date, startTime, options?.isPublicHoliday ?? false);
   const walkInPeak = defaultPeakRate(tiers);
+
 
   let baseRate: number;
 

@@ -13,8 +13,8 @@ const SiteFooter = () => {
       <div className="container mx-auto px-4 py-14 grid gap-10 md:grid-cols-3">
         <div>
           <img src={venueLogo} alt={tenant.venue_name} className="h-14 mb-4" />
-          <p className="text-primary-foreground/70 text-sm leading-relaxed">
-            {tenant.venue_name}, an indoor golf centre. Play, practice and compete, rain or shine.
+          <p className="font-display font-bold uppercase tracking-[0.15em] text-primary-foreground text-lg sm:text-xl">
+            Play. Improve. Elevate.
           </p>
           <div className="flex gap-3 mt-5">
             {tenant.socials.facebook && (

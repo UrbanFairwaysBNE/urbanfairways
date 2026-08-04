@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["Archivo", "system-ui", "sans-serif"],
-        sans: ["Manrope", "system-ui", "sans-serif"],
+        display: ["Montserrat", "system-ui", "sans-serif"],
+        sans: ["Montserrat", "system-ui", "sans-serif"],
       },
 
       colors: {

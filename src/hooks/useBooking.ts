@@ -863,8 +863,13 @@ export function useBooking() {
     savedCard: savedCard ?? null,
     isLoadingSavedCard,
     tierPricing,
+    pricingSpecials,
+    availableDurations,
+    getBookingTotal,
+    isPeakSlot,
     getHourlyRate,
     getRateInfo,
+
     canWeekdayMemberBook,
     checkMultiBayRestriction,
     publicHolidays,

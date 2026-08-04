@@ -52,9 +52,9 @@ const MarketingHome = () => {
           <p className="text-accent font-display tracking-[0.25em] uppercase text-sm mb-4">
             Welcome to {tenant.venue_name}
           </p>
-          <h1 className="font-display text-5xl sm:text-7xl lg:text-8xl text-primary-foreground leading-[0.95] tracking-tight">
-            Indoor Golf,<br />
-            <span className="text-accent">Redefined.</span>
+          <h1 className="font-display font-extrabold text-5xl sm:text-7xl lg:text-8xl text-primary-foreground leading-[0.95] tracking-tight uppercase">
+            Play. Improve.<br />
+            <span className="text-accent">Elevate.</span>
           </h1>
           <p className="mt-6 text-lg sm:text-xl text-primary-foreground/90 max-w-xl">
             Experience world-class indoor golf. Play, practice and compete, rain or shine.

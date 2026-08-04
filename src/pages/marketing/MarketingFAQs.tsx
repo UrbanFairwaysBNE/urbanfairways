@@ -3,47 +3,48 @@ import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useTenant } from "@/config/tenant";
 
-const getGroups = (venueName: string) => [
+const getGroups = (venueName: string, email: string, phone: string) => [
   {
     section: `Visiting ${venueName}`,
     items: [
-      { q: "Do I need to be a member?", a: "No, visitors are always welcome. Just book a bay online and turn up. Pay-as-you-go rates apply off-peak and peak, per bay for a small group of players." },
-      { q: "When are we open?", a: "Members have access via the automated bays during extended hours. Staffed hours vary, check the banner at the top of the site or call us." },
-      { q: "How many people can fit in a bay?", a: "Each bay comfortably fits a small group of players. You can play stroke play, scramble, closest-to-pin and more, all on the same booking." },
-      { q: "Do you provide clubs?", a: "Yes, we have rental clubs available at the centre. Just let us know when you book." },
-      { q: "Is there a bar on site?", a: `Yes, our on-site bar is open during staffed hours serving a range of drinks. Grab a cold one while you play or wind down after your round.` },
+      { q: "What are your operating hours?", a: "Bays can be booked from 5:30am to 11:00pm, 7 days a week." },
+      { q: "Do you have a reception?", a: `${venueName} is self check-in — each bay switches on and off with your booking. If you need a hand, email ${email} or call ${phone} any time.` },
+      { q: "Are clubs and balls provided?", a: "Yes. Sets of clubs are freely available to use and balls are provided at no charge. You're welcome to bring your own balls as long as they're clean and free of scuffs or nicks." },
+      { q: "Can I bring a friend?", a: "Yes. Members can bring up to 3 guests per session at no extra charge. We suggest allowing around an hour per person so everyone gets plenty of time." },
+      { q: "What parking is available?", a: "There are 4 free spaces directly in front of the venue, plus 2-hour free parking across the street at Woolworths." },
+      { q: "Is the space available for private hire or corporate bookings?", a: "Yes, we have a function room available. Get in touch with the team to arrange an inspection." },
     ],
   },
   {
-    section: "Booking & Payment",
+    section: "Booking & Bays",
     items: [
-      { q: "How do I book?", a: `Bookings are made through The ${venueName} Hub. Choose your bay, your time, and pay online, done in under a minute.` },
-      { q: "Can I cancel or reschedule?", a: "Yes, bookings can be cancelled or rescheduled from inside The Hub up until the booking starts." },
-      { q: "Do you offer gift cards?", a: "Yes, gift cards are available on our Gift Cards page and can be redeemed for any booking or membership." },
+      { q: "How do I book a bay?", a: "For casual play, hit the Book a Bay button. Members book sessions through the booking portal. Not a member yet? Choose a membership under Join Now, then book your session in the portal." },
+      { q: "How does the bay work?", a: "When you book, you'll get a confirmation email with a one-time access code. Enter the code followed by # at the door. Your bay powers on shortly before your booking starts and shuts down just after it ends, so sessions flow smoothly from one to the next." },
+      { q: "How long should I book for?", a: "For one person, an hour is usually enough for range practice or 18 holes. As a guide: 2 players around 2 hours, 3 players around 2.5–3 hours." },
+      { q: "What if there's a problem, like a system crash?", a: `The bays are computer-controlled, so the occasional crash can happen. Message us on WhatsApp (${phone}) and we'll sort it as quickly as we can and add any lost time back to your session.` },
+      { q: "What software powers the simulators?", a: "Our simulators run GSPro, with over 2,000 high-end courses, realistic ball physics and a full suite of game improvement features." },
     ],
   },
   {
     section: "Membership",
     items: [
-      { q: "What memberships are available?", a: "We offer a few weekly plans at different price points. All include discounted bay rates and no lock-in contracts." },
-      { q: "Can I cancel any time?", a: "Yes, all memberships can be cancelled at any time. We don't refund the most recent weekly payment." },
-      { q: "What's the difference between membership tiers?", a: "Higher tiers get a lower hourly rate and priority booking. All tiers include access to the League." },
-      { q: "Can all members join competitions?", a: "Entry-level members can join our local weekly comp. The full League season is a perk reserved for higher membership tiers." },
+      { q: "Do I need a membership to play?", a: "Not at all. Memberships give you the best value with perks like preferred booking hours, but you're always welcome to play pay-as-you-go." },
+      { q: "How do I join?", a: "Click Join Now to sign up. You'll receive a welcome email with everything you need to get started." },
+      { q: "How do I cancel?", a: `Members need to give 7 days' notice to cancel a membership — just email ${email}. The most recent weekly payment isn't refunded.` },
     ],
   },
   {
-    section: `${venueName} League`,
+    section: "Coaching",
     items: [
-      { q: "What is the League?", a: "A members-only golf sim league with weekly tournament rounds, leaderboards, competitions and prizes. Access is included with Birdie and Eagle memberships." },
-      { q: "How do I play?", a: "Once you've created an SGT account, your name is synced to every bay. Hit ONLINE MATCH, choose your name, and play your weekly rounds whenever suits you." },
-      { q: "Are there prizes?", a: "Yes, we work with local businesses and run a monthly medal prize alongside ad-hoc giveaways." },
+      { q: "Can I invite a coach for private teaching?", a: "Yes, all coaches are welcome. You're free to arrange private lessons during your session." },
     ],
   },
 ];
 
+
 const MarketingFAQs = () => {
   const { tenant } = useTenant();
-  const groups = getGroups(tenant.venue_name);
+  const groups = getGroups(tenant.venue_name, tenant.support_email, tenant.support_phone);
   return (
   <MarketingLayout>
     <Seo title={`FAQs | ${tenant.venue_name} Indoor Golf`} description={`Answers on booking, pricing, memberships, bay access, rental clubs, gift cards and the ${tenant.venue_name} League.`} path="/faqs" />

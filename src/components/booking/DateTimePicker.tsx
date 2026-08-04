@@ -121,6 +121,8 @@ export function DateTimePicker({
   selectedDate,
   selectedTime,
   selectedDuration,
+  durations = DURATIONS,
+
   selectedPlayers,
   onDateChange,
   onTimeChange,

@@ -1,28 +1,26 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  TierConfig,
+  TIER_SELECT,
+  findTier,
+  getDefaultTier,
+  normaliseTier,
+  subscriptionTiers,
+  tierLabel,
+  grantsLeagueAccess,
+  grantsRangeAccess,
+} from "@/lib/tier-config";
+import { defaultOffPeakRate, defaultPeakRate } from "@/lib/pricing-utils";
 
-export interface PricingTier {
-  id: string;
-  tier: string;
-  hourly_rate: number;
-  weekly_subscription_price: number | null;
-  stripe_product_id: string | null;
-  stripe_price_id: string | null;
-  display_name: string;
-  display_order: number;
-  is_subscription: boolean;
-}
+export type PricingTier = TierConfig;
 
-// Updated fallback rates for new tier structure
-const FALLBACK_RATES: Record<string, number> = {
-  visitor: 35, // Peak rate
-  weekday: 10,
-  birdie: 10,
-  eagle: 8,
-};
-
+/**
+ * Loads the venue's membership tiers from `pricing_config`.
+ * A brand-new venue has zero tiers — every helper degrades gracefully.
+ */
 export function usePricing() {
-  const [pricing, setPricing] = useState<PricingTier[]>([]);
+  const [pricing, setPricing] = useState<TierConfig[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,38 +30,32 @@ export function usePricing() {
 
     const { data, error: fetchError } = await supabase
       .from("pricing_config")
-      .select("*")
+      .select(TIER_SELECT)
       .order("display_order");
 
     if (fetchError) {
       console.error("Error fetching pricing:", fetchError);
       setError(fetchError.message);
     } else if (data) {
-      setPricing(data as PricingTier[]);
+      setPricing((data as Record<string, unknown>[]).map(normaliseTier));
     }
 
     setIsLoading(false);
   };
 
   const getHourlyRate = (tier: string): number => {
-    const tierPricing = pricing.find(p => p.tier === tier.toLowerCase());
-    if (tierPricing) {
-      return Number(tierPricing.hourly_rate);
-    }
-    return FALLBACK_RATES[tier.toLowerCase()] || FALLBACK_RATES.visitor;
+    const tierPricing = findTier(pricing, tier);
+    if (tierPricing) return Number(tierPricing.hourly_rate);
+    return defaultPeakRate(pricing);
   };
 
   const getWeeklyPrice = (tier: string): number | null => {
-    const tierPricing = pricing.find(p => p.tier === tier.toLowerCase());
-    return tierPricing?.weekly_subscription_price 
-      ? Number(tierPricing.weekly_subscription_price) 
-      : null;
+    const tierPricing = findTier(pricing, tier);
+    return tierPricing?.weekly_subscription_price ?? null;
   };
 
-  const getStripePriceId = (tier: string): string | null => {
-    const tierPricing = pricing.find(p => p.tier === tier.toLowerCase());
-    return tierPricing?.stripe_price_id || null;
-  };
+  const getStripePriceId = (tier: string): string | null =>
+    findTier(pricing, tier)?.stripe_price_id || null;
 
   useEffect(() => {
     fetchPricing();
@@ -73,6 +65,16 @@ export function usePricing() {
     pricing,
     isLoading,
     error,
+    /** No tiers configured yet (fresh venue) */
+    isUnconfigured: !isLoading && pricing.length === 0,
+    defaultTier: getDefaultTier(pricing),
+    memberTiers: subscriptionTiers(pricing),
+    peakRate: defaultPeakRate(pricing),
+    offPeakRate: defaultOffPeakRate(pricing),
+    getTier: (tier: string) => findTier(pricing, tier),
+    getTierLabel: (tier?: string | null) => tierLabel(pricing, tier),
+    hasLeagueAccess: (tier?: string | null) => grantsLeagueAccess(pricing, tier),
+    hasRangeAccess: (tier?: string | null) => grantsRangeAccess(pricing, tier),
     getHourlyRate,
     getWeeklyPrice,
     getStripePriceId,

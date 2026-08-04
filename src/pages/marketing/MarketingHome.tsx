@@ -65,7 +65,7 @@ const MarketingHome = () => {
               Book Now <ArrowRight className="h-4 w-4" />
             </a>
             <a
-              href="https://apps.apple.com/au/app/birdies-hub/id6758370714"
+              href={tenant.socials?.ios_app_url || "#"}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -76,7 +76,7 @@ const MarketingHome = () => {
               />
             </a>
             <a
-              href="https://play.google.com/store/apps/details?id=com.birdiesbayside.hub"
+              href={tenant.socials?.android_app_url || "#"}
               target="_blank"
               rel="noopener noreferrer"
             >

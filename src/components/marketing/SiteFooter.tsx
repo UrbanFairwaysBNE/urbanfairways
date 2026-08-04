@@ -42,7 +42,7 @@ const SiteFooter = () => {
           </div>
           <div className="flex flex-wrap items-center gap-3 mt-5">
             <a
-              href="https://apps.apple.com/au/app/birdies-hub/id6758370714"
+              href={tenant.socials?.ios_app_url || "#"}
               target="_blank"
               rel="noreferrer"
             >
@@ -53,7 +53,7 @@ const SiteFooter = () => {
               />
             </a>
             <a
-              href="https://play.google.com/store/apps/details?id=com.birdiesbayside.hub"
+              href={tenant.socials?.android_app_url || "#"}
               target="_blank"
               rel="noreferrer"
             >

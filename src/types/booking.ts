@@ -1,4 +1,4 @@
-// Core types for the Birdies booking platform
+// Core types for the booking platform
 
 export type MembershipTier = 'visitor' | 'weekday' | 'birdie' | 'eagle';
 
@@ -35,7 +35,7 @@ export const MEMBERSHIP_TIERS: Record<MembershipTier, MembershipPricing> = {
     weeklyFee: 27,
     hourlyRate: 10,
     description: 'Play anytime',
-    features: ['$10/hr anytime', 'Birdies League Access', 'Swing Lab access', 'Cancel any time'],
+    features: ['$10/hr anytime', 'League Access', 'Swing Lab access', 'Cancel any time'],
   },
   eagle: {
     tier: 'eagle',
@@ -43,7 +43,7 @@ export const MEMBERSHIP_TIERS: Record<MembershipTier, MembershipPricing> = {
     weeklyFee: 35,
     hourlyRate: 8,
     description: 'Best value for regulars',
-    features: ['$8/hr anytime', 'Birdies League Access', 'Swing Lab access', 'Priority booking', 'Cancel any time'],
+    features: ['$8/hr anytime', 'League Access', 'Swing Lab access', 'Priority booking', 'Cancel any time'],
   },
 };
 

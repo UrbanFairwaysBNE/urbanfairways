@@ -70,7 +70,7 @@ export default function LeagueHighlights() {
       <div className="mb-6 animate-fade-in">
         <h1 className="font-anton text-2xl md:text-3xl text-primary mb-1">YOUR HIGHLIGHTS</h1>
         <p className="font-inter text-muted-foreground text-sm">
-          Recorded sessions from your Birdies bookings. Open a session to view and download your clips.
+          Recorded sessions from your bookings. Open a session to view and download your clips.
         </p>
       </div>
 

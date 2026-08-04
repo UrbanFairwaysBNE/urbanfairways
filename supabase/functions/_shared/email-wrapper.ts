@@ -165,6 +165,24 @@ export function buildEmailTemplate(
 
 // Fetches the current email layout from the DB, falling back to defaults on
 // any error. Accepts any Supabase client that exposes `.from().select()`.
+// Substitutes tenant merge values into stored layout HTML so the seeded
+// header/footer stay venue-agnostic in the database.
+export function applyTenantTokens(html: string, tenant: TenantConfig): string {
+  const values: Record<string, string> = {
+    venue_name: tenant.venue_name || "",
+    legal_entity: tenant.legal_entity || "",
+    address: tenantAddress(tenant),
+    support_phone: tenant.support_phone || "",
+    support_email: tenant.support_email || "",
+    booking_domain: tenant.booking_domain || "",
+    hub_domain: tenant.hub_domain || "",
+  };
+  return html.replace(
+    /\{\{\s*(venue_name|legal_entity|address|support_phone|support_email|booking_domain|hub_domain)\s*\}\}/g,
+    (_m, key: string) => values[key] ?? "",
+  );
+}
+
 export async function fetchEmailLayout(
   supabase: any,
   tenant: TenantConfig = NEUTRAL_TENANT,
@@ -177,8 +195,12 @@ export async function fetchEmailLayout(
       .maybeSingle();
 
     return {
-      header_html: data?.header_html || defaultHeaderHtml(tenant),
-      footer_html: data?.footer_html || defaultFooterHtml(tenant),
+      header_html: data?.header_html
+        ? applyTenantTokens(data.header_html, tenant)
+        : defaultHeaderHtml(tenant),
+      footer_html: data?.footer_html
+        ? applyTenantTokens(data.footer_html, tenant)
+        : defaultFooterHtml(tenant),
     };
   } catch (_err) {
     return {
@@ -187,6 +209,7 @@ export async function fetchEmailLayout(
     };
   }
 }
+
 
 // Convenience async helper: fetches the layout then renders the template.
 // This is the recommended entry point for all send-* edge functions so that

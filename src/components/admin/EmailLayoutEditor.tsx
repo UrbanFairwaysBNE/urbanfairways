@@ -14,13 +14,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useTenant, formatTenantAddress, type TenantSettings } from "@/config/tenant";
+import { useTenant, formatTenantAddress, bookingUrl, type TenantSettings } from "@/config/tenant";
 
 // Kept in sync with supabase/functions/_shared/email-wrapper.ts DEFAULTS.
 const buildDefaultHeaderHtml = (t: TenantSettings) => `<tr>
   <td align="center" style="background-color:#2F3134; padding:18px; border-radius:16px 16px 0 0;">
     <img
-      src="https://cdn.shopify.com/s/files/1/0758/7030/6550/files/NO-BG_BIRDIES-LOGOS_WORK-DOC_AMENDED-9.7.25-01.png?v=1761536603"
+      src="${bookingUrl(t, "/__l5e/assets-v1/9691088f-3b4b-41b4-bcb3-d4cd4de1540c/venue-logo-email.png")}"
       width="140"
       alt="${t.venue_name}"
       style="display:block; width:140px; height:auto; border:0;"

@@ -3,6 +3,7 @@ import Stripe from "npm:stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { Resend } from "npm:resend@2.0.0";
 import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
+import { loadTiers, TierRow } from "../_shared/tiers.ts";
 import { getTenant, tenantHubUrl } from "../_shared/tenant.ts";
 
 const corsHeaders = {
@@ -66,7 +67,9 @@ const buildTierMaps = (tiers: TierRow[]) => {
   const rank: Record<string, number> = {};
   ordered.forEach((t, i) => {
     names[t.tier] = t.display_name || t.tier;
-    prices[t.tier] = `$${Number(t.hourly_rate).toFixed(2)}`;
+    prices[t.tier] = t.weekly_subscription_price !== null && t.weekly_subscription_price !== undefined
+      ? `$${Number(t.weekly_subscription_price).toFixed(2)}`
+      : "";
     rank[t.tier] = i + 1;
   });
   tiers.filter((t) => t.is_default).forEach((t) => {
@@ -223,6 +226,13 @@ serve(async (req) => {
 
     // Load dynamic price to tier map
     const PRICE_TO_TIER = await getPriceToTierMap(supabaseAdmin);
+    const configuredTiers = await loadTiers(supabaseAdmin);
+    const {
+      names: TIER_NAMES,
+      prices: TIER_WEEKLY_PRICES,
+      rank: TIER_RANK,
+      walkInTier: WALK_IN_TIER,
+    } = buildTierMaps(configuredTiers);
 
     // ─── SUBSCRIPTION CREATED / UPDATED ───
     if (event.type === "customer.subscription.created" || event.type === "customer.subscription.updated") {
@@ -280,12 +290,11 @@ serve(async (req) => {
           }
 
           const previousTier = profile?.membership_tier;
-          const isNewMembership = previousTier === "visitor" || !previousTier;
+          const isNewMembership = previousTier === WALK_IN_TIER || !previousTier;
           const isTierChange = !isNewMembership && previousTier && previousTier !== newTier;
           const previousTierName = previousTier ? (TIER_NAMES[previousTier] || previousTier) : "";
 
-          // Rank tiers to detect upgrade vs downgrade
-          const TIER_RANK: Record<string, number> = { weekday: 1, birdie: 2, eagle: 3 };
+          // Rank tiers (by configured display order) to detect upgrade vs downgrade
           const isUpgrade = isTierChange && (TIER_RANK[newTier] || 0) > (TIER_RANK[previousTier || ""] || 0);
 
           const { error } = await supabaseAdmin
@@ -487,7 +496,7 @@ serve(async (req) => {
           });
         }
 
-        const alreadyVisitor = profile?.membership_tier === "visitor";
+        const alreadyVisitor = profile?.membership_tier === WALK_IN_TIER;
         const firstName = profile?.first_name || customer.name?.split(" ")[0] || "there";
         const lastName = profile?.last_name || "";
         const previousTier = alreadyVisitor ? "Member" : (profile?.membership_tier ? TIER_NAMES[profile.membership_tier] || profile.membership_tier : "Member");
@@ -499,16 +508,16 @@ serve(async (req) => {
         if (!alreadyVisitor) {
           const { error } = await supabaseAdmin
             .from("profiles")
-            .update({ membership_tier: "visitor" })
+            .update({ membership_tier: WALK_IN_TIER })
             .eq("email", email);
 
           if (error) {
             logStep("Error resetting profile", { error: error.message });
             throw error;
           }
-          logStep("Membership tier reset to visitor");
+          logStep("Membership tier reset to the walk-in tier");
         } else {
-          logStep("Already visitor (cancelled by admin), proceeding to send email");
+          logStep("Already on walk-in tier (cancelled by admin), proceeding to send email");
         }
 
         // Remove from SGT tour

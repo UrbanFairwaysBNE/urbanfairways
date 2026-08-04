@@ -56,16 +56,23 @@ const triggerBookingConfirmation = async (bookingId: string) => {
   return { success: true, status: response.status, response: responseBody };
 };
 
-const TIER_NAMES: Record<string, string> = {
-  "weekday": "Weekday",
-  "birdie": "Birdie",
-  "eagle": "Eagle",
-};
-
-const TIER_WEEKLY_PRICES: Record<string, string> = {
-  "weekday": "$15.00",
-  "birdie": "$27.00",
-  "eagle": "$35.00",
+// Tier names, prices and ranking are all read from `pricing_config`.
+const buildTierMaps = (tiers: TierRow[]) => {
+  const ordered = [...tiers]
+    .filter((t) => t.is_subscription && !t.is_default)
+    .sort((a, b) => a.display_order - b.display_order);
+  const names: Record<string, string> = {};
+  const prices: Record<string, string> = {};
+  const rank: Record<string, number> = {};
+  ordered.forEach((t, i) => {
+    names[t.tier] = t.display_name || t.tier;
+    prices[t.tier] = `$${Number(t.hourly_rate).toFixed(2)}`;
+    rank[t.tier] = i + 1;
+  });
+  tiers.filter((t) => t.is_default).forEach((t) => {
+    names[t.tier] = t.display_name || t.tier;
+  });
+  return { names, prices, rank, walkInTier: tiers.find((t) => t.is_default)?.tier ?? "visitor" };
 };
 
 // Replace template tags with actual values

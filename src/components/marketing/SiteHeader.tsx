@@ -45,15 +45,15 @@ const isGroupActive = (group: NavGroup, pathname: string) =>
 const SiteHeader = () => {
   const { tenant } = useTenant();
   const [open, setOpen] = useState(false);
-  const [playOpen, setPlayOpen] = useState(false);
-  const [mobilePlayOpen, setMobilePlayOpen] = useState(false);
-  const playRef = useRef<HTMLDivElement>(null);
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
+  const [mobileGroup, setMobileGroup] = useState<string | null>(null);
+  const navRef = useRef<HTMLElement>(null);
   const { pathname } = useLocation();
 
   useEffect(() => {
     setOpen(false);
-    setPlayOpen(false);
-    setMobilePlayOpen(false);
+    setOpenGroup(null);
+    setMobileGroup(null);
   }, [pathname]);
 
 
@@ -64,16 +64,17 @@ const SiteHeader = () => {
     };
   }, [open]);
 
-  // Close PLAY dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
-      if (playRef.current && !playRef.current.contains(e.target as Node)) {
-        setPlayOpen(false);
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        setOpenGroup(null);
       }
     };
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
+
 
   return (
     <header className="sticky top-0 z-50 bg-primary text-primary-foreground shadow-sm">

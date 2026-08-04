@@ -96,9 +96,24 @@ export function bookingUrl(t: TenantSettings, path = "/"): string {
   return `https://${t.booking_domain}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
-/** Absolute https URL on the hub domain. */
+/**
+ * Absolute https URL for the app (formerly "hub").
+ *
+ * Two deployment shapes are supported:
+ *  - separate hub domain (hub.example.com) → plain path on that host
+ *  - single domain → the app lives under `/app`; the root path resolves to
+ *    `/app`, deeper paths keep their route and carry `?hub=1` so app mode
+ *    sticks for the session.
+ */
 export function hubUrl(t: TenantSettings, path = "/"): string {
-  return `https://${t.hub_domain}${path.startsWith("/") ? path : `/${path}`}`;
+  const p = path.startsWith("/") ? path : `/${path}`;
+  const sameDomain = !t.hub_domain || t.hub_domain === t.booking_domain;
+  const host = sameDomain ? t.booking_domain : t.hub_domain;
+
+  if (!sameDomain) return `https://${host}${p}`;
+
+  if (p === "/") return `https://${host}/app`;
+  return `https://${host}${p}${p.includes("?") ? "&" : "?"}hub=1`;
 }
 
 /* ------------------------------------------------------------------ *

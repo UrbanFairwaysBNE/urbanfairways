@@ -178,12 +178,20 @@ export function useBooking() {
     staleTime: STALE_TIMES.STATIC,
   });
 
+  // Casual specials (e.g. 90 minutes for $60) - cached like pricing
+  const { data: pricingSpecials = [] } = useQuery({
+    queryKey: QUERY_KEYS.PRICING_SPECIALS,
+    queryFn: fetchPricingSpecials,
+    staleTime: STALE_TIMES.STATIC,
+  });
+
   // Public holidays - cached for 30 minutes
   const { data: publicHolidays = [] } = useQuery({
     queryKey: QUERY_KEYS.PUBLIC_HOLIDAYS,
     queryFn: fetchPublicHolidays,
     staleTime: STALE_TIMES.STATIC,
   });
+
 
   // User data - cached for 5 minutes
   const { data: userProfile } = useQuery({

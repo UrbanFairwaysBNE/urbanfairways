@@ -76,6 +76,17 @@ const TIME_SLOTS = generateTimeSlots();
 const DURATIONS = [1, 2, 3, 4];
 const PLAYERS = [1, 2, 3, 4];
 
+/** "1 hour", "1.5 hours" → "1 hr 30 min" style labels for fractional sessions. */
+export const formatDurationLabel = (hours: number): string => {
+  const totalMinutes = Math.round(hours * 60);
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  if (m === 0) return `${h} ${h === 1 ? "hour" : "hours"}`;
+  if (h === 0) return `${m} minutes`;
+  return `${h} hr ${m} min`;
+};
+
+
 // Get the next available time slot (rounded up to nearest 30 min)
 const getNextAvailableTimeSlot = (): string => {
   const now = new Date();

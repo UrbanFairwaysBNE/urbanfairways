@@ -35,8 +35,8 @@ const MarketingHome = () => {
       {/* HERO */}
       <section className="relative h-[88vh] min-h-[560px] flex items-center overflow-hidden">
         <video
-          src={heroVideo.url}
-          poster={heroPoster.url}
+          src={heroPoster}
+          poster={heroPoster}
           autoPlay
           muted
           loop
@@ -110,7 +110,7 @@ const MarketingHome = () => {
             </Link>
           </div>
           <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-[4/3]">
-            <img src={simulatorBay.url} alt={`${tenant.venue_name} simulator bay`} className="w-full h-full object-cover" />
+            <img src={simulatorBay} alt={`${tenant.venue_name} simulator bay`} className="w-full h-full object-cover" />
           </div>
         </div>
       </section>

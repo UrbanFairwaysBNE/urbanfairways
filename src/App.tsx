@@ -216,7 +216,8 @@ const App = () => {
       <PushNotificationInit />
       <Router>
         <ScrollToTop />
-        <TermsGate />
+
+
 
         <DeepLinkHandler />
         <NativeRoutePersistence />

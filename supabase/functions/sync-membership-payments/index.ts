@@ -124,11 +124,12 @@ serve(async (req) => {
       }
 
       // Determine tier from subscription
-      let tier = "birdie"; // default
+      // Tier comes solely from the price → tier map built from pricing_config
+      let tier: string | null = null;
       const subscription = invoice.subscription as Stripe.Subscription;
       if (subscription && subscription.items?.data?.[0]?.price?.id) {
         const priceId = subscription.items.data[0].price.id;
-        tier = priceToTier[priceId] || "birdie";
+        tier = priceToTier[priceId] ?? null;
       }
 
       // Insert missing payment

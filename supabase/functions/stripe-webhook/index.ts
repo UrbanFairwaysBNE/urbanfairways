@@ -577,8 +577,8 @@ serve(async (req) => {
                     <h3 style="margin:0 0 10px 0; font-family:Archivo, Impact, Arial Black, sans-serif; color:#2F3134;">What happened?</h3>
                     <ul style="margin:0; padding-left:20px;">
                       <li style="margin-bottom:8px;">Your card on file was declined when we tried to take your membership payment</li>
-                      <li style="margin-bottom:8px;">Your membership has been cancelled and your account has been moved to <strong>Visitor</strong> status</li>
-                      <li style="margin-bottom:8px;">You can still book sessions at our standard visitor rates</li>
+                      <li style="margin-bottom:8px;">Your membership has been cancelled and your account has been moved to <strong>${TIER_NAMES[WALK_IN_TIER] || "walk-in"}</strong> status</li>
+                      <li style="margin-bottom:8px;">You can still book sessions at our standard walk-in rates</li>
                     </ul>
                   </td>
                 </tr>
@@ -602,7 +602,7 @@ serve(async (req) => {
                 Hi ${firstName}, your <strong>${previousTier}</strong> membership has been cancelled.
               </p>
               <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
-                Your account has been reverted to Visitor status. You can still book sessions at our standard visitor rates.
+                Your account has been reverted to Visitor status. You can still book sessions at our standard walk-in rates.
               </p>
               <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 If you'd like to rejoin, simply re-register for a membership through your account.

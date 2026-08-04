@@ -5,6 +5,7 @@ export interface TierRow {
   tier: string;
   display_name: string | null;
   hourly_rate: number;
+  weekly_subscription_price: number | null;
   off_peak_hourly_rate: number | null;
   restricted_to_off_peak: boolean;
   single_bay_at_peak: boolean;
@@ -16,7 +17,7 @@ export interface TierRow {
 }
 
 export const TIER_SELECT =
-  "tier, display_name, hourly_rate, off_peak_hourly_rate, restricted_to_off_peak, single_bay_at_peak, grants_league_access, grants_range_access, is_subscription, is_default, display_order";
+  "tier, display_name, hourly_rate, weekly_subscription_price, off_peak_hourly_rate, restricted_to_off_peak, single_bay_at_peak, grants_league_access, grants_range_access, is_subscription, is_default, display_order";
 
 /** Load every configured tier. Returns [] for a venue with no pricing yet. */
 export async function loadTiers(

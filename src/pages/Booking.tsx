@@ -545,7 +545,12 @@ export default function Booking() {
     ? getHourlyRate(userMembershipTier, selectedDate, selectedTime)
     : getHourlyRate());
 
+  // Session total: hourly rate × duration, unless a casual special is cheaper
+  const sessionTotal = rateInfo?.total ?? hourlyRate * selectedDuration;
+  const appliedSpecial = rateInfo?.special ?? null;
+
   const canConfirm = selectedDate && selectedTime && selectedBayId;
+
 
   return (
     <div className="min-h-screen bg-background">

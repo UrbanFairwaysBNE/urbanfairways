@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Clock, Plus } from "lucide-react";
 import { calculateHourlyRate, isPeakTime } from "@/lib/pricing-utils";
+import { TierConfig, TIER_SELECT, normaliseTier } from "@/lib/tier-config";
 
 interface Booking {
   id: string;
@@ -49,7 +50,7 @@ const addHours = (time: string, hours: number) => {
 
 export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) => {
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [pricingConfig, setPricingConfig] = useState<Record<string, number>>({});
+  const [pricingConfig, setPricingConfig] = useState<TierConfig[]>([]);
   const [nextBookingStart, setNextBookingStart] = useState<string | null>(null);
   const [closeTime, setCloseTime] = useState<string | null>(null);
   const [selectedHours, setSelectedHours] = useState<number>(1);
@@ -74,7 +75,7 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
           .select("membership_tier, custom_hourly_rate, deposit_balance, custom_segment")
           .eq("user_id", user.id)
           .single(),
-        supabase.from("pricing_config").select("tier, hourly_rate"),
+        supabase.from("pricing_config").select(TIER_SELECT).order("display_order"),
         supabase
           .from("bookings")
           .select("start_time")

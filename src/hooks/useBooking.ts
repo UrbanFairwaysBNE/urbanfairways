@@ -341,7 +341,7 @@ export function useBooking() {
 
   /**
    * Get hourly rate based on membership tier, date, and time.
-   * Uses peak/off-peak pricing for visitors and weekday restrictions.
+   * Uses peak/off-peak pricing plus any tier restrictions from pricing_config.
    */
   const getHourlyRate = (
     tier: string = userMembershipTier,

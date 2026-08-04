@@ -7,9 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import birdiesLogo from "@/assets/birdies-logo.png";
+import { useTenant } from "@/config/tenant";
 import { Loader2, ArrowLeft, CheckCircle2, Eye, EyeOff, UserPlus } from "lucide-react";
 
 export default function LeagueRegister() {
+  const { tenant } = useTenant();
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -133,7 +135,7 @@ export default function LeagueRegister() {
       <div className="min-h-screen bg-background flex flex-col">
         <header className="bg-primary py-4 px-4 safe-area-top">
           <div className="container flex items-center gap-3">
-            <img src={birdiesLogo} alt="Birdies" className="h-8 w-auto" />
+            <img src={birdiesLogo} alt={tenant.venue_name} className="h-8 w-auto" />
           </div>
         </header>
         <main className="flex-1 flex items-center justify-center px-4 py-8">
@@ -163,7 +165,7 @@ export default function LeagueRegister() {
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <img src={birdiesLogo} alt="Birdies" className="h-8 w-auto" />
+          <img src={birdiesLogo} alt={tenant.venue_name} className="h-8 w-auto" />
         </div>
       </header>
 
@@ -172,7 +174,7 @@ export default function LeagueRegister() {
         <div className="bg-white border-b border-border/50 px-4 py-4">
           <div className="container max-w-md">
             <h1 className="font-anton text-xl text-primary mb-1">
-              JOIN BIRDIES LEAGUE
+              JOIN {tenant.venue_name.toUpperCase()} LEAGUE
             </h1>
             <p className="font-inter text-sm text-muted-foreground">
               Create your Simulator Golf Tour account to join the league
@@ -239,7 +241,7 @@ export default function LeagueRegister() {
                   </button>
                 </div>
                 <p className="text-xs text-muted-foreground font-inter">
-                  This is for your SGT account only, not your Birdies Hub login
+                  This is for your SGT account only, not your {tenant.venue_name} Hub login
                 </p>
               </div>
 
@@ -266,7 +268,7 @@ export default function LeagueRegister() {
               {/* Info note */}
               <div className="rounded-md bg-muted/50 p-3">
                 <p className="font-inter text-xs text-muted-foreground">
-                  Your Birdies Hub email (<strong className="text-primary">{user.email}</strong>) will be used for your SGT account. 
+                  Your {tenant.venue_name} Hub email (<strong className="text-primary">{user.email}</strong>) will be used for your SGT account. 
                   An admin will set your initial handicap after registration.
                 </p>
               </div>

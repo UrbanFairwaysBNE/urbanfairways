@@ -14,6 +14,7 @@ import { useActiveTourData } from "@/hooks/useActiveTourData";
 import { supabase } from "@/integrations/supabase/client";
 import birdiesB from "@/assets/birdies-b-icon.png";
 import { useIframeAutoResize } from "@/hooks/useIframeAutoResize";
+import { useTenant } from "@/config/tenant";
 
 interface MonthlyStanding {
   id: string;
@@ -32,6 +33,7 @@ interface MonthlyStanding {
 }
 
 export default function EmbedLeaderboard() {
+  const { tenant } = useTenant();
   useIframeAutoResize();
   const { activeTour, currentTournament, tournaments, isLoading: dataLoading } = useActiveTourData();
   
@@ -139,10 +141,10 @@ export default function EmbedLeaderboard() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <img src={birdiesB} alt="Birdies" className="h-10" />
+          <img src={birdiesB} alt={tenant.venue_name} className="h-10" />
           <div>
             <h1 className="font-bold text-xl text-[hsl(128,42%,21%)]">LEADERBOARD</h1>
-            <p className="text-sm text-[hsl(128,20%,40%)]">{activeTour?.name || "Birdies Tour"}</p>
+            <p className="text-sm text-[hsl(128,20%,40%)]">{activeTour?.name || `${tenant.venue_name} Tour`}</p>
           </div>
         </div>
         {lastUpdated && activeTab === "weekly" && (
@@ -431,7 +433,7 @@ export default function EmbedLeaderboard() {
 
       {/* Footer */}
       <div className="mt-6 text-center text-xs text-[hsl(128,20%,40%)]">
-        Powered by Birdies League Hub • Live updates every 30 seconds
+        Powered by {tenant.venue_name} League Hub • Live updates every 30 seconds
       </div>
     </div>
   );

@@ -4,8 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Trophy } from "lucide-react";
 import { format } from "date-fns";
 import birdiesLogo from "@/assets/birdies-b-orange.png";
+import { useTenant } from "@/config/tenant";
 
 export default function EmbedTVLocalComp() {
+  const { tenant } = useTenant();
   // Fetch all completed/active comps to determine week number
   const { data: allComps } = useQuery({
     queryKey: ["tv-local-comp-all"],
@@ -102,7 +104,7 @@ export default function EmbedTVLocalComp() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-6">
-          <img src={birdiesLogo} alt="Birdies" className="h-16" />
+          <img src={birdiesLogo} alt={tenant.venue_name} className="h-16" />
           <div>
             <h1 className="font-bold text-4xl text-[hsl(128,42%,21%)] tracking-tight">
               AMBROSE COMP
@@ -176,7 +178,7 @@ export default function EmbedTVLocalComp() {
 
       {/* Footer */}
       <div className="mt-4 text-center text-lg text-[hsl(128,20%,40%)]">
-        Live updates · Powered by Birdies League Hub
+        Live updates · Powered by {tenant.venue_name} League Hub
       </div>
     </div>
   );

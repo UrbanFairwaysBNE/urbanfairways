@@ -196,8 +196,13 @@ interface BayBooking {
   } | null;
 }
 
+const SETTINGS_TABS = ["general", "reporting", "pricing", "pos", "notifications"] as const;
+
 export default function AdminSettings() {
   const { isAdmin, isLoading: authLoading } = useAdminAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab") ?? "";
+  const activeTab = (SETTINGS_TABS as readonly string[]).includes(tabParam) ? tabParam : "general";
   const { toast } = useToast();
 
   // General settings - load from database

@@ -104,33 +104,38 @@ const SiteHeader = () => {
         </Link>
 
         {/* Desktop: full nav */}
-        <nav className="hidden lg:flex items-center gap-6 xl:gap-7">
-          {/* PLAY dropdown */}
-          <div ref={playRef} className="relative">
-            <button
-              onClick={() => setPlayOpen((p) => !p)}
-              className={`font-display tracking-wide text-sm uppercase transition-colors whitespace-nowrap flex items-center gap-1 ${
-                isPlayActive(pathname) ? "text-accent" : "text-primary-foreground hover:text-accent"
-              }`}
-            >
-              PLAY <ChevronDown className={`h-3.5 w-3.5 transition-transform ${playOpen ? "rotate-180" : ""}`} />
-            </button>
-            {playOpen && (
-              <div className="absolute top-full left-0 mt-2 w-48 bg-primary border border-primary-foreground/10 rounded-md shadow-xl py-1 z-50">
-                {playLinks.map((l) => (
-                  <Link
-                    key={l.to}
-                    to={l.to}
-                    className={`block px-4 py-2.5 text-sm font-display tracking-wide uppercase transition-colors ${
-                      pathname === l.to ? "text-accent" : "text-primary-foreground hover:text-accent"
-                    }`}
-                  >
-                    {l.label}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
+        <nav ref={navRef} className="hidden lg:flex items-center gap-6 xl:gap-7">
+          {navGroups.map((group) => (
+            <div key={group.key} className="relative">
+              <button
+                onClick={() => setOpenGroup((p) => (p === group.key ? null : group.key))}
+                className={`font-display tracking-wide text-sm uppercase transition-colors whitespace-nowrap flex items-center gap-1 ${
+                  isGroupActive(group, pathname) ? "text-accent" : "text-primary-foreground hover:text-accent"
+                }`}
+              >
+                {group.label}{" "}
+                <ChevronDown
+                  className={`h-3.5 w-3.5 transition-transform ${openGroup === group.key ? "rotate-180" : ""}`}
+                />
+              </button>
+              {openGroup === group.key && (
+                <div className="absolute top-full left-0 mt-2 w-52 bg-primary border border-primary-foreground/10 rounded-md shadow-xl py-1 z-50">
+                  {group.links.map((l) => (
+                    <Link
+                      key={l.to}
+                      to={l.to}
+                      className={`block px-4 py-2.5 text-sm font-display tracking-wide uppercase transition-colors ${
+                        pathname === l.to ? "text-accent" : "text-primary-foreground hover:text-accent"
+                      }`}
+                    >
+                      {l.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+
 
           {topNav.map((n) => {
             const active = pathname === n.to;

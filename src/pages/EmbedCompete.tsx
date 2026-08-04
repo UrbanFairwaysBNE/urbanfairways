@@ -196,7 +196,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
           <div className="text-[11px] uppercase tracking-widest font-bold" style={{ color: ORANGE }}>
             Three ways to play
           </div>
-          <h3 className="font-black text-3xl sm:text-4xl" style={{ color: GREEN, fontFamily: "'Anton', sans-serif" }}>
+          <h3 className="font-black text-3xl sm:text-4xl" style={{ color: GREEN, fontFamily: "'Archivo', system-ui, sans-serif" }}>
             HOW TO COMPETE
           </h3>
         </div>
@@ -263,7 +263,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
                 <span className="inline-block text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded text-white mb-1" style={{ backgroundColor: ORANGE }}>
                   Weekly
                 </span>
-                <h3 className="font-black text-lg leading-tight" style={{ color: GREEN, fontFamily: "'Anton', sans-serif" }}>
+                <h3 className="font-black text-lg leading-tight" style={{ color: GREEN, fontFamily: "'Archivo', system-ui, sans-serif" }}>
                   {tenant.venue_name} League
                 </h3>
                 <p className="text-xs mt-0.5 truncate" style={{ color: MUTED }}>
@@ -393,7 +393,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
                 <span className="inline-block text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded text-white mb-1" style={{ backgroundColor: GREEN }}>
                   Monthly
                 </span>
-                <h3 className="font-black text-lg leading-tight" style={{ color: GREEN, fontFamily: "'Anton', sans-serif" }}>
+                <h3 className="font-black text-lg leading-tight" style={{ color: GREEN, fontFamily: "'Archivo', system-ui, sans-serif" }}>
                   Monthly Winner Race
                 </h3>
                 <p className="text-xs mt-0.5 truncate" style={{ color: MUTED }}>
@@ -458,7 +458,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
                 <span className="inline-block text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded text-white mb-1" style={{ backgroundColor: ORANGE }}>
                   Wednesday Nights
                 </span>
-                <h3 className="font-black text-lg leading-tight" style={{ color: GREEN, fontFamily: "'Anton', sans-serif" }}>
+                <h3 className="font-black text-lg leading-tight" style={{ color: GREEN, fontFamily: "'Archivo', system-ui, sans-serif" }}>
                   2-Man Ambrose
                 </h3>
                 <p className="text-xs mt-0.5 truncate" style={{ color: MUTED }}>
@@ -567,7 +567,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
       <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-12">
         <div className="rounded-3xl p-8 sm:p-12 text-center" style={{ backgroundColor: GREEN }}>
           <h3 className="text-white font-black text-3xl sm:text-5xl mb-3"
-            style={{ fontFamily: "'Anton', sans-serif" }}>
+            style={{ fontFamily: "'Archivo', system-ui, sans-serif" }}>
             READY TO TEE IT UP?
           </h3>
           <p className="text-white/70 mb-6 max-w-xl mx-auto">
@@ -629,7 +629,7 @@ function HowCard({ icon, tag, title, desc, prize }: { icon: React.ReactNode; tag
         {icon}
       </div>
       <div className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: ORANGE }}>{tag}</div>
-      <h4 className="font-black text-xl mb-2" style={{ color: GREEN, fontFamily: "'Anton', sans-serif" }}>{title}</h4>
+      <h4 className="font-black text-xl mb-2" style={{ color: GREEN, fontFamily: "'Archivo', system-ui, sans-serif" }}>{title}</h4>
       <p className="text-sm mb-4 leading-relaxed" style={{ color: MUTED }}>{desc}</p>
       <div className="text-sm font-bold pt-3 border-t" style={{ borderColor: BORDER, color: GREEN }}>
         🏆 {prize}

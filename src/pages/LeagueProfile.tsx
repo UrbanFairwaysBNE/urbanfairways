@@ -203,7 +203,7 @@ export default function LeagueProfile() {
           {/* Handicap Section */}
           <div className="p-6 text-center">
             <p className="text-xs font-display text-muted-foreground uppercase tracking-wide mb-1">CURRENT HANDICAP</p>
-            <p className="text-5xl text-primary" style={{ fontFamily: "'Anton', sans-serif" }}>
+            <p className="text-5xl text-primary" style={{ fontFamily: "'Archivo', system-ui, sans-serif" }}>
               {stats?.handicap ?? "N/A"}
             </p>
           </div>

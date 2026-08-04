@@ -9,7 +9,7 @@ const WelcomePreview = () => {
   return (
     <div className="min-h-screen flex items-center justify-center overflow-hidden" style={{ backgroundColor: '#f5f3ef' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Manrope:wght@300;400;500&display=swap');
         
         @keyframes fadeIn {
           from { opacity: 0; transform: scale(0.95); }
@@ -68,7 +68,7 @@ const WelcomePreview = () => {
         <p 
           className="text-[28px] mb-3"
           style={{ 
-            fontFamily: 'Inter, sans-serif', 
+            fontFamily: 'Manrope, system-ui, sans-serif', 
             color: '#2f3134',
             opacity: 0.85,
             fontWeight: 400
@@ -80,7 +80,7 @@ const WelcomePreview = () => {
         <p 
           className="text-[28px]"
           style={{ 
-            fontFamily: 'Inter, sans-serif', 
+            fontFamily: 'Manrope, system-ui, sans-serif', 
             color: '#2f3134',
             opacity: 0.85,
             fontWeight: 400
@@ -109,7 +109,7 @@ const WelcomePreview = () => {
           >
             {tenant.venue_name} Etiquette
           </h3>
-          <ol className="space-y-3" style={{ fontFamily: 'Inter, sans-serif', color: '#2f3134' }}>
+          <ol className="space-y-3" style={{ fontFamily: 'Manrope, system-ui, sans-serif', color: '#2f3134' }}>
             {[
               "Use a different ball after every shot, this prevents a ball cracking on you!",
               "If you keep skying your drives, tee it down lower",

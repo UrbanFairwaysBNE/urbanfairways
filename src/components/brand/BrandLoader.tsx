@@ -1,0 +1,78 @@
+import { UF_MARK_PATHS } from "./uf-mark-paths";
+
+interface BrandLoaderProps {
+  /** Pixel size of the mark */
+  size?: number;
+  /** Optional label shown beneath the mark */
+  label?: string;
+  /** Fill the viewport height */
+  fullscreen?: boolean;
+  className?: string;
+}
+
+/**
+ * Animated Urban Fairways mark used as the loading indicator across the
+ * website and the app. The outline is traced (starting from the left of the
+ * U and following the curve all the way round) and the solid colour fades in
+ * behind it, then the whole loop repeats.
+ */
+const BrandLoader = ({ size = 96, label, fullscreen = false, className = "" }: BrandLoaderProps) => {
+  const mark = (
+    <div className={`flex flex-col items-center gap-4 ${className}`}>
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 2186 2186"
+        role="img"
+        aria-label="Loading"
+        className="uf-loader"
+      >
+        <style>{`
+          @keyframes uf-trace { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+          @keyframes uf-fill { 0%, 35% { fill-opacity: 0; } 75%, 100% { fill-opacity: 1; } }
+          .uf-loader .uf-path {
+            stroke-width: 40;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill-opacity: 0;
+            stroke-dasharray: 1;
+            stroke-dashoffset: 1;
+            animation:
+              uf-trace 1.9s cubic-bezier(0.65, 0, 0.35, 1) infinite,
+              uf-fill 1.9s ease-out infinite;
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .uf-loader .uf-path {
+              animation: none;
+              stroke-dashoffset: 0;
+              fill-opacity: 1;
+            }
+          }
+        `}</style>
+        {/* Green U curve first, then the rest of the mark trails behind it */}
+        {[1, 0, 2, 3, 4, 5].map((index, order) => {
+          const p = UF_MARK_PATHS[index];
+          if (!p) return null;
+          return (
+            <path
+              key={index}
+              className="uf-path"
+              d={p.d}
+              pathLength={1}
+              fill={p.fill}
+              stroke={p.fill}
+              style={{ animationDelay: `${order * 0.09}s` }}
+            />
+          );
+        })}
+      </svg>
+      {label ? <span className="text-sm text-muted-foreground">{label}</span> : null}
+    </div>
+  );
+
+  if (!fullscreen) return mark;
+
+  return <div className="min-h-screen flex items-center justify-center bg-background">{mark}</div>;
+};
+
+export default BrandLoader;

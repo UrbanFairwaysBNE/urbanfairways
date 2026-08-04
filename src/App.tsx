@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useRef } from "react";
+import BrandLoader from "@/components/brand/BrandLoader";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -105,14 +106,7 @@ const isElectron = typeof window !== 'undefined' && (window as any).electronAPI?
 const Router = isElectron ? HashRouter : BrowserRouter;
 
 // Loading fallback component
-const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-background">
-    <div className="flex flex-col items-center gap-3">
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      <span className="text-sm text-muted-foreground">Loading...</span>
-    </div>
-  </div>
-);
+const PageLoader = () => <BrandLoader fullscreen size={96} label="Loading..." />;
 
 // Deep link handler component - handles the app's custom URL scheme
 function DeepLinkHandler() {

@@ -2,7 +2,8 @@ import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
-import { calculateHourlyRate, isPeakTime, isWeekdayMemberTime, formatLocalDateKey } from "@/lib/pricing-utils";
+import { calculateHourlyRate, isPeakTime, isOffPeakTime, defaultPeakRate, formatLocalDateKey } from "@/lib/pricing-utils";
+import { TierConfig, TIER_SELECT, findTier, normaliseTier, hasSingleBayPeakLimit, isOffPeakOnlyTier } from "@/lib/tier-config";
 import { Capacitor } from "@capacitor/core";
 import { QUERY_KEYS, STALE_TIMES } from "@/lib/query-keys";
 export interface Bay {
@@ -42,14 +43,6 @@ export interface SavedCard {
   expYear?: number;
 }
 
-// Updated fallback pricing for new tier structure
-const FALLBACK_PRICING: Record<string, number> = {
-  visitor: 35, // Peak rate
-  weekday: 10,
-  birdie: 10,
-  eagle: 8,
-};
-
 export type PaymentMethod = "card" | "balance";
 
 // Fetch functions extracted for React Query
@@ -64,18 +57,15 @@ const fetchBays = async (): Promise<Bay[]> => {
   return data || [];
 };
 
-const fetchPricing = async (): Promise<Record<string, number>> => {
+const fetchPricing = async (): Promise<TierConfig[]> => {
   const { data, error } = await supabase
     .from("pricing_config")
-    .select("tier, hourly_rate");
+    .select(TIER_SELECT)
+    .order("display_order");
 
   if (error) throw error;
-  
-  const pricing: Record<string, number> = {};
-  (data || []).forEach((p: { tier: string; hourly_rate: number }) => {
-    pricing[p.tier] = Number(p.hourly_rate);
-  });
-  return pricing;
+
+  return ((data || []) as Record<string, unknown>[]).map(normaliseTier);
 };
 
 export interface PublicHoliday {
@@ -160,7 +150,7 @@ export function useBooking() {
   });
 
   // Static data - cached for 30 minutes (pricing rarely changes)
-  const { data: tierPricing = FALLBACK_PRICING } = useQuery({
+  const { data: tierPricing = [] } = useQuery({
     queryKey: QUERY_KEYS.PRICING,
     queryFn: fetchPricing,
     staleTime: STALE_TIMES.STATIC,
@@ -365,7 +355,7 @@ export function useBooking() {
     
     // If no date/time provided, return the base tier rate
     if (!date || !startTime) {
-      return tierPricing[tier] || FALLBACK_PRICING[tier] || FALLBACK_PRICING.visitor;
+      return Number(findTier(tierPricing, tier)?.hourly_rate ?? defaultPeakRate(tierPricing));
     }
     
     const holidaySurchargePercent = getHolidaySurchargeForDate(date);
@@ -378,11 +368,11 @@ export function useBooking() {
   };
 
   /**
-   * Check if a weekday member can book at member rate for given time
+   * Check if an off-peak-only tier can book at member rate for a given time
    */
   const canWeekdayMemberBook = (date: Date, startTime: string): boolean => {
-    if (userMembershipTier !== "weekday") return true;
-    return isWeekdayMemberTime(date, startTime);
+    if (!isOffPeakOnlyTier(tierPricing, userMembershipTier)) return true;
+    return isOffPeakTime(date, startTime);
   };
 
   /**
@@ -415,8 +405,8 @@ export function useBooking() {
     durationHours: number,
     bayId: string
   ): boolean => {
-    // Only applies to Birdie/Eagle during peak hours
-    if (!["birdie", "eagle"].includes(userMembershipTier)) return false;
+    // Only applies to tiers flagged single_bay_at_peak, during peak hours
+    if (!hasSingleBayPeakLimit(tierPricing, userMembershipTier)) return false;
     if (!isPeakTime(date, startTime)) return false;
     
     // Calculate end time
@@ -432,7 +422,7 @@ export function useBooking() {
     );
     
     return hasOverlap;
-  }, [userMembershipTier, userBookingsForDate]);
+  }, [userMembershipTier, userBookingsForDate, tierPricing]);
 
   /**
    * Get the display rate info for the booking UI
@@ -444,7 +434,7 @@ export function useBooking() {
     bayId?: string
   ): { rate: number; isPeak: boolean; isRestricted: boolean; isMultiBayRestricted: boolean; isHoliday: boolean; holidayName: string | null; surchargePercent: number } => {
     const isPeak = isPeakTime(date, startTime);
-    const isWeekdayRestricted = userMembershipTier === "weekday" && !isWeekdayMemberTime(date, startTime);
+    const isWeekdayRestricted = isOffPeakOnlyTier(tierPricing, userMembershipTier) && isPeak;
     const holiday = getHolidayForDate(date);
     const surchargePercent = holiday ? Number(holiday.surcharge_percent) : 0;
     
@@ -456,7 +446,7 @@ export function useBooking() {
     // If multi-bay restricted, rate becomes visitor peak rate (then surcharge applied on top)
     let rate: number;
     if (isMultiBayRestricted) {
-      const baseRate = FALLBACK_PRICING.visitor; // $35 peak visitor rate
+      const baseRate = defaultPeakRate(tierPricing); // walk-in peak rate
       rate = surchargePercent > 0 
         ? Math.round(baseRate * (1 + surchargePercent / 100) * 100) / 100
         : baseRate;
@@ -602,8 +592,8 @@ export function useBooking() {
     if (customHourlyRate !== null) {
       // Custom rate always takes priority
       actualHourlyRate = customHourlyRate;
-    } else if (["birdie", "eagle"].includes(userMembershipTier) && isPeakTime(date, startTime)) {
-      // For Birdie/Eagle during peak: check for overlapping bookings in DB (not cached state)
+    } else if (hasSingleBayPeakLimit(tierPricing, userMembershipTier) && isPeakTime(date, startTime)) {
+      // For single-bay-limited tiers during peak: check for overlapping bookings in DB (not cached state)
       const { data: existingBookings } = await supabase
         .from("bookings")
         .select("id, bay_id, start_time, end_time")
@@ -620,8 +610,8 @@ export function useBooking() {
       const holidaySurchargePercent = getHolidaySurchargeForDate(date);
       if (hasOverlappingBooking) {
         // Multi-bay during peak: charge visitor rate instead of member rate (+ holiday surcharge if any)
-        console.log("[useBooking] Multi-bay peak restriction triggered - charging visitor rate");
-        const baseRate = FALLBACK_PRICING.visitor; // $35 peak visitor rate
+        console.log("[useBooking] Multi-bay peak restriction triggered - charging walk-in rate");
+        const baseRate = defaultPeakRate(tierPricing); // walk-in peak rate
         actualHourlyRate = holidaySurchargePercent > 0
           ? Math.round(baseRate * (1 + holidaySurchargePercent / 100) * 100) / 100
           : baseRate;

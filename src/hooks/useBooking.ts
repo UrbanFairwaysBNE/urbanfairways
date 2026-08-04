@@ -232,6 +232,24 @@ export function useBooking() {
     return publicHolidays.find(h => h.holiday_date === key) ?? null;
   }, [publicHolidays]);
 
+  /** True when the date is a public holiday (charged at the peak rate all day). */
+  const isPublicHolidayDate = useCallback((date: Date | string): boolean => {
+    const key = typeof date === "string" ? date : formatLocalDateKey(date);
+    return publicHolidays.some(h => h.holiday_date === key);
+  }, [publicHolidays]);
+
+  /** True when a date/time is peak, taking public holidays into account. */
+  const isPeakSlot = useCallback((date: Date, startTime: string): boolean => {
+    return isPeakTime(date, startTime, isPublicHolidayDate(date));
+  }, [isPublicHolidayDate]);
+
+  /** Session lengths offered, including any special durations (e.g. 1.5h). */
+  const availableDurations = useMemo(
+    () => durationOptions(pricingSpecials),
+    [pricingSpecials]
+  );
+
+
   // Memoized fetch function to avoid recreating on every render
   const fetchBookingsForDateInternal = useCallback(async (dateStr: string) => {
     setIsLoading(true);

@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { getTenant, tenantBookingUrl } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,6 +15,7 @@ serve(async (req) => {
 
   try {
     const { playerName, tournamentName, prizeAmount, testEmail } = await req.json();
+    const tenant = await getTenant();
 
     if (!playerName || !tournamentName || !prizeAmount || !testEmail) {
       return new Response(
@@ -29,7 +31,7 @@ serve(async (req) => {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="x-apple-disable-message-reformatting" />
-  <title>Birdies Email</title>
+  <title>${tenant.venue_name} Email</title>
   <style>
     @import url("https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Manrope:wght@400;600&display=swap");
   </style>
@@ -46,7 +48,7 @@ serve(async (req) => {
 <!-- Header -->
 <tr>
 <td align="center" style="background-color:#2F3134; padding:18px; border-radius:16px 16px 0 0;">
-  <img src="https://cdn.shopify.com/s/files/1/0758/7030/6550/files/NO-BG_BIRDIES-LOGOS_WORK-DOC_AMENDED-9.7.25-01.png?v=1761536603" width="140" alt="Birdies Bayside" style="display:block; width:140px; height:auto; border:0;" />
+  <img src="${tenantBookingUrl(tenant, "/__l5e/assets-v1/9691088f-3b4b-41b4-bcb3-d4cd4de1540c/venue-logo-email.png")}" width="140" alt="${tenant.venue_name}" style="display:block; width:140px; height:auto; border:0;" />
 </td>
 </tr>
 

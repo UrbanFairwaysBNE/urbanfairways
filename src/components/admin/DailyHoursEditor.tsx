@@ -31,17 +31,18 @@ const DAY_NAMES = [
   "Saturday",
 ];
 
-const TIME_OPTIONS = Array.from({ length: 24 }, (_, h) =>
-  `${h.toString().padStart(2, "0")}:00`
-);
+const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
+  const h = Math.floor(i / 2);
+  const m = i % 2 === 0 ? "00" : "30";
+  return `${h.toString().padStart(2, "0")}:${m}`;
+});
 
 function formatTime(time: string): string {
-  const [hh] = time.split(":");
+  const [hh, mm] = time.split(":");
   const hour = parseInt(hh, 10);
-  if (hour === 0) return "12:00 AM";
-  if (hour === 12) return "12:00 PM";
-  if (hour > 12) return `${hour - 12}:00 PM`;
-  return `${hour}:00 AM`;
+  const suffix = hour >= 12 ? "PM" : "AM";
+  const h12 = hour % 12 === 0 ? 12 : hour % 12;
+  return `${h12}:${mm} ${suffix}`;
 }
 
 interface Props {

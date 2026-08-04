@@ -111,7 +111,7 @@ Keep up the momentum! See you at the next tournament.
 <tr>
 <td bgcolor="#B5772A" style="border-radius:12px;">
 
-<a href="https://hub.birdiesbayside.com.au/my-account"
+<a href="https://example.com/my-account"
 style="display:inline-block; padding:14px 28px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:18px; letter-spacing:0.3px; color:#FFFFFF; text-decoration:none;">
 View My Account
 </a>
@@ -132,11 +132,11 @@ View My Account
 <tr>
 <td align="center" style="padding-bottom:14px;">
 
-<a href="https://www.instagram.com/birdiesbayside/" style="display:inline-block; margin:0 6px;">
+<a href="https://www.instagram.com/" style="display:inline-block; margin:0 6px;">
 <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" width="28" alt="Instagram" style="border:0;" />
 </a>
 
-<a href="https://www.facebook.com/birdiesbayside" style="display:inline-block; margin:0 6px;">
+<a href="https://www.facebook.com/" style="display:inline-block; margin:0 6px;">
 <img src="https://cdn-icons-png.flaticon.com/512/174/174848.png" width="28" alt="Facebook" style="border:0;" />
 </a>
 

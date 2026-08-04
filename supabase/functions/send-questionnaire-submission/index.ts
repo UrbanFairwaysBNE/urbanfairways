@@ -47,8 +47,8 @@ Deno.serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Bayside Questionnaire <noreply@birdiesbayside.com.au>",
-        to: ["sam@baysidegolf.com.au"],
+        from: "Questionnaire <noreply@example.com>",
+        to: ["admin@example.com"],
         reply_to: contactEmail || undefined,
         subject: `New Sim Centre Questionnaire — ${tradingName || "Submission"}`,
         html,

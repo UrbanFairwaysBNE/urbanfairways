@@ -2,6 +2,7 @@ import Seo from "@/components/Seo";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Globe, CalendarDays, Zap, Trophy, ArrowRight } from "lucide-react";
+import { useTenant, hubUrl } from "@/config/tenant";
 
 const HERO = "https://cdn.shopify.com/s/files/1/0758/7030/6550/files/Untitled_design_42.png?v=1760070483&width=3840";
 
@@ -12,20 +13,20 @@ const features = [
   { icon: Trophy, title: "Prizes & Giveaways", body: "Win big, or small, with locally supported prizes and giveaways." },
 ];
 
-const faqs = [
+const getFaqs = (venueName: string) => [
   {
     section: "General Information",
     items: [
-      { q: "What is the Birdies League?", a: "The Birdies League is a members-only golf sim league that allows competitive play, tournament rounds, leaderboards, competitions and prizes." },
-      { q: "How much does it cost to join?", a: "Access to the Birdies League is included with your membership. You must be a Birdie member or higher to take part, Weekday members can still join our Wednesday local comp." },
+      { q: `What is the ${venueName} League?`, a: `The ${venueName} League is a members-only golf sim league that allows competitive play, tournament rounds, leaderboards, competitions and prizes.` },
+      { q: "How much does it cost to join?", a: `Access to the ${venueName} League is included with your membership. You must be a Birdie member or higher to take part, Weekday members can still join our Wednesday local comp.` },
     ],
   },
   {
     section: "Registration & Setup",
     items: [
-      { q: "How do I join?", a: "You can join the league by scanning the QR code at Birdies. This will take you to the SGT Club registration where you can create your own account for future round tracking." },
-      { q: "How do I play?", a: "Once you've created an SGT login, your name will be automatically synced to every bay at Birdies. Just hit ONLINE MATCH and choose your name from the dropdown to load your weekly rounds." },
-      { q: "What if I can't make a certain day?", a: "There are no set tournament days at Birdies. You're free to play your 2 weekly rounds any time and your leaderboard status will update automatically." },
+      { q: "How do I join?", a: `You can join the league by scanning the QR code at ${venueName}. This will take you to the SGT Club registration where you can create your own account for future round tracking.` },
+      { q: "How do I play?", a: `Once you've created an SGT login, your name will be automatically synced to every bay at ${venueName}. Just hit ONLINE MATCH and choose your name from the dropdown to load your weekly rounds.` },
+      { q: "What if I can't make a certain day?", a: `There are no set tournament days at ${venueName}. You're free to play your 2 weekly rounds any time and your leaderboard status will update automatically.` },
       { q: "What if I want to cancel?", a: "Just email us and we'll cancel your membership within 24 working hours. Your most recent weekly payment will not be refunded." },
     ],
   },
@@ -35,30 +36,33 @@ const faqs = [
       { q: "How many holes do I play each week?", a: "Each week you'll be required to play 2 full 18-hole rounds. These can be played on different days, or even resumed at different times if required." },
       { q: "What courses will I play?", a: "We always select the best courses to play each week. Some of our tours will be themed, for example we may run an Aussie tour that's only Australian courses." },
       { q: "Is there a handicap system?", a: "Yes. You'll be required to obtain your handicap in your first week by completing 'Q School'. Once you have your handicap you'll play the tour and get a net score for each round." },
-      { q: "What if I hit an accidental shot or get a strange misread?", a: "Although we can edit scores, to ensure fair play all scores will be final. We recommend ensuring you are very comfortable with GSPRO and sim usage before competing in the Birdies League." },
+      { q: "What if I hit an accidental shot or get a strange misread?", a: `Although we can edit scores, to ensure fair play all scores will be final. We recommend ensuring you are very comfortable with GSPRO and sim usage before competing in the ${venueName} League.` },
     ],
   },
   {
     section: "Scoring & Standings",
     items: [
       { q: "How is scoring tracked?", a: "Scores are fully automated through GSPRO and the SGT. Your round results show at the end of the round and are visible online almost immediately." },
-      { q: "Where can we see the leaderboard?", a: "The leaderboard is available in the online SGT portal, or you can see it on our Birdies TV located near the vending machine." },
+      { q: "Where can we see the leaderboard?", a: `The leaderboard is available in the online SGT portal, or you can see it on our ${venueName} TV located near the vending machine.` },
       { q: "What if I miss a week?", a: "You won't gain any points for that week, but the leaderboards are cumulative, so missing one round won't be a huge disadvantage." },
       { q: "Are there prizes?", a: "Yes, we work with local businesses and have a rotating selection of prizes, including a monthly medal prize." },
     ],
   },
 ];
 
-const MarketingLeague = () => (
+const MarketingLeague = () => {
+  const { tenant } = useTenant();
+  const faqs = getFaqs(tenant.venue_name);
+  return (
   <MarketingLayout>
-    <Seo title={"The Birdies League | Weekly Simulator Golf"} description={"Play the Birdies League each week: handicapped simulator tournaments, live leaderboards, monthly winners and prizes at Redland Bay."} path="/league-info" />
+    <Seo title={`The ${tenant.venue_name} League | Weekly Simulator Golf`} description={`Play the ${tenant.venue_name} League each week: handicapped simulator tournaments, live leaderboards, monthly winners and prizes at Redland Bay.`} path="/league-info" />
     <section className="relative h-[19vh] min-h-[130px] flex items-end overflow-hidden">
       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${HERO})` }} />
       <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/80 to-primary/40" />
       <div className="relative container mx-auto px-4 pb-8">
         <p className="text-accent font-display tracking-[0.25em] uppercase text-xs mb-1.5">Members Only</p>
         <h1 className="font-display text-3xl sm:text-5xl text-primary-foreground leading-none">
-          Welcome to the<br /><span className="text-accent">Birdies League</span>
+          Welcome to the<br /><span className="text-accent">{tenant.venue_name} League</span>
         </h1>
       </div>
     </section>
@@ -66,12 +70,12 @@ const MarketingLeague = () => (
     <section className="py-12 sm:py-20">
       <div className="container mx-auto px-4 max-w-3xl text-center">
         <p className="text-lg text-foreground/80 leading-relaxed mb-8">
-          The Birdies League is the ultimate place to be for golfers looking to show off their skills. A perk of Birdie
+          The {tenant.venue_name} League is the ultimate place to be for golfers looking to show off their skills. A perk of Birdie
           and Eagle membership, it creates a great community and healthy competition. It's competitive, social, and the
           best way to get more out of every swing.
         </p>
         <a
-          href="https://hub.birdiesbayside.com.au/embed/leaderboard"
+          href={hubUrl(tenant, "/embed/leaderboard")}
           className="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-accent-foreground font-display tracking-wide uppercase px-7 py-3.5 rounded-md"
         >
           View Leaderboard <ArrowRight className="h-4 w-4" />
@@ -124,6 +128,7 @@ const MarketingLeague = () => (
       </div>
     </section>
   </MarketingLayout>
-);
+  );
+};
 
 export default MarketingLeague;

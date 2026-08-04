@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { Resend } from "npm:resend@2.0.0";
+import { getTenant, tenantHubUrl, tenantBookingUrl, tenantAddress } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,6 +20,8 @@ serve(async (req) => {
 
   try {
     logStep("Function started");
+
+    const tenant = await getTenant();
 
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -39,7 +42,7 @@ serve(async (req) => {
     // Generate a password recovery link using the auth admin API.
     // We email a safe app URL carrying the token hash instead of the one-time verify link,
     // which helps avoid mail scanners burning the token before the customer clicks it.
-    const rawSiteUrl = Deno.env.get("SITE_URL") || "https://hub.birdiesbayside.com.au";
+    const rawSiteUrl = Deno.env.get("SITE_URL") || tenantHubUrl(tenant);
     const siteUrl = /^https?:\/\//i.test(rawSiteUrl) ? rawSiteUrl.replace(/\/$/, "") : `https://${rawSiteUrl.replace(/^\/+/, "").replace(/\/$/, "")}`;
     const siteOrigin = new URL(`${siteUrl}/`).origin;
     const requestedRedirect = (redirectUrl || "/reset-password").trim() || "/reset-password";
@@ -79,13 +82,13 @@ serve(async (req) => {
     const resetLink = resetUrl.toString();
     const name = firstName || "there";
 
-    // Build branded email matching other Birdies emails
+    // Build branded email matching other tenant emails
     const bodyContent = `
               <p style="font-family:Inter, Arial, sans-serif; font-size:15px; line-height:1.6; color:#333333; margin:0 0 16px;">
                 Hi ${name}!
               </p>
               <p style="font-family:Inter, Arial, sans-serif; font-size:15px; line-height:1.6; color:#333333; margin:0 0 16px;">
-                You've been invited to set up your password for your Birdies account, or you requested a password reset.
+                You've been invited to set up your password for your ${tenant.venue_name} account, or you requested a password reset.
               </p>
               <p style="font-family:Inter, Arial, sans-serif; font-size:15px; line-height:1.6; color:#333333; margin:0 0 6px;">
                 Click the button below to set your password:
@@ -98,7 +101,7 @@ serve(async (req) => {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="x-apple-disable-message-reformatting" />
-  <title>Set Your Birdies Password</title>
+  <title>Set Your ${tenant.venue_name} Password</title>
   <style>
     @import url("https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600&display=swap");
   </style>
@@ -111,12 +114,7 @@ serve(async (req) => {
           <!-- HEADER -->
           <tr>
             <td align="center" style="background-color:#1F4C25; padding:18px; border-radius:16px 16px 0 0;">
-              <img
-                src="https://cdn.shopify.com/s/files/1/0758/7030/6550/files/NO-BG_BIRDIES-LOGOS_WORK-DOC_AMENDED-9.7.25-01.png?v=1761536603"
-                width="140"
-                alt="Birdies Bayside"
-                style="display:block; width:140px; height:auto; border:0;"
-              />
+              <div style="font-family:Anton, Impact, Arial Black, sans-serif; font-size:26px; color:#FFFFFF; text-align:center; letter-spacing:0.5px;">${tenant.venue_name}</div>
             </td>
           </tr>
           <!-- BODY -->
@@ -148,7 +146,7 @@ serve(async (req) => {
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td align="center" style="padding-bottom:14px;">
-                    <a href="https://www.instagram.com/birdiesbayside" style="margin:0 8px; text-decoration:none;">
+                    <a href="https://www.instagram.com/${tenant.socials?.instagram || ''}" style="margin:0 8px; text-decoration:none;">
                       <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram" width="28" height="28" style="display:inline-block; border:0;" />
                     </a>
                     <a href="https://www.facebook.com/share/17NifCh2vH/" style="margin:0 8px; text-decoration:none;">
@@ -158,10 +156,10 @@ serve(async (req) => {
                 </tr>
                 <tr>
                   <td align="center" style="font-family:Inter, Arial, sans-serif; font-size:14px; line-height:1.7; color:#FFFFFF;">
-                    <div><a href="https://maps.app.goo.gl/vTXLZvd8XPZEeRn16" style="color:#FFFFFF; text-decoration:underline;">Unit 2, 86 Jardine Drive, Redland Bay QLD 4165</a></div>
-                    <div><a href="tel:+61721468442" style="color:#FFFFFF; text-decoration:underline;">(07) 2146 8442</a></div>
-                    <div><a href="https://birdiesbayside.com.au" style="color:#FFFFFF; text-decoration:underline;">birdiesbayside.com.au</a></div>
-                    <div style="margin-top:10px; font-size:12px; opacity:0.75;">© Birdies Bayside</div>
+                    <div>${tenantAddress(tenant)}</div>
+                    <div><a href="tel:${tenant.support_phone}" style="color:#FFFFFF; text-decoration:underline;">${tenant.support_phone}</a></div>
+                    <div><a href="${tenantBookingUrl(tenant)}" style="color:#FFFFFF; text-decoration:underline;">${tenant.booking_domain}</a></div>
+                    <div style="margin-top:10px; font-size:12px; opacity:0.75;">© ${tenant.venue_name}</div>
                   </td>
                 </tr>
               </table>
@@ -176,9 +174,9 @@ serve(async (req) => {
 
     // Send email via Resend
     const emailResponse = await resend.emails.send({
-      from: "Birdies <info@birdiesbayside.com.au>",
+      from: `${tenant.venue_name} <${tenant.sender_email}>`,
       to: [email],
-      subject: "Set Your Birdies Password",
+      subject: `Set Your ${tenant.venue_name} Password`,
       html: htmlContent,
     });
 

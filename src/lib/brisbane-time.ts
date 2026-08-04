@@ -1,7 +1,7 @@
 /**
  * Brisbane time formatting helpers.
  *
- * Birdies operates entirely in Australia/Brisbane (AEST, UTC+10, no DST).
+ * This app operates entirely in Australia/Brisbane (AEST, UTC+10, no DST).
  * NEVER render a timestamp with a bare `toLocaleString()` — that uses the
  * viewer's device timezone, which produces wrong times for staff checking
  * the Hub from another region and makes UTC values from the database look

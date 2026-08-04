@@ -9,8 +9,8 @@ import { useEffect } from "react";
  *
  *   <script>
  *     window.addEventListener('message', function (e) {
- *       if (!e.data || e.data.type !== 'birdies:embed-height') return;
- *       var iframes = document.querySelectorAll('iframe[src*="hub.birdiesbayside.com.au/embed"]');
+ *       if (!e.data || e.data.type !== 'app:embed-height') return;
+ *       var iframes = document.querySelectorAll('iframe[src*="/embed"]'); // scope to your hub domain in production
  *       iframes.forEach(function (f) {
  *         try {
  *           if (f.contentWindow === e.source) {
@@ -38,7 +38,7 @@ export function useIframeAutoResize(enabled: boolean = true) {
       if (height && (force || height !== lastHeight)) {
         lastHeight = height;
         window.parent.postMessage(
-          { type: "birdies:embed-height", height },
+          { type: "app:embed-height", height },
           "*"
         );
       }

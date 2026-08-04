@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import { getTenant, tenantHubUrl, tenantBookingUrl, tenantAddress, TenantConfig } from "../_shared/tenant.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -21,10 +22,10 @@ const logStep = (step: string, details?: any) => {
   console.log(`[SEND-PAYMENT-RETRY-WARNING] ${step}${detailsStr}`);
 };
 
-const buildTemplate = (firstName: string, amount?: number, cancelledBookings = 0) => {
+const buildTemplate = (tenant: TenantConfig, firstName: string, amount?: number, cancelledBookings = 0) => {
   const amountLine = amount
-    ? `<p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">We tried to charge <strong>$${amount.toFixed(2)}</strong> for your weekly Birdies membership and the payment didn't go through.</p>`
-    : `<p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">We tried to charge your card for your weekly Birdies membership and the payment didn't go through.</p>`;
+    ? `<p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">We tried to charge <strong>$${amount.toFixed(2)}</strong> for your weekly ${tenant.venue_name} membership and the payment didn't go through.</p>`
+    : `<p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">We tried to charge your card for your weekly ${tenant.venue_name} membership and the payment didn't go through.</p>`;
 
   const bookingsLine = cancelledBookings > 0
     ? `<p style="margin:0;">As a result, <strong>${cancelledBookings} upcoming booking${cancelledBookings === 1 ? " has" : "s have"} been cancelled and refunded</strong>, and no new bookings can be made until your card on file is updated.</p>`
@@ -37,7 +38,7 @@ const buildTemplate = (firstName: string, amount?: number, cancelledBookings = 0
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="x-apple-disable-message-reformatting" />
-  <title>Birdies Email</title>
+  <title>${tenant.venue_name} Email</title>
   <style>
     @import url("https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600&display=swap");
   </style>
@@ -49,7 +50,7 @@ const buildTemplate = (firstName: string, amount?: number, cancelledBookings = 0
         <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px; width:100%;">
           <tr>
             <td align="center" style="background-color:#1F4C25; padding:18px; border-radius:16px 16px 0 0;">
-              <img src="https://cdn.shopify.com/s/files/1/0758/7030/6550/files/NO-BG_BIRDIES-LOGOS_WORK-DOC_AMENDED-9.7.25-01.png?v=1761536603" width="140" alt="Birdies Bayside" style="display:block; width:140px; height:auto; border:0;" />
+              <div style="font-family:Anton, Impact, Arial Black, sans-serif; font-size:26px; color:#FFFFFF; text-align:center; letter-spacing:0.5px;">${tenant.venue_name}</div>
             </td>
           </tr>
           <tr>
@@ -69,7 +70,7 @@ const buildTemplate = (firstName: string, amount?: number, cancelledBookings = 0
 
               <p style="margin:18px 0 8px; font-family:Inter, Arial, sans-serif; font-size:15px; line-height:1.6; color:#1F4C25; text-align:center;">Update your card on file and you'll be straight back in:</p>
               <p style="margin:0 0 4px; text-align:center;">
-                <a href="https://hub.birdiesbayside.com.au/my-account" style="display:inline-block; background-color:#EC622D; color:#FFFFFF; font-family:Anton, Impact, Arial Black, sans-serif; font-size:18px; padding:12px 28px; border-radius:8px; text-decoration:none; letter-spacing:0.5px;">Update Card</a>
+                <a href="${tenantHubUrl(tenant, "/my-account")}" style="display:inline-block; background-color:#EC622D; color:#FFFFFF; font-family:Anton, Impact, Arial Black, sans-serif; font-size:18px; padding:12px 28px; border-radius:8px; text-decoration:none; letter-spacing:0.5px;">Update Card</a>
               </p>
 
             </td>
@@ -79,16 +80,16 @@ const buildTemplate = (firstName: string, amount?: number, cancelledBookings = 0
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td align="center" style="padding-bottom:14px;">
-                    <a href="https://www.instagram.com/birdiesbayside" style="margin:0 8px; text-decoration:none;"><img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram" width="28" height="28" style="display:inline-block; border:0;" /></a>
+                    <a href="https://www.instagram.com/${tenant.socials?.instagram || ''}" style="margin:0 8px; text-decoration:none;"><img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram" width="28" height="28" style="display:inline-block; border:0;" /></a>
                     <a href="https://www.facebook.com/share/17NifCh2vH/" style="margin:0 8px; text-decoration:none;"><img src="https://cdn-icons-png.flaticon.com/512/174/174848.png" alt="Facebook" width="28" height="28" style="display:inline-block; border:0;" /></a>
                   </td>
                 </tr>
                 <tr>
                   <td align="center" style="font-family:Inter, Arial, sans-serif; font-size:14px; line-height:1.7; color:#FFFFFF;">
-                    <div><a href="https://maps.app.goo.gl/vTXLZvd8XPZEeRn16" style="color:#FFFFFF; text-decoration:underline;">Unit 2, 86 Jardine Drive, Redland Bay QLD 4165</a></div>
-                    <div><a href="tel:+61721468442" style="color:#FFFFFF; text-decoration:underline;">(07) 2146 8442</a></div>
-                    <div><a href="https://birdiesbayside.com.au" style="color:#FFFFFF; text-decoration:underline;">birdiesbayside.com.au</a></div>
-                    <div style="margin-top:10px; font-size:12px; opacity:0.75;">© Birdies Bayside</div>
+                    <div>${tenantAddress(tenant)}</div>
+                    <div><a href="tel:${tenant.support_phone}" style="color:#FFFFFF; text-decoration:underline;">${tenant.support_phone}</a></div>
+                    <div><a href="${tenantBookingUrl(tenant)}" style="color:#FFFFFF; text-decoration:underline;">${tenant.booking_domain}</a></div>
+                    <div style="margin-top:10px; font-size:12px; opacity:0.75;">© ${tenant.venue_name}</div>
                   </td>
                 </tr>
               </table>
@@ -108,17 +109,18 @@ serve(async (req) => {
   }
 
   try {
+    const tenant = await getTenant();
     const { email, first_name, amount, cancelled_bookings }: PaymentRetryRequest = await req.json();
     logStep("Request received", { email, first_name, amount, cancelled_bookings });
 
     if (!email) throw new Error("Missing email");
 
-    const html = buildTemplate(first_name || "there", amount, cancelled_bookings ?? 0);
+    const html = buildTemplate(tenant, first_name || "there", amount, cancelled_bookings ?? 0);
 
     const emailResponse = await resend.emails.send({
-      from: "Birdies Bayside <info@birdiesbayside.com.au>",
+      from: `${tenant.venue_name} <${tenant.sender_email}>`,
       to: [email],
-      subject: "Your Birdies payment didn't clear — bookings on hold",
+      subject: `Your ${tenant.venue_name} payment didn't clear — bookings on hold`,
       html,
     });
 

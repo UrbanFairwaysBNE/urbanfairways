@@ -2,6 +2,7 @@
 // can be uploaded manually from the browser, bypassing the Bay Controller entirely.
 // Also supports action=status to check how Cloudflare processed that upload.
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { getTenant } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,6 +17,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  const tenant = await getTenant();
 
   const jwt = req.headers.get("Authorization")?.replace("Bearer ", "") ?? "";
   const authClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
@@ -62,7 +64,7 @@ Deno.serve(async (req) => {
     body: JSON.stringify({
       maxDurationSeconds,
       requireSignedURLs: false,
-      allowedOrigins: ["birdiesbayside.com.au", "*.birdiesbayside.com.au", "*.lovable.app", "localhost:8080"],
+      allowedOrigins: [tenant.booking_domain, `*.${tenant.booking_domain}`, "*.lovable.app", "localhost:8080"],
       meta: { name: body.name ?? `Manual test upload ${new Date().toISOString()}`, source: "manual-admin-test" },
     }),
   });

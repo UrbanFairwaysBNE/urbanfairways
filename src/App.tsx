@@ -9,6 +9,7 @@ import { App as CapacitorApp } from "@capacitor/app";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import ScrollToTop from "@/components/ScrollToTop";
 import { TermsGate } from "@/components/legal/TermsGate";
+import { loadTenantSnapshot } from "@/config/tenant";
 
 
 // Lazy load all pages for code splitting
@@ -111,7 +112,7 @@ const PageLoader = () => (
   </div>
 );
 
-// Deep link handler component - handles birdiesbayside:// URLs
+// Deep link handler component - handles the app's custom URL scheme
 function DeepLinkHandler() {
   const navigate = useNavigate();
 
@@ -125,8 +126,8 @@ function DeepLinkHandler() {
         
         try {
           // Parse the deep link URL
-          // Format: birdiesbayside://booking-success?booking_id=xxx
-          // or: birdiesbayside://card-added
+          // Format: <scheme>://booking-success?booking_id=xxx
+          // or: <scheme>://card-added
           const url = new URL(event.url);
           const path = url.hostname; // e.g., "booking-success", "card-added"
           const params = url.searchParams;
@@ -200,7 +201,12 @@ function PushNotificationInit() {
   return null;
 }
 
-const App = () => (
+const App = () => {
+  useEffect(() => {
+    loadTenantSnapshot();
+  }, []);
+
+  return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -299,6 +305,7 @@ const App = () => (
       </Router>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;

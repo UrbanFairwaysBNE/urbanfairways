@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { Resend } from "npm:resend@2.0.0";
 import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
+import { getTenant, tenantHubUrl } from "../_shared/tenant.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -14,12 +15,13 @@ interface Body {
   gift_card_id: string;
 }
 
-const SIGNUP_URL = "https://hub.birdiesbayside.com.au";
-
 serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const tenant = await getTenant();
+
 
   try {
+    const SIGNUP_URL = tenantHubUrl(tenant, "/");
     const { gift_card_id } = (await req.json()) as Body;
     if (!gift_card_id) throw new Error("gift_card_id required");
 
@@ -47,7 +49,7 @@ serve(async (req: Request): Promise<Response> => {
     const recipientEmail = String(card.recipient_email).toLowerCase().trim();
     const recipientName = card.recipient_name || "there";
 
-    const subject = `You've been issued a $${amount.toFixed(2)} Birdies gift card`;
+    const subject = `You've been issued a $${amount.toFixed(2)} ${tenant.venue_name} gift card`;
     const heading = "You've Been Issued a Gift Card";
 
     const amountBlock = `
@@ -61,7 +63,7 @@ serve(async (req: Request): Promise<Response> => {
       </table>
     `;
 
-    const intro = `<p style="margin:0 0 14px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">Hi ${escapeHtml(recipientName)}, Birdies Bayside has issued you a gift card to enjoy a session with us.</p>`;
+    const intro = `<p style="margin:0 0 14px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">Hi ${escapeHtml(recipientName)}, ${tenant.venue_name} has issued you a gift card to enjoy a session with us.</p>`;
 
     const footer = `<p style="margin:18px 0 0; font-family:Inter, Arial, sans-serif; font-size:15px; line-height:1.6; color:#1F4C25; text-align:center;">Create your free account using <strong>this email address</strong> and your credit applies automatically at checkout.</p>`;
 
@@ -71,7 +73,7 @@ serve(async (req: Request): Promise<Response> => {
     });
 
     const r = await resend.emails.send({
-      from: "Birdies Bayside <info@birdiesbayside.com.au>",
+      from: `${tenant.venue_name} <${tenant.sender_email}>`,
       to: [recipientEmail],
       subject,
       html,

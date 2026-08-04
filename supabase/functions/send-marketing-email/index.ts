@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { getTenant, tenantHubUrl, tenantBookingUrl, tenantAddress, TenantConfig } from "../_shared/tenant.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -18,14 +19,14 @@ interface Recipient {
 // Simple token generator for unsubscribe URL verification
 async function generateUnsubscribeToken(email: string): Promise<string> {
   const encoder = new TextEncoder();
-  const data = encoder.encode(email.toLowerCase() + "birdies-unsubscribe-salt");
+  const data = encoder.encode(email.toLowerCase() + "venue-unsubscribe-salt");
   const hashBuffer = await crypto.subtle.digest("SHA-256", data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.slice(0, 8).map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
-function buildUnsubscribeUrl(email: string, token: string): string {
-  const rawUrl = Deno.env.get("SITE_URL") || "https://hub.birdiesbayside.com.au";
+function buildUnsubscribeUrl(email: string, token: string, tenant: TenantConfig): string {
+  const rawUrl = Deno.env.get("SITE_URL") || tenantHubUrl(tenant);
   const siteUrl = /^https?:\/\//i.test(rawUrl) ? rawUrl.replace(/\/$/, "") : `https://${rawUrl.replace(/^\/+/, "").replace(/\/$/, "")}`;
   return `${siteUrl}/unsubscribe?email=${encodeURIComponent(email)}&token=${token}`;
 }
@@ -53,9 +54,9 @@ function replaceTemplateTags(html: string, recipient: Recipient, resetLink?: str
 }
 
 // Generate password reset link for a user
-async function generateResetLink(supabaseAdmin: any, email: string): Promise<string | null> {
+async function generateResetLink(supabaseAdmin: any, email: string, tenant: TenantConfig): Promise<string | null> {
   try {
-    const rawUrl = Deno.env.get("SITE_URL") || "https://hub.birdiesbayside.com.au";
+    const rawUrl = Deno.env.get("SITE_URL") || tenantHubUrl(tenant);
     const siteUrl = /^https?:\/\//i.test(rawUrl) ? rawUrl.replace(/\/$/, "") : `https://${rawUrl.replace(/^\/+/, "").replace(/\/$/, "")}`;
     
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
@@ -79,7 +80,7 @@ async function generateResetLink(supabaseAdmin: any, email: string): Promise<str
 }
 
 // Build branded email wrapper with unsubscribe link for marketing emails
-const buildEmailTemplate = (heading: string, bodyContent: string, ctaButton?: { text: string; url: string }, unsubscribeUrl?: string) => {
+const buildEmailTemplate = (tenant: TenantConfig, heading: string, bodyContent: string, ctaButton?: { text: string; url: string }, unsubscribeUrl?: string) => {
   const buttonHtml = ctaButton ? `
               <!-- BUTTON -->
               <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:22px auto 0;">
@@ -100,7 +101,7 @@ const buildEmailTemplate = (heading: string, bodyContent: string, ctaButton?: { 
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="x-apple-disable-message-reformatting" />
-  <title>Birdies Email</title>
+  <title>${tenant.venue_name} Email</title>
   <style>
     @import url("https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600&display=swap");
   </style>
@@ -114,12 +115,7 @@ const buildEmailTemplate = (heading: string, bodyContent: string, ctaButton?: { 
           <!-- HEADER -->
           <tr>
             <td align="center" style="background-color:#1F4C25; padding:18px; border-radius:16px 16px 0 0;">
-              <img
-                src="https://cdn.shopify.com/s/files/1/0758/7030/6550/files/NO-BG_BIRDIES-LOGOS_WORK-DOC_AMENDED-9.7.25-01.png?v=1761536603"
-                width="140"
-                alt="Birdies Bayside"
-                style="display:block; width:140px; height:auto; border:0;"
-              />
+              <div style="font-family:Anton, Impact, Arial Black, sans-serif; font-size:26px; color:#FFFFFF; text-align:center; letter-spacing:0.5px;">${tenant.venue_name}</div>
             </td>
           </tr>
           <!-- BODY -->
@@ -140,7 +136,7 @@ const buildEmailTemplate = (heading: string, bodyContent: string, ctaButton?: { 
                 <tr>
                   <td align="center" style="padding-bottom:14px;">
                     <!-- Instagram -->
-                    <a href="https://www.instagram.com/birdiesbayside" style="margin:0 8px; text-decoration:none;">
+                    <a href="https://www.instagram.com/${tenant.socials?.instagram || ''}" style="margin:0 8px; text-decoration:none;">
                       <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram" width="28" height="28" style="display:inline-block; border:0;" />
                     </a>
                     <!-- Facebook -->
@@ -152,10 +148,10 @@ const buildEmailTemplate = (heading: string, bodyContent: string, ctaButton?: { 
                 <!-- CONTACT DETAILS -->
                 <tr>
                   <td align="center" style="font-family:Inter, Arial, sans-serif; font-size:14px; line-height:1.7; color:#FFFFFF;">
-                    <div><a href="https://maps.app.goo.gl/vTXLZvd8XPZEeRn16" style="color:#FFFFFF; text-decoration:underline;">Unit 2, 86 Jardine Drive, Redland Bay QLD 4165</a></div>
-                    <div><a href="tel:+61721468442" style="color:#FFFFFF; text-decoration:underline;">(07) 2146 8442</a></div>
-                    <div><a href="https://birdiesbayside.com.au" style="color:#FFFFFF; text-decoration:underline;">birdiesbayside.com.au</a></div>
-                    <div style="margin-top:10px; font-size:12px; opacity:0.75;">© Birdies Bayside</div>
+                    <div>${tenantAddress(tenant)}</div>
+                    <div><a href="tel:${tenant.support_phone}" style="color:#FFFFFF; text-decoration:underline;">${tenant.support_phone}</a></div>
+                    <div><a href="${tenantBookingUrl(tenant)}" style="color:#FFFFFF; text-decoration:underline;">${tenant.booking_domain}</a></div>
+                    <div style="margin-top:10px; font-size:12px; opacity:0.75;">© ${tenant.venue_name}</div>
                     ${unsubscribeUrl ? `<div style="margin-top:12px; font-size:11px; opacity:0.6;"><a href="${unsubscribeUrl}" style="color:#FFFFFF; text-decoration:underline;">Unsubscribe from marketing emails</a></div>` : ''}
                   </td>
                 </tr>
@@ -176,7 +172,8 @@ async function sendEmailsInBackground(
   campaign_id: string,
   subject: string,
   html_content: string,
-  recipients: Recipient[]
+  recipients: Recipient[],
+  tenant: TenantConfig
 ) {
   console.log(`[BACKGROUND] Starting email send for campaign ${campaign_id} to ${recipients.length} recipients`);
   
@@ -217,12 +214,12 @@ async function sendEmailsInBackground(
         // Generate reset link if needed
         let resetLink: string | undefined;
         if (needsResetLink && supabaseAdmin) {
-          const link = await generateResetLink(supabaseAdmin, recipient.email);
+          const link = await generateResetLink(supabaseAdmin, recipient.email, tenant);
           if (link) {
             resetLink = link;
           } else {
             // If we can't generate a reset link, use a fallback URL with forgot=true
-            resetLink = "https://hub.birdiesbayside.com.au/?forgot=true";
+            resetLink = tenantHubUrl(tenant, "/?forgot=true");
             console.warn(`[BACKGROUND] Using fallback URL for ${recipient.email}`);
           }
         }
@@ -232,7 +229,7 @@ async function sendEmailsInBackground(
         
         // Generate unsubscribe URL for this recipient
         const unsubscribeToken = await generateUnsubscribeToken(recipient.email);
-        const unsubscribeUrl = buildUnsubscribeUrl(recipient.email, unsubscribeToken);
+        const unsubscribeUrl = buildUnsubscribeUrl(recipient.email, unsubscribeToken, tenant);
         
         // Wrap the marketing content in branded template
         const bodyContent = `
@@ -241,10 +238,10 @@ async function sendEmailsInBackground(
             </div>
         `;
         
-        const brandedHtml = buildEmailTemplate(personalizedSubject, bodyContent, undefined, unsubscribeUrl);
+        const brandedHtml = buildEmailTemplate(tenant, personalizedSubject, bodyContent, undefined, unsubscribeUrl);
 
         return {
-          from: "Birdies Bayside <info@birdiesbayside.com.au>",
+          from: `${tenant.venue_name} <${tenant.sender_email}>`,
           to: [recipient.email],
           subject: personalizedSubject,
           html: brandedHtml,
@@ -305,6 +302,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    const tenant = await getTenant();
     const { campaign_id, subject, html_content, recipients }: MarketingEmailRequest = await req.json();
 
     console.log(`[SEND-MARKETING-EMAIL] Starting campaign: ${campaign_id}`);
@@ -315,7 +313,7 @@ const handler = async (req: Request): Promise<Response> => {
     // @ts-ignore - EdgeRuntime is available in Supabase Edge Functions
     if (typeof EdgeRuntime !== "undefined" && EdgeRuntime.waitUntil) {
       // @ts-ignore
-      EdgeRuntime.waitUntil(sendEmailsInBackground(campaign_id, subject, html_content, recipients));
+      EdgeRuntime.waitUntil(sendEmailsInBackground(campaign_id, subject, html_content, recipients, tenant));
       
       console.log(`[SEND-MARKETING-EMAIL] Background task started, returning immediately`);
       
@@ -333,7 +331,7 @@ const handler = async (req: Request): Promise<Response> => {
     } else {
       // Fallback for environments without EdgeRuntime.waitUntil
       console.log(`[SEND-MARKETING-EMAIL] EdgeRuntime.waitUntil not available, processing synchronously`);
-      await sendEmailsInBackground(campaign_id, subject, html_content, recipients);
+      await sendEmailsInBackground(campaign_id, subject, html_content, recipients, tenant);
       
       return new Response(
         JSON.stringify({ 

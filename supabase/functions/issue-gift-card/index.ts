@@ -2,6 +2,8 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { Resend } from "npm:resend@2.0.0";
 import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
+import { tenantHubUrl } from "../_shared/tenant.ts";
+import { getTenant } from "../_shared/tenant.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -17,13 +19,13 @@ interface Body {
   amount?: number;
 }
 
-const SIGNUP_URL = "https://hub.birdiesbayside.com.au";
-const HUB_ACCOUNT_URL = "https://hub.birdiesbayside.com.au/my-account";
-
 serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const tenant = await getTenant();
+
 
   try {
+    const SIGNUP_URL = tenantHubUrl(tenant, "/");
     const { gift_card_id } = (await req.json()) as Body;
     if (!gift_card_id) throw new Error("gift_card_id required");
 
@@ -62,7 +64,7 @@ serve(async (req: Request): Promise<Response> => {
       `[issue-gift-card] Issuing card ${card.id} amount=$${amount} method=${deliveryMethod} recipient=${recipientEmail}`
     );
 
-    // Check if recipient already has a Birdies account
+    // Check if recipient already has an account
     const { data: recipientProfile } = await supabase
       .from("profiles")
       .select("user_id, first_name, deposit_balance")
@@ -113,8 +115,8 @@ serve(async (req: Request): Promise<Response> => {
     // ── Email to RECIPIENT ──
     if (deliveryMethod === "email_recipient" || deliveryMethod === "both") {
       const subject = autoApplied
-        ? `${senderName} just gifted you $${amount.toFixed(2)} of Birdies credit!`
-        : `${senderName} sent you a $${amount.toFixed(2)} Birdies gift!`;
+        ? `${senderName} just gifted you $${amount.toFixed(2)} of ${tenant.venue_name} credit!`
+        : `${senderName} sent you a $${amount.toFixed(2)} ${tenant.venue_name} gift!`;
 
       const heading = autoApplied ? "You've Been Gifted!" : "You've Been Gifted!";
 
@@ -143,8 +145,8 @@ serve(async (req: Request): Promise<Response> => {
       `;
 
       const intro = autoApplied
-        ? `<p style="margin:0 0 14px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">Hi ${escapeHtml(recipientName)}, great news — <strong>${escapeHtml(senderName)}</strong> has gifted you Birdies credit, and we've already added it to your account.</p>`
-        : `<p style="margin:0 0 14px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">Hi ${escapeHtml(recipientName)}, <strong>${escapeHtml(senderName)}</strong> wants you to enjoy a session at Birdies Bayside on them.</p>`;
+        ? `<p style="margin:0 0 14px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">Hi ${escapeHtml(recipientName)}, great news — <strong>${escapeHtml(senderName)}</strong> has gifted you ${tenant.venue_name} credit, and we've already added it to your account.</p>`
+        : `<p style="margin:0 0 14px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">Hi ${escapeHtml(recipientName)}, <strong>${escapeHtml(senderName)}</strong> wants you to enjoy a session at ${tenant.venue_name} on them.</p>`;
 
       const footer = autoApplied
         ? `<p style="margin:18px 0 0; font-family:Inter, Arial, sans-serif; font-size:15px; line-height:1.6; color:#1F4C25; text-align:center;">Book a bay and your credit will apply automatically at checkout.</p>`
@@ -154,12 +156,12 @@ serve(async (req: Request): Promise<Response> => {
 
       const html = await renderBrandedEmail(supabase, heading, body, {
         text: autoApplied ? "Book a Bay" : "Activate Your Gift",
-        url: autoApplied ? "https://hub.birdiesbayside.com.au/booking" : SIGNUP_URL,
+        url: autoApplied ? tenantHubUrl(tenant, "/booking") : SIGNUP_URL,
       });
 
       try {
         const r = await resend.emails.send({
-          from: "Birdies Bayside <info@birdiesbayside.com.au>",
+          from: `${tenant.venue_name} <${tenant.sender_email}>`,
           to: [recipientEmail],
           subject,
           html,
@@ -183,7 +185,7 @@ serve(async (req: Request): Promise<Response> => {
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFF5E4; border:3px dashed #1F4C25; border-radius:18px;">
                 <tr>
                   <td style="padding:34px 28px; text-align:center;">
-                    <p style="margin:0 0 6px; font-family:Inter, Arial, sans-serif; font-size:13px; color:#1F4C25; letter-spacing:2px; text-transform:uppercase; opacity:0.8;">Birdies Bayside Gift Card</p>
+                    <p style="margin:0 0 6px; font-family:Inter, Arial, sans-serif; font-size:13px; color:#1F4C25; letter-spacing:2px; text-transform:uppercase; opacity:0.8;">${escapeHtml(tenant.venue_name)} Gift Card</p>
                     <p style="margin:0 0 18px; font-family:Anton, Impact, Arial Black, sans-serif; font-size:64px; line-height:1; color:#EC622D;">$${amount.toFixed(2)}</p>
                     <p style="margin:0 0 6px; font-family:Inter, Arial, sans-serif; font-size:14px; color:#1F4C25; opacity:0.75;">To</p>
                     <p style="margin:0 0 18px; font-family:Anton, Impact, Arial Black, sans-serif; font-size:28px; color:#1F4C25;">${escapeHtml(recipientName)}</p>
@@ -198,7 +200,7 @@ serve(async (req: Request): Promise<Response> => {
                         </td>
                       </tr>
                     </table>
-                    <p style="margin:14px 0 0; font-family:Inter, Arial, sans-serif; font-size:11px; line-height:1.5; color:#1F4C25; opacity:0.8;">Create a free account at <strong>hub.birdiesbayside.com.au</strong><br/>then enter this code under <strong>My Account → Redeem Gift Card</strong></p>
+                    <p style="margin:14px 0 0; font-family:Inter, Arial, sans-serif; font-size:11px; line-height:1.5; color:#1F4C25; opacity:0.8;">Create a free account at <strong>${tenant.hub_domain}</strong><br/>then enter this code under <strong>My Account → Redeem Gift Card</strong></p>
                   </td>
                 </tr>
               </table>
@@ -215,7 +217,7 @@ serve(async (req: Request): Promise<Response> => {
             <td style="padding:20px 22px;">
               <p style="margin:0 0 10px; font-family:Anton, Impact, Arial Black, sans-serif; font-size:18px; color:#1F4C25; text-align:center; letter-spacing:0.5px;">How ${escapeHtml(recipientName)} Redeems Their Gift</p>
               <ol style="margin:0; padding-left:22px; font-family:Inter, Arial, sans-serif; font-size:14px; line-height:1.7; color:#1F4C25;">
-                <li>Head to <a href="https://hub.birdiesbayside.com.au" style="color:#EC622D; text-decoration:underline;"><strong>hub.birdiesbayside.com.au</strong></a> and create a free account (or sign in).</li>
+                <li>Head to <a href="${tenantHubUrl(tenant, "/")}" style="color:#EC622D; text-decoration:underline;"><strong>${tenant.hub_domain}</strong></a> and create a free account (or sign in).</li>
                 <li>Go to <strong>My Account</strong> and find the <strong>"Redeem Gift Card"</strong> section.</li>
                 <li>Enter the redemption code above — credit applies to their account instantly.</li>
                 <li>Book a bay and the credit is automatically used at checkout.</li>
@@ -229,7 +231,7 @@ serve(async (req: Request): Promise<Response> => {
 
       try {
         const r = await resend.emails.send({
-          from: "Birdies Bayside <info@birdiesbayside.com.au>",
+          from: `${tenant.venue_name} <${tenant.sender_email}>`,
           to: [senderEmail],
           subject,
           html,

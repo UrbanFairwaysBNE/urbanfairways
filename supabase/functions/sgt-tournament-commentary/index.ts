@@ -1,5 +1,6 @@
 // Generates a social-ready written recap of an SGT tournament from its scorecards.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { getTenant } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -28,6 +29,8 @@ function holes(hole_data: Record<string, number> | null): Hole[] {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  const tenant = await getTenant();
 
   try {
     const { tournament_id } = await req.json();
@@ -180,7 +183,7 @@ Deno.serve(async (req) => {
       easiest_holes: hardestHoles.slice(-3).reverse(),
     };
 
-    const systemPrompt = `You are the resident writer for Birdies Bayside's indoor golf league (SGT). You write the weekly tournament wrap that gets posted straight to social media.
+    const systemPrompt = `You are the resident writer for ${tenant.venue_name}'s indoor golf league (SGT). You write the weekly tournament wrap that gets posted straight to social media.
 
 Voice: plain, understated, factual. Write like a club captain typing up the week's results — dry, matter-of-fact, occasionally a small wry aside. Never breathless. Australian English.
 

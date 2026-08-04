@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { Resend } from "npm:resend@2.0.0";
 import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
+import { getTenant, tenantHubUrl } from "../_shared/tenant.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -32,6 +33,8 @@ serve(async (req: Request): Promise<Response> => {
 
   try {
     const { user_id } = await req.json();
+    const tenant = await getTenant();
+
     logStep("Function started", { user_id });
 
     if (!user_id) {
@@ -181,12 +184,12 @@ serve(async (req: Request): Promise<Response> => {
           subject = replaceTemplateTags(subject, templateTags);
           htmlContent = await renderBrandedEmail(supabase, "Loyalty Credit Earned!", bodyContent, {
             text: "Book Now",
-            url: "https://hub.birdiesbayside.com.au/booking",
+            url: tenantHubUrl(tenant, "/booking"),
           });
         } else {
           const bodyContent = `
               <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
-                Hi ${profile.first_name}, thanks for being a loyal visitor! You've completed <strong>${totalBookings} visits</strong> to Birdies Bayside and earned a loyalty credit.
+                Hi ${profile.first_name}, thanks for being a loyal visitor! You've completed <strong>${totalBookings} visits</strong> to ${tenant.venue_name} and earned a loyalty credit.
               </p>
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1F4C25; border-radius:12px; margin:18px 0;">
                 <tr>
@@ -206,12 +209,12 @@ serve(async (req: Request): Promise<Response> => {
 
           htmlContent = await renderBrandedEmail(supabase, "Loyalty Credit Earned!", bodyContent, {
             text: "Book Now",
-            url: "https://hub.birdiesbayside.com.au/booking",
+            url: tenantHubUrl(tenant, "/booking"),
           });
         }
 
         await resend.emails.send({
-          from: "Birdies Bayside <info@birdiesbayside.com.au>",
+          from: `${tenant.venue_name} <${tenant.sender_email}>`,
           to: [profile.email],
           subject,
           html: htmlContent,

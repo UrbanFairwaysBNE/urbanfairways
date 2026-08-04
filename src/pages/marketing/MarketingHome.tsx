@@ -7,13 +7,14 @@ import heroPoster from "@/assets/hero-poster.jpg.asset.json";
 import simulatorBay from "@/assets/simulator-bay.png.asset.json";
 import swingLabBadge from "@/assets/swing-lab-badge.png.asset.json";
 import googlePlayBadge from "@/assets/google-play-badge.svg";
+import { useTenant, hubUrl } from "@/config/tenant";
 const COMMUNITY_IMG = "https://cdn.shopify.com/s/files/1/0758/7030/6550/files/Birdies_Golf.jpg?v=1751956878&width=3840";
 
-const features = [
+const getFeatures = (venueName: string) => [
   { icon: Target, title: "High-Tech Simulators", body: "Tour-accurate launch data, 4K graphics and 2,300+ world-famous courses." },
   { icon: Clock, title: "Flexible 5am - 11pm Access", body: "Six fully automated bays, book any time, play any time." },
   { icon: DollarSign, title: "Affordable Memberships", body: "Pay a simple weekly fee to unlock your member hourly rate." },
-  { icon: Trophy, title: "Competitions & League", body: "Birdie & Eagle members get access to the Birdies League. Weekday members can still jump into our Wednesday local comp." },
+  { icon: Trophy, title: "Competitions & League", body: `Birdie & Eagle members get access to the ${venueName} League. Weekday members can still jump into our Wednesday local comp.` },
 ];
 
 const swingLabFeatures = [
@@ -26,9 +27,11 @@ const swingLabFeatures = [
 ];
 
 const MarketingHome = () => {
+  const { tenant } = useTenant();
+  const features = getFeatures(tenant.venue_name);
   return (
     <MarketingLayout>
-    <Seo title={"Birdies Bayside | Indoor Golf in Redland Bay"} description={"Premium indoor golf in Redland Bay. Book one of six automated simulator bays, play 2,300+ world courses, join the league or visit the Birdies Bar."} path="/" />
+    <Seo title={`${tenant.venue_name} | Indoor Golf in Redland Bay`} description={`Premium indoor golf in Redland Bay. Book one of six automated simulator bays, play 2,300+ world courses, join the league or visit the ${tenant.venue_name} Bar.`} path="/" />
       {/* HERO */}
       <section className="relative h-[88vh] min-h-[560px] flex items-center overflow-hidden">
         <video
@@ -44,7 +47,7 @@ const MarketingHome = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/40 to-transparent" />
         <div className="relative container mx-auto px-4 max-w-5xl">
           <p className="text-accent font-display tracking-[0.25em] uppercase text-sm mb-4">
-            Welcome to Birdies, Redland Bay
+            Welcome to {tenant.venue_name}, Redland Bay
           </p>
           <h1 className="font-display text-5xl sm:text-7xl lg:text-8xl text-primary-foreground leading-[0.95] tracking-tight">
             Indoor Golf,<br />
@@ -56,7 +59,7 @@ const MarketingHome = () => {
           </p>
           <div className="mt-8 flex flex-col items-start gap-3">
             <a
-              href="https://hub.birdiesbayside.com.au/"
+              href={hubUrl(tenant, "/")}
               className="bg-accent hover:bg-accent/90 text-accent-foreground font-display tracking-wide uppercase px-7 h-12 rounded-md inline-flex items-center justify-center gap-2 transition-all hover:translate-x-0.5"
             >
               Book Now <ArrowRight className="h-4 w-4" />
@@ -87,16 +90,16 @@ const MarketingHome = () => {
         </div>
       </section>
 
-      {/* WHAT IS BIRDIES */}
+      {/* WHAT IS THE VENUE */}
       <section className="py-12 sm:py-28">
         <div className="container mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <p className="text-accent font-display tracking-[0.2em] uppercase text-sm mb-3">What is Birdies?</p>
+            <p className="text-accent font-display tracking-[0.2em] uppercase text-sm mb-3">What is {tenant.venue_name}?</p>
             <h2 className="font-display text-4xl sm:text-5xl text-primary leading-tight mb-6">
               Redland's premier indoor golf centre.
             </h2>
             <p className="text-foreground/80 text-lg leading-relaxed mb-4">
-              Birdies combines cutting-edge simulator technology with 4K visuals and tour-level accuracy.
+              {tenant.venue_name} combines cutting-edge simulator technology with 4K visuals and tour-level accuracy.
               Perfect for practice, game improvement, or a quick round with friends, all without leaving the Redlands.
             </p>
             <Link
@@ -107,7 +110,7 @@ const MarketingHome = () => {
             </Link>
           </div>
           <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-[4/3]">
-            <img src={simulatorBay.url} alt="Birdies simulator bay" className="w-full h-full object-cover" />
+            <img src={simulatorBay.url} alt={`${tenant.venue_name} simulator bay`} className="w-full h-full object-cover" />
           </div>
         </div>
       </section>
@@ -116,7 +119,7 @@ const MarketingHome = () => {
       <section className="bg-primary text-primary-foreground py-12 sm:py-24">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-14">
-            <p className="text-accent font-display tracking-[0.2em] uppercase text-sm mb-3">Why Birdies</p>
+            <p className="text-accent font-display tracking-[0.2em] uppercase text-sm mb-3">Why {tenant.venue_name}</p>
             <h2 className="font-display text-4xl sm:text-5xl leading-tight">
               Tour-level tech. Local prices. Zero excuses.
             </h2>
@@ -152,7 +155,7 @@ const MarketingHome = () => {
           <div className="text-center max-w-2xl mx-auto mb-14">
             <img
               src={swingLabBadge.url}
-              alt="Swing Lab Birdies Redland Bay badge"
+              alt={`Swing Lab ${tenant.venue_name} Redland Bay badge`}
               className="h-28 sm:h-36 w-auto mx-auto mb-6 object-contain"
               loading="lazy"
             />
@@ -161,7 +164,7 @@ const MarketingHome = () => {
               Your Personal Driving Range Coach.
             </h2>
             <p className="mt-4 text-foreground/80 text-lg leading-relaxed">
-              Every range session becomes actionable data. Track your distances, dispersion, swing dynamics and progress over time — all included with your Birdies membership.
+              Every range session becomes actionable data. Track your distances, dispersion, swing dynamics and progress over time — all included with your {tenant.venue_name} membership.
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
@@ -198,9 +201,9 @@ const MarketingHome = () => {
             </h2>
           </div>
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            <PriceCard tier="Weekday" rate="$10/hr" price="$15" tag="Mon-Thu before 4pm only" perks={["Swing Lab access", "Cancel any time", "Peak times charged at visitor rate"]} />
-            <PriceCard tier="Birdie" rate="$10/hr" price="$27" tag="Most popular" highlight perks={["Play anytime", "Birdies League access", "Swing Lab access", "Cancel any time"]} />
-            <PriceCard tier="Eagle" rate="$8/hr" price="$35" tag="Best value per round" perks={["Play anytime", "Birdies League access", "Swing Lab access", "Priority booking", "Cancel any time"]} />
+            <PriceCard tier="Weekday" rate="$10/hr" price="$15" tag="Mon-Thu before 4pm only" perks={["Swing Lab access", "Cancel any time", "Peak times charged at visitor rate"]} joinHref={hubUrl(tenant, "/")} />
+            <PriceCard tier="Birdie" rate="$10/hr" price="$27" tag="Most popular" highlight perks={["Play anytime", `${tenant.venue_name} League access`, "Swing Lab access", "Cancel any time"]} joinHref={hubUrl(tenant, "/")} />
+            <PriceCard tier="Eagle" rate="$8/hr" price="$35" tag="Best value per round" perks={["Play anytime", `${tenant.venue_name} League access`, "Swing Lab access", "Priority booking", "Cancel any time"]} joinHref={hubUrl(tenant, "/")} />
           </div>
           <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto mt-8">
             <div className="bg-card border border-border rounded-2xl p-7 text-card-foreground hover:shadow-lg transition-all">
@@ -214,7 +217,7 @@ const MarketingHome = () => {
               </div>
               <p className="text-sm text-foreground/60 mb-2">Mon-Thu before 4pm</p>
               <p className="text-sm text-foreground/60 mb-6">Per bay, up to 4 players</p>
-              <a href="https://hub.birdiesbayside.com.au/" className="block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors bg-accent hover:bg-accent/90 text-accent-foreground">
+              <a href={hubUrl(tenant, "/")} className="block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors bg-accent hover:bg-accent/90 text-accent-foreground">
                 Book Now
               </a>
             </div>
@@ -229,7 +232,7 @@ const MarketingHome = () => {
               </div>
               <p className="text-sm text-foreground/60 mb-2">Fri-Sun & Mon-Thu 4pm+</p>
               <p className="text-sm text-foreground/60 mb-6">Per bay, up to 4 players</p>
-              <a href="https://hub.birdiesbayside.com.au/" className="block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors bg-accent hover:bg-accent/90 text-accent-foreground">
+              <a href={hubUrl(tenant, "/")} className="block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors bg-accent hover:bg-accent/90 text-accent-foreground">
                 Book Now
               </a>
             </div>
@@ -249,10 +252,10 @@ const MarketingHome = () => {
             Become a Member Today.
           </h2>
           <p className="text-primary-foreground/85 text-lg mb-8">
-            Join Birdies and get unlimited access to premium simulators, the Birdies League, and a great local community.
+            Join {tenant.venue_name} and get unlimited access to premium simulators, the {tenant.venue_name} League, and a great local community.
           </p>
           <a
-            href="https://hub.birdiesbayside.com.au/"
+            href={hubUrl(tenant, "/")}
             className="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-accent-foreground font-display tracking-wide uppercase px-8 py-4 rounded-md"
           >
             Join Now <ArrowRight className="h-4 w-4" />
@@ -270,6 +273,7 @@ const PriceCard = ({
   tag,
   perks,
   highlight,
+  joinHref,
 }: {
   tier: string;
   rate: string;
@@ -277,6 +281,7 @@ const PriceCard = ({
   tag: string;
   perks: string[];
   highlight?: boolean;
+  joinHref: string;
 }) => (
   <div
     className={`relative rounded-2xl p-7 border transition-all bg-card text-card-foreground hover:shadow-lg ${
@@ -309,7 +314,7 @@ const PriceCard = ({
       ))}
     </ul>
     <a
-      href="https://hub.birdiesbayside.com.au/"
+      href={joinHref}
       className="block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors bg-primary hover:bg-primary/90 text-primary-foreground"
     >
       Join

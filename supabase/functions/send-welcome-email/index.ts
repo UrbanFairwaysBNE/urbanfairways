@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
+import { getTenant, tenantHubUrl, tenantBookingUrl } from "../_shared/tenant.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -40,6 +41,8 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
+    const tenant = await getTenant();
+
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
@@ -75,21 +78,21 @@ serve(async (req) => {
     };
 
     // Use custom subject if available
-    let subject = emailTemplate?.subject || "Welcome to Birdies!";
+    let subject = emailTemplate?.subject || `Welcome to ${tenant.venue_name}!`;
     let htmlContent: string;
 
     if (emailTemplate?.html_content) {
       const bodyContent = replaceTemplateTags(emailTemplate.html_content, templateTags);
       subject = replaceTemplateTags(subject, templateTags);
-      htmlContent = await renderBrandedEmail(supabaseClient, "Welcome to Birdies!", bodyContent, {
+      htmlContent = await renderBrandedEmail(supabaseClient, `Welcome to ${tenant.venue_name}!`, bodyContent, {
         text: "Book Your First Session",
-        url: "https://hub.birdiesbayside.com.au/booking"
+        url: tenantBookingUrl(tenant, "/booking")
       });
       logStep("Using custom email template with wrapper");
     } else {
       const bodyContent = `
               <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
-                Hi ${first_name}, welcome to Birdies Bayside! We're excited to have you join our community of golf enthusiasts.
+                Hi ${first_name}, welcome to ${tenant.venue_name}! We're excited to have you join our community of golf enthusiasts.
               </p>
               
               <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
@@ -103,7 +106,7 @@ serve(async (req) => {
                     <ul style="margin:0; padding-left:20px;">
                       <li style="margin-bottom:8px;">Book your first session</li>
                       <li style="margin-bottom:8px;">Explore our membership options for discounted rates</li>
-                      <li style="margin-bottom:8px;">Join the Birdies League to compete with other members</li>
+                      <li style="margin-bottom:8px;">Join the ${tenant.venue_name} League to compete with other members</li>
                     </ul>
                   </td>
                 </tr>
@@ -111,19 +114,19 @@ serve(async (req) => {
               
               <p style="margin:18px 0 0; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
                 See you on the course!<br/>
-                <strong>The Birdies Team</strong>
+                <strong>The ${tenant.venue_name} Team</strong>
               </p>
       `;
       
-      htmlContent = await renderBrandedEmail(supabaseClient, "Welcome to Birdies!", bodyContent, {
+      htmlContent = await renderBrandedEmail(supabaseClient, `Welcome to ${tenant.venue_name}!`, bodyContent, {
         text: "Book Your First Session",
-        url: "https://hub.birdiesbayside.com.au/booking"
+        url: tenantBookingUrl(tenant, "/booking")
       });
     }
 
     // Send email
     const emailResponse = await resend.emails.send({
-      from: "Birdies Bayside <info@birdiesbayside.com.au>",
+      from: `${tenant.venue_name} <${tenant.sender_email}>`,
       to: [email],
       subject: subject,
       html: htmlContent,

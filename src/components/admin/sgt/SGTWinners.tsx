@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Trophy, Award, Calendar, DollarSign, Mail, CheckCircle2, Clock, User, ChevronDown, ChevronUp, Send } from "lucide-react";
 import { format } from "date-fns";
 import { getRecentBlockLabels } from "@/lib/league-block";
+import { useTenant, formatTenantAddress, type TenantSettings } from "@/config/tenant";
 import {
   Select,
   SelectContent,
@@ -84,12 +85,12 @@ interface MonthlyStanding {
 }
 
 // Default email template for monthly winners
-const DEFAULT_MONTHLY_EMAIL_TEMPLATE = `<!doctype html>
+const buildDefaultMonthlyEmailTemplate = (t: TenantSettings) => `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Birdies Email</title>
+  <title>${t.venue_name} Email</title>
   <style>
     @import url("https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600&display=swap");
   </style>
@@ -101,7 +102,7 @@ const DEFAULT_MONTHLY_EMAIL_TEMPLATE = `<!doctype html>
   <!-- HEADER -->
   <tr>
     <td align="center" style="background-color:#1F4C25; padding:18px; border-radius:16px 16px 0 0;">
-      <img src="https://cdn.shopify.com/s/files/1/0758/7030/6550/files/NO-BG_BIRDIES-LOGOS_WORK-DOC_AMENDED-9.7.25-01.png?v=1761536603" width="140" alt="Birdies Bayside" style="display:block; width:140px; height:auto; border:0;" />
+      <img src="https://cdn.shopify.com/s/files/1/0758/7030/6550/files/NO-BG_BIRDIES-LOGOS_WORK-DOC_AMENDED-9.7.25-01.png?v=1761536603" width="140" alt="${t.venue_name}" style="display:block; width:140px; height:auto; border:0;" />
     </td>
   </tr>
   <!-- BODY -->
@@ -114,18 +115,18 @@ const DEFAULT_MONTHLY_EMAIL_TEMPLATE = `<!doctype html>
         Congratulations <strong>{{first_name}}</strong>!
       </p>
       <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25;">
-        You've been crowned the <strong>{{month}}</strong> Birdies Tour Champion! Your consistent play throughout the month has earned you this well-deserved recognition.
+        You've been crowned the <strong>{{month}}</strong> ${t.venue_name} Tour Champion! Your consistent play throughout the month has earned you this well-deserved recognition.
       </p>
       <div style="background-color:#ffffff; border:1px solid rgba(31,76,37,0.15); border-radius:12px; padding:20px; margin:22px 0; text-align:center;">
         <p style="font-size:14px; color:#1F4C25; margin:0 0 8px 0; font-family:Inter, Arial, sans-serif; opacity:0.75;">Your Prize</p>
         <p style="font-family:Anton, Impact, Arial Black, sans-serif; font-size:28px; color:#EC622D; margin:0;">{{prize_description}}</p>
       </div>
       <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25;">
-        Pop in next time you're at Birdies to collect your prize. Keep up the great golf!
+        Pop in next time you're at ${t.venue_name} to collect your prize. Keep up the great golf!
       </p>
       <p style="margin:24px 0 0; font-family:Inter, Arial, sans-serif; font-size:16px; color:#1F4C25;">
         See you on the virtual fairways,<br>
-        <strong>The Birdies Team</strong>
+        <strong>The ${t.venue_name} Team</strong>
       </p>
     </td>
   </tr>
@@ -135,20 +136,20 @@ const DEFAULT_MONTHLY_EMAIL_TEMPLATE = `<!doctype html>
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td align="center" style="padding-bottom:14px;">
-            <a href="https://www.instagram.com/birdiesbayside" style="margin:0 8px; text-decoration:none;">
+            <a href="${t.socials?.instagram || '#'}" style="margin:0 8px; text-decoration:none;">
               <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram" width="28" height="28" style="display:inline-block; border:0;" />
             </a>
-            <a href="https://www.facebook.com/p/Birdies-Bayside-61577186327753/" style="margin:0 8px; text-decoration:none;">
+            <a href="${t.socials?.facebook || '#'}" style="margin:0 8px; text-decoration:none;">
               <img src="https://cdn-icons-png.flaticon.com/512/174/174848.png" alt="Facebook" width="28" height="28" style="display:inline-block; border:0;" />
             </a>
           </td>
         </tr>
         <tr>
           <td align="center" style="font-family:Inter, Arial, sans-serif; font-size:14px; line-height:1.7; color:#FFFFFF;">
-            <div><a href="https://maps.app.goo.gl/vTXLZvd8XPZEeRn16" style="color:#FFFFFF; text-decoration:underline;">Unit 2, 86 Jardine Drive, Redland Bay QLD 4165</a></div>
-            <div><a href="tel:+61721468442" style="color:#FFFFFF; text-decoration:underline;">(07) 2146 8442</a></div>
-            <div><a href="https://birdiesbayside.com.au" style="color:#FFFFFF; text-decoration:underline;">birdiesbayside.com.au</a></div>
-            <div style="margin-top:10px; font-size:12px; opacity:0.75;">© Birdies Bayside</div>
+            <div><a href="https://maps.google.com/?q=${encodeURIComponent(formatTenantAddress(t))}" style="color:#FFFFFF; text-decoration:underline;">${formatTenantAddress(t)}</a></div>
+            <div><a href="tel:${t.support_phone}" style="color:#FFFFFF; text-decoration:underline;">${t.support_phone}</a></div>
+            <div><a href="https://${t.booking_domain}" style="color:#FFFFFF; text-decoration:underline;">${t.booking_domain}</a></div>
+            <div style="margin-top:10px; font-size:12px; opacity:0.75;">© ${t.venue_name}</div>
           </td>
         </tr>
       </table>
@@ -161,6 +162,7 @@ const DEFAULT_MONTHLY_EMAIL_TEMPLATE = `<!doctype html>
 </html>`;
 
 export function SGTWinners() {
+  const { tenant } = useTenant();
   const queryClient = useQueryClient();
   
   // Weekly prize approval state
@@ -173,7 +175,7 @@ export function SGTWinners() {
   const [selectedMonthlyWinner, setSelectedMonthlyWinner] = useState<{ playerId: number; playerName: string } | null>(null);
   const [monthlyPrizeDescription, setMonthlyPrizeDescription] = useState("");
   const [monthlyEmailSubject, setMonthlyEmailSubject] = useState("");
-  const [monthlyEmailHtml, setMonthlyEmailHtml] = useState(DEFAULT_MONTHLY_EMAIL_TEMPLATE);
+  const [monthlyEmailHtml, setMonthlyEmailHtml] = useState(() => buildDefaultMonthlyEmailTemplate(tenant));
 
   // Fetch weekly prizes (approved only for the history section)
   const { data: weeklyPrizes, isLoading: loadingWeekly } = useQuery({
@@ -435,7 +437,7 @@ export function SGTWinners() {
       setSelectedMonthlyWinner(null);
       setMonthlyPrizeDescription("");
       setMonthlyEmailSubject("");
-      setMonthlyEmailHtml(DEFAULT_MONTHLY_EMAIL_TEMPLATE);
+      setMonthlyEmailHtml(buildDefaultMonthlyEmailTemplate(tenant));
       
       if (data.emailSent) {
         toast.success(`Monthly award sent to ${data.recipientEmail}`);
@@ -724,7 +726,7 @@ export function SGTWinners() {
                         setSelectedMonthlyWinner(null);
                         setMonthlyPrizeDescription("");
                         setMonthlyEmailSubject("");
-                        setMonthlyEmailHtml(DEFAULT_MONTHLY_EMAIL_TEMPLATE);
+                        setMonthlyEmailHtml(buildDefaultMonthlyEmailTemplate(tenant));
                       }}
                     >
                       Cancel

@@ -1,5 +1,6 @@
 // Generates a social-ready written recap of a weekly 2-Man Ambrose competition.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { getTenant } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -15,6 +16,8 @@ const norm = (s: string) => (s || "").trim().toLowerCase();
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  const tenant = await getTenant();
 
   try {
     const { competition_id } = await req.json();
@@ -161,7 +164,7 @@ Deno.serve(async (req) => {
       }),
     };
 
-    const systemPrompt = `You are the resident writer for Birdies Bayside's weekly 2-Man Ambrose competition ("Ambrose Wednesdays"). You write the weekly wrap that gets posted straight to social media.
+    const systemPrompt = `You are the resident writer for ${tenant.venue_name}'s weekly 2-Man Ambrose competition ("Ambrose Wednesdays"). You write the weekly wrap that gets posted straight to social media.
 
 Voice: plain, understated, factual. Write like a club captain typing up the week's results — dry, matter-of-fact, occasionally a small wry aside. Never breathless. Australian English.
 

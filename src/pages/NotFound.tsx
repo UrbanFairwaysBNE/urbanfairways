@@ -1,8 +1,10 @@
 import Seo from "@/components/Seo";
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { useTenant } from "@/config/tenant";
 
 const NotFound = () => {
+  const { tenant } = useTenant();
   const location = useLocation();
 
   useEffect(() => {
@@ -11,7 +13,7 @@ const NotFound = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted">
-      <Seo title={"Page Not Found | Birdies Bayside"} description={"The page you are looking for does not exist. Head back to the Birdies Bayside home page."} path={location.pathname} noindex />
+      <Seo title={`Page Not Found | ${tenant.venue_name}`} description={`The page you are looking for does not exist. Head back to the ${tenant.venue_name} home page.`} path={location.pathname} noindex />
       <div className="text-center">
         <h1 className="mb-4 text-4xl font-bold">404</h1>
         <p className="mb-4 text-xl text-muted-foreground">Oops! Page not found</p>

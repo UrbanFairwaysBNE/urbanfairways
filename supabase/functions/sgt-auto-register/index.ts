@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
+import { getTenant, tenantHubUrl } from "../_shared/tenant.ts";
 
 
 const corsHeaders = {
@@ -211,7 +212,8 @@ serve(async (req) => {
           { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
-      const guideUrl = "https://hub.birdiesbayside.com.au/birdies-guide";
+      const tenant = await getTenant();
+      const guideUrl = tenantHubUrl(tenant, "/member-guide");
       const tags: Record<string, string> = {
         '{first_name}': profile.first_name || 'Golfer',
         '{handicap}': handicapDisplay,
@@ -219,14 +221,14 @@ serve(async (req) => {
       };
 
       let bodyContent = emailTemplate.html_content;
-      let subject = emailTemplate.subject || "Welcome to the Birdies League!";
+      let subject = emailTemplate.subject || `Welcome to the ${tenant.venue_name} League!`;
       for (const [tag, value] of Object.entries(tags)) {
         const escaped = tag.replace(/[{}]/g, '\\$&');
         bodyContent = bodyContent.replace(new RegExp(escaped, 'g'), value);
         subject = subject.replace(new RegExp(escaped, 'g'), value);
       }
 
-      const wrappedHtml = await renderBrandedEmail(supabaseClient, "Welcome to the Birdies League!", bodyContent, {
+      const wrappedHtml = await renderBrandedEmail(supabaseClient, `Welcome to the ${tenant.venue_name} League!`, bodyContent, {
         text: "Read the Player Guide",
         url: guideUrl,
       });
@@ -236,7 +238,7 @@ serve(async (req) => {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${resendKey}` },
         body: JSON.stringify({
-          from: "Birdies Bayside <info@birdiesbayside.com.au>",
+          from: `${tenant.venue_name} <${tenant.sender_email}>`,
           to: [profile.email],
           subject,
           html: wrappedHtml,
@@ -498,7 +500,8 @@ serve(async (req) => {
             .single();
 
           if (emailTemplate?.html_content) {
-            const guideUrl = "https://hub.birdiesbayside.com.au/birdies-guide";
+            const tenant = await getTenant();
+      const guideUrl = tenantHubUrl(tenant, "/member-guide");
             const tags: Record<string, string> = {
               '{first_name}': profile.first_name || 'Golfer',
               '{handicap}': handicapDisplay,
@@ -506,7 +509,7 @@ serve(async (req) => {
             };
 
             let bodyContent = emailTemplate.html_content;
-            let subject = emailTemplate.subject || "Welcome to the Birdies League!";
+            let subject = emailTemplate.subject || `Welcome to the ${tenant.venue_name} League!`;
             for (const [tag, value] of Object.entries(tags)) {
               const escaped = tag.replace(/[{}]/g, '\\$&');
               bodyContent = bodyContent.replace(new RegExp(escaped, 'g'), value);
@@ -528,7 +531,7 @@ serve(async (req) => {
                   "Authorization": `Bearer ${resendKey}`,
                 },
                 body: JSON.stringify({
-                  from: "Birdies Bayside <info@birdiesbayside.com.au>",
+                  from: `${tenant2.venue_name} <${tenant2.sender_email}>`,
                   to: [profile.email],
                   subject,
                   html: wrappedHtml,

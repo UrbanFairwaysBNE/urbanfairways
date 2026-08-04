@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { getTenant } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -18,6 +19,7 @@ serve(async (req: Request): Promise<Response> => {
   }
 
   try {
+    const tenant = await getTenant();
     const { email, token }: UnsubscribeRequest = await req.json();
 
     if (!email) {
@@ -37,7 +39,7 @@ serve(async (req: Request): Promise<Response> => {
     );
 
     // Verify token matches email hash (simple security measure)
-    const expectedToken = await generateToken(email);
+    const expectedToken = await generateToken(email, tenant.venue_name);
     if (token && token !== expectedToken) {
       console.warn(`[marketing-unsubscribe] Invalid token for ${email}`);
       // Still allow unsubscribe but log the mismatch
@@ -88,9 +90,9 @@ serve(async (req: Request): Promise<Response> => {
 });
 
 // Simple token generator for URL verification
-async function generateToken(email: string): Promise<string> {
+async function generateToken(email: string, venueName: string): Promise<string> {
   const encoder = new TextEncoder();
-  const data = encoder.encode(email.toLowerCase() + "birdies-unsubscribe-salt");
+  const data = encoder.encode(email.toLowerCase() + `${venueName.toLowerCase().replace(/\s+/g, "-")}-unsubscribe-salt`);
   const hashBuffer = await crypto.subtle.digest("SHA-256", data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.slice(0, 8).map(b => b.toString(16).padStart(2, "0")).join("");

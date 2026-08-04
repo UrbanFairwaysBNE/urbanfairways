@@ -290,7 +290,7 @@ serve(async (req) => {
     console.log(`[PUSH] Found ${tokens.length} push tokens`);
 
     // Prepare senders
-    const bundleId = 'com.birdiesbayside.hub';
+    const bundleId = Deno.env.get('APNS_BUNDLE_ID') ?? 'com.example.hub';
     let apnsJwt: string | null = null;
     let serviceAccount: ServiceAccount | null = null;
 

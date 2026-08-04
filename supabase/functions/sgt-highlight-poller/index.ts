@@ -43,7 +43,7 @@ let SGT_CLUB = "";
 async function fetchEmbedHtml(tournamentId: string): Promise<string | null> {
   const url = `https://simulatorgolftour.com/embed/tournament/${encodeURIComponent(tournamentId)}/standings/gross`;
   try {
-    const res = await fetch(url, { headers: { "User-Agent": "BirdiesHub-HighlightPoller/2.0" } });
+    const res = await fetch(url, { headers: { "User-Agent": "HighlightPoller/2.0" } });
     if (!res.ok) {
       console.error(`[poller] embed ${res.status} for tournament ${tournamentId}`);
       return null;

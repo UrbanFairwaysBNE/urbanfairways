@@ -12,6 +12,7 @@ import { ArrowLeft, Plus, ThumbsUp, MessageCircle, Trash2, Image as ImageIcon, X
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import birdiesLogo from "@/assets/birdies-logo.png";
+import { useTenant } from "@/config/tenant";
 
 interface Post {
   id: string;
@@ -38,6 +39,7 @@ interface Comment {
 type MembershipTier = "visitor" | "weekday" | "birdie" | "eagle";
 
 const Clubhouse = () => {
+  const { tenant } = useTenant();
   const { user, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[]>([]);
@@ -421,14 +423,14 @@ const Clubhouse = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
-          <img src={birdiesLogo} alt="Birdies" className="h-10 w-auto" />
+          <img src={birdiesLogo} alt={tenant.venue_name} className="h-10 w-auto" />
         </header>
         <main className="flex-1 flex items-center justify-center p-6">
           <Card className="max-w-md text-center">
             <CardContent className="pt-6">
               <h2 className="text-xl font-semibold mb-2">Members Only</h2>
               <p className="text-muted-foreground mb-4">
-                Upgrade your membership to access the Birdies Clubhouse community.
+                Upgrade your membership to access the {tenant.venue_name} Clubhouse community.
               </p>
               <Button onClick={() => navigate("/membership")}>
                 View Memberships
@@ -454,7 +456,7 @@ const Clubhouse = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
-          <img src={birdiesLogo} alt="Birdies" className="h-10 w-auto" />
+          <img src={birdiesLogo} alt={tenant.venue_name} className="h-10 w-auto" />
         </div>
         <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
           <DialogTrigger asChild>
@@ -541,7 +543,7 @@ const Clubhouse = () => {
       {/* Main content */}
       <main className="flex-1 p-6">
         <div className="container max-w-3xl mx-auto">
-          <h1 className="font-display text-4xl text-primary mb-2">BIRDIES CLUBHOUSE</h1>
+          <h1 className="font-display text-4xl text-primary mb-2">{tenant.venue_name.toUpperCase()} CLUBHOUSE</h1>
           <p className="text-muted-foreground mb-8">Connect with fellow members</p>
 
           {loadingPosts ? (
@@ -733,7 +735,7 @@ const Clubhouse = () => {
       {/* Footer */}
       <footer className="bg-primary py-4 px-6 text-center">
         <p className="text-primary-foreground/60 text-sm">
-          © {new Date().getFullYear()} Birdies. All rights reserved.
+          © {new Date().getFullYear()} {tenant.venue_name}. All rights reserved.
         </p>
       </footer>
     </div>

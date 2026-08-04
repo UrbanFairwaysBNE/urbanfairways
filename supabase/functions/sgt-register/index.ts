@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { getClubUrl, getSgtConfig } from "../_shared/sgt-config.ts";
+import { getTenant, TenantConfig } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,7 +13,7 @@ const SGT_BASE_URL = "https://simulatorgolftour.com/sgt-api/club-admin";
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 // Build branded email for new member notification with onboarding link
-function buildNewMemberEmail(data: { username: string; email: string; sgtUserId: number; registeredAt: string; onboardingUrl: string; typicalScore?: string }): string {
+function buildNewMemberEmail(data: { username: string; email: string; sgtUserId: number; registeredAt: string; onboardingUrl: string; typicalScore?: string }, tenant: TenantConfig): string {
   const registrationDate = new Date(data.registeredAt).toLocaleString("en-AU", {
     timeZone: "Australia/Brisbane",
     dateStyle: "full",
@@ -42,7 +43,7 @@ function buildNewMemberEmail(data: { username: string; email: string; sgtUserId:
               <img
                 src="https://cdn.shopify.com/s/files/1/0758/7030/6550/files/NO-BG_BIRDIES-LOGOS_WORK-DOC_AMENDED-9.7.25-01.png?v=1761536603"
                 width="140"
-                alt="Birdies Bayside"
+                alt="${tenant.venue_name}"
                 style="display:block; width:140px; height:auto; border:0;"
               />
             </td>
@@ -54,7 +55,7 @@ function buildNewMemberEmail(data: { username: string; email: string; sgtUserId:
                 🆕 New League Member!
               </h1>
               <p style="margin:0 0 8px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
-                A new member has joined the Birdies League via the app.
+                A new member has joined the ${tenant.venue_name} League via the app.
               </p>
               <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:14px; line-height:1.6; color:#EC622D; text-align:center; font-weight:600;">
                 ⚠️ Action Required: Set their handicap to complete onboarding
@@ -135,7 +136,7 @@ function buildNewMemberEmail(data: { username: string; email: string; sgtUserId:
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td align="center" style="font-family:Inter, Arial, sans-serif; font-size:12px; color:#FFFFFF; opacity:0.75;">
-                    © Birdies Bayside
+                    © ${tenant.venue_name}
                   </td>
                 </tr>
               </table>
@@ -601,6 +602,7 @@ serve(async (req) => {
       const onboardingUrl = `${siteUrl}/admin/sgt-manager?tab=registrations`;
       
       try {
+        const tenant = await getTenant();
         const emailHtml = buildNewMemberEmail({
           username,
           email: user.email!,
@@ -608,12 +610,12 @@ serve(async (req) => {
           registeredAt: new Date().toISOString(),
           onboardingUrl,
           typicalScore: typeof typicalScore === "string" ? typicalScore : undefined,
-        });
+        }, tenant);
 
         await resend.emails.send({
-          from: "Birdies Bayside <info@birdiesbayside.com.au>",
-          to: ["info@birdiesbayside.com.au"],
-          subject: `🆕 Action Required: Onboard ${username} to Birdies League`,
+          from: `${tenant.venue_name} <${tenant.sender_email}>`,
+          to: [tenant.support_email],
+          subject: `🆕 Action Required: Onboard ${username} to ${tenant.venue_name} League`,
           html: emailHtml,
         });
         console.log("[SGT-REGISTER] Onboarding notification email sent");

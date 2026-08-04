@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { Resend } from "npm:resend@2.0.0";
+import { getTenant, tenantHubUrl, TenantConfig } from "../_shared/tenant.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -44,6 +45,7 @@ serve(async (req: Request): Promise<Response> => {
   }
 
   try {
+    const tenant = await getTenant();
     logStep("Function started");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -261,13 +263,13 @@ serve(async (req: Request): Promise<Response> => {
         };
 
         let subject = template?.subject || "Your Free Hour is Waiting, {first_name}!";
-        let htmlContent = template?.html_content || getDefaultTemplate();
+        let htmlContent = template?.html_content || getDefaultTemplate(tenant);
 
         subject = replaceTemplateTags(subject, templateTags);
         htmlContent = replaceTemplateTags(htmlContent, templateTags);
 
         const emailResponse = await resend.emails.send({
-          from: "Birdies Bayside <info@birdiesbayside.com.au>",
+          from: `${tenant.venue_name} <${tenant.sender_email}>`,
           to: [user.email],
           subject,
           html: htmlContent,
@@ -341,8 +343,8 @@ serve(async (req: Request): Promise<Response> => {
 
       try {
         await resend.emails.send({
-          from: "Birdies System <admin@birdiesbayside.com.au>",
-          to: ["admin@birdiesbayside.com.au"],
+          from: `${tenant.venue_name} System <${tenant.admin_alert_email}>`,
+          to: [tenant.admin_alert_email],
           subject: `First Session Promo Report - ${results.processed} customers processed`,
           html: reportHtml,
         });
@@ -376,7 +378,7 @@ serve(async (req: Request): Promise<Response> => {
   }
 });
 
-function getDefaultTemplate(): string {
+function getDefaultTemplate(tenant: TenantConfig): string {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -398,7 +400,7 @@ function getDefaultTemplate(): string {
             <td style="background-color:#FFF5E4; padding:26px 22px; border-left:1px solid rgba(31,76,37,0.12); border-right:1px solid rgba(31,76,37,0.12);">
               <h1 style="margin:0 0 14px; font-family:Arial, sans-serif; font-size:34px; line-height:1.1; color:#1F4C25; text-align:center;">A Gift From Us To You!</h1>
               <p style="margin:0 0 18px; font-family:Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
-                Hi {first_name}, we noticed you haven't booked your first session yet. We'd love to see you at Birdies, so we've added credit to your account!
+                Hi {first_name}, we noticed you haven't booked your first session yet. We'd love to see you at ${tenant.venue_name}, so we've added credit to your account!
               </p>
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1F4C25; border-radius:12px; margin:18px 0;">
                 <tr>
@@ -415,7 +417,7 @@ function getDefaultTemplate(): string {
               <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:22px auto 0;">
                 <tr>
                   <td bgcolor="#EC622D" style="border-radius:12px;">
-                    <a href="https://hub.birdiesbayside.com.au/booking" style="display:inline-block; padding:14px 28px; font-family:Arial, sans-serif; font-size:18px; font-weight:bold; color:#FFFFFF; text-decoration:none;">Book Your Free Session</a>
+                    <a href="${tenantHubUrl(tenant, "/booking")}" style="display:inline-block; padding:14px 28px; font-family:Arial, sans-serif; font-size:18px; font-weight:bold; color:#FFFFFF; text-decoration:none;">Book Your Free Session</a>
                   </td>
                 </tr>
               </table>
@@ -424,7 +426,7 @@ function getDefaultTemplate(): string {
           <tr>
             <td style="background-color:#1F4C25; padding:22px; border-radius:0 0 16px 16px;">
               <p style="margin:0; font-family:Arial, sans-serif; font-size:13px; color:#FFF5E4; text-align:center; opacity:0.85;">
-                Birdies Bayside | <a href="mailto:info@birdiesbayside.com.au" style="color:#EC622D; text-decoration:none;">info@birdiesbayside.com.au</a>
+                ${tenant.venue_name} | <a href="mailto:${tenant.support_email}" style="color:#EC622D; text-decoration:none;">${tenant.support_email}</a>
               </p>
             </td>
           </tr>

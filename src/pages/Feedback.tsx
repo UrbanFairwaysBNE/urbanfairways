@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Frown, Meh, Smile, CheckCircle2 } from "lucide-react";
 import birdiesLogo from "@/assets/birdies-green-logo.png";
+import { useTenant, formatTenantAddress } from "@/config/tenant";
 
 type Score = "bad" | "ok" | "good";
 
@@ -16,6 +17,7 @@ const scoreOptions: { value: Score; label: string; icon: typeof Frown; color: st
 ];
 
 export default function Feedback() {
+  const { tenant } = useTenant();
   const { token: routeToken, quick: routeQuick } = useParams<{ token?: string; quick?: Score }>();
   const [searchParams] = useSearchParams();
   const token = routeToken || searchParams.get("token") || "";
@@ -102,12 +104,12 @@ export default function Feedback() {
     return (
       <div className="min-h-screen bg-[#FFF5E4] flex items-center justify-center p-4">
         <div className="max-w-md w-full text-center space-y-6">
-          <img src={birdiesLogo} alt="Birdies Bayside" className="h-14 mx-auto" />
+          <img src={birdiesLogo} alt={tenant.venue_name} className="h-14 mx-auto" />
           <div className="bg-white rounded-2xl p-8 shadow-sm border border-[#1F4C25]/10">
             <CheckCircle2 className="h-16 w-16 text-emerald-600 mx-auto mb-4" />
             <h1 className="text-2xl font-bold text-[#1F4C25] mb-2">Thanks for your feedback!</h1>
             <p className="text-[#1F4C25]/70">
-              We really appreciate you taking the time. Your feedback helps us make Birdies even better.
+              We really appreciate you taking the time. Your feedback helps us make {tenant.venue_name} even better.
             </p>
           </div>
         </div>
@@ -119,9 +121,9 @@ export default function Feedback() {
     <div className="min-h-screen bg-[#FFF5E4] flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-6">
         <div className="text-center">
-          <img src={birdiesLogo} alt="Birdies Bayside" className="h-14 mx-auto mb-4" />
+          <img src={birdiesLogo} alt={tenant.venue_name} className="h-14 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-[#1F4C25]">How was your visit?</h1>
-          <p className="text-[#1F4C25]/70 mt-1">We'd love to hear about your experience at Birdies</p>
+          <p className="text-[#1F4C25]/70 mt-1">We'd love to hear about your experience at {tenant.venue_name}</p>
         </div>
 
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#1F4C25]/10 space-y-5">
@@ -192,7 +194,7 @@ export default function Feedback() {
         </div>
 
         <p className="text-center text-xs text-[#1F4C25]/40">
-          Birdies Bayside · Unit 2, 86 Jardine Drive, Redland Bay
+          {tenant.venue_name} · {formatTenantAddress(tenant)}
         </p>
       </div>
     </div>

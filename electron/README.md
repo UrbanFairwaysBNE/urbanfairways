@@ -1,4 +1,4 @@
-# Birdies Bay Controller - Electron App
+# Bay Controller - Electron App
 
 This directory contains the Electron wrapper for the Bay Controller application.
 
@@ -51,7 +51,7 @@ To run in development mode:
 
 - **Password Protection**: App requires password "Holeinone1" to access
 - **Bay Selection**: Select which bay (1-6) this controller manages
-- **Booking Sync**: Pulls bookings from the Birdies platform in real-time
+- **Booking Sync**: Pulls bookings from the venue platform in real-time
 - **TAPO Plug Control**: Scans network for TAPO P110 smart plugs
 - **Auto Power Control**: Turns on 3 minutes before booking, off when done
 - **Back-to-back Handling**: Keeps plugs on between consecutive bookings

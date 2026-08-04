@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { Resend } from "npm:resend@2.0.0";
 import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
+import { getTenant, tenantHubUrl } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -18,6 +19,7 @@ serve(async (req) => {
   }
 
   try {
+    const tenant = await getTenant();
     const { userId, playerName, tournamentName, prizeAmount } = await req.json();
 
     if (!userId || !playerName || !tournamentName || !prizeAmount) {
@@ -72,7 +74,7 @@ serve(async (req) => {
     // Wrap body content in branded template
     const htmlContent = await renderBrandedEmail(supabase, "🏆 Congratulations! 🏆", bodyContent, {
       text: "View My Account",
-      url: "https://hub.birdiesbayside.com.au/my-account"
+      url: tenantHubUrl(tenant, "/my-account")
     });
 
     if (!RESEND_API_KEY) {
@@ -84,7 +86,7 @@ serve(async (req) => {
     }
 
     const emailResult = await resend.emails.send({
-      from: "Birdies Bayside <info@birdiesbayside.com.au>",
+      from: `${tenant.venue_name} <${tenant.sender_email}>`,
       to: [profile.email],
       subject: subject,
       html: htmlContent,

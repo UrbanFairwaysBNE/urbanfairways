@@ -15,12 +15,14 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { toast } from "sonner";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { isHubHost } from "@/lib/hub-host";
+import { useTenant } from "@/config/tenant";
 
 const PRESET_AMOUNTS = [35, 70, 105, 175, 350];
 type DeliveryMethod = "email_recipient" | "print_to_sender" | "both";
 
 
 function GiftContent() {
+  const { tenant } = useTenant();
   const [params] = useSearchParams();
   const success = params.get("success") === "1";
   const cancelled = params.get("cancelled") === "1";
@@ -118,7 +120,7 @@ function GiftContent() {
     } catch (err: any) {
       console.error("[gift checkout]", err);
       toast.error(err.message || "Failed to start checkout", {
-        description: "If this keeps happening, please contact us at sales@baysidegolf.com.au.",
+        description: `If this keeps happening, please contact us at ${tenant.support_email}.`,
         duration: 8000,
       });
       setSubmitting(false);
@@ -157,7 +159,7 @@ function GiftContent() {
             className="text-4xl md:text-5xl text-[#1F4C25] mb-2 tracking-wide"
             style={{ fontFamily: "Anton, sans-serif" }}
           >
-            GIVE THE GIFT OF BIRDIES
+            GIVE THE GIFT OF {tenant.venue_name.toUpperCase()}
           </h1>
           <p className="text-[#1F4C25]/75 text-base">
             Indoor golf simulator credit, redeemable on any bay booking, food or drink.
@@ -380,12 +382,13 @@ function GiftContent() {
 }
 
 export default function Gift() {
+  const { tenant } = useTenant();
   if (isHubHost()) {
     return <GiftContent />;
   }
   return (
     <MarketingLayout>
-      <Seo title={"Gift Cards | Birdies Bayside Indoor Golf"} description={"Buy a Birdies Bayside gift card, redeemable on simulator bay bookings and memberships at our Redland Bay indoor golf centre."} path="/gift" />
+      <Seo title={`Gift Cards | ${tenant.venue_name} Indoor Golf`} description={`Buy a ${tenant.venue_name} gift card, redeemable on simulator bay bookings and memberships at our indoor golf centre.`} path="/gift" />
       <GiftContent />
     </MarketingLayout>
   );

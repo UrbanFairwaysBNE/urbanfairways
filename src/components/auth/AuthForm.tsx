@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { TermsContent } from "@/components/legal/TermsContent";
 import { CURRENT_TERMS_VERSION } from "@/lib/terms-version";
+import { useTenant } from "@/config/tenant";
 
 
 const signUpSchema = z.object({
@@ -32,6 +33,7 @@ interface AuthFormProps {
 }
 
 export function AuthForm({ defaultToSignUp = false }: AuthFormProps) {
+  const { tenant } = useTenant();
   const [searchParams] = useSearchParams();
   const [isSignUp, setIsSignUp] = useState(defaultToSignUp);
   const [isLoading, setIsLoading] = useState(false);
@@ -201,7 +203,7 @@ export function AuthForm({ defaultToSignUp = false }: AuthFormProps) {
           
           toast({
 
-            title: "Welcome to Birdies!",
+            title: `Welcome to ${tenant.venue_name}!`,
             description: "Your account has been created successfully.",
           });
         }
@@ -316,7 +318,7 @@ export function AuthForm({ defaultToSignUp = false }: AuthFormProps) {
           </CardTitle>
           <CardDescription>
             {isSignUp
-              ? "Join Birdies and start booking bays today"
+              ? `Join ${tenant.venue_name} and start booking bays today`
               : "Sign in to access your account"}
           </CardDescription>
         </CardHeader>

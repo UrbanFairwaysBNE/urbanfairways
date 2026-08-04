@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
+import { getTenant } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -18,6 +19,7 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const tenant = await getTenant();
 
     // Verify admin user
     const authHeader = req.headers.get("Authorization");
@@ -115,7 +117,7 @@ serve(async (req) => {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                from: "Birdies <noreply@birdiesbayside.com.au>",
+                from: `${tenant.venue_name} <${tenant.sender_email}>`,
                 to: [profile.email],
                 subject: subject,
                 html: htmlContent,
@@ -133,7 +135,7 @@ serve(async (req) => {
           }
         }
       } else {
-        console.log(`[APPROVE-MONTHLY] Player ${playerId} not linked to a Birdies profile`);
+        console.log(`[APPROVE-MONTHLY] Player ${playerId} not linked to a ${tenant.venue_name} profile`);
       }
     }
 

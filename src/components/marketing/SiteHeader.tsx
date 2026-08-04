@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ChevronDown } from "lucide-react";
 import birdiesLogo from "@/assets/birdies-logo.png";
+import { useTenant, hubUrl } from "@/config/tenant";
 
 const playLinks = [
   { to: "/about", label: "About" },
@@ -21,6 +22,7 @@ const isPlayActive = (pathname: string) =>
   playLinks.some((l) => l.to === pathname);
 
 const SiteHeader = () => {
+  const { tenant } = useTenant();
   const [open, setOpen] = useState(false);
   const [playOpen, setPlayOpen] = useState(false);
   const [mobilePlayOpen, setMobilePlayOpen] = useState(false);
@@ -57,8 +59,12 @@ const SiteHeader = () => {
       {/* Top announcement bar */}
       <div className="bg-accent text-accent-foreground text-center text-xs sm:text-sm py-2 px-4 font-bold uppercase tracking-wide">
         <Link to="/staffed-hours" className="hover:underline">Click Here For Staffed Hours</Link>
-        {" | "}
-        <a href="tel:0721468442" className="hover:underline">07 2146 8442</a>
+        {tenant.support_phone && (
+          <>
+            {" | "}
+            <a href={`tel:${tenant.support_phone.replace(/\s+/g, "")}`} className="hover:underline">{tenant.support_phone}</a>
+          </>
+        )}
       </div>
 
       <div className="container mx-auto flex items-center justify-between py-3 px-4 gap-3">
@@ -72,7 +78,7 @@ const SiteHeader = () => {
         </button>
 
         <Link to="/" className="flex items-center gap-2 lg:order-first">
-          <img src={birdiesLogo} alt="Birdies, Indoor Golf Redefined" className="h-10 sm:h-12" />
+          <img src={birdiesLogo} alt={`${tenant.venue_name}, Indoor Golf Redefined`} className="h-10 sm:h-12" />
         </Link>
 
         {/* Desktop: full nav */}
@@ -119,7 +125,7 @@ const SiteHeader = () => {
             );
           })}
           <a
-            href="https://hub.birdiesbayside.com.au/"
+            href={hubUrl(tenant, "/")}
             className="ml-2 bg-accent hover:bg-accent/90 text-accent-foreground font-display tracking-wide text-sm uppercase px-5 py-2.5 rounded-md transition-colors whitespace-nowrap"
           >
             Book Now
@@ -151,7 +157,7 @@ const SiteHeader = () => {
           }`}
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-primary-foreground/10">
-            <img src={birdiesLogo} alt="Birdies" className="h-10" />
+            <img src={birdiesLogo} alt={tenant.venue_name} className="h-10" />
             <button
               className="p-2 -mr-2"
               onClick={() => setOpen(false)}
@@ -202,7 +208,7 @@ const SiteHeader = () => {
               </Link>
             ))}
             <a
-              href="https://hub.birdiesbayside.com.au/"
+              href={hubUrl(tenant, "/")}
               className="mt-4 bg-accent text-accent-foreground font-display tracking-wide uppercase text-center px-5 py-3 rounded-md"
             >
               Book Now

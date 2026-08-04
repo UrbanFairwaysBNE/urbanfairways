@@ -31,7 +31,7 @@ const BrandLoader = ({ size = 96, label, fullscreen = false, className = "" }: B
           @keyframes uf-trace { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
           @keyframes uf-fill { 0%, 35% { fill-opacity: 0; } 75%, 100% { fill-opacity: 1; } }
           .uf-loader .uf-path {
-            stroke-width: 14;
+            stroke-width: 40;
             stroke-linecap: round;
             stroke-linejoin: round;
             fill-opacity: 0;

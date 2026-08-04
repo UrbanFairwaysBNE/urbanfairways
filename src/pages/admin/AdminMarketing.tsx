@@ -49,6 +49,7 @@ import {
   ClipboardList,
 } from "lucide-react";
 import { ReviewApprovals } from "@/components/admin/ReviewApprovals";
+import { EmailPreviewFrame } from "@/components/admin/EmailPreviewFrame";
 
 interface Campaign {
   id: string;

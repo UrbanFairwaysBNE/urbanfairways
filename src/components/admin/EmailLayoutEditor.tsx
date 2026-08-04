@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useTenant, formatTenantAddress, bookingUrl, type TenantSettings } from "@/config/tenant";
+import { EmailPreviewFrame } from "@/components/admin/EmailPreviewFrame";
 
 // Kept in sync with supabase/functions/_shared/email-wrapper.ts DEFAULTS.
 const buildDefaultHeaderHtml = (t: TenantSettings) => `<tr>

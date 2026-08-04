@@ -42,6 +42,7 @@ import { SmsTemplatesSection } from "@/components/admin/SmsTemplatesSection";
 import { DoorAccessSection } from "@/components/admin/DoorAccessSection";
 
 import { EmailLayoutEditor } from "@/components/admin/EmailLayoutEditor";
+import { EmailPreviewFrame } from "@/components/admin/EmailPreviewFrame";
 import { format } from "date-fns";
 
 // Template types and their available placeholder tags

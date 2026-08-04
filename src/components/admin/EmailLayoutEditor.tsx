@@ -65,7 +65,7 @@ const buildPreview = (header: string, footer: string) => `<!doctype html>
         ${header}
         <tr><td style="background-color:#F5F3EF; padding:26px 22px; border-left:1px solid rgba(47,49,52,0.12); border-right:1px solid rgba(47,49,52,0.12);">
           <h1 style="margin:0 0 14px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:34px; line-height:1.1; color:#2F3134; text-align:center;">Sample Email Heading</h1>
-          <p style="font-family:Inter,Arial,sans-serif;font-size:16px;line-height:1.6;color:#2F3134;text-align:center;margin:0 0 12px;">This is where the body of each email template appears. The header above and footer below are shared across every customer email and can be edited here.</p>
+          <p style="font-family:Manrope,Arial,sans-serif;font-size:16px;line-height:1.6;color:#2F3134;text-align:center;margin:0 0 12px;">This is where the body of each email template appears. The header above and footer below are shared across every customer email and can be edited here.</p>
         </td></tr>
         ${footer}
       </table>

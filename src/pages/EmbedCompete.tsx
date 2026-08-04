@@ -473,7 +473,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
               <div className="p-5">
                 <div
                   className="relative overflow-hidden rounded-3xl p-6 sm:p-10"
-                  style={{ background: `linear-gradient(135deg, ${GREEN} 0%, hsl(128,42%,15%) 100%)` }}
+                  style={{ background: `linear-gradient(135deg, ${GREEN} 0%, hsl(220,4%,13%) 100%)` }}
                 >
                   <div className="absolute -right-12 -top-12 w-64 h-64 rounded-full opacity-20"
                     style={{ background: `radial-gradient(circle, ${ORANGE} 0%, transparent 70%)` }} />

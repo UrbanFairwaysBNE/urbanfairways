@@ -26,11 +26,11 @@ const buildEmail = (tenant: TenantConfig, heading: string, body: string) => `<!d
         <div style="font-family:Archivo, Impact, Arial Black, sans-serif; font-size:26px; color:#FFFFFF; text-align:center; letter-spacing:0.5px;">${tenant.venue_name}</div>
       </td></tr>
       <tr><td style="background-color:#F5F3EF;padding:26px 22px;border-left:1px solid rgba(47,49,52,0.12);border-right:1px solid rgba(47,49,52,0.12);">
-        <h1 style="margin:0 0 14px;font-family:Anton,Impact,Arial Black,sans-serif;font-size:34px;line-height:1.1;color:#2F3134;text-align:center;">${heading}</h1>
+        <h1 style="margin:0 0 14px;font-family:Archivo,Impact,Arial Black,sans-serif;font-size:34px;line-height:1.1;color:#2F3134;text-align:center;">${heading}</h1>
         ${body}
         <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:22px auto 0;">
           <tr><td bgcolor="#B5772A" style="border-radius:12px;">
-            <a href="${tenantBookingUrl(tenant, "/booking")}" style="display:inline-block;padding:14px 24px;font-family:Anton,Impact,Arial Black,sans-serif;font-size:18px;letter-spacing:0.3px;color:#FFFFFF;text-decoration:none;">BOOK NOW</a>
+            <a href="${tenantBookingUrl(tenant, "/booking")}" style="display:inline-block;padding:14px 24px;font-family:Archivo,Impact,Arial Black,sans-serif;font-size:18px;letter-spacing:0.3px;color:#FFFFFF;text-decoration:none;">BOOK NOW</a>
           </td></tr>
         </table>
       </td></tr>
@@ -40,7 +40,7 @@ const buildEmail = (tenant: TenantConfig, heading: string, body: string) => `<!d
             <a href="https://www.instagram.com/${tenant.socials?.instagram || ''}" style="margin:0 8px;text-decoration:none;"><img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram" width="28" height="28" style="display:inline-block;border:0;"/></a>
             <a href="https://www.facebook.com/share/17NifCh2vH/" style="margin:0 8px;text-decoration:none;"><img src="https://cdn-icons-png.flaticon.com/512/174/174848.png" alt="Facebook" width="28" height="28" style="display:inline-block;border:0;"/></a>
           </td></tr>
-          <tr><td align="center" style="font-family:Inter,Arial,sans-serif;font-size:14px;line-height:1.7;color:#FFFFFF;">
+          <tr><td align="center" style="font-family:Manrope,Arial,sans-serif;font-size:14px;line-height:1.7;color:#FFFFFF;">
             <div>${tenantAddress(tenant)}</div>
             <div><a href="tel:${tenant.support_phone}" style="color:#FFFFFF;text-decoration:underline;">${tenant.support_phone}</a></div>
             <div><a href="${tenantBookingUrl(tenant)}" style="color:#FFFFFF;text-decoration:underline;">${tenant.booking_domain}</a></div>
@@ -62,14 +62,14 @@ const bodyFor = (tenant: TenantConfig, firstName: string, balance: number, isFin
     : `Pop in for a hit — your credit is ready to roll into your next booking.`;
 
   return `
-    <p style="margin:0 0 18px;font-family:Inter,Arial,sans-serif;font-size:16px;line-height:1.6;color:#2F3134;text-align:center;">${intro}</p>
+    <p style="margin:0 0 18px;font-family:Manrope,Arial,sans-serif;font-size:16px;line-height:1.6;color:#2F3134;text-align:center;">${intro}</p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#2F3134;border-radius:12px;margin:18px 0;">
       <tr><td style="padding:30px;text-align:center;">
-        <p style="margin:0 0 8px;font-family:Inter,Arial,sans-serif;font-size:14px;color:#F5F3EF;opacity:0.9;">Your Credit Balance</p>
-        <p style="margin:0;font-family:Anton,Impact,Arial Black,sans-serif;font-size:52px;color:#B5772A;">$${balance.toFixed(2)}</p>
+        <p style="margin:0 0 8px;font-family:Manrope,Arial,sans-serif;font-size:14px;color:#F5F3EF;opacity:0.9;">Your Credit Balance</p>
+        <p style="margin:0;font-family:Archivo,Impact,Arial Black,sans-serif;font-size:52px;color:#B5772A;">$${balance.toFixed(2)}</p>
       </td></tr>
     </table>
-    <p style="margin:18px 0 0;font-family:Inter,Arial,sans-serif;font-size:16px;line-height:1.6;color:#2F3134;text-align:center;">${outro}</p>
+    <p style="margin:18px 0 0;font-family:Manrope,Arial,sans-serif;font-size:16px;line-height:1.6;color:#2F3134;text-align:center;">${outro}</p>
   `;
 };
 

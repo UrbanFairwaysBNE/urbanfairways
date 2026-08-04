@@ -312,20 +312,21 @@ export function DateTimePicker({
         <label className="text-sm font-medium text-foreground">Duration</label>
         <Select
           value={selectedDuration.toString()}
-          onValueChange={(value) => onDurationChange(parseInt(value))}
+          onValueChange={(value) => onDurationChange(parseFloat(value))}
           disabled={compLocked}
         >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select duration" />
           </SelectTrigger>
           <SelectContent className="bg-popover">
-            {DURATIONS.map((duration) => (
+            {durations.map((duration) => (
               <SelectItem key={duration} value={duration.toString()}>
-                {duration} {duration === 1 ? "hour" : "hours"}
+                {formatDurationLabel(duration)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
+
       </div>
 
       {/* Players Selector */}

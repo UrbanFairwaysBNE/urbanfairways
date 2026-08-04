@@ -285,6 +285,7 @@ const App = () => {
             <Route path="/gate-access" element={<MarketingGateAccess />} />
             <Route path="/whats-on" element={<MarketingWhatsOn />} />
             <Route path="/coaching" element={<MarketingCoaching />} />
+            <Route path="/tpi-assessment" element={<MarketingTPI />} />
 
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminDashboard />} />

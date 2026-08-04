@@ -1,4 +1,4 @@
-package com.birdiesbayside.hub;
+package com.venue.hub;
 
 import com.getcapacitor.BridgeActivity;
 

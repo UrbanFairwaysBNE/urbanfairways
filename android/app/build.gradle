@@ -8,10 +8,10 @@ if (keystorePropertiesFile.exists()) {
 
 
 android {
-    namespace = "com.birdiesbayside.hub"
+    namespace = "com.venue.hub"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.birdiesbayside.hub"
+        applicationId "com.venue.hub"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

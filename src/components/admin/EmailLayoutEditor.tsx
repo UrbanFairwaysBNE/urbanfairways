@@ -133,7 +133,28 @@ export const EmailLayoutEditor = () => {
     else setFooter(buildDefaultFooterHtml(tenant));
   };
 
-  const previewSrc = useMemo(() => buildPreview(header, footer), [header, footer]);
+  // Mirrors applyTenantTokens() in supabase/functions/_shared/email-wrapper.ts
+  const applyTokens = (html: string) => {
+    const values: Record<string, string> = {
+      venue_name: tenant.venue_name || "",
+      legal_entity: tenant.legal_entity || "",
+      address: formatTenantAddress(tenant),
+      support_phone: tenant.support_phone || "",
+      support_email: tenant.support_email || "",
+      booking_domain: tenant.booking_domain || "",
+      hub_domain: tenant.hub_domain || "",
+    };
+    return html.replace(
+      /\{\{\s*(venue_name|legal_entity|address|support_phone|support_email|booking_domain|hub_domain)\s*\}\}/g,
+      (_m, key: string) => values[key] ?? "",
+    );
+  };
+
+  const previewSrc = useMemo(
+    () => buildPreview(applyTokens(header), applyTokens(footer)),
+    [header, footer, tenant],
+  );
+
 
   return (
     <Card>

@@ -31,16 +31,14 @@ const MarketingHome = () => {
     <Seo title={`${tenant.venue_name} | Indoor Golf Simulators`} description={`${tenant.venue_name} in ${tenant.suburb || "your area"}. Book a simulator bay, play world-famous courses, join the league or visit the venue.`} path="/" />
       {/* HERO */}
       <section className="relative h-[88vh] min-h-[560px] flex items-center overflow-hidden">
-        <video
-          src={heroPoster}
-          poster={heroPoster}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
+        <img
+          src={venueInterior}
+          alt="Indoor golf simulator bay"
+          width={1536}
+          height={1024}
           className="absolute inset-0 w-full h-full object-cover"
         />
+
         <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/40 to-transparent" />
         <div className="relative container mx-auto px-4 max-w-5xl">
           <p className="text-accent font-display tracking-[0.25em] uppercase text-sm mb-4">

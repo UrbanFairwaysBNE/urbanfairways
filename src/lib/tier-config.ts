@@ -119,3 +119,22 @@ export function subscriptionTiers(tiers: TierConfig[]): TierConfig[] {
 export function memberTierKeys(tiers: TierConfig[]): string[] {
   return subscriptionTiers(tiers).map((t) => t.tier);
 }
+
+/**
+ * Neutral badge classes for a tier, assigned by display order so any set of
+ * venue-defined tiers gets a stable, distinct look without hardcoded names.
+ */
+const TIER_BADGE_PALETTE = [
+  "bg-primary/10 text-primary border-primary/20",
+  "bg-accent/10 text-accent border-accent/20",
+  "bg-secondary text-secondary-foreground border-border",
+  "bg-muted text-muted-foreground border-border",
+];
+
+export function tierBadgeClass(tiers: TierConfig[], key?: string | null): string {
+  const tier = findTier(tiers, key);
+  if (!tier || tier.is_default) return "bg-muted text-muted-foreground";
+  const index = subscriptionTiers(tiers).findIndex((t) => t.tier === tier.tier);
+  if (index < 0) return "bg-muted text-muted-foreground";
+  return TIER_BADGE_PALETTE[index % TIER_BADGE_PALETTE.length];
+}

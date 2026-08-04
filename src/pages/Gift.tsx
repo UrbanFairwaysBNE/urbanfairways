@@ -14,15 +14,11 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
+import { isHubHost } from "@/lib/hub-host";
 
 const PRESET_AMOUNTS = [35, 70, 105, 175, 350];
 type DeliveryMethod = "email_recipient" | "print_to_sender" | "both";
 
-const isHubHost = () => {
-  if (typeof window === "undefined") return false;
-  const h = window.location.hostname;
-  return h.startsWith("hub.") || h === "hub.birdiesbayside.com.au";
-};
 
 function GiftContent() {
   const [params] = useSearchParams();

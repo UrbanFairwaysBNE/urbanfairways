@@ -1074,32 +1074,8 @@ export default function AdminSettings() {
               <DoorAccessSection />
             </CollapsibleSection>
 
-            {/* Timezone Settings */}
 
-            <CollapsibleSection title="General Settings" description="Configure basic platform settings">
-              <Card>
-                <CardContent className="space-y-4 pt-6">
-                  <div className="max-w-sm space-y-2">
-                    <Label htmlFor="timezone">Timezone</Label>
-                    <Select value={timezone} onValueChange={handleTimezoneChange}>
-                      <SelectTrigger id="timezone">
-                        <SelectValue placeholder="Select timezone" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Australia/Sydney">Australia/Sydney (AEST)</SelectItem>
-                        <SelectItem value="Australia/Melbourne">Australia/Melbourne (AEST)</SelectItem>
-                        <SelectItem value="Australia/Brisbane">Australia/Brisbane (AEST)</SelectItem>
-                        <SelectItem value="Australia/Perth">Australia/Perth (AWST)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-muted-foreground">
-                      Timezone used for booking times and notifications
-                    </p>
-                  </div>
 
-                </CardContent>
-              </Card>
-            </CollapsibleSection>
 
             {/* Operating Hours */}
             <CollapsibleSection

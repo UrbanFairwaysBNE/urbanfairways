@@ -621,10 +621,8 @@ export function useBooking() {
     if (!user) throw new Error("Not authenticated");
 
     const dateStr = format(date, "yyyy-MM-dd");
-    const startHour = parseInt(startTime.split(":")[0]);
-    const startMinute = parseInt(startTime.split(":")[1]);
-    const endHour = startHour + durationHours;
-    const endTime = `${endHour.toString().padStart(2, "0")}:${startMinute.toString().padStart(2, "0")}`;
+    const endTime = addDurationToTime(startTime, durationHours);
+
 
     // Delete any existing PENDING bookings by this user that overlap with this slot
     // This allows users to "replace" their failed pending bookings seamlessly

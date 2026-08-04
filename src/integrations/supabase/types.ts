@@ -1877,11 +1877,20 @@ export type Database = {
       pricing_config: {
         Row: {
           created_at: string
+          description: string | null
           display_name: string
           display_order: number
+          features: Json
+          grants_league_access: boolean
+          grants_range_access: boolean
           hourly_rate: number
           id: string
+          is_default: boolean
           is_subscription: boolean
+          off_peak_hourly_rate: number | null
+          restricted_to_off_peak: boolean
+          restrictions: string | null
+          single_bay_at_peak: boolean
           stripe_price_id: string | null
           stripe_product_id: string | null
           tier: string
@@ -1890,11 +1899,20 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          description?: string | null
           display_name: string
           display_order?: number
+          features?: Json
+          grants_league_access?: boolean
+          grants_range_access?: boolean
           hourly_rate: number
           id?: string
+          is_default?: boolean
           is_subscription?: boolean
+          off_peak_hourly_rate?: number | null
+          restricted_to_off_peak?: boolean
+          restrictions?: string | null
+          single_bay_at_peak?: boolean
           stripe_price_id?: string | null
           stripe_product_id?: string | null
           tier: string
@@ -1903,11 +1921,20 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          description?: string | null
           display_name?: string
           display_order?: number
+          features?: Json
+          grants_league_access?: boolean
+          grants_range_access?: boolean
           hourly_rate?: number
           id?: string
+          is_default?: boolean
           is_subscription?: boolean
+          off_peak_hourly_rate?: number | null
+          restricted_to_off_peak?: boolean
+          restrictions?: string | null
+          single_bay_at_peak?: boolean
           stripe_price_id?: string | null
           stripe_product_id?: string | null
           tier?: string

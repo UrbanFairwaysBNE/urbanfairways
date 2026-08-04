@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { Check, Clock, DollarSign, Trophy, Target, ArrowRight, BarChart3, Crosshair, TrendingUp, Activity, Gauge } from "lucide-react";
 import venueInterior from "@/assets/venue-interior.jpg";
+import simBayImage from "@/assets/sim-bay.webp.asset.json";
 import heroVideo from "@/assets/hero-video.mp4.asset.json";
 
 import swingLabBadge from "@/assets/swing-lab-badge.png.asset.json";
@@ -112,7 +113,7 @@ const MarketingHome = () => {
             </Link>
           </div>
           <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-[4/3]">
-            <img src={venueInterior} alt="Indoor golf simulator bay" className="w-full h-full object-cover" />
+            <img src={simBayImage.url} alt="Urban Fairways indoor golf simulator bay in West End Brisbane" className="w-full h-full object-cover" loading="lazy" />
           </div>
         </div>
       </section>

@@ -471,13 +471,11 @@ export function useBooking() {
   ): boolean => {
     // Only applies to tiers flagged single_bay_at_peak, during peak hours
     if (!hasSingleBayPeakLimit(tierPricing, userMembershipTier)) return false;
-    if (!isPeakTime(date, startTime)) return false;
-    
+    if (!isPeakSlot(date, startTime)) return false;
+
     // Calculate end time
-    const startHour = parseInt(startTime.split(":")[0]);
-    const startMinute = parseInt(startTime.split(":")[1]);
-    const endHour = startHour + durationHours;
-    const endTime = `${endHour.toString().padStart(2, "0")}:${startMinute.toString().padStart(2, "0")}`;
+    const endTime = addDurationToTime(startTime, durationHours);
+
     
     // Check for existing overlapping bookings by this user on a different bay
     const hasOverlap = userBookingsForDate.some(booking => 

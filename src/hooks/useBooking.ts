@@ -494,8 +494,8 @@ export function useBooking() {
     startTime: string, 
     durationHours: number = 1, 
     bayId?: string
-  ): { rate: number; isPeak: boolean; isRestricted: boolean; isMultiBayRestricted: boolean; isHoliday: boolean; holidayName: string | null; surchargePercent: number } => {
-    const isPeak = isPeakTime(date, startTime);
+  ): { rate: number; total: number; special: PricingSpecial | null; isPeak: boolean; isRestricted: boolean; isMultiBayRestricted: boolean; isHoliday: boolean; holidayName: string | null; surchargePercent: number } => {
+    const isPeak = isPeakSlot(date, startTime);
     const isWeekdayRestricted = isOffPeakOnlyTier(tierPricing, userMembershipTier) && isPeak;
     const holiday = getHolidayForDate(date);
     const surchargePercent = holiday ? Number(holiday.surcharge_percent) : 0;
@@ -515,9 +515,13 @@ export function useBooking() {
     } else {
       rate = getHourlyRate(userMembershipTier, date, startTime);
     }
-    
+
+    const { total, special } = getBookingTotal(rate, durationHours, date, startTime);
+
     return { 
       rate, 
+      total,
+      special,
       isPeak, 
       isRestricted: isWeekdayRestricted, 
       isMultiBayRestricted,
@@ -526,6 +530,7 @@ export function useBooking() {
       surchargePercent,
     };
   };
+
 
   /**
    * Get user's pending booking IDs for a given bay/time slot (for "see through" logic)

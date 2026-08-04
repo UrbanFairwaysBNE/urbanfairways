@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -196,8 +197,13 @@ interface BayBooking {
   } | null;
 }
 
+const SETTINGS_TABS = ["general", "reporting", "pricing", "pos", "notifications"] as const;
+
 export default function AdminSettings() {
   const { isAdmin, isLoading: authLoading } = useAdminAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab") ?? "";
+  const activeTab = (SETTINGS_TABS as readonly string[]).includes(tabParam) ? tabParam : "general";
   const { toast } = useToast();
 
   // General settings - load from database
@@ -843,7 +849,11 @@ export default function AdminSettings() {
           </div>
         </div>
 
-        <Tabs defaultValue="general" className="space-y-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => setSearchParams({ tab: value }, { replace: true })}
+          className="space-y-6"
+        >
           <TabsList className="grid w-full max-w-2xl grid-cols-5">
             <TabsTrigger value="general" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />

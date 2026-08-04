@@ -15,7 +15,8 @@ import {
   Bell,
   Trophy,
   BarChart3,
-  Target
+  Target,
+  ClipboardCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -42,6 +43,7 @@ const navItems = [
   { path: "/admin/marketing", label: "Marketing", icon: Mail },
   { path: "/admin/announcements", label: "Announcements", icon: Bell },
   { path: "/admin/settings", label: "Settings", icon: Settings },
+  { path: "/admin/setup-status", label: "Setup Status", icon: ClipboardCheck },
 ];
 
 export function AdminLayout({ children }: AdminLayoutProps) {

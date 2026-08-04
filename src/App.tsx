@@ -73,6 +73,7 @@ const AdminTimetable = lazy(() => import("./pages/admin/AdminTimetable"));
 const AdminCustomers = lazy(() => import("./pages/admin/AdminCustomers"));
 const AdminPOS = lazy(() => import("./pages/admin/AdminPOS"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
+const AdminSetupStatus = lazy(() => import("./pages/admin/AdminSetupStatus"));
 const AdminBulkEmail = lazy(() => import("./pages/admin/AdminBulkEmail"));
 const AdminBayControl = lazy(() => import("./pages/admin/AdminBayControl"));
 const AdminMarketing = lazy(() => import("./pages/admin/AdminMarketing"));
@@ -289,6 +290,7 @@ const App = () => {
             <Route path="/admin/marketing" element={<AdminMarketing />} />
             <Route path="/admin/announcements" element={<AdminAnnouncements />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
+            <Route path="/admin/setup-status" element={<AdminSetupStatus />} />
             <Route path="/admin/bulk-email" element={<AdminBulkEmail />} />
             <Route path="/admin/customer-import" element={<AdminCustomerImport />} />
             <Route path="/admin/sgt" element={<AdminSGTManager />} />

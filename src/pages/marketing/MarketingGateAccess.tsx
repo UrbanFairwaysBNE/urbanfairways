@@ -3,10 +3,12 @@ import { useState } from "react";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useTenant } from "@/config/tenant";
 
 const HERO = "https://cdn.shopify.com/s/files/1/0758/7030/6550/files/Birdies_Golf.jpg?v=1751956878&width=3840";
 
 const MarketingGateAccess = () => {
+  const { tenant } = useTenant();
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -33,7 +35,7 @@ const MarketingGateAccess = () => {
       console.error(err);
       toast({
         title: "Something went wrong",
-        description: "Please try again or call (07) 2146 8442.",
+        description: `Please try again or call ${tenant.support_phone}.`,
         variant: "destructive",
       });
     } finally {
@@ -43,14 +45,14 @@ const MarketingGateAccess = () => {
 
   return (
     <MarketingLayout>
-    <Seo title={"Gate & Bay Access Guide | Birdies Bayside"} description={"How to access the Birdies Bayside car park boom gate and your simulator bay outside staffed hours, step by step."} path="/gate-access" />
+    <Seo title={`Gate & Bay Access Guide | ${tenant.venue_name}`} description={`How to access the ${tenant.venue_name} car park boom gate and your simulator bay outside staffed hours, step by step.`} path="/gate-access" />
       <section className="relative h-[22vh] min-h-[160px] flex items-end overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${HERO})` }} />
         <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/70 to-primary/30" />
         <div className="relative container mx-auto px-4 pb-6">
           <p className="text-accent font-display tracking-[0.25em] uppercase text-xs mb-1.5">After-Hours Entry</p>
           <h1 className="font-display text-3xl sm:text-4xl text-primary-foreground leading-none">
-            Birdies Gate Access Request
+            {tenant.venue_name} Gate Access Request
           </h1>
         </div>
       </section>

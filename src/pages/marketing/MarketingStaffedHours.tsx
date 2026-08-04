@@ -2,6 +2,7 @@ import Seo from "@/components/Seo";
 import { Clock, Phone, AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
+import { useTenant } from "@/config/tenant";
 
 const hours = [
   { day: "Monday, Thursday", time: "4PM – 9PM" },
@@ -11,9 +12,10 @@ const hours = [
 ];
 
 const MarketingStaffedHours = () => {
+  const { tenant } = useTenant();
   return (
     <MarketingLayout>
-    <Seo title={"Staffed Hours & Opening Times | Birdies Bayside"} description={"Current staffed hours and automated bay access times for Birdies Bayside indoor golf in Redland Bay. Bays open 5am to 11pm."} path="/staffed-hours" />
+    <Seo title={`Staffed Hours & Opening Times | ${tenant.venue_name}`} description={`Current staffed hours and automated bay access times for ${tenant.venue_name} indoor golf in Redland Bay. Bays open 5am to 11pm.`} path="/staffed-hours" />
       {/* Hero */}
       <section className="bg-primary text-primary-foreground py-10 md:py-14">
         <div className="container mx-auto px-4 text-center">
@@ -61,16 +63,16 @@ const MarketingStaffedHours = () => {
         <div className="container mx-auto px-4 max-w-3xl text-center">
           <p className="text-muted-foreground">
             *Our centre is fully automated outside of staffed hours. This keeps our pricing low
-            and makes self-service simple. We recommend booking your first Birdies session during
+            and makes self-service simple. We recommend booking your first session during
             staffed hours so our friendly staff can help you learn the sim tech. Tech support is
             always available over the phone.
           </p>
           <a
-            href="tel:0721468442"
+            href={`tel:${tenant.support_phone.replace(/\s+/g, "")}`}
             className="inline-flex items-center gap-2 mt-6 bg-accent hover:bg-accent/90 text-accent-foreground font-display tracking-wide uppercase px-6 py-3 rounded-md transition-colors"
           >
             <Phone className="h-4 w-4" />
-            07 2146 8442
+            {tenant.support_phone}
           </a>
         </div>
       </section>

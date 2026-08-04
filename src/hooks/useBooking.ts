@@ -655,7 +655,7 @@ export function useBooking() {
     if (customHourlyRate !== null) {
       // Custom rate always takes priority
       actualHourlyRate = customHourlyRate;
-    } else if (hasSingleBayPeakLimit(tierPricing, userMembershipTier) && isPeakTime(date, startTime)) {
+    } else if (hasSingleBayPeakLimit(tierPricing, userMembershipTier) && isPeakSlot(date, startTime)) {
       // For single-bay-limited tiers during peak: check for overlapping bookings in DB (not cached state)
       const { data: existingBookings } = await supabase
         .from("bookings")
@@ -671,6 +671,7 @@ export function useBooking() {
       );
       
       const holidaySurchargePercent = getHolidaySurchargeForDate(date);
+      const holidayFlag = isPublicHolidayDate(date);
       if (hasOverlappingBooking) {
         // Multi-bay during peak: charge visitor rate instead of member rate (+ holiday surcharge if any)
         console.log("[useBooking] Multi-bay peak restriction triggered - charging walk-in rate");
@@ -680,15 +681,17 @@ export function useBooking() {
           : baseRate;
       } else {
         // No conflict: use member rate (with holiday surcharge if applicable)
-        actualHourlyRate = calculateHourlyRate(userMembershipTier, date, startTime, tierPricing, { segment: customSegment, holidaySurchargePercent });
+        actualHourlyRate = calculateHourlyRate(userMembershipTier, date, startTime, tierPricing, { segment: customSegment, holidaySurchargePercent, isPublicHoliday: holidayFlag });
       }
     } else {
       // All other cases: use standard rate calculation (with holiday surcharge if applicable)
       const holidaySurchargePercent = getHolidaySurchargeForDate(date);
-      actualHourlyRate = calculateHourlyRate(userMembershipTier, date, startTime, tierPricing, { segment: customSegment, holidaySurchargePercent });
+      actualHourlyRate = calculateHourlyRate(userMembershipTier, date, startTime, tierPricing, { segment: customSegment, holidaySurchargePercent, isPublicHoliday: isPublicHolidayDate(date) });
     }
-    
-    const totalPrice = actualHourlyRate * durationHours;
+
+    // Apply any casual special (e.g. 90 minutes for $60) when it beats the hourly rate
+    const { total: totalPrice } = getBookingTotal(actualHourlyRate, durationHours, date, startTime);
+
     
     // Track how much to deduct from balance and charge to card
     let balanceDeduction = 0;

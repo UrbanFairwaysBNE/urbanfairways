@@ -194,11 +194,8 @@ export default function Booking() {
       let currentHourlyRate = getHourlyRate(userMembershipTier, selectedDate, selectedTime);
       const dateStr = format(selectedDate, "yyyy-MM-dd");
       
-      if (hasSingleBayPeakLimit(pricing, userMembershipTier) && isPeakTime(selectedDate, selectedTime)) {
-        const startHourCalc = parseInt(selectedTime.split(":")[0]);
-        const startMinuteCalc = parseInt(selectedTime.split(":")[1]);
-        const endHourCalc = startHourCalc + selectedDuration;
-        const endTimeCalc = `${endHourCalc.toString().padStart(2, "0")}:${startMinuteCalc.toString().padStart(2, "0")}`;
+      if (hasSingleBayPeakLimit(pricing, userMembershipTier) && isPeakSlot(selectedDate, selectedTime)) {
+        const endTimeCalc = addDurationToTime(selectedTime, selectedDuration);
         
         const { data: existingBookings } = await supabase
           .from("bookings")
@@ -222,12 +219,10 @@ export default function Booking() {
         }
       }
       
-      const totalPrice = currentHourlyRate * selectedDuration;
+      const { total: totalPrice } = getBookingTotal(currentHourlyRate, selectedDuration, selectedDate, selectedTime);
       
-      const startHour = parseInt(selectedTime.split(":")[0]);
-      const startMinute = parseInt(selectedTime.split(":")[1]);
-      const endHour = startHour + selectedDuration;
-      const endTime = `${endHour.toString().padStart(2, "0")}:${startMinute.toString().padStart(2, "0")}`;
+      const endTime = addDurationToTime(selectedTime, selectedDuration);
+
       
       const { data: bookingData, error } = await supabase
         .from("bookings")

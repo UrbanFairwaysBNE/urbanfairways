@@ -14,9 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["Anton", "sans-serif"],
-        anton: ["Anton", "sans-serif"],
-        sans: ["Inter", "system-ui", "sans-serif"],
+        display: ["Archivo", "system-ui", "sans-serif"],
+        sans: ["Manrope", "system-ui", "sans-serif"],
       },
 
       colors: {
@@ -63,13 +62,13 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Birdies brand colors
-        birdies: {
-          green: "hsl(var(--birdies-green))",
-          "green-light": "hsl(var(--birdies-green-light))",
-          orange: "hsl(var(--birdies-orange))",
-          "orange-light": "hsl(var(--birdies-orange-light))",
-          cream: "hsl(var(--birdies-cream))",
+        // Neutral placeholder brand colors (replace values per client)
+        brand: {
+          primary: "hsl(var(--brand-primary))",
+          "primary-light": "hsl(var(--brand-primary-light))",
+          accent: "hsl(var(--brand-accent))",
+          "accent-light": "hsl(var(--brand-accent-light))",
+          surface: "hsl(var(--brand-surface))",
         },
         // League Hub premium colors
         league: {

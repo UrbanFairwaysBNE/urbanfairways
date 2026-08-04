@@ -22,7 +22,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CalendarIcon, Plus, UserPlus, Ban } from "lucide-react";
+import { CalendarIcon, Plus, UserPlus, Ban, Check, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { calculateHourlyRate, isOffPeakTime, getPricingLabel } from "@/lib/pricing-utils";
 import { TierConfig, TIER_SELECT, findTier, isDefaultTier, normaliseTier, tierLabel } from "@/lib/tier-config";
@@ -214,6 +214,7 @@ export function AddBookingDialog({
 
   const handleCustomerSearch = (value: string) => {
     setCustomerSearch(value);
+    setSelectedCustomerId("");
     if (value.length >= 2) {
       fetchCustomers(value);
     } else {
@@ -623,7 +624,7 @@ export function AddBookingDialog({
                     onChange={(e) => handleCustomerSearch(e.target.value)}
                   />
                   
-                  {customerSearch.length >= 2 && (
+                  {customerSearch.length >= 2 && !selectedCustomerId && (
                     <div className="max-h-40 overflow-y-auto border rounded-md">
                       {isLoadingCustomers ? (
                         <div className="p-3 text-sm text-muted-foreground text-center">Searching...</div>
@@ -664,14 +665,30 @@ export function AddBookingDialog({
                 </div>
 
                 {selectedCustomer && (
-                  <div className="p-3 bg-muted/50 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-sm">
+                  <div className="p-3 rounded-lg border-2 border-primary bg-primary/5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="flex items-center gap-2 font-medium text-sm">
+                        <Check className="h-4 w-4 text-primary" />
                         {selectedCustomer.first_name} {selectedCustomer.last_name}
                       </span>
-                      <Badge className={getMembershipColor(selectedCustomer.membership_tier)}>
-                        {tierLabel(tierRates, selectedCustomer.membership_tier) || selectedCustomer.membership_tier} - ${getCalculatedHourlyRate()}/hr
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge className={getMembershipColor(selectedCustomer.membership_tier)}>
+                          {tierLabel(tierRates, selectedCustomer.membership_tier) || selectedCustomer.membership_tier} - ${getCalculatedHourlyRate()}/hr
+                        </Badge>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => {
+                            setSelectedCustomerId("");
+                            setCustomerSearch("");
+                            setCustomers([]);
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 )}

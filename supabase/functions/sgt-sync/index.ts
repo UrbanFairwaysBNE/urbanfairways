@@ -8,6 +8,7 @@ const corsHeaders = {
 
 const SGT_BASE_URL = "https://simulatorgolftour.com/sgt-api/club-admin";
 import { getClubUrl } from "../_shared/sgt-config.ts";
+import { getTenant, tenantHubUrl } from "../_shared/tenant.ts";
 
 let CLUB_URL = "";
 
@@ -106,6 +107,7 @@ serve(async (req) => {
   }
 
   CLUB_URL = await getClubUrl();
+  const tenant = await getTenant();
 
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;

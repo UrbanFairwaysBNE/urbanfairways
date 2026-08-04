@@ -143,6 +143,23 @@ const MarketingMembership = () => {
             </a>
           </div>
         </div>
+        {specials.length > 0 && (
+          <div className="max-w-3xl mx-auto mt-6 grid gap-3">
+            {specials.map((s) => (
+              <div
+                key={s.id}
+                className="flex items-center justify-between gap-4 rounded-xl border border-accent/30 bg-accent/5 px-5 py-4"
+              >
+                <div className="text-left">
+                  <p className="font-display uppercase tracking-wide text-primary">{s.name}</p>
+                  <p className="text-sm text-foreground/60">{s.duration_minutes} minutes of bay time</p>
+                </div>
+                <span className="font-display text-2xl text-accent">${s.price}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
         <div className="text-center mt-10">
           <a
             href={hubUrl(tenant, "/")}

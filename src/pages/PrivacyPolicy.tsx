@@ -38,7 +38,7 @@ export default function PrivacyPolicy() {
 
                 <h3 className="font-semibold text-foreground">4. Recording, Filming and Media</h3>
                 <p>
-                  Our bays are monitored by security cameras, and gameplay may be video and/or audio recorded — including automatically during league rounds, competitions and events. By using our facility you consent to being recorded, and to Birdies using that footage, imagery and associated gameplay data (such as your name, username, scores and handicap) for promotional, marketing, social media, leaderboard and broadcast purposes. You can opt out of publicly shared content at any time by contacting us.
+                  Our bays are monitored by security cameras, and gameplay may be video and/or audio recorded — including automatically during league rounds, competitions and events. By using our facility you consent to being recorded, and to {tenant.venue_name} using that footage, imagery and associated gameplay data (such as your name, username, scores and handicap) for promotional, marketing, social media, leaderboard and broadcast purposes. You can opt out of publicly shared content at any time by contacting us.
                 </p>
 
                 <h3 className="font-semibold text-foreground">5. Data Sharing</h3>

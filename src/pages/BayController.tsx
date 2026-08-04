@@ -89,6 +89,7 @@ const findDisplayByLabel = (displays: DisplayInfo[], label: string): DisplayInfo
 // Import Electron types
 import "@/types/electron.d";
 import { useBayControllerLogger } from "@/hooks/useBayControllerLogger";
+import { useTenant, hubUrl } from "@/config/tenant";
 
 const CORRECT_PASSWORD = "Holeinone1";
 const FALLBACK_VERSION = "1.0.7";
@@ -147,6 +148,7 @@ function CollapsibleSettingsCard({
 }
 
 export default function BayController() {
+  const { tenant } = useTenant();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");

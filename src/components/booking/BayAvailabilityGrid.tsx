@@ -61,8 +61,18 @@ export function BayAvailabilityGrid({
           )}
         </div>
         <div className="text-sm text-muted-foreground">
-          ${hourlyRate}/hr × {selectedDuration}hr = <span className="font-semibold text-accent">${totalPrice}</span>
+          {specialName ? (
+            <>
+              {specialName} = <span className="font-semibold text-accent">${totalPrice}</span>
+            </>
+          ) : (
+            <>
+              ${hourlyRate}/hr × {formatDurationLabel(selectedDuration)} ={" "}
+              <span className="font-semibold text-accent">${totalPrice}</span>
+            </>
+          )}
         </div>
+
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">

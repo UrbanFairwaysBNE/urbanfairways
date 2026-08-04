@@ -53,7 +53,7 @@ export function LeagueLayout({ children }: LeagueLayoutProps) {
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <Link to="/league" className="flex items-center">
-              <img src={venueMark} alt={tenant.venue_name} className="h-10 w-auto" />
+              <img src={venueMark} alt={tenant.venue_name} className="h-7 sm:h-10 w-auto" />
             </Link>
           </div>
 

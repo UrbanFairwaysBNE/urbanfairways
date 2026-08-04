@@ -561,12 +561,12 @@ export default function Booking() {
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <h1 className="font-display text-2xl tracking-wide">BOOK A BAY</h1>
+            <h1 className="font-display text-base sm:text-2xl tracking-wide">BOOK A BAY</h1>
           </div>
           <img 
             src={venueLogo} 
             alt={tenant.venue_name} 
-            className="h-10 w-auto"
+            className="h-7 sm:h-10 w-auto"
           />
         </div>
       </header>

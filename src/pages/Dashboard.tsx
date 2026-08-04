@@ -198,7 +198,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="bg-primary py-4 px-6 flex items-center justify-between safe-area-top">
-        <img src={venueLogo} alt={tenant.venue_name} className="h-10 w-auto" />
+        <img src={venueLogo} alt={tenant.venue_name} className="h-7 sm:h-10 w-auto" />
         <div className="flex items-center gap-2 sm:gap-4">
           <NotificationBell />
           {isAdmin && (

@@ -426,7 +426,7 @@ const Clubhouse = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
-          <img src={venueLogo} alt={tenant.venue_name} className="h-10 w-auto" />
+          <img src={venueLogo} alt={tenant.venue_name} className="h-7 sm:h-10 w-auto" />
         </header>
         <main className="flex-1 flex items-center justify-center p-6">
           <Card className="max-w-md text-center">
@@ -459,7 +459,7 @@ const Clubhouse = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
-          <img src={venueLogo} alt={tenant.venue_name} className="h-10 w-auto" />
+          <img src={venueLogo} alt={tenant.venue_name} className="h-7 sm:h-10 w-auto" />
         </div>
         <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
           <DialogTrigger asChild>

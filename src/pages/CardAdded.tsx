@@ -49,7 +49,7 @@ export default function CardAdded() {
     <div className="min-h-screen bg-background flex flex-col">
       <header className="bg-primary text-primary-foreground py-4 px-4 safe-area-top">
         <div className="max-w-4xl mx-auto flex items-center justify-center">
-          <img src={venueLogo} alt={tenant.venue_name} className="h-10 w-auto" />
+          <img src={venueLogo} alt={tenant.venue_name} className="h-7 sm:h-10 w-auto" />
         </div>
       </header>
 

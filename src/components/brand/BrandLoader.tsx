@@ -28,8 +28,8 @@ const BrandLoader = ({ size = 96, label, fullscreen = false, className = "" }: B
         className="uf-loader"
       >
         <style>{`
-          @keyframes uf-trace { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
-          @keyframes uf-fill { 0%, 35% { fill-opacity: 0; } 75%, 100% { fill-opacity: 1; } }
+          @keyframes uf-trace { 0% { stroke-dashoffset: 1; } 42% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: 0; } }
+          @keyframes uf-fill { 0%, 18% { fill-opacity: 0; } 46%, 100% { fill-opacity: 1; } }
           .uf-loader .uf-path {
             stroke-width: 40;
             stroke-linecap: round;
@@ -38,8 +38,8 @@ const BrandLoader = ({ size = 96, label, fullscreen = false, className = "" }: B
             stroke-dasharray: 1;
             stroke-dashoffset: 1;
             animation:
-              uf-trace 1.9s cubic-bezier(0.65, 0, 0.35, 1) infinite,
-              uf-fill 1.9s ease-out infinite;
+              uf-trace 2.4s cubic-bezier(0.65, 0, 0.35, 1) infinite,
+              uf-fill 2.4s ease-out infinite;
           }
           @media (prefers-reduced-motion: reduce) {
             .uf-loader .uf-path {
@@ -61,7 +61,7 @@ const BrandLoader = ({ size = 96, label, fullscreen = false, className = "" }: B
               pathLength={1}
               fill={p.fill}
               stroke={p.fill}
-              style={{ animationDelay: `${order * 0.09}s` }}
+              style={{ animationDelay: `${order * 0.05}s` }}
             />
           );
         })}

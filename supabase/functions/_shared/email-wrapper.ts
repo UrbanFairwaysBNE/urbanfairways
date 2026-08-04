@@ -150,7 +150,7 @@ export function buildEmailTemplate(
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F5F3EF;">
     <tr>
       <td align="center" style="padding:24px 12px;">
-        <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px; width:100%;">
+        <table role="presentation" class="uf-shell" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px; width:100%;">
           ${header}
           <tr>
             <td style="background-color:#F5F3EF; padding:26px 22px; border-left:1px solid rgba(47,49,52,0.12); border-right:1px solid rgba(47,49,52,0.12);">

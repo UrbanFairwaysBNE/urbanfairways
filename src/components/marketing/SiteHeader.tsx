@@ -32,7 +32,7 @@ const navGroups: NavGroup[] = [
 ];
 
 const topNav = [
-  { to: "/membership-info", label: "JOIN" },
+  { to: "/membership-info", label: "MEMBERSHIPS" },
   { to: "/gift", label: "Gift cards" },
   { to: "/whats-on", label: "What's On" },
   { to: "/contact", label: "Contact" },

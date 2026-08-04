@@ -78,10 +78,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           <div className="flex items-center justify-between">
             <Link to="/admin" className="flex items-center gap-3">
               <img src={venueLogo} alt={tenant.venue_name} className="h-8" />
-              <span className="font-display text-xl text-sidebar-foreground uppercase tracking-wide">
-                Admin
-              </span>
             </Link>
+
             <AdminOrderNotifications />
           </div>
         </div>
@@ -136,9 +134,6 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             >
               {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
-            <span className="font-display text-lg text-sidebar-foreground uppercase tracking-wide">
-              Admin
-            </span>
           </div>
           <Link to="/admin" className="flex items-center gap-2">
             <img src={venueLogo} alt={tenant.venue_name} className="h-7" />

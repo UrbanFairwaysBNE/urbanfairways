@@ -22,7 +22,7 @@ interface ImportRow {
   message?: string;
 }
 
-const VALID_TIERS = ['visitor', 'weekday', 'birdie', 'eagle'];
+
 
 export default function AdminCustomerImport() {
   const { isAdmin, isLoading: authLoading } = useAdminAuth();

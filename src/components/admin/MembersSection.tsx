@@ -33,6 +33,8 @@ import {
   ArrowUpDown,
 } from "lucide-react";
 import { format, subDays, parseISO } from "date-fns";
+import { usePricing } from "@/hooks/usePricing";
+import { memberTierKeys, tierBadgeClass } from "@/lib/tier-config";
 
 interface MemberProfile {
   id: string;
@@ -62,6 +64,11 @@ type SortDirection = "asc" | "desc";
 
 
 export function MembersSection() {
+  const { pricing, defaultTier, memberTiers } = usePricing();
+  // Tier keys are venue-defined; the walk-in tier comes from pricing config.
+  const walkInTier = defaultTier?.tier ?? "visitor";
+  const MEMBER_TIERS = memberTierKeys(pricing);
+  const getTierColor = (tier: string) => tierBadgeClass(pricing, tier);
   const [members, setMembers] = useState<MemberProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -78,14 +85,15 @@ export function MembersSection() {
   useEffect(() => {
     fetchMembers();
     fetchWeeklyChanges();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pricing]);
 
   const fetchMembers = async () => {
     setIsLoading(true);
     const { data, error } = await supabase
       .from("profiles")
       .select("id, user_id, first_name, last_name, email, phone, membership_tier, membership_on_hold, payment_failed_at, created_at, updated_at")
-      .neq("membership_tier", "visitor")
+      .neq("membership_tier", walkInTier)
       .order("last_name");
 
     if (!error && data) {
@@ -133,12 +141,12 @@ export function MembersSection() {
 
     // Joins: visitor -> member tier
     const joins = enriched.filter(
-      (c) => c.previous_tier === "visitor" && MEMBER_TIERS.includes(c.new_tier)
+      (c) => c.previous_tier === walkInTier && MEMBER_TIERS.includes(c.new_tier)
     );
 
     // Dropoffs: member tier -> visitor
     const dropoffs = enriched.filter(
-      (c) => MEMBER_TIERS.includes(c.previous_tier) && c.new_tier === "visitor"
+      (c) => MEMBER_TIERS.includes(c.previous_tier) && c.new_tier === walkInTier
     );
 
     // Determine net-new vs returning: check if any PRIOR member->visitor record exists (before this week)
@@ -150,7 +158,7 @@ export function MembersSection() {
         .select("user_id")
         .in("user_id", joinUserIds)
         .in("previous_tier", MEMBER_TIERS)
-        .eq("new_tier", "visitor")
+        .eq("new_tier", walkInTier)
         .lt("changed_at", weekAgo);
       if (priorChanges) {
         previousMemberIds = new Set(priorChanges.map((c) => c.user_id));
@@ -381,11 +389,9 @@ export function MembersSection() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Tiers</SelectItem>
-            <SelectItem value="weekday">Weekday</SelectItem>
-            <SelectItem value="par">Par</SelectItem>
-            <SelectItem value="birdie">Birdie</SelectItem>
-            <SelectItem value="eagle">Eagle</SelectItem>
-            <SelectItem value="albatross">Albatross</SelectItem>
+            {memberTiers.map((t) => (
+              <SelectItem key={t.tier} value={t.tier}>{t.display_name}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>

@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 type TimeFilter = "today" | "week" | "month" | "quarter";
-type MemberTierFilter = "all" | "weekday" | "birdie" | "eagle";
+type MemberTierFilter = string;
 type MemberRevenueFilter = "weekly" | "monthly" | "quarterly";
 
 interface DashboardStats {

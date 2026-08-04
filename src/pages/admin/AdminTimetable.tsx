@@ -504,14 +504,7 @@ export default function AdminTimetable() {
     return `${displayHour}${minStr}${ampm}`;
   };
 
-  const getMembershipColor = (tier: string) => {
-    switch (tier?.toLowerCase()) {
-      case "eagle": return "bg-amber-500/10 text-amber-600 border-amber-200";
-      case "birdie": return "bg-blue-500/10 text-blue-600 border-blue-200";
-      case "weekday": return "bg-teal-500/10 text-teal-600 border-teal-200";
-      default: return "bg-muted text-muted-foreground";
-    }
-  };
+  const getMembershipColor = (tier: string) => tierBadgeClass(pricing, tier);
 
   // Generate time slots for the dropdown (5am to 10:30pm in 30-min increments)
   const TIME_OPTIONS = OPERATING_SLOTS.filter(slot => {

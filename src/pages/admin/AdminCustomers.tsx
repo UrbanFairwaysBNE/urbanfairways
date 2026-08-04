@@ -298,14 +298,7 @@ export default function AdminCustomers() {
     ));
   };
 
-  const getMembershipColor = (tier: string) => {
-    switch (tier?.toLowerCase()) {
-      case "eagle": return "bg-amber-500/10 text-amber-600 border-amber-200";
-      case "birdie": return "bg-blue-500/10 text-blue-600 border-blue-200";
-      case "weekday": return "bg-teal-500/10 text-teal-600 border-teal-200";
-      default: return "bg-muted text-muted-foreground";
-    }
-  };
+  const getMembershipColor = (tier: string) => tierBadgeClass(pricing, tier);
 
   const resetAddCustomerForm = () => {
     setNewFirstName("");
@@ -1123,18 +1116,11 @@ export default function AdminCustomers() {
                 All Tiers
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setTierFilter("eagle")}>
-                Eagle
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTierFilter("birdie")}>
-                Birdie
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTierFilter("weekday")}>
-                Weekday
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTierFilter("visitor")}>
-                Visitor
-              </DropdownMenuItem>
+              {pricing.map((t) => (
+                <DropdownMenuItem key={t.tier} onClick={() => setTierFilter(t.tier)}>
+                  {t.display_name}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
 

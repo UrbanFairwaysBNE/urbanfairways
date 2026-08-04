@@ -76,13 +76,7 @@ interface CustomerFilter {
   booking_count?: string;
 }
 
-const MEMBERSHIP_OPTIONS = [
-  { value: "all", label: "All Customers" },
-  { value: "visitor", label: "Visitor" },
-  { value: "weekday", label: "Weekday" },
-  { value: "birdie", label: "Birdie" },
-  { value: "eagle", label: "Eagle" },
-];
+const ALL_CUSTOMERS_OPTION = { value: "all", label: "All Customers" };
 
 const BOOKING_OPTIONS = [
   { value: "all", label: "Any Booking Count" },
@@ -286,7 +280,7 @@ export default function AdminMarketing() {
       .eq("marketing_opt_out", false);
     
     if (membershipFilter !== "all") {
-      query = query.eq("membership_tier", membershipFilter as "visitor" | "weekday" | "birdie" | "eagle");
+      query = query.eq("membership_tier", membershipFilter);
     }
 
     // Apply segment filter
@@ -395,7 +389,7 @@ export default function AdminMarketing() {
         .eq("marketing_opt_out", false);
       
       if (membershipFilter !== "all") {
-        recipientQuery = recipientQuery.eq("membership_tier", membershipFilter as "visitor" | "weekday" | "birdie" | "eagle");
+        recipientQuery = recipientQuery.eq("membership_tier", membershipFilter);
       }
 
       // Apply segment filter

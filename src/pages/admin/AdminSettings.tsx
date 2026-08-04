@@ -30,6 +30,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Plus, Pencil, Trash2, Settings, ShoppingCart, Bell, DollarSign, X, Copy, Check, Eye, BarChart3, AlertTriangle, Loader2, GripVertical, ArrowUp, ArrowDown, Coffee, ChevronDown, Gift } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { SalesReporting } from "@/components/admin/SalesReporting";
 import { LoyaltyPromoSettings } from "@/components/admin/LoyaltyPromoSettings";
@@ -285,6 +286,7 @@ export default function AdminSettings() {
   // Email Templates
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
   const [emailTemplates, setEmailTemplates] = useState<EmailTemplateDB[]>([]);
+  const [templateToDelete, setTemplateToDelete] = useState<EmailTemplateDB | null>(null);
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(true);
   const [templateHtml, setTemplateHtml] = useState("");
   const [templateSubject, setTemplateSubject] = useState("");
@@ -382,6 +384,35 @@ export default function AdminSettings() {
     }
     setIsSavingTemplate(false);
   };
+
+  const deleteTemplate = async (template: EmailTemplateDB) => {
+    try {
+      const { error } = await supabase
+        .from("email_templates")
+        .delete()
+        .eq("id", template.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Template deleted",
+        description: `${template.name} has been removed.`,
+        duration: 3000,
+      });
+
+      setTemplateToDelete(null);
+      setSelectedTemplate((prev) => (prev?.id === template.id ? null : prev));
+      fetchEmailTemplates();
+    } catch (error: any) {
+      toast({
+        title: "Error deleting template",
+        description: error.message || "Failed to delete template.",
+        variant: "destructive",
+        duration: 4000,
+      });
+    }
+  };
+
 
   // Fetch bays, their devices, and upcoming bookings
   const fetchBays = async () => {
@@ -1306,6 +1337,14 @@ export default function AdminSettings() {
                             >
                               {template.is_active ? "On" : "Off"}
                             </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setTemplateToDelete(template)}
+                              className="h-8 w-8"
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
                           </div>
                         </div>
                       </div>
@@ -1403,18 +1442,53 @@ export default function AdminSettings() {
                   </p>
                 </div>
 
-                <div className="flex gap-2 justify-end">
-                  <Button variant="outline" onClick={() => setSelectedTemplate(null)}>
-                    Cancel
+                <div className="flex flex-wrap gap-2 justify-between">
+                  <Button
+                    variant="outline"
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => {
+                      const match = emailTemplates.find((t) => t.id === selectedTemplate.id);
+                      if (match) setTemplateToDelete(match);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
                   </Button>
-                  <Button onClick={saveTemplate} disabled={isSavingTemplate}>
-                    {isSavingTemplate ? "Saving..." : "Save Template"}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => setSelectedTemplate(null)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={saveTemplate} disabled={isSavingTemplate}>
+                      {isSavingTemplate ? "Saving..." : "Save Template"}
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Delete Email Template Confirmation */}
+        <AlertDialog open={!!templateToDelete} onOpenChange={(open) => !open && setTemplateToDelete(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete "{templateToDelete?.name}"?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This permanently removes the template. Any notification using it will fall back to the default content.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => templateToDelete && deleteTemplate(templateToDelete)}
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
 
         {/* Email Template Preview Dialog */}
         <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>

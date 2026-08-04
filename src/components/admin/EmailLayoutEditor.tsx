@@ -18,7 +18,7 @@ import { useTenant, formatTenantAddress, bookingUrl, type TenantSettings } from 
 
 // Kept in sync with supabase/functions/_shared/email-wrapper.ts DEFAULTS.
 const buildDefaultHeaderHtml = (t: TenantSettings) => `<tr>
-  <td align="center" style="background-color:#2F3134; padding:18px; border-radius:16px 16px 0 0;">
+  <td align="center" style="background-color:#1C1F24; padding:18px; border-radius:16px 16px 0 0;">
     <img
       src="${bookingUrl(t, "/__l5e/assets-v1/9691088f-3b4b-41b4-bcb3-d4cd4de1540c/venue-logo-email.png")}"
       width="140"
@@ -29,7 +29,7 @@ const buildDefaultHeaderHtml = (t: TenantSettings) => `<tr>
 </tr>`;
 
 const buildDefaultFooterHtml = (t: TenantSettings) => `<tr>
-  <td style="background-color:#2F3134; padding:22px; border-radius:0 0 16px 16px;">
+  <td style="background-color:#1C1F24; padding:22px; border-radius:0 0 16px 16px;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr>
         <td align="center" style="padding-bottom:14px;">
@@ -42,7 +42,7 @@ const buildDefaultFooterHtml = (t: TenantSettings) => `<tr>
         </td>
       </tr>
       <tr>
-        <td align="center" style="font-family:Manrope, Arial, sans-serif; font-size:14px; line-height:1.7; color:#FFFFFF;">
+        <td align="center" style="font-family:Montserrat, Arial, sans-serif; font-size:14px; line-height:1.7; color:#FFFFFF;">
           <div><a href="https://maps.google.com/?q=${encodeURIComponent(formatTenantAddress(t))}" style="color:#FFFFFF; text-decoration:underline;">${formatTenantAddress(t)}</a></div>
           <div><a href="tel:${t.support_phone}" style="color:#FFFFFF; text-decoration:underline;">${t.support_phone}</a></div>
           <div><a href="https://${t.booking_domain}" style="color:#FFFFFF; text-decoration:underline;">${t.booking_domain}</a></div>
@@ -56,16 +56,16 @@ const buildDefaultFooterHtml = (t: TenantSettings) => `<tr>
 const buildPreview = (header: string, footer: string) => `<!doctype html>
 <html lang="en"><head><meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<style>@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Manrope:wght@400;600&display=swap");</style>
+<style>@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Montserrat:wght@400;600&display=swap");</style>
 </head>
-<body style="margin:0; padding:0; background-color:#F5F3EF;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F5F3EF;">
+<body style="margin:0; padding:0; background-color:#F4F1EB;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F4F1EB;">
     <tr><td align="center" style="padding:24px 12px;">
       <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px; width:100%;">
         ${header}
-        <tr><td style="background-color:#F5F3EF; padding:26px 22px; border-left:1px solid rgba(47,49,52,0.12); border-right:1px solid rgba(47,49,52,0.12);">
-          <h1 style="margin:0 0 14px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:34px; line-height:1.1; color:#2F3134; text-align:center;">Sample Email Heading</h1>
-          <p style="font-family:Manrope,Arial,sans-serif;font-size:16px;line-height:1.6;color:#2F3134;text-align:center;margin:0 0 12px;">This is where the body of each email template appears. The header above and footer below are shared across every customer email and can be edited here.</p>
+        <tr><td style="background-color:#F4F1EB; padding:26px 22px; border-left:1px solid rgba(47,49,52,0.12); border-right:1px solid rgba(47,49,52,0.12);">
+          <h1 style="margin:0 0 14px; font-family:Montserrat, Impact, Arial Black, sans-serif; font-size:34px; line-height:1.1; color:#1C1F24; text-align:center;">Sample Email Heading</h1>
+          <p style="font-family:Montserrat,Arial,sans-serif;font-size:16px;line-height:1.6;color:#1C1F24;text-align:center;margin:0 0 12px;">This is where the body of each email template appears. The header above and footer below are shared across every customer email and can be edited here.</p>
         </td></tr>
         ${footer}
       </table>

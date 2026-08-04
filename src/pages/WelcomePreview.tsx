@@ -7,9 +7,9 @@ const WelcomePreview = () => {
   const firstName = searchParams.get("name") || "Guest";
 
   return (
-    <div className="min-h-screen flex items-center justify-center overflow-hidden" style={{ backgroundColor: '#f5f3ef' }}>
+    <div className="min-h-screen flex items-center justify-center overflow-hidden" style={{ backgroundColor: '#f4f1eb' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Manrope:wght@300;400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Montserrat:wght@300;400;500&display=swap');
         
         @keyframes fadeIn {
           from { opacity: 0; transform: scale(0.95); }
@@ -44,8 +44,8 @@ const WelcomePreview = () => {
         <h1 
           className="text-[96px] mb-2 uppercase tracking-wide"
           style={{ 
-            fontFamily: 'Archivo, system-ui, sans-serif', 
-            color: '#2f3134',
+            fontFamily: 'Montserrat, system-ui, sans-serif', 
+            color: '#1c1f24',
             fontWeight: 400,
             letterSpacing: '2px'
           }}
@@ -56,8 +56,8 @@ const WelcomePreview = () => {
         <h2 
           className="text-[56px] mb-16 uppercase"
           style={{ 
-            fontFamily: 'Archivo, system-ui, sans-serif', 
-            color: '#b5772a',
+            fontFamily: 'Montserrat, system-ui, sans-serif', 
+            color: '#5f6f52',
             fontWeight: 400,
             letterSpacing: '1px'
           }}
@@ -68,8 +68,8 @@ const WelcomePreview = () => {
         <p 
           className="text-[28px] mb-3"
           style={{ 
-            fontFamily: 'Manrope, system-ui, sans-serif', 
-            color: '#2f3134',
+            fontFamily: 'Montserrat, system-ui, sans-serif', 
+            color: '#1c1f24',
             opacity: 0.85,
             fontWeight: 400
           }}
@@ -80,8 +80,8 @@ const WelcomePreview = () => {
         <p 
           className="text-[28px]"
           style={{ 
-            fontFamily: 'Manrope, system-ui, sans-serif', 
-            color: '#2f3134',
+            fontFamily: 'Montserrat, system-ui, sans-serif', 
+            color: '#1c1f24',
             opacity: 0.85,
             fontWeight: 400
           }}
@@ -101,15 +101,15 @@ const WelcomePreview = () => {
           <h3 
             className="text-[36px] mb-5 uppercase text-center"
             style={{ 
-              fontFamily: 'Archivo, system-ui, sans-serif', 
-              color: '#2f3134',
+              fontFamily: 'Montserrat, system-ui, sans-serif', 
+              color: '#1c1f24',
               fontWeight: 400,
               letterSpacing: '2px'
             }}
           >
             {tenant.venue_name} Etiquette
           </h3>
-          <ol className="space-y-3" style={{ fontFamily: 'Manrope, system-ui, sans-serif', color: '#2f3134' }}>
+          <ol className="space-y-3" style={{ fontFamily: 'Montserrat, system-ui, sans-serif', color: '#1c1f24' }}>
             {[
               "Use a different ball after every shot, this prevents a ball cracking on you!",
               "If you keep skying your drives, tee it down lower",
@@ -119,7 +119,7 @@ const WelcomePreview = () => {
               <li key={i} className="flex gap-3 items-start text-[22px]" style={{ opacity: 0.85 }}>
                 <span 
                   className="flex-shrink-0 w-[32px] h-[32px] rounded-full flex items-center justify-center text-[16px] font-semibold mt-[2px]"
-                  style={{ backgroundColor: '#b5772a', color: '#fff' }}
+                  style={{ backgroundColor: '#5f6f52', color: '#fff' }}
                 >
                   {i + 1}
                 </span>
@@ -132,15 +132,15 @@ const WelcomePreview = () => {
         <div className="mt-10 flex gap-4 justify-center">
           <span 
             className="loading-dot w-[18px] h-[18px] rounded-full"
-            style={{ backgroundColor: '#b5772a' }}
+            style={{ backgroundColor: '#5f6f52' }}
           />
           <span 
             className="loading-dot w-[18px] h-[18px] rounded-full"
-            style={{ backgroundColor: '#b5772a' }}
+            style={{ backgroundColor: '#5f6f52' }}
           />
           <span 
             className="loading-dot w-[18px] h-[18px] rounded-full"
-            style={{ backgroundColor: '#b5772a' }}
+            style={{ backgroundColor: '#5f6f52' }}
           />
         </div>
       </div>

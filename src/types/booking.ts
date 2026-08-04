@@ -1,6 +1,8 @@
 // Core types for the booking platform
 
-export type MembershipTier = 'visitor' | 'weekday' | 'birdie' | 'eagle';
+// Tier keys and metadata are venue-defined and live in `pricing_config`.
+// See `src/lib/tier-config.ts` — nothing about a tier is hardcoded here.
+export type MembershipTier = string;
 
 export interface MembershipPricing {
   tier: MembershipTier;
@@ -11,41 +13,6 @@ export interface MembershipPricing {
   features: string[];
   restrictions?: string;
 }
-
-export const MEMBERSHIP_TIERS: Record<MembershipTier, MembershipPricing> = {
-  visitor: {
-    tier: 'visitor',
-    name: 'Visitor',
-    weeklyFee: 0,
-    hourlyRate: 35, // Peak rate - off-peak is $25
-    description: 'Pay as you play',
-    features: ['No commitment', 'Peak: $35/hr, Off-Peak: $25/hr', 'Book up to 1 week ahead'],
-  },
-  weekday: {
-    tier: 'weekday',
-    name: 'Weekday Member',
-    weeklyFee: 15,
-    hourlyRate: 10,
-    description: 'Perfect for daytime players',
-    features: ['$10/hr weekdays before 4pm', 'Swing Lab access', 'No weekend commitment', 'Cancel any time'],
-  },
-  birdie: {
-    tier: 'birdie',
-    name: 'Birdie Member',
-    weeklyFee: 27,
-    hourlyRate: 10,
-    description: 'Play anytime',
-    features: ['$10/hr anytime', 'League Access', 'Swing Lab access', 'Cancel any time'],
-  },
-  eagle: {
-    tier: 'eagle',
-    name: 'Eagle Member',
-    weeklyFee: 35,
-    hourlyRate: 8,
-    description: 'Best value for regulars',
-    features: ['$8/hr anytime', 'League Access', 'Swing Lab access', 'Priority booking', 'Cancel any time'],
-  },
-};
 
 export interface Bay {
   id: string;

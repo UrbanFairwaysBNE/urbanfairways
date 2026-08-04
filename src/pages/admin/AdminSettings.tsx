@@ -206,9 +206,8 @@ export default function AdminSettings() {
   const activeTab = (SETTINGS_TABS as readonly string[]).includes(tabParam) ? tabParam : "general";
   const { toast } = useToast();
 
-  // General settings - load from database
-  const [timezone, setTimezone] = useState("Australia/Sydney");
-  const [isLoadingTimezone, setIsLoadingTimezone] = useState(true);
+  // Timezone is hardcoded to Australia/Brisbane project-wide (no admin control)
+
 
   // League Highlights settings
   const [highlightRecordingEnabled, setHighlightRecordingEnabled] = useState(false);
@@ -233,53 +232,25 @@ export default function AdminSettings() {
     setBayDeviceForm(initial);
   }, [bayDevices]);
 
-  // Load timezone and highlight settings from database on mount
+  // Load highlight settings from database on mount
   useEffect(() => {
     const loadSettings = async () => {
       const { data } = await supabase
         .from("system_settings")
-        .select("timezone, highlight_recording_enabled")
+        .select("highlight_recording_enabled")
         .eq("id", "global")
         .single();
-      
-      if (data?.timezone) {
-        setTimezone(data.timezone);
-      }
+
       if (data?.highlight_recording_enabled !== undefined) {
         setHighlightRecordingEnabled(data.highlight_recording_enabled);
       }
-      setIsLoadingTimezone(false);
     };
-    
+
     if (isAdmin) {
       loadSettings();
     }
   }, [isAdmin]);
 
-  // Save timezone to database when it changes
-  const handleTimezoneChange = async (value: string) => {
-    setTimezone(value);
-    
-    const { error } = await supabase
-      .from("system_settings")
-      .update({ timezone: value })
-      .eq("id", "global");
-    
-    if (error) {
-      toast({
-        title: "Error saving timezone",
-        description: error.message,
-        variant: "destructive",
-        duration: 4000,
-      });
-    } else {
-      toast({
-        title: "Settings saved",
-        description: `Timezone updated to ${value}. Bay controllers will sync on next refresh.`,
-        duration: 3000,
-      });
-    }
-  };
 
   // POS Products
   const [products, setProducts] = useState<POSProduct[]>([]);
@@ -1074,32 +1045,8 @@ export default function AdminSettings() {
               <DoorAccessSection />
             </CollapsibleSection>
 
-            {/* Timezone Settings */}
 
-            <CollapsibleSection title="General Settings" description="Configure basic platform settings">
-              <Card>
-                <CardContent className="space-y-4 pt-6">
-                  <div className="max-w-sm space-y-2">
-                    <Label htmlFor="timezone">Timezone</Label>
-                    <Select value={timezone} onValueChange={handleTimezoneChange}>
-                      <SelectTrigger id="timezone">
-                        <SelectValue placeholder="Select timezone" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Australia/Sydney">Australia/Sydney (AEST)</SelectItem>
-                        <SelectItem value="Australia/Melbourne">Australia/Melbourne (AEST)</SelectItem>
-                        <SelectItem value="Australia/Brisbane">Australia/Brisbane (AEST)</SelectItem>
-                        <SelectItem value="Australia/Perth">Australia/Perth (AWST)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-muted-foreground">
-                      Timezone used for booking times and notifications
-                    </p>
-                  </div>
 
-                </CardContent>
-              </Card>
-            </CollapsibleSection>
 
             {/* Operating Hours */}
             <CollapsibleSection

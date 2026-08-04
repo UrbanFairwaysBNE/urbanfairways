@@ -92,7 +92,7 @@ export function TermsContent() {
 
       <div>
         <h3 className="font-semibold text-foreground">10. Behaviour and Conduct</h3>
-        <p>10.1. Birdies maintains a zero-tolerance policy for abusive, aggressive, or inappropriate behaviour.</p>
+        <p>10.1. {tenant.venue_name} maintains a zero-tolerance policy for abusive, aggressive, or inappropriate behaviour.</p>
         <p>10.2. We reserve the right to refuse service, terminate memberships, or ban individuals who violate these Terms.</p>
       </div>
 

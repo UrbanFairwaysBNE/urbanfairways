@@ -90,6 +90,17 @@ const fetchPublicHolidays = async (): Promise<PublicHoliday[]> => {
   }));
 };
 
+const fetchPricingSpecials = async (): Promise<PricingSpecial[]> => {
+  const { data, error } = await supabase
+    .from("pricing_specials")
+    .select("id, name, duration_minutes, price, applies_peak, applies_off_peak, is_active, display_order")
+    .eq("is_active", true)
+    .order("display_order");
+  if (error) throw error;
+  return (data || []).map((s: any) => ({ ...s, price: Number(s.price) }));
+};
+
+
 const fetchUserProfile = async () => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;

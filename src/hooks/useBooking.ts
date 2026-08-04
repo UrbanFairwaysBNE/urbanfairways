@@ -540,10 +540,8 @@ export function useBooking() {
     startTime: string,
     durationHours: number
   ): Booking | undefined => {
-    const startHour = parseInt(startTime.split(":")[0]);
-    const startMinute = parseInt(startTime.split(":")[1]);
-    const endHour = startHour + durationHours;
-    const endTime = `${endHour.toString().padStart(2, "0")}:${startMinute.toString().padStart(2, "0")}`;
+    const endTime = addDurationToTime(startTime, durationHours);
+
     
     return userBookingsForDate.find(booking => 
       booking.bay_id === bayId && 

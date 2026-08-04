@@ -3249,6 +3249,69 @@ export type Database = {
         }
         Relationships: []
       }
+      tenant_settings: {
+        Row: {
+          abn: string
+          address_line: string
+          admin_alert_email: string
+          booking_domain: string
+          created_at: string
+          hub_domain: string
+          id: string
+          legal_entity: string
+          postcode: string
+          sender_email: string
+          socials: Json
+          state: string
+          suburb: string
+          support_email: string
+          support_phone: string
+          timezone: string
+          updated_at: string
+          venue_name: string
+        }
+        Insert: {
+          abn?: string
+          address_line?: string
+          admin_alert_email?: string
+          booking_domain?: string
+          created_at?: string
+          hub_domain?: string
+          id?: string
+          legal_entity?: string
+          postcode?: string
+          sender_email?: string
+          socials?: Json
+          state?: string
+          suburb?: string
+          support_email?: string
+          support_phone?: string
+          timezone?: string
+          updated_at?: string
+          venue_name?: string
+        }
+        Update: {
+          abn?: string
+          address_line?: string
+          admin_alert_email?: string
+          booking_domain?: string
+          created_at?: string
+          hub_domain?: string
+          id?: string
+          legal_entity?: string
+          postcode?: string
+          sender_email?: string
+          socials?: Json
+          state?: string
+          suburb?: string
+          support_email?: string
+          support_phone?: string
+          timezone?: string
+          updated_at?: string
+          venue_name?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

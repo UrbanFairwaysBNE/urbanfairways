@@ -33,6 +33,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { SalesReporting } from "@/components/admin/SalesReporting";
 import { LoyaltyPromoSettings } from "@/components/admin/LoyaltyPromoSettings";
 import { ActivityLog } from "@/components/admin/ActivityLog";
+import VenueDetailsSection from "@/components/admin/VenueDetailsSection";
 import { TableServiceSettings } from "@/components/admin/TableServiceSettings";
 import { DailyHoursEditor } from "@/components/admin/DailyHoursEditor";
 import { PublicHolidaysSection } from "@/components/admin/PublicHolidaysSection";
@@ -868,10 +869,17 @@ export default function AdminSettings() {
 
           {/* General Settings */}
           <TabsContent value="general" className="space-y-4">
+            {/* Venue Details */}
+            <CollapsibleSection title="Venue Details" description="Venue name, contact details, domains and address used across the site, emails and legal pages">
+              <VenueDetailsSection />
+            </CollapsibleSection>
+
             {/* Activity Log */}
             <CollapsibleSection title="Activity Log" description="Recent authentication events and user activity">
               <ActivityLog />
             </CollapsibleSection>
+
+
 
 
             {/* Bay Management */}

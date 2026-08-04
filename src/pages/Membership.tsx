@@ -169,14 +169,14 @@ const Membership = () => {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <span className="font-display text-2xl tracking-wide text-primary-foreground">
+          <span className="font-display text-base sm:text-2xl tracking-wide text-primary-foreground">
             MEMBERSHIP
           </span>
         </div>
         <img 
           src={venueLogo} 
           alt={tenant.venue_name} 
-          className="h-10 w-auto"
+          className="h-7 sm:h-10 w-auto"
         />
       </header>
 

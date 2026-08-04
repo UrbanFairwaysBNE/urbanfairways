@@ -157,7 +157,7 @@ const SiteHeader = () => {
           }`}
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-primary-foreground/10">
-            <img src={venueLogo} alt={tenant.venue_name} className="h-10" />
+            <img src={venueLogo} alt={tenant.venue_name} className="h-[30px]" />
             <button
               className="p-2 -mr-2"
               onClick={() => setOpen(false)}

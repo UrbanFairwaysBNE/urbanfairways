@@ -44,7 +44,7 @@ const getGroups = (venueName: string, email: string, phone: string) => [
 
 const MarketingFAQs = () => {
   const { tenant } = useTenant();
-  const groups = getGroups(tenant.venue_name);
+  const groups = getGroups(tenant.venue_name, tenant.support_email, tenant.support_phone);
   return (
   <MarketingLayout>
     <Seo title={`FAQs | ${tenant.venue_name} Indoor Golf`} description={`Answers on booking, pricing, memberships, bay access, rental clubs, gift cards and the ${tenant.venue_name} League.`} path="/faqs" />

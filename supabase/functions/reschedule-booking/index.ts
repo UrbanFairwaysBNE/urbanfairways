@@ -30,66 +30,16 @@ function isPeakTime(dateStr: string, startTime: string): boolean {
 }
 
 /**
- * Checks if a time is valid for weekday member rate.
- */
-function isWeekdayMemberTime(dateStr: string, startTime: string): boolean {
-  const date = new Date(dateStr + "T00:00:00");
-  const dayOfWeek = date.getDay();
-  const hour = parseInt(startTime.split(":")[0], 10);
-  
-  // Must be Monday (1) through Thursday (4)
-  if (dayOfWeek < 1 || dayOfWeek > 4) {
-    return false;
-  }
-  
-  // Must be before 4pm
-  return hour < 16;
-}
-
-/**
- * Calculate hourly rate based on tier and time
+ * Data-driven hourly rate: every tier's metadata comes from `pricing_config`.
  */
 function calculateHourlyRate(
   tier: string,
   dateStr: string,
   startTime: string,
-  pricingConfig: Record<string, number>,
+  tiers: TierRow[],
   customHourlyRate: number | null
 ): number {
-  // Custom rate always takes precedence
-  if (customHourlyRate !== null && customHourlyRate > 0) {
-    return customHourlyRate;
-  }
-
-  const isPeak = isPeakTime(dateStr, startTime);
-  
-  switch (tier.toLowerCase()) {
-    case "visitor":
-      return isPeak ? VISITOR_PEAK_RATE : VISITOR_OFF_PEAK_RATE;
-    
-    case "weekday":
-      // Weekday members pay their rate for off-peak weekday slots
-      // Otherwise they pay visitor peak rate
-      return isWeekdayMemberTime(dateStr, startTime) 
-        ? (pricingConfig.weekday || 10) 
-        : VISITOR_PEAK_RATE;
-    
-    case "par":
-      return pricingConfig.par || 12;
-    
-    case "birdie":
-      return pricingConfig.birdie || 10;
-    
-    case "eagle":
-      return pricingConfig.eagle || 9;
-    
-    case "albatross":
-      return pricingConfig.albatross || 8;
-    
-    default:
-      // Unknown tier defaults to peak visitor rate
-      return VISITOR_PEAK_RATE;
-  }
+  return calculateTierHourlyRate(tiers, tier, isPeakTime(dateStr, startTime), customHourlyRate);
 }
 
 serve(async (req) => {

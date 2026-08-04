@@ -59,11 +59,13 @@ export async function fetchTenantSettings(): Promise<TenantSettings> {
   if (error) throw error;
   if (!data) return TENANT_DEFAULTS;
 
-  return {
+  const resolved: TenantSettings = {
     ...TENANT_DEFAULTS,
     ...data,
     socials: (data.socials as Record<string, string> | null) ?? {},
   };
+  setTenantSnapshot(resolved);
+  return resolved;
 }
 
 /** React hook — returns placeholders until the row loads. */
@@ -97,4 +99,32 @@ export function bookingUrl(t: TenantSettings, path = "/"): string {
 /** Absolute https URL on the hub domain. */
 export function hubUrl(t: TenantSettings, path = "/"): string {
   return `https://${t.hub_domain}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
+/* ------------------------------------------------------------------ *
+ * Sync snapshot access (for non-React modules: helpers, libs, utils)
+ *
+ * React code should use `useTenant()`. Plain modules that need a value
+ * synchronously read `getTenantSnapshot()`, which returns the last loaded
+ * row (or the placeholders until `fetchTenantSettings()` has resolved once).
+ * ------------------------------------------------------------------ */
+let snapshot: TenantSettings = TENANT_DEFAULTS;
+
+export function setTenantSnapshot(t: TenantSettings) {
+  snapshot = t;
+}
+
+export function getTenantSnapshot(): TenantSettings {
+  return snapshot;
+}
+
+/** Loads the tenant row once and caches it into the sync snapshot. */
+export async function loadTenantSnapshot(): Promise<TenantSettings> {
+  try {
+    const t = await fetchTenantSettings();
+    setTenantSnapshot(t);
+    return t;
+  } catch {
+    return snapshot;
+  }
 }

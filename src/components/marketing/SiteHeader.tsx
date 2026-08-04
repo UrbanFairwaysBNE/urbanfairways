@@ -194,33 +194,37 @@ const SiteHeader = () => {
             </button>
           </div>
           <nav className="flex flex-col px-4 py-4 gap-1">
-            {/* PLAY expandable */}
-            <div>
-              <button
-                onClick={() => setMobilePlayOpen((p) => !p)}
-                className={`w-full flex items-center justify-between font-display tracking-wide uppercase py-3 border-b border-primary-foreground/10 ${
-                  isPlayActive(pathname) ? "text-accent" : "text-primary-foreground"
-                }`}
-              >
-                <span>PLAY</span>
-                <ChevronDown className={`h-4 w-4 transition-transform ${mobilePlayOpen ? "rotate-180" : ""}`} />
-              </button>
-              {mobilePlayOpen && (
-                <div className="pl-4 flex flex-col gap-1">
-                  {playLinks.map((l) => (
-                    <Link
-                      key={l.to}
-                      to={l.to}
-                      className={`font-display tracking-wide uppercase py-2 text-sm ${
-                        pathname === l.to ? "text-accent" : "text-primary-foreground/80"
-                      }`}
-                    >
-                      {l.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
+            {navGroups.map((group) => (
+              <div key={group.key}>
+                <button
+                  onClick={() => setMobileGroup((p) => (p === group.key ? null : group.key))}
+                  className={`w-full flex items-center justify-between font-display tracking-wide uppercase py-3 border-b border-primary-foreground/10 ${
+                    isGroupActive(group, pathname) ? "text-accent" : "text-primary-foreground"
+                  }`}
+                >
+                  <span>{group.label}</span>
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${mobileGroup === group.key ? "rotate-180" : ""}`}
+                  />
+                </button>
+                {mobileGroup === group.key && (
+                  <div className="pl-4 flex flex-col gap-1">
+                    {group.links.map((l) => (
+                      <Link
+                        key={l.to}
+                        to={l.to}
+                        className={`font-display tracking-wide uppercase py-2 text-sm ${
+                          pathname === l.to ? "text-accent" : "text-primary-foreground/80"
+                        }`}
+                      >
+                        {l.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+
 
 
             {topNav.map((n) => (

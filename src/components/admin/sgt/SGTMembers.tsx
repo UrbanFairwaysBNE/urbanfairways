@@ -75,6 +75,7 @@ interface LinkedProfile {
 }
 
 export function SGTMembers() {
+  const { tenant } = useTenant();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
@@ -331,7 +332,7 @@ export function SGTMembers() {
       case "unlink":
         return {
           title: "Unlink Profile",
-          description: `Unlink the Birdies account from "${member.user_name}"'s SGT account? They will need to re-register to link again.`,
+          description: `Unlink the ${tenant.venue_name} account from "${member.user_name}"'s SGT account? They will need to re-register to link again.`,
         };
       default:
         return { title: "", description: "" };

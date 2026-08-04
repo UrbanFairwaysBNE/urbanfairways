@@ -1,13 +1,16 @@
 import Seo from "@/components/Seo";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { Phone, Mail, MapPin } from "lucide-react";
+import { useTenant, formatTenantAddress } from "@/config/tenant";
 
 const HERO = "https://cdn.shopify.com/s/files/1/0758/7030/6550/files/Birdies_Golf.jpg?v=1751956878&width=3840";
 const MAP_IMG = "https://cdn.shopify.com/s/files/1/0758/7030/6550/files/WE_ARE_HERE.png?v=1755590019&width=3840";
 
-const MarketingContact = () => (
+const MarketingContact = () => {
+  const { tenant } = useTenant();
+  return (
   <MarketingLayout>
-    <Seo title={"Contact Birdies Bayside | Redland Bay Indoor Golf"} description={"Get in touch with Birdies Bayside. Find our Redland Bay address, phone number, staffed hours and directions to the centre."} path="/contact" />
+    <Seo title={`Contact ${tenant.venue_name} | Redland Bay Indoor Golf`} description={`Get in touch with ${tenant.venue_name}. Find our Redland Bay address, phone number, staffed hours and directions to the centre.`} path="/contact" />
     <section className="relative h-[22vh] min-h-[160px] flex items-end overflow-hidden">
       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${HERO})` }} />
       <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/70 to-primary/30" />
@@ -26,22 +29,23 @@ const MarketingContact = () => (
             Got a question, want to plan a function, or need help with a booking? Drop us a line, we reply very quickly.
           </p>
           <div className="space-y-5">
-            <ContactRow icon={Phone} label="Phone" value="(07) 2146 8442" href="tel:0721468442" />
-            <ContactRow icon={Mail} label="Email" value="info@birdiesbayside.com.au" href="mailto:info@birdiesbayside.com.au" />
-            <ContactRow icon={MapPin} label="Address" value="Unit 2, 86 Jardine Drive, Redland Bay QLD 4165" />
+            <ContactRow icon={Phone} label="Phone" value={tenant.support_phone} href={`tel:${tenant.support_phone.replace(/\s+/g, "")}`} />
+            <ContactRow icon={Mail} label="Email" value={tenant.support_email} href={`mailto:${tenant.support_email}`} />
+            <ContactRow icon={MapPin} label="Address" value={formatTenantAddress(tenant)} />
           </div>
 
           <div className="mt-10 rounded-xl overflow-hidden border border-border">
-            <img src={MAP_IMG} alt="Birdies location map" className="w-full h-auto" />
+            <img src={MAP_IMG} alt={`${tenant.venue_name} location map`} className="w-full h-auto" />
           </div>
         </div>
 
         {/* Contact form */}
-        <ContactForm />
+        <ContactForm supportEmail={tenant.support_email} />
       </div>
     </section>
   </MarketingLayout>
-);
+  );
+};
 
 const ContactRow = ({
   icon: Icon,
@@ -69,7 +73,7 @@ const ContactRow = ({
   </div>
 );
 
-const ContactForm = () => {
+const ContactForm = ({ supportEmail }: { supportEmail: string }) => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
@@ -77,7 +81,7 @@ const ContactForm = () => {
     const body = encodeURIComponent(
       `Name: ${data.get("name")}\nEmail: ${data.get("email")}\nPhone: ${data.get("phone")}\n\n${data.get("message")}`
     );
-    window.location.href = `mailto:info@birdiesbayside.com.au?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:${supportEmail}?subject=${subject}&body=${body}`;
   };
 
   return (

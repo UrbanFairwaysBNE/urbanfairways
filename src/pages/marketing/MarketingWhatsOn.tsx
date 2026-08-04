@@ -3,9 +3,8 @@ import { useEffect, useState } from "react";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar, Loader2, Repeat } from "lucide-react";
+import venueInterior from "@/assets/venue-interior.jpg";
 import { useTenant } from "@/config/tenant";
-
-const HERO = "https://cdn.shopify.com/s/files/1/0758/7030/6550/files/Birdies_Golf.jpg?v=1751956878&width=3840";
 
 interface Event {
   id: string;
@@ -43,9 +42,9 @@ const MarketingWhatsOn = () => {
 
   return (
     <MarketingLayout>
-    <Seo title={`What's On | Events at ${tenant.venue_name}`} description={`Upcoming events, leagues, competitions and specials at ${tenant.venue_name} indoor golf in Redland Bay.`} path="/whats-on" />
+    <Seo title={`What's On | Events at ${tenant.venue_name}`} description={`Upcoming events, leagues, competitions and specials at ${tenant.venue_name} indoor golf.`} path="/whats-on" />
       <section className="relative h-[17vh] min-h-[110px] flex items-end overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${HERO})` }} />
+        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${venueInterior})` }} />
         <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/70 to-primary/30" />
         <div className="relative container mx-auto px-4 pb-8">
           <p className="text-accent font-display tracking-[0.25em] uppercase text-xs mb-1.5">Welcome</p>

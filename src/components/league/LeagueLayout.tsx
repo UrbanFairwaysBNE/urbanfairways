@@ -2,7 +2,7 @@ import { ReactNode, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useTenant } from "@/config/tenant";
-import birdiesBLogo from "@/assets/venue-logo-mark.png";
+import venueMark from "@/assets/venue-logo-mark.png";
 import {
   LayoutDashboard,
   History,
@@ -53,7 +53,7 @@ export function LeagueLayout({ children }: LeagueLayoutProps) {
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <Link to="/league" className="flex items-center">
-              <img src={birdiesBLogo} alt={tenant.venue_name} className="h-10 w-auto" />
+              <img src={venueMark} alt={tenant.venue_name} className="h-10 w-auto" />
             </Link>
           </div>
 

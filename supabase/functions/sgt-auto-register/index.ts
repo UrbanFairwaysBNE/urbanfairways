@@ -516,7 +516,7 @@ serve(async (req) => {
               subject = subject.replace(new RegExp(escaped, 'g'), value);
             }
 
-            const wrappedHtml = await renderBrandedEmail(supabaseClient, "Welcome to the Birdies League!", bodyContent, {
+            const wrappedHtml = await renderBrandedEmail(supabaseClient, `Welcome to the ${tenant.venue_name} League!`, bodyContent, {
               text: "Read the Player Guide",
               url: guideUrl,
             });

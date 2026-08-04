@@ -189,8 +189,8 @@ serve(async (req) => {
 
     for (const member of members) {
       const m = member as { user_id: number; user_name: string; user_email?: string; user_active?: number; user_country_code?: string; user_has_avatar?: string; user_game_id?: string };
-      const isPayingBirdiesMember = payingSgtIds.has(m.user_id);
-      const localActive = isPayingBirdiesMember ? 1 : (m.user_active ?? 1);
+      const isPayingLocalMember = payingSgtIds.has(m.user_id);
+      const localActive = isPayingLocalMember ? 1 : (m.user_active ?? 1);
 
       await supabase.from("sgt_members").upsert({
         user_id: m.user_id,
@@ -204,9 +204,9 @@ serve(async (req) => {
       }, { onConflict: 'user_id' });
       totalRecords++;
     }
-    console.log(`[SGT-SYNC] Synced ${members.length} members (${payingSgtIds.size} forced-active as paying Birdies members)`);
+    console.log(`[SGT-SYNC] Synced ${members.length} members (${payingSgtIds.size} forced-active as paying members)`);
 
-    // 1b. Auto-link SGT members to Birdies profiles by email match
+    // 1b. Auto-link SGT members to local profiles by email match
     // This catches users who registered on SGT externally (not via sgt-register)
     console.log("[SGT-SYNC] Checking for unlinked profiles...");
     let linkedCount = 0;
@@ -247,16 +247,16 @@ serve(async (req) => {
         if (resendKey) {
           const { Resend } = await import("https://esm.sh/resend@2.0.0");
           const resend = new Resend(resendKey);
-          const rawUrl = Deno.env.get("SITE_URL") || "https://birdie-bay-bookings.lovable.app";
+          const rawUrl = Deno.env.get("SITE_URL") || tenantHubUrl(tenant);
           const siteUrl = /^https?:\/\//i.test(rawUrl) ? rawUrl.replace(/\/$/, "") : `https://${rawUrl.replace(/^\/+/, "").replace(/\/$/, "")}`;
           
           for (const linked of newlyLinked) {
             try {
               await resend.emails.send({
-                from: "Birdies Bayside <info@birdiesbayside.com.au>",
-                to: ["info@birdiesbayside.com.au"],
-                subject: `🆕 Action Required: Onboard ${linked.username} to Birdies League`,
-                html: `<p><strong>${linked.username}</strong> (${linked.email}) has been auto-linked to their Birdies profile via SGT sync.</p>
+                from: `${tenant.venue_name} <${tenant.sender_email}>`,
+                to: [tenant.admin_alert_email],
+                subject: `🆕 Action Required: Onboard ${linked.username} to the ${tenant.venue_name} League`,
+                html: `<p><strong>${linked.username}</strong> (${linked.email}) has been auto-linked to their local profile via SGT sync.</p>
                        <p>SGT User ID: ${linked.sgtUserId}</p>
                        <p><strong>⚠️ Action Required:</strong> Set their handicap to complete onboarding.</p>
                        <p><a href="${siteUrl}/admin/sgt-manager?tab=registrations">Open Pending Onboarding →</a></p>`,

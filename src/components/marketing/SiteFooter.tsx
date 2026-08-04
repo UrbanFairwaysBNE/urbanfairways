@@ -17,24 +17,28 @@ const SiteFooter = () => {
             {tenant.venue_name}'s premier indoor golf centre. Play, practice and compete, rain or shine.
           </p>
           <div className="flex gap-3 mt-5">
-            <a
-              href="https://www.facebook.com/p/Birdies-Bayside-61577186327753/"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Facebook"
-              className="bg-primary-foreground/10 hover:bg-accent transition-colors p-2 rounded-full"
-            >
-              <Facebook className="h-4 w-4" />
-            </a>
-            <a
-              href="https://www.instagram.com/birdiesbayside"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Instagram"
-              className="bg-primary-foreground/10 hover:bg-accent transition-colors p-2 rounded-full"
-            >
-              <Instagram className="h-4 w-4" />
-            </a>
+            {tenant.socials.facebook && (
+              <a
+                href={tenant.socials.facebook}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Facebook"
+                className="bg-primary-foreground/10 hover:bg-accent transition-colors p-2 rounded-full"
+              >
+                <Facebook className="h-4 w-4" />
+              </a>
+            )}
+            {tenant.socials.instagram && (
+              <a
+                href={tenant.socials.instagram}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Instagram"
+                className="bg-primary-foreground/10 hover:bg-accent transition-colors p-2 rounded-full"
+              >
+                <Instagram className="h-4 w-4" />
+              </a>
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-3 mt-5">
             <a

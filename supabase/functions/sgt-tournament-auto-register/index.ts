@@ -334,7 +334,7 @@ async function registerAllMembersForTournament(
   });
 
   // SELF-HEAL: if a tour member has no local row (e.g. wiped by a past cleanup) but SGT
-  // still holds their Birdies custom HCP, restore it instead of silently falling back to Combo HCP.
+  // still holds their venue custom HCP, restore it instead of silently falling back to Combo HCP.
   for (const m of allTourMembers) {
     if (!customHcpMap.has(m.user_id) && m.custom_hcp !== null && m.custom_hcp !== undefined) {
       customHcpMap.set(m.user_id, m.custom_hcp);

@@ -40,12 +40,9 @@ function buildNewMemberEmail(data: { username: string; email: string; sgtUserId:
           <!-- HEADER -->
           <tr>
             <td align="center" style="background-color:#1F4C25; padding:18px; border-radius:16px 16px 0 0;">
-              <img
-                src="https://cdn.shopify.com/s/files/1/0758/7030/6550/files/NO-BG_BIRDIES-LOGOS_WORK-DOC_AMENDED-9.7.25-01.png?v=1761536603"
-                width="140"
-                alt="${tenant.venue_name}"
-                style="display:block; width:140px; height:auto; border:0;"
-              />
+              <div style="font-family:Anton, Impact, Arial Black, sans-serif; font-size:24px; letter-spacing:0.5px; color:#FFFFFF;">
+                ${tenant.venue_name}
+              </div>
             </td>
           </tr>
           <!-- BODY -->

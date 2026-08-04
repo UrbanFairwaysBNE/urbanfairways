@@ -32,6 +32,7 @@ const tiers = [
 
 const MarketingMembership = () => {
   const { tenant } = useTenant();
+  const { peakLabel, offPeakLabel, specials } = useCasualRates();
   return (
   <MarketingLayout>
     <Seo title={`Golf Memberships | ${tenant.venue_name}`} description={`Compare ${tenant.venue_name} membership tiers, included simulator hours, member pricing and automated bay access.`} path="/membership-info" />
@@ -117,7 +118,7 @@ const MarketingMembership = () => {
             <div className="mb-5">
               <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold bg-accent/10 text-accent border border-accent/20">
                 <Clock className="h-3.5 w-3.5" />
-                $XX/hr
+                {offPeakLabel ?? "—"}/hr
               </span>
             </div>
             <p className="text-sm text-foreground/60 mb-2">Off-peak hours</p>
@@ -132,7 +133,7 @@ const MarketingMembership = () => {
             <div className="mb-5">
               <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold bg-accent/10 text-accent border border-accent/20">
                 <Clock className="h-3.5 w-3.5" />
-                $XX/hr
+                {peakLabel ?? "—"}/hr
               </span>
             </div>
             <p className="text-sm text-foreground/60 mb-2">Peak hours</p>

@@ -49,6 +49,9 @@ interface DateTimePickerProps {
   selectedDate: Date | undefined;
   selectedTime: string | undefined;
   selectedDuration: number;
+  /** Session lengths in hours; defaults to 1–4 when not supplied. */
+  durations?: number[];
+
   selectedPlayers: number;
   onDateChange: (date: Date | undefined) => void;
   onTimeChange: (time: string) => void;

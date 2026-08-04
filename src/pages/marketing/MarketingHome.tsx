@@ -57,8 +57,7 @@ const MarketingHome = () => {
             <span className="text-accent">Elevate.</span>
           </h1>
           <p className="mt-6 text-lg sm:text-xl text-primary-foreground/90 max-w-xl">
-            Experience world-class indoor golf. Play, practice and compete, rain or shine.
-            Visitors welcome.
+            Indoor golf, the Urban way. Play for fun, Improve with real data, Elevate every part of your game. Everyone welcome.
           </p>
           <div className="mt-8 flex flex-col items-start gap-3">
             <a

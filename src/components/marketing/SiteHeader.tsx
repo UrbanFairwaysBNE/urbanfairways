@@ -4,23 +4,43 @@ import { Menu, X, ChevronDown } from "lucide-react";
 import venueLogo from "@/assets/venue-logo.png";
 import { useTenant, hubUrl } from "@/config/tenant";
 
-const playLinks = [
-  { to: "/about", label: "About" },
-  { to: "/staffed-hours", label: "Staffed Hours" },
-  { to: "/faqs", label: "FAQs" },
+type NavGroup = { key: string; label: string; links: { to: string; label: string }[] };
+
+const navGroups: NavGroup[] = [
+  {
+    key: "play",
+    label: "PLAY",
+    links: [
+      { to: "/about", label: "About" },
+      { to: "/staffed-hours", label: "Staffed Hours" },
+      { to: "/faqs", label: "FAQs" },
+    ],
+  },
+  {
+    key: "improve",
+    label: "IMPROVE",
+    links: [
+      { to: "/coaching", label: "Coaching" },
+      { to: "/tpi-assessment", label: "TPI Assessment" },
+    ],
+  },
+  {
+    key: "elevate",
+    label: "ELEVATE",
+    links: [{ to: "/compete-info", label: "Compete" }],
+  },
 ];
 
 const topNav = [
-  { to: "/coaching", label: "Coaching" },
-  { to: "/compete-info", label: "COMPETE" },
   { to: "/membership-info", label: "JOIN" },
   { to: "/gift", label: "Gift cards" },
   { to: "/whats-on", label: "What's On" },
   { to: "/contact", label: "Contact" },
 ];
 
-const isPlayActive = (pathname: string) =>
-  playLinks.some((l) => l.to === pathname);
+const isGroupActive = (group: NavGroup, pathname: string) =>
+  group.links.some((l) => l.to === pathname);
+
 
 const SiteHeader = () => {
   const { tenant } = useTenant();

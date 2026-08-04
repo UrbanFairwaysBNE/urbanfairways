@@ -27,8 +27,10 @@ const Eyebrow = ({ children }: { children: React.ReactNode }) => (
   </p>
 );
 
-const Tile = ({ children }: { children: React.ReactNode }) => (
-  <section className="bg-card border border-border rounded-2xl shadow-sm p-6 sm:p-10">{children}</section>
+const Tile = ({ id, children }: { id?: string; children: React.ReactNode }) => (
+  <section id={id} className="scroll-mt-24 bg-card border border-border rounded-2xl shadow-sm p-6 sm:p-10">
+    {children}
+  </section>
 );
 
 const MarketingCoaching = () => {
@@ -53,8 +55,27 @@ const MarketingCoaching = () => {
 
       <div className="py-12 sm:py-20 bg-secondary/30">
         <div className="container mx-auto px-4 max-w-5xl space-y-8 sm:space-y-12">
+          {/* Quick links */}
+          <nav className="grid grid-cols-3 gap-3 sm:gap-6">
+            {[
+              { id: "private-coaching", label: "Private Coaching" },
+              { id: "ladies", label: "Ladies" },
+              { id: "juniors", label: "Juniors" },
+            ].map((item) => (
+              <a
+                key={item.id}
+                href={`#${item.id}`}
+                className="bg-card border border-border hover:border-accent rounded-xl px-3 py-4 text-center transition-colors"
+              >
+                <span className="text-accent font-display font-bold tracking-[0.12em] uppercase text-xs sm:text-base leading-tight">
+                  {item.label}
+                </span>
+              </a>
+            ))}
+          </nav>
+
           {/* PGA Pro 1-on-1 */}
-          <Tile>
+          <Tile id="private-coaching">
             <Eyebrow>Private Coaching</Eyebrow>
             <h2 className="font-display text-3xl sm:text-4xl text-primary leading-tight mb-4">
               PGA Pro 1-on-1 Golf Lessons
@@ -82,8 +103,8 @@ const MarketingCoaching = () => {
           </Tile>
 
           {/* Ladies beginner group classes */}
-          <Tile>
-            <Eyebrow>Coming Soon</Eyebrow>
+          <Tile id="ladies">
+            <Eyebrow>Ladies</Eyebrow>
             <h2 className="font-display text-3xl sm:text-4xl text-primary leading-tight mb-6">
               Ladies Beginner Group Classes
             </h2>
@@ -129,7 +150,7 @@ const MarketingCoaching = () => {
           </Tile>
 
           {/* Junior program */}
-          <Tile>
+          <Tile id="juniors">
             <Eyebrow>Juniors</Eyebrow>
             <h2 className="font-display text-3xl sm:text-4xl text-primary leading-tight mb-6">
               {tenant.venue_name} Junior After School Golf Program

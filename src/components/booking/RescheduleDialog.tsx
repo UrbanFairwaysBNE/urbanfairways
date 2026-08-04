@@ -183,11 +183,9 @@ export const RescheduleDialog = ({
     return `${hour12}:${minutes} ${ampm}`;
   };
 
-  const calculateEndTime = (startTime: string, durationHours: number): string => {
-    const [hours, minutes] = startTime.split(":").map(Number);
-    const endHours = hours + durationHours;
-    return `${endHours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
-  };
+  const calculateEndTime = (startTime: string, durationHours: number): string =>
+    addDurationToTime(startTime, durationHours);
+
 
   const isSlotAvailable = (bayId: string, startTime: string): boolean => {
     const endTime = calculateEndTime(startTime, booking.duration_hours);

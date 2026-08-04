@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { loadTiers } from "../_shared/tiers.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -133,17 +134,22 @@ serve(async (req) => {
     const tourMembers = extractArray(tourMembersData, ['members', 'results']) as SGTMember[];
     const tourMemberIds = new Set(tourMembers.map(m => m.user_id));
 
-    // 4. Get paying members (birdie/eagle) from our profiles
-    const { data: payingMembers, error: profilesError } = await supabase
-      .from("profiles")
-      .select("user_id, email, first_name, last_name, display_name, membership_tier, sgt_user_id")
-      .in("membership_tier", ["birdie", "eagle"]);
+    // 4. Get league-eligible members (per pricing_config) from our profiles
+    const leagueTiers = (await loadTiers(supabase))
+      .filter((t) => t.grants_league_access)
+      .map((t) => t.tier);
+    const { data: payingMembers, error: profilesError } = leagueTiers.length
+      ? await supabase
+          .from("profiles")
+          .select("user_id, email, first_name, last_name, display_name, membership_tier, sgt_user_id")
+          .in("membership_tier", leagueTiers)
+      : { data: [], error: null };
 
     if (profilesError) {
       throw new Error(`Failed to fetch profiles: ${profilesError.message}`);
     }
 
-    console.log(`[SGT-SYNC-ELIGIBLE] Found ${payingMembers?.length || 0} paying members (birdie/eagle)`);
+    console.log(`[SGT-SYNC-ELIGIBLE] Found ${payingMembers?.length || 0} league-eligible members`);
 
     const results: EligibleMemberResult[] = [];
     let addedToClub = 0;

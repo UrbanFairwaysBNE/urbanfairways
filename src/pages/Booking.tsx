@@ -622,18 +622,18 @@ export default function Booking() {
             <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
             <div>
               <strong>Additional bay booking.</strong> You already have a bay booked at this time. 
-              Additional bays during peak hours are charged at visitor rates ($35/hr).
+              Additional bays during peak hours are charged at {defaultTier?.display_name || "walk-in"} rates (${walkInPeakRate}/hr).
             </div>
           </div>
         )}
 
-        {/* Weekday member restriction warning */}
-        {userMembershipTier === "weekday" && rateInfo?.isRestricted && (
+        {/* Off-peak-only tier restriction warning */}
+        {isOffPeakOnlyTier(pricing, userMembershipTier) && rateInfo?.isRestricted && (
           <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
             <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
             <div>
-              <strong>Peak time selected.</strong> As a Weekday member, you get $10/hr for Monday-Thursday before 4pm only. 
-              This booking will be charged at the visitor peak rate ($35/hr).
+              <strong>Peak time selected.</strong> As a {getTierLabel(userMembershipTier)} member, your member rate applies during off-peak hours only. 
+              This booking will be charged at the {defaultTier?.display_name || "walk-in"} peak rate (${walkInPeakRate}/hr).
             </div>
           </div>
         )}

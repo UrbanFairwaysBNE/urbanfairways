@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { loadTiers } from "../_shared/tiers.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -176,13 +177,18 @@ serve(async (req) => {
     const membersResponse = await sgtRequest("/members/list", apiKey);
     const members = extractArray(membersResponse, ['members', 'results']);
 
-    // Pre-fetch paying members (birdie/eagle) so we never mark them Inactive locally
+    // Pre-fetch league-eligible members (per pricing_config) so we never mark them Inactive locally
     // even if SGT's own user_active flag is 0 (e.g. their SGT subscription lapsed).
-    const { data: payingProfiles } = await supabase
-      .from("profiles")
-      .select("sgt_user_id")
-      .in("membership_tier", ["birdie", "eagle"])
-      .not("sgt_user_id", "is", null);
+    const leagueTiers = (await loadTiers(supabase))
+      .filter((t) => t.grants_league_access)
+      .map((t) => t.tier);
+    const { data: payingProfiles } = leagueTiers.length
+      ? await supabase
+          .from("profiles")
+          .select("sgt_user_id")
+          .in("membership_tier", leagueTiers)
+          .not("sgt_user_id", "is", null)
+      : { data: [] as { sgt_user_id: number | null }[] };
     const payingSgtIds = new Set(
       ((payingProfiles || []) as { sgt_user_id: number | null }[])
         .map((p) => p.sgt_user_id)

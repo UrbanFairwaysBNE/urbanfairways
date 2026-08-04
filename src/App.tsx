@@ -8,7 +8,6 @@ import { Capacitor } from "@capacitor/core";
 import { App as CapacitorApp } from "@capacitor/app";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import ScrollToTop from "@/components/ScrollToTop";
-import { TermsGate } from "@/components/legal/TermsGate";
 import { loadTenantSnapshot } from "@/config/tenant";
 
 

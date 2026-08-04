@@ -27,7 +27,7 @@ import venueLogo from "@/assets/venue-logo.png";
 import { MembershipPaymentIssueDialog } from "@/components/membership/MembershipPaymentIssueDialog";
 import { useTenant } from "@/config/tenant";
 import { usePricing } from "@/hooks/usePricing";
-import { hasSingleBayPeakLimit } from "@/lib/tier-config";
+import { hasSingleBayPeakLimit, isOffPeakOnlyTier } from "@/lib/tier-config";
 
 const PENDING_BOOKING_KEY = "bb:pendingBookingId";
 

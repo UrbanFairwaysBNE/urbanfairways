@@ -83,24 +83,33 @@ const MarketingAbout = () => {
         <div>
           <p className="text-accent font-display font-bold tracking-[0.2em] uppercase text-sm mb-3">Our Story</p>
           <h2 className="font-display text-4xl sm:text-5xl leading-tight mb-6">
-            Golf has entered a new era, and it's happening indoors.
+            Indoor Golf Made Easy.
           </h2>
           <div className="space-y-4 text-primary-foreground/85 text-lg leading-relaxed">
             <p>
-              Thanks to major leaps in simulator technology, indoor golf is no longer just a substitute for the real thing.
-              The game has changed, and we are going all in.
+              {tenant.venue_name} was created with one simple goal: to make indoor golf available to everyone.
+              No memberships you don't need, no intimidating clubhouse, no waiting on a tee sheet. Just a great
+              space, great technology, and an open door.
             </p>
             <p>
-              We created {tenant.venue_name} to bring this revolution to life. Our space is all about giving our community the
-              opportunity to practice, compete, and refine their game with ease.
+              Indoor golf is growing in popularity all the time, and it's now a genuine alternative to traditional
+              golf rather than a poor substitute for it. Modern simulators track every part of your swing and ball
+              flight, so the feedback you get in a bay is often better than anything you'd get on the range.
             </p>
             <p>
-              Whether you're working on your swing or playing with friends, {tenant.venue_name} makes golf more accessible, more
-              flexible, and far more convenient. No more 5-hour rounds, no more getting rained off, just great golf,
-              when it suits you.
+              It also offers ways to play and enjoy the game that outdoor golf simply cannot. Play world-famous
+              courses, hit a focused practice session on your lunch break, run closest-to-the-pin games with mates,
+              or work through a proper coaching plan with real data behind it. Rain, wind, heat and daylight stop
+              being part of the equation.
             </p>
-            <p className="font-display text-accent text-2xl pt-4">Indoor Golf, Redefined.</p>
+            <p>
+              Whether you're a seasoned player chasing a lower handicap or you've never swung a club in your life,
+              we have you covered. Our bays, our coaches and our team are here to make it easy from the moment you
+              walk in.
+            </p>
+            <p className="font-display text-accent text-2xl pt-4">Play. Improve. Elevate.</p>
           </div>
+
         </div>
         <div className="rounded-2xl overflow-hidden shadow-xl aspect-[4/3]">
           <img src={venueInterior} alt="Venue interior" className="w-full h-full object-cover" />

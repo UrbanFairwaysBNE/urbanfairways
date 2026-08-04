@@ -2,9 +2,11 @@ import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { useAuth } from "@/hooks/useAuth";
+import { isHubHost } from "@/lib/hub-host";
 import birdiesLogo from "@/assets/birdies-logo.png";
 import birdiesAppIcon from "@/assets/birdies-app-icon.png";
 import MarketingHome from "./marketing/MarketingHome";
+
 
 /**
  * Hostname routing:

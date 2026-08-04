@@ -65,6 +65,7 @@ const MarketingStaffedHours = lazy(() => import("./pages/marketing/MarketingStaf
 const MarketingGateAccess = lazy(() => import("./pages/marketing/MarketingGateAccess"));
 const MarketingWhatsOn = lazy(() => import("./pages/marketing/MarketingWhatsOn"));
 const MarketingCoaching = lazy(() => import("./pages/marketing/MarketingCoaching"));
+const MarketingTPI = lazy(() => import("./pages/marketing/MarketingTPI"));
 
 // Admin pages
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));

@@ -481,7 +481,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
                   <div className="relative grid lg:grid-cols-5 gap-8 items-start">
                     <div className="lg:col-span-2">
                       <h2 className="text-white font-black text-3xl sm:text-4xl leading-none mb-3"
-                        style={{ fontFamily: "'Anton', 'Impact', sans-serif" }}>
+                        style={{ fontFamily: "'Archivo', 'Impact', sans-serif" }}>
                         2-MAN AMBROSE
                       </h2>
                       <p className="text-white/75 mb-6">

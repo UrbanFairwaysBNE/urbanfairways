@@ -1,5 +1,5 @@
 import { Phone, Mail, MapPin, Facebook, Instagram } from "lucide-react";
-import birdiesLogo from "@/assets/birdies-logo.png";
+import birdiesLogo from "@/assets/venue-logo.png";
 import googlePlayBadge from "@/assets/google-play-badge.svg";
 import { useTenant, hubUrl, formatTenantAddress } from "@/config/tenant";
 

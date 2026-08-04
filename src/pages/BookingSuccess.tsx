@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { CheckCircle, Calendar, Clock, MapPin, CreditCard, Loader2, XCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import birdieLogo from "@/assets/birdies-b-logo.png";
+import birdieLogo from "@/assets/venue-logo-mark.png";
 import { useTenant } from "@/config/tenant";
 
 interface BookingDetails {

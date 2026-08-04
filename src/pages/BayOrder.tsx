@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { ShoppingCart, Plus, Minus, Check, Loader2 } from "lucide-react";
-import birdieLogo from "@/assets/birdies-logo.png";
+import birdieLogo from "@/assets/venue-logo.png";
 import { useTenant } from "@/config/tenant";
 
 interface POSProduct {

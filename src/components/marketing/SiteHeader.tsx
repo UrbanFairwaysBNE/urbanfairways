@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ChevronDown } from "lucide-react";
-import birdiesLogo from "@/assets/birdies-logo.png";
+import birdiesLogo from "@/assets/venue-logo.png";
 import { useTenant, hubUrl } from "@/config/tenant";
 
 const playLinks = [

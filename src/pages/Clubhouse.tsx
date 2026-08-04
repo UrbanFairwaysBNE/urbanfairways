@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, Plus, ThumbsUp, MessageCircle, Trash2, Image as ImageIcon, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
-import birdiesLogo from "@/assets/birdies-logo.png";
+import birdiesLogo from "@/assets/venue-logo.png";
 import { useTenant } from "@/config/tenant";
 
 interface Post {

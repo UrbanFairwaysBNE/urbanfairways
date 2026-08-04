@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Trophy, Medal, Award, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import birdiesLogo from "@/assets/birdies-b-orange.png";
+import birdiesLogo from "@/assets/venue-logo-mark.png";
 import { getCurrentBlockLabel } from "@/lib/league-block";
 import { useTenant } from "@/config/tenant";
 

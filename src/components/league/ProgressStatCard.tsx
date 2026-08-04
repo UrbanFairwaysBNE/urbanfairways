@@ -35,7 +35,7 @@ export function ProgressStatCard({
           <p className={`font-anton text-2xl ${valueClassName}`}>{value}</p>
           <p className="text-xs font-inter text-muted-foreground">{label}</p>
           {subValue && (
-            <p className="text-xs font-inter text-birdies-orange font-medium mt-1">{subValue}</p>
+            <p className="text-xs font-inter text-brand-accent font-medium mt-1">{subValue}</p>
           )}
         </button>
 

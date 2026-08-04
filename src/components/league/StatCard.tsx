@@ -30,7 +30,7 @@ export function StatCard({
           {label}
         </span>
         {icon && (
-          <div className="text-birdies-orange">
+          <div className="text-brand-accent">
             {icon}
           </div>
         )}

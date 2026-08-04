@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { useSGTTournamentStandings } from "@/hooks/useSGTEmbedData";
 import { useActiveTourData } from "@/hooks/useActiveTourData";
 import { useExemptPlayers } from "@/hooks/useExemptPlayers";
-import birdiesLogo from "@/assets/birdies-b-orange.png";
+import birdiesLogo from "@/assets/venue-logo-mark.png";
 import { useTenant } from "@/config/tenant";
 
 export default function EmbedTVWeekly() {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { CheckCircle, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import birdiesLogo from "@/assets/birdies-logo.png";
+import birdiesLogo from "@/assets/venue-logo.png";
 import { useTenant } from "@/config/tenant";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";

@@ -6,7 +6,7 @@ import { useActiveTourData } from "@/hooks/useActiveTourData";
 import { useSGTTournamentStandings } from "@/hooks/useSGTEmbedData";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import birdiesB from "@/assets/birdies-b-orange.png";
+import birdiesB from "@/assets/venue-logo-mark.png";
 import { useIframeAutoResize } from "@/hooks/useIframeAutoResize";
 import { TournamentStatsView } from "@/components/sgt/TournamentStatsView";
 import { useTenant, hubUrl } from "@/config/tenant";

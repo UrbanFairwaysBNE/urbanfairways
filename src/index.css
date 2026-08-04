@@ -60,11 +60,11 @@
     --sidebar-ring: 18 84% 55%;
 
     /* Custom Birdies tokens */
-    --birdies-green: 128 42% 21%;
-    --birdies-orange: 18 84% 55%;
-    --birdies-cream: 37 100% 95%;
-    --birdies-green-light: 128 30% 35%;
-    --birdies-orange-light: 18 84% 65%;
+    --brand-primary: 128 42% 21%;
+    --brand-accent: 18 84% 55%;
+    --brand-surface: 37 100% 95%;
+    --brand-primary-light: 128 30% 35%;
+    --brand-accent-light: 18 84% 65%;
     
     /* League Hub - Premium Gold/Amber theme */
     --league-primary: 45 93% 47%;
@@ -146,11 +146,11 @@
   }
 
   .gradient-orange {
-    background: linear-gradient(135deg, hsl(var(--birdies-orange)) 0%, hsl(var(--birdies-orange-light)) 100%);
+    background: linear-gradient(135deg, hsl(var(--brand-accent)) 0%, hsl(var(--brand-accent-light)) 100%);
   }
 
   .gradient-green {
-    background: linear-gradient(135deg, hsl(var(--birdies-green)) 0%, hsl(var(--birdies-green-light)) 100%);
+    background: linear-gradient(135deg, hsl(var(--brand-primary)) 0%, hsl(var(--brand-primary-light)) 100%);
   }
 
   /* Stat Card Styling */
@@ -190,7 +190,7 @@
 
   /* Score badge colors */
   .badge-in-progress {
-    @apply bg-birdies-orange/15 text-birdies-orange;
+    @apply bg-brand-accent/15 text-brand-accent;
   }
 
   .badge-completed {
@@ -205,6 +205,6 @@
   }
   
   .bogey-stat {
-    @apply bg-birdies-orange/10;
+    @apply bg-brand-accent/10;
   }
 }

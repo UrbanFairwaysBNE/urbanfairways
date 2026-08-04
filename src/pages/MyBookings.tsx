@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Calendar, Clock, MapPin, X, RefreshCw, Plus } from "lucide-react";
 import { format, parseISO, isPast, isToday } from "date-fns";
 import { toast } from "sonner";
-import birdiesLogo from "@/assets/birdies-logo.png";
+import birdiesLogo from "@/assets/venue-logo.png";
 import { useTenant } from "@/config/tenant";
 import {
   AlertDialog,

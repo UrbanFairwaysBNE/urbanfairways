@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Frown, Meh, Smile, CheckCircle2 } from "lucide-react";
-import birdiesLogo from "@/assets/birdies-green-logo.png";
+import birdiesLogo from "@/assets/venue-logo.png";
 import { useTenant, formatTenantAddress } from "@/config/tenant";
 
 type Score = "bad" | "ok" | "good";

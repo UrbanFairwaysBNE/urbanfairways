@@ -27,7 +27,7 @@ export default function LeagueRounds() {
   if (authLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 text-birdies-orange animate-spin" />
+        <Loader2 className="h-8 w-8 text-brand-accent animate-spin" />
       </div>
     );
   }
@@ -49,7 +49,7 @@ export default function LeagueRounds() {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 text-birdies-orange animate-spin" />
+          <Loader2 className="h-8 w-8 text-brand-accent animate-spin" />
         </div>
       ) : rounds.length === 0 ? (
         <div className="bg-white rounded-2xl border border-border/50 p-12 text-center shadow-sm animate-fade-in">

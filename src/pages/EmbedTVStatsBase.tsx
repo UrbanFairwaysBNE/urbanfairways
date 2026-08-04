@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveTourData } from "@/hooks/useActiveTourData";
 import type { StatsResponse } from "@/components/sgt/TournamentStatsView";
-import birdiesLogo from "@/assets/birdies-b-orange.png";
+import birdiesLogo from "@/assets/venue-logo-mark.png";
 import { useTenant } from "@/config/tenant";
 
 type PlayerRow = Record<string, unknown> & { user_name?: string; numrounds?: number };

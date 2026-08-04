@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CheckCircle2 } from "lucide-react";
-import birdiesLogo from "@/assets/birdies-green-logo.png";
+import birdiesLogo from "@/assets/venue-logo.png";
 import { useTenant, formatTenantAddress } from "@/config/tenant";
 
 const dayOptions = ["Monday", "Wednesday", "Thursday"];

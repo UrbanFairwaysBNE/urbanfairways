@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import birdiesLogo from "@/assets/birdies-logo.png";
+import birdiesLogo from "@/assets/venue-logo.png";
 import { useTenant } from "@/config/tenant";
 import { Loader2, ArrowLeft, CheckCircle2, Eye, EyeOff, UserPlus } from "lucide-react";
 
@@ -125,7 +125,7 @@ export default function LeagueRegister() {
   if (authLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 text-birdies-orange animate-spin" />
+        <Loader2 className="h-8 w-8 text-brand-accent animate-spin" />
       </div>
     );
   }
@@ -147,7 +147,7 @@ export default function LeagueRegister() {
             <p className="font-inter text-muted-foreground">
               Redirecting you to the League Hub...
             </p>
-            <Loader2 className="h-6 w-6 text-birdies-orange animate-spin mx-auto mt-4" />
+            <Loader2 className="h-6 w-6 text-brand-accent animate-spin mx-auto mt-4" />
           </div>
         </main>
       </div>
@@ -277,7 +277,7 @@ export default function LeagueRegister() {
               <Button
                 onClick={handleRegister}
                 disabled={isRegistering || !username || !password || usernameAvailable === false}
-                className="w-full bg-birdies-orange hover:bg-birdies-orange/90 text-white font-inter font-semibold"
+                className="w-full bg-brand-accent hover:bg-brand-accent/90 text-white font-inter font-semibold"
               >
                 {isRegistering ? (
                   <>

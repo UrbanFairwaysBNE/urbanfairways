@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Eye, EyeOff, Lock, Check, AlertCircle, Loader2, Mail } from "lucide-react";
-import birdieLogo from "@/assets/birdies-logo.png";
+import birdieLogo from "@/assets/venue-logo.png";
 import { useTenant } from "@/config/tenant";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;

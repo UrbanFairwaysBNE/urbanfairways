@@ -121,7 +121,7 @@ export default function LeagueHub() {
   if (authLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 text-birdies-orange animate-spin" />
+        <Loader2 className="h-8 w-8 text-brand-accent animate-spin" />
       </div>
     );
   }
@@ -165,7 +165,7 @@ export default function LeagueHub() {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 text-birdies-orange animate-spin" />
+          <Loader2 className="h-8 w-8 text-brand-accent animate-spin" />
         </div>
       ) : !sgtUserId ? (
         // Show registration prompt if user doesn't have SGT account
@@ -208,7 +208,7 @@ export default function LeagueHub() {
               <h2 className="font-anton text-xl text-primary">RECENT ROUNDS</h2>
               <Link
                 to="/league/rounds"
-                className="flex items-center gap-1 text-birdies-orange font-inter font-medium text-sm hover:underline"
+                className="flex items-center gap-1 text-brand-accent font-inter font-medium text-sm hover:underline"
               >
                 View all <ChevronRight className="h-4 w-4" />
               </Link>

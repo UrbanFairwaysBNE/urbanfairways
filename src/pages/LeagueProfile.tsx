@@ -156,7 +156,7 @@ export default function LeagueProfile() {
   if (authLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 text-birdies-orange animate-spin" />
+        <Loader2 className="h-8 w-8 text-brand-accent animate-spin" />
       </div>
     );
   }
@@ -186,7 +186,7 @@ export default function LeagueProfile() {
         <div className="bg-white rounded-2xl border border-border/50 overflow-hidden mb-6 shadow-sm animate-fade-in">
           {/* Green Hero Section */}
           <div className="bg-primary p-6 flex flex-col items-center">
-            <div className="w-24 h-24 rounded-full bg-birdies-orange flex items-center justify-center text-white font-anton text-4xl shadow-lg mb-4">
+            <div className="w-24 h-24 rounded-full bg-brand-accent flex items-center justify-center text-white font-anton text-4xl shadow-lg mb-4">
               {displayName.charAt(0).toUpperCase()}
             </div>
             <h1 className="font-anton text-2xl text-primary-foreground mb-1 uppercase tracking-wide">
@@ -211,7 +211,7 @@ export default function LeagueProfile() {
 
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 text-birdies-orange animate-spin" />
+            <Loader2 className="h-8 w-8 text-brand-accent animate-spin" />
           </div>
         ) : (
           <>
@@ -261,7 +261,7 @@ export default function LeagueProfile() {
                   {/* Scoring Breakdown */}
                   <div className="mb-6">
                     <h3 className="font-inter font-semibold text-primary mb-4 flex items-center gap-2 text-sm">
-                      <CircleDot className="h-4 w-4 text-birdies-orange" />
+                      <CircleDot className="h-4 w-4 text-brand-accent" />
                       Average Per Round
                     </h3>
                     <div className="grid grid-cols-2 gap-3">
@@ -285,7 +285,7 @@ export default function LeagueProfile() {
                         value={progressStats.avgBogeys.toFixed(1)}
                         label="Bogeys"
                         explanation="The average number of bogeys (one over par) per round."
-                        className="bg-birdies-orange/10"
+                        className="bg-brand-accent/10"
                         valueClassName="text-foreground"
                         variant="compact"
                       />
@@ -303,7 +303,7 @@ export default function LeagueProfile() {
                   {/* Par Performance */}
                   <div className="mb-6">
                     <h3 className="font-inter font-semibold text-primary mb-4 flex items-center gap-2 text-sm">
-                      <Zap className="h-4 w-4 text-birdies-orange" />
+                      <Zap className="h-4 w-4 text-brand-accent" />
                       Par Performance
                     </h3>
                     <div className="grid grid-cols-3 gap-3">
@@ -345,7 +345,7 @@ export default function LeagueProfile() {
                       explanation="Your best score relative to par across all recorded rounds."
                       className="bg-muted/30"
                       valueClassName="text-foreground"
-                      icon={<div className="w-10 h-10 rounded-full bg-birdies-orange/20 flex items-center justify-center"><Award className="h-5 w-5 text-birdies-orange" /></div>}
+                      icon={<div className="w-10 h-10 rounded-full bg-brand-accent/20 flex items-center justify-center"><Award className="h-5 w-5 text-brand-accent" /></div>}
                     />
                     <ProgressStatCard
                       value={`${progressStats.blowUpFrequency.toFixed(1)}%`}
@@ -353,7 +353,7 @@ export default function LeagueProfile() {
                       explanation="The percentage of holes where you scored triple bogey or worse."
                       className="bg-muted/30"
                       valueClassName="text-foreground"
-                      icon={<div className="w-10 h-10 rounded-full bg-birdies-orange/20 flex items-center justify-center"><AlertTriangle className="h-5 w-5 text-birdies-orange" /></div>}
+                      icon={<div className="w-10 h-10 rounded-full bg-brand-accent/20 flex items-center justify-center"><AlertTriangle className="h-5 w-5 text-brand-accent" /></div>}
                     />
                     <ProgressStatCard
                       value={`${progressStats.consistencyScore.toFixed(0)}%`}

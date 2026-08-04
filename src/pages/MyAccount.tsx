@@ -9,7 +9,7 @@ import { ArrowLeft, Crown, Lock, User, Mail, Phone, Plus, Loader2, Trash2, Penci
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import birdiesLogo from "@/assets/birdies-logo.png";
+import birdiesLogo from "@/assets/venue-logo.png";
 import { useTenant } from "@/config/tenant";
 import {
   AlertDialog,

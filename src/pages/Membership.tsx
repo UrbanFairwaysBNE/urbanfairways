@@ -7,7 +7,7 @@ import { ArrowLeft, Check, Crown, Loader2, Clock, AlertCircle } from "lucide-rea
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import birdiesLogo from "@/assets/birdies-logo.png";
+import birdiesLogo from "@/assets/venue-logo.png";
 import { useTenant } from "@/config/tenant";
 import { usePricing, PricingTier } from "@/hooks/usePricing";
 import { VISITOR_PEAK_RATE, VISITOR_OFF_PEAK_RATE } from "@/lib/pricing-utils";

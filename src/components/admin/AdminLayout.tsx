@@ -20,7 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import birdieLogo from "@/assets/birdies-logo.png";
+import birdieLogo from "@/assets/venue-logo.png";
 import { AdminOrderNotifications } from "./AdminOrderNotifications";
 import { useTenant } from "@/config/tenant";
 

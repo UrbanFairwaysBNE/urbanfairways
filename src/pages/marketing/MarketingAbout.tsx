@@ -1,7 +1,7 @@
 import Seo from "@/components/Seo";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { ArrowRight, LayoutGrid, Monitor, BadgePercent, Trophy, Smartphone } from "lucide-react";
-import birdiesNeonSign from "@/assets/birdies-neon-sign.png.asset.json";
+import birdiesNeonSign from "@/assets/venue-interior.jpg";
 import { useTenant, hubUrl } from "@/config/tenant";
 
 const HERO = "https://cdn.shopify.com/s/files/1/0758/7030/6550/files/Birdies_Golf.jpg?v=1751956878&width=3840";

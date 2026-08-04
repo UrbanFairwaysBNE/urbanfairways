@@ -48,7 +48,7 @@ const MarketingCoaching = () => {
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${venueInterior})` }} />
         <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/70 to-primary/30" />
         <div className="relative container mx-auto px-4 pb-8">
-          <p className="text-accent font-display tracking-[0.25em] uppercase text-xs mb-1.5">Improve your game</p>
+          <p className="text-accent font-display font-bold tracking-[0.25em] uppercase text-xs mb-1.5">Improve your game</p>
           <h1 className="font-display text-3xl sm:text-5xl text-primary-foreground leading-none">Coaching</h1>
         </div>
       </section>

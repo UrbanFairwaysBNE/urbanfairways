@@ -50,7 +50,7 @@ const MarketingFAQs = () => {
     <Seo title={`FAQs | ${tenant.venue_name} Indoor Golf`} description={`Answers on booking, pricing, memberships, bay access, rental clubs, gift cards and the ${tenant.venue_name} League.`} path="/faqs" />
     <section className="bg-primary text-primary-foreground py-12 sm:py-20">
       <div className="container mx-auto px-4 max-w-3xl text-center">
-        <p className="text-accent font-display tracking-[0.25em] uppercase text-sm mb-2">FAQs</p>
+        <p className="text-accent font-display font-bold tracking-[0.25em] uppercase text-sm mb-2">FAQs</p>
         <h1 className="font-display text-5xl sm:text-6xl leading-none mb-4">Questions, Answered.</h1>
         <p className="text-primary-foreground/80 text-lg">
           Everything you need to know about {tenant.venue_name}, visiting, booking, memberships and the league.
@@ -62,7 +62,7 @@ const MarketingFAQs = () => {
       <div className="container mx-auto px-4 max-w-3xl">
         {groups.map((group) => (
           <div key={group.section} className="mb-10">
-            <h3 className="font-display text-sm uppercase tracking-[0.2em] text-accent mb-4">{group.section}</h3>
+            <h3 className="font-display font-bold text-sm uppercase tracking-[0.2em] text-accent mb-4">{group.section}</h3>
             <Accordion type="single" collapsible className="space-y-2">
               {group.items.map((item, i) => (
                 <AccordionItem

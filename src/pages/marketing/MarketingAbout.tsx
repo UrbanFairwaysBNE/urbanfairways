@@ -42,7 +42,7 @@ const MarketingAbout = () => {
       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${venueInterior})` }} />
       <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/70 to-primary/30" />
       <div className="relative container mx-auto px-4 pb-8">
-        <p className="text-accent font-display tracking-[0.25em] uppercase text-xs mb-1.5">Welcome</p>
+        <p className="text-accent font-display font-bold tracking-[0.25em] uppercase text-xs mb-1.5">Welcome</p>
         <h1 className="font-display text-3xl sm:text-5xl text-primary-foreground leading-none">About {tenant.venue_name}</h1>
       </div>
     </section>
@@ -51,7 +51,7 @@ const MarketingAbout = () => {
     <section className="py-10 sm:py-20">
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <p className="text-accent font-display tracking-[0.2em] uppercase text-sm mb-3">What We Are</p>
+          <p className="text-accent font-display font-bold tracking-[0.2em] uppercase text-sm mb-3">What We Are</p>
           <h2 className="font-display text-4xl sm:text-5xl text-primary leading-tight">
             A Premier Indoor Golf Centre
           </h2>
@@ -81,7 +81,7 @@ const MarketingAbout = () => {
     <section className="py-10 sm:py-20 bg-primary text-primary-foreground">
       <div className="container mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center max-w-6xl">
         <div>
-          <p className="text-accent font-display tracking-[0.2em] uppercase text-sm mb-3">Our Story</p>
+          <p className="text-accent font-display font-bold tracking-[0.2em] uppercase text-sm mb-3">Our Story</p>
           <h2 className="font-display text-4xl sm:text-5xl leading-tight mb-6">
             Golf has entered a new era, and it's happening indoors.
           </h2>

@@ -106,7 +106,7 @@ const isElectron = typeof window !== 'undefined' && (window as any).electronAPI?
 const Router = isElectron ? HashRouter : BrowserRouter;
 
 // Loading fallback component
-const PageLoader = () => <BrandLoader fullscreen size={96} label="Loading..." />;
+const PageLoader = () => <BrandLoader fullscreen size={112} />;
 
 // Deep link handler component - handles the app's custom URL scheme
 function DeepLinkHandler() {

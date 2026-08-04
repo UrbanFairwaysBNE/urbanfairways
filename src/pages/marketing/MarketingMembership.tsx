@@ -40,7 +40,7 @@ const MarketingMembership = () => {
       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${venueInterior})` }} />
       <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/70 to-primary/30" />
       <div className="relative container mx-auto px-4 pb-8">
-        <p className="text-accent font-display tracking-[0.25em] uppercase text-xs mb-1.5">Membership</p>
+        <p className="text-accent font-display font-bold tracking-[0.25em] uppercase text-xs mb-1.5">Membership</p>
         <h1 className="font-display text-3xl sm:text-5xl text-primary-foreground leading-none">
           Play More.<br />Save More.
         </h1>
@@ -69,7 +69,7 @@ const MarketingMembership = () => {
                 Most Popular
               </span>
             )}
-            <p className="text-xs uppercase tracking-wider mb-2 text-foreground/60">{t.tag}</p>
+            <p className="text-xs font-bold uppercase tracking-wider mb-2 text-foreground/60">{t.tag}</p>
             <h3 className="font-display text-4xl uppercase tracking-wide mb-1">{t.name}</h3>
             <div className="mb-5">
               <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold bg-accent/10 text-accent border border-accent/20">
@@ -103,7 +103,7 @@ const MarketingMembership = () => {
     <section className="py-12 sm:py-20">
       <div className="container mx-auto px-4 max-w-5xl">
         <div className="text-center mb-10">
-          <p className="text-accent font-display tracking-[0.2em] uppercase text-sm mb-3">Pay As You Go</p>
+          <p className="text-accent font-display font-bold tracking-[0.2em] uppercase text-sm mb-3">Pay As You Go</p>
           <h2 className="font-display text-4xl sm:text-5xl text-primary leading-tight mb-4">
             Not ready to commit? Just pay to play.
           </h2>
@@ -113,7 +113,7 @@ const MarketingMembership = () => {
         </div>
         <div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
           <div className="bg-card border border-border rounded-2xl p-8 text-card-foreground hover:shadow-lg transition-all text-left">
-            <p className="text-xs uppercase tracking-wider mb-2 text-foreground/60">Off-Peak</p>
+            <p className="text-xs font-bold uppercase tracking-wider mb-2 text-foreground/60">Off-Peak</p>
             <h3 className="font-display text-3xl uppercase tracking-wide mb-1 text-primary">Visitor</h3>
             <div className="mb-5">
               <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold bg-accent/10 text-accent border border-accent/20">
@@ -128,7 +128,7 @@ const MarketingMembership = () => {
             </a>
           </div>
           <div className="bg-card border border-border rounded-2xl p-8 text-card-foreground hover:shadow-lg transition-all text-left">
-            <p className="text-xs uppercase tracking-wider mb-2 text-foreground/60">Peak</p>
+            <p className="text-xs font-bold uppercase tracking-wider mb-2 text-foreground/60">Peak</p>
             <h3 className="font-display text-3xl uppercase tracking-wide mb-1 text-primary">Visitor</h3>
             <div className="mb-5">
               <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold bg-accent/10 text-accent border border-accent/20">

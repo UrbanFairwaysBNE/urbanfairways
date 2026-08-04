@@ -97,7 +97,7 @@ const MarketingHome = () => {
       <section className="py-12 sm:py-28">
         <div className="container mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <p className="text-accent font-display tracking-[0.2em] uppercase text-sm mb-3">What is {tenant.venue_name}?</p>
+            <p className="text-accent font-display font-bold tracking-[0.2em] uppercase text-sm mb-3">What is {tenant.venue_name}?</p>
             <h2 className="font-display text-4xl sm:text-5xl text-primary leading-tight mb-6">
               A premier indoor golf centre in the West End of Brisbane.
             </h2>
@@ -122,7 +122,7 @@ const MarketingHome = () => {
       <section className="bg-primary text-primary-foreground py-12 sm:py-24">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-14">
-            <p className="text-accent font-display tracking-[0.2em] uppercase text-sm mb-3">Why {tenant.venue_name}</p>
+            <p className="text-accent font-display font-bold tracking-[0.2em] uppercase text-sm mb-3">Why {tenant.venue_name}</p>
             <h2 className="font-display text-4xl sm:text-5xl leading-tight">
               Tour-level tech. Local prices. Zero excuses.
             </h2>
@@ -162,7 +162,7 @@ const MarketingHome = () => {
               className="h-28 sm:h-36 w-auto mx-auto mb-6 object-contain"
               loading="lazy"
             />
-            <p className="text-accent font-display tracking-[0.2em] uppercase text-sm mb-3">Swing Lab</p>
+            <p className="text-accent font-display font-bold tracking-[0.2em] uppercase text-sm mb-3">Swing Lab</p>
             <h2 className="font-display text-4xl sm:text-5xl text-primary leading-tight">
               Your Personal Driving Range Coach.
             </h2>
@@ -198,7 +198,7 @@ const MarketingHome = () => {
       <section className="py-12 sm:py-24">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <p className="text-accent font-display tracking-[0.2em] uppercase text-sm mb-3">Pricing</p>
+            <p className="text-accent font-display font-bold tracking-[0.2em] uppercase text-sm mb-3">Pricing</p>
             <h2 className="font-display text-4xl sm:text-5xl text-primary leading-tight">
               Pay as you go, or save with a membership.
             </h2>
@@ -210,7 +210,7 @@ const MarketingHome = () => {
           </div>
           <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto mt-8">
             <div className="bg-card border border-border rounded-2xl p-7 text-card-foreground hover:shadow-lg transition-all">
-              <p className="text-xs uppercase tracking-wider mb-2 text-foreground/60">Off-Peak</p>
+              <p className="text-xs font-bold uppercase tracking-wider mb-2 text-foreground/60">Off-Peak</p>
               <h3 className="font-display text-3xl uppercase tracking-wide mb-1">Visitor</h3>
               <div className="mb-5">
                 <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold bg-accent/10 text-accent border border-accent/20">
@@ -225,7 +225,7 @@ const MarketingHome = () => {
               </a>
             </div>
             <div className="bg-card border border-border rounded-2xl p-7 text-card-foreground hover:shadow-lg transition-all">
-              <p className="text-xs uppercase tracking-wider mb-2 text-foreground/60">Peak</p>
+              <p className="text-xs font-bold uppercase tracking-wider mb-2 text-foreground/60">Peak</p>
               <h3 className="font-display text-3xl uppercase tracking-wide mb-1">Visitor</h3>
               <div className="mb-5">
                 <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold bg-accent/10 text-accent border border-accent/20">
@@ -313,7 +313,7 @@ const PriceCard = ({
         Most Popular
       </span>
     )}
-    <p className="text-xs uppercase tracking-wider mb-2 text-foreground/60">{tag}</p>
+    <p className="text-xs font-bold uppercase tracking-wider mb-2 text-foreground/60">{tag}</p>
     <h3 className="font-display text-3xl uppercase tracking-wide mb-1">{tier}</h3>
     <div className="mb-5">
       <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold bg-accent/10 text-accent border border-accent/20">

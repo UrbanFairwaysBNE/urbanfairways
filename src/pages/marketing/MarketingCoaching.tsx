@@ -150,7 +150,7 @@ const MarketingCoaching = () => {
           </Tile>
 
           {/* Junior program */}
-          <Tile>
+          <Tile id="juniors">
             <Eyebrow>Juniors</Eyebrow>
             <h2 className="font-display text-3xl sm:text-4xl text-primary leading-tight mb-6">
               {tenant.venue_name} Junior After School Golf Program

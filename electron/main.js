@@ -1586,7 +1586,7 @@ async function showWelcomeWindows(firstName) {
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+          font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
           background: #f5f3ef;
           display: flex;
           align-items: center;
@@ -2384,7 +2384,7 @@ async function showSgtInfoOverlay(displayLabel) {
           * { margin: 0; padding: 0; box-sizing: border-box; }
           html, body {
             background: transparent;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
           }
           .overlay {
             background: white;
@@ -2688,7 +2688,7 @@ async function showSgtHideConfirmation(displayLabel) {
           * { margin: 0; padding: 0; box-sizing: border-box; }
           html, body {
             background: transparent;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
             width: 100%;
             height: 100%;
           }

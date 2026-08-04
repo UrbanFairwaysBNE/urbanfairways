@@ -159,7 +159,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
   }, [ambroseTeams]);
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: CREAM, fontFamily: "Inter, system-ui, sans-serif" }}>
+    <div className="min-h-screen" style={{ backgroundColor: CREAM, fontFamily: "Manrope, system-ui, sans-serif" }}>
       {/* HERO */}
       {!hideHero && (
         <section className="relative overflow-hidden" style={{ backgroundColor: GREEN }}>

@@ -186,10 +186,10 @@ export default function LeagueProfile() {
         <div className="bg-white rounded-2xl border border-border/50 overflow-hidden mb-6 shadow-sm animate-fade-in">
           {/* Green Hero Section */}
           <div className="bg-primary p-6 flex flex-col items-center">
-            <div className="w-24 h-24 rounded-full bg-brand-accent flex items-center justify-center text-white font-anton text-4xl shadow-lg mb-4">
+            <div className="w-24 h-24 rounded-full bg-brand-accent flex items-center justify-center text-white font-display text-4xl shadow-lg mb-4">
               {displayName.charAt(0).toUpperCase()}
             </div>
-            <h1 className="font-anton text-2xl text-primary-foreground mb-1 uppercase tracking-wide">
+            <h1 className="font-display text-2xl text-primary-foreground mb-1 uppercase tracking-wide">
               {displayName}
             </h1>
             {email && (
@@ -202,7 +202,7 @@ export default function LeagueProfile() {
 
           {/* Handicap Section */}
           <div className="p-6 text-center">
-            <p className="text-xs font-anton text-muted-foreground uppercase tracking-wide mb-1">CURRENT HANDICAP</p>
+            <p className="text-xs font-display text-muted-foreground uppercase tracking-wide mb-1">CURRENT HANDICAP</p>
             <p className="text-5xl text-primary" style={{ fontFamily: "'Anton', sans-serif" }}>
               {stats?.handicap ?? "N/A"}
             </p>
@@ -217,7 +217,7 @@ export default function LeagueProfile() {
           <>
             {/* Performance Stats */}
             <div className="mb-6 animate-slide-up" style={{ animationDelay: "100ms" }}>
-              <h2 className="font-anton text-xl text-primary mb-4">
+              <h2 className="font-display text-xl text-primary mb-4">
                 PERFORMANCE STATS
               </h2>
               <div className="grid grid-cols-2 gap-4">
@@ -254,7 +254,7 @@ export default function LeagueProfile() {
             {/* My Progress */}
             {progressStats && (
               <div className="mb-6 animate-slide-up" style={{ animationDelay: "150ms" }}>
-                <h2 className="font-anton text-xl text-primary mb-4">
+                <h2 className="font-display text-xl text-primary mb-4">
                   MY PROGRESS
                 </h2>
                 <div className="bg-white rounded-2xl border border-border/50 p-5 shadow-sm">

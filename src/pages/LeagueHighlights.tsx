@@ -68,7 +68,7 @@ export default function LeagueHighlights() {
   return (
     <LeagueLayout>
       <div className="mb-6 animate-fade-in">
-        <h1 className="font-anton text-2xl md:text-3xl text-primary mb-1">YOUR HIGHLIGHTS</h1>
+        <h1 className="font-display text-2xl md:text-3xl text-primary mb-1">YOUR HIGHLIGHTS</h1>
         <p className="font-inter text-muted-foreground text-sm">
           Recorded sessions from your bookings. Open a session to view and download your clips.
         </p>

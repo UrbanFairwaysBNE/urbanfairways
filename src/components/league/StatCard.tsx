@@ -26,7 +26,7 @@ export function StatCard({
       style={{ animationDelay: `${delay}ms` }}
     >
       <div className="flex items-start justify-between mb-3">
-        <span className="text-xs font-anton text-muted-foreground uppercase tracking-wide">
+        <span className="text-xs font-display text-muted-foreground uppercase tracking-wide">
           {label}
         </span>
         {icon && (

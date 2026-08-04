@@ -343,7 +343,7 @@ export default function SwingLab() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className="flex items-center gap-2.5 bg-card border border-border rounded-lg px-5 py-3 shadow-sm active:scale-[0.98] transition-transform">
-                      <span className="font-anton text-xl uppercase tracking-wide text-primary">
+                      <span className="font-display text-xl uppercase tracking-wide text-primary">
                         {TABS.find((t) => t.value === activeTab)?.label}
                       </span>
                       <ChevronDown className="h-5 w-5 text-accent" />
@@ -354,7 +354,7 @@ export default function SwingLab() {
                       <DropdownMenuItem
                         key={t.value}
                         onSelect={() => setActiveTab(t.value)}
-                        className={`font-anton uppercase tracking-wide text-base py-2.5 cursor-pointer ${
+                        className={`font-display uppercase tracking-wide text-base py-2.5 cursor-pointer ${
                           activeTab === t.value ? "text-accent bg-accent/10" : "text-foreground"
                         }`}
                       >
@@ -398,15 +398,15 @@ export default function SwingLab() {
                       {clubStats.map((c) => (
                         <div key={c.club} className="grid grid-cols-[1fr_6rem_6rem] items-center px-4 py-3">
                           <div className="flex items-center gap-3 min-w-0">
-                            <span className="font-anton text-lg font-bold uppercase tracking-wide text-accent truncate border-2 border-accent rounded-full px-3 py-0.5">
+                            <span className="font-display text-lg font-bold uppercase tracking-wide text-accent truncate border-2 border-accent rounded-full px-3 py-0.5">
                               {c.club}
                             </span>
                           </div>
-                          <div className="font-anton text-xl text-primary tabular-nums text-center">
+                          <div className="font-display text-xl text-primary tabular-nums text-center">
                             {c.avgCarry != null ? Math.round(c.avgCarry) : "—"}
                             <span className="text-xs text-muted-foreground font-sans ml-1">{dLbl}</span>
                           </div>
-                          <div className="font-anton text-xl text-primary tabular-nums text-right">
+                          <div className="font-display text-xl text-primary tabular-nums text-right">
                             {c.avgTotal != null ? Math.round(c.avgTotal) : "—"}
                             <span className="text-xs text-muted-foreground font-sans ml-1">{dLbl}</span>
                           </div>
@@ -683,7 +683,7 @@ function OverviewTiles({
             <div className="text-xs uppercase tracking-wide text-accent flex items-center gap-1">
               <TrendingUp className="h-3.5 w-3.5" />My Progress
             </div>
-            <div className="text-lg font-anton mt-1 leading-tight">Track your trends over time</div>
+            <div className="text-lg font-display mt-1 leading-tight">Track your trends over time</div>
             <div className="text-xs text-muted-foreground mt-1">See which metrics are improving, flat, or slipping.</div>
           </div>
           <ChevronDown className="h-5 w-5 -rotate-90 text-accent group-hover:translate-x-0.5 transition-transform shrink-0" />
@@ -786,7 +786,7 @@ function TileCard({
             </Popover>
           )}
         </div>
-        <div className="text-2xl font-anton text-primary mt-1 leading-tight">{value}</div>
+        <div className="text-2xl font-display text-primary mt-1 leading-tight">{value}</div>
         {sub && (
           <div className={`text-xs mt-1 ${highlight ? "text-accent" : "text-muted-foreground"}`}>{sub}</div>
         )}
@@ -810,7 +810,7 @@ function FocusPointCard({ focus }: { focus: { club: string; pct: number; avgSmas
           <span className="flex items-center gap-1"><FlaskConical className="h-3.5 w-3.5" />Focus Point</span>
           <InfoIcon className="h-3.5 w-3.5 opacity-80" />
         </div>
-        <div className="text-2xl font-anton text-primary mt-1 leading-tight">{headline}</div>
+        <div className="text-2xl font-display text-primary mt-1 leading-tight">{headline}</div>
         <div className="text-xs text-muted-foreground mt-1">{sub}</div>
       </button>
 
@@ -825,7 +825,7 @@ function FocusPointCard({ focus }: { focus: { club: string; pct: number; avgSmas
               <div className="space-y-3 text-sm text-foreground/90 pt-2">
                 {focus ? (
                   <>
-                    <p className="font-anton text-lg text-foreground">
+                    <p className="font-display text-lg text-foreground">
                       {focus.club}: {Math.round(focus.pct)}% of tour smash
                     </p>
                     <p>
@@ -858,7 +858,7 @@ function Kpi({ label, value, icon }: { label: string; value: string; icon?: Reac
         <div className="text-xs uppercase tracking-wide text-muted-foreground flex items-center gap-1">
           {icon}{label}
         </div>
-        <div className="text-2xl font-anton text-primary mt-1">{value}</div>
+        <div className="text-2xl font-display text-primary mt-1">{value}</div>
       </CardContent>
     </Card>
   );

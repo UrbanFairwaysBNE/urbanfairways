@@ -141,7 +141,7 @@ export default function LeagueRegister() {
         <main className="flex-1 flex items-center justify-center px-4 py-8">
           <div className="text-center">
             <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <h1 className="font-anton text-2xl text-primary mb-2">
+            <h1 className="font-display text-2xl text-primary mb-2">
               WELCOME TO THE LEAGUE!
             </h1>
             <p className="font-inter text-muted-foreground">
@@ -173,7 +173,7 @@ export default function LeagueRegister() {
       <main className="flex-1 flex flex-col">
         <div className="bg-white border-b border-border/50 px-4 py-4">
           <div className="container max-w-md">
-            <h1 className="font-anton text-xl text-primary mb-1">
+            <h1 className="font-display text-xl text-primary mb-1">
               JOIN {tenant.venue_name.toUpperCase()} LEAGUE
             </h1>
             <p className="font-inter text-sm text-muted-foreground">

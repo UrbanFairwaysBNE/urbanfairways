@@ -12,7 +12,7 @@ export default function PrivacyPolicy() {
       <div className="mx-auto max-w-3xl">
         <Card>
           <CardHeader>
-            <CardTitle className="font-anton text-2xl md:text-3xl">Privacy Policy</CardTitle>
+            <CardTitle className="font-display text-2xl md:text-3xl">Privacy Policy</CardTitle>
           </CardHeader>
           <CardContent>
             <ScrollArea className="h-[70vh] pr-4">

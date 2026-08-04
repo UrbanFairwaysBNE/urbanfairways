@@ -12,7 +12,7 @@ export function LeagueRegistrationPrompt() {
           <Trophy className="h-6 w-6 text-brand-accent" />
         </div>
         <div className="flex-1">
-          <h2 className="font-anton text-xl mb-2">JOIN {tenant.venue_name.toUpperCase()} LEAGUE</h2>
+          <h2 className="font-display text-xl mb-2">JOIN {tenant.venue_name.toUpperCase()} LEAGUE</h2>
           <p className="font-inter text-sm text-primary-foreground/80 mb-4">
             Create your Simulator Golf Tour account to compete in tournaments, track your handicap, and climb the leaderboard.
           </p>

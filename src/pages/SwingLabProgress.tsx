@@ -299,7 +299,7 @@ export default function SwingLabProgress() {
       <main className="container mx-auto px-4 py-4 max-w-3xl">
         <div className="flex items-end justify-between gap-3 mb-3">
           <div>
-            <h1 className="text-xl font-anton leading-tight">My Progress</h1>
+            <h1 className="text-xl font-display leading-tight">My Progress</h1>
             <p className="text-xs text-muted-foreground mt-1">
               Comparing {TF_LABEL[tf].toLowerCase()} vs the {windows.days} days before that.
             </p>
@@ -394,7 +394,7 @@ function TrendTile({ result }: { result: TileResult }) {
           </PopoverContent>
         </Popover>
       </div>
-      <div className={`text-2xl font-anton mt-1 leading-tight ${styles.value}`}>
+      <div className={`text-2xl font-display mt-1 leading-tight ${styles.value}`}>
         {result.current != null ? result.fmt(result.current) : "—"}
       </div>
       <div className={`text-xs mt-1 flex items-center gap-1 ${styles.sub}`}>

@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
+import { getTenant, tenantHubUrl, tenantBookingUrl } from "../_shared/tenant.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -81,7 +82,7 @@ const formatPhoneForSMS = (phone: string | null): string | null => {
 };
 
 // Send SMS via SMS Broadcast API
-const sendSMS = async (phone: string, message: string): Promise<{ success: boolean; response?: string; error?: string }> => {
+const sendSMS = async (phone: string, message: string, senderName = "Notification"): Promise<{ success: boolean; response?: string; error?: string }> => {
   const username = Deno.env.get("SMS_BROADCAST_USERNAME");
   const password = Deno.env.get("SMS_BROADCAST_PASSWORD");
   
@@ -100,7 +101,7 @@ const sendSMS = async (phone: string, message: string): Promise<{ success: boole
       username,
       password,
       to: formattedPhone,
-      from: "Birdies",
+      from: senderName,
       message: message,
     });
     
@@ -134,6 +135,7 @@ const replaceTemplateTags = (template: string, tags: Record<string, string>): st
 
 
 serve(async (req) => {
+  const tenant = await getTenant();
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -441,8 +443,8 @@ serve(async (req) => {
       // Use custom subject if available
       const isReschedule = notification_type === "reschedule";
       subject = isReschedule 
-        ? "Booking Rescheduled - Birdies Bayside"
-        : (emailTemplate?.subject || "Booking Confirmed - Birdies Bayside");
+        ? `Booking Rescheduled - ${tenant.venue_name}`
+        : (emailTemplate?.subject || `Booking Confirmed - ${tenant.venue_name}`);
       
       // Main booking SMS — pulled from editable sms_templates table
       const smsKey = isReschedule
@@ -458,7 +460,7 @@ serve(async (req) => {
                 <tr>
                   <td style="padding:20px; text-align:center;">
                     <p style="margin:0 0 8px; font-family:Anton, Impact, Arial Black, sans-serif; font-size:18px; color:#1F4C25;">
-                      ENJOYING BIRDIES? ⭐
+                      ENJOYING ${tenant.venue_name.toUpperCase()}? ⭐
                     </p>
                     <p style="margin:0 0 14px; font-family:Inter, Arial, sans-serif; font-size:14px; color:#1F4C25; line-height:1.5;">
                       Leave us a Google Review and receive <strong>$15 credit</strong> on your next visit!
@@ -486,9 +488,9 @@ serve(async (req) => {
       // Check if custom template exists (only for confirmation, not reschedule)
       if (!isReschedule && emailTemplate?.html_content) {
         let bodyContent = replaceTemplateTags(emailTemplate.html_content, templateTags);
-        // Insert Google Review CTA after "First Time at Birdies?" section
+        // Insert Google Review CTA after "First Time at {venue}?" section
         if (reviewCtaHtml) {
-          const firstTimeIndex = bodyContent.indexOf('First Time at Birdies');
+          const firstTimeIndex = bodyContent.indexOf(`First Time at ${tenant.venue_name}`);
           if (firstTimeIndex !== -1) {
             const afterFirstTime = bodyContent.indexOf('</table>', firstTimeIndex);
             if (afterFirstTime !== -1) {
@@ -504,7 +506,7 @@ serve(async (req) => {
         }
         htmlContent = await renderBrandedEmail(supabaseClient, headingText, bodyContent, {
           text: "View My Bookings",
-          url: "https://hub.birdiesbayside.com.au/my-bookings"
+          url: tenantHubUrl(tenant, "/my-bookings")
         });
         logStep("Using custom email template with wrapper", { reviewCtaInjected: !!reviewCtaHtml, templateKey });
       } else {
@@ -538,7 +540,7 @@ serve(async (req) => {
                     ${needsBoomGate ? `
                     <p style="margin:0; font-size:14px;">
                       <strong>IMPORTANT:</strong> You will require Boom gate access for your booking time.<br/>
-                      <a href="https://birdiesbayside.com.au/gate-access" style="color:#EC622D;">Request gate access here</a>
+                      <a href="${tenantBookingUrl(tenant, "/gate-access")}" style="color:#EC622D;">Request gate access here</a>
                     </p>
                     ` : ''}
                   </td>
@@ -550,18 +552,18 @@ serve(async (req) => {
               ${reviewCtaHtml}
               
               <p style="margin:18px 0 0; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
-                We look forward to seeing you at Birdies Bayside!
+                We look forward to seeing you at ${tenant.venue_name}!
               </p>
         `;
         
         htmlContent = await renderBrandedEmail(supabaseClient, headingText, bodyContent, {
           text: "View My Bookings",
-          url: "https://hub.birdiesbayside.com.au/my-bookings"
+          url: tenantHubUrl(tenant, "/my-bookings")
         });
       }
     } else if (notification_type === "cancellation") {
       // Cancellation
-      subject = emailTemplate?.subject || "Booking Cancelled - Birdies Bayside";
+      subject = emailTemplate?.subject || `Booking Cancelled - ${tenant.venue_name}`;
       smsMessage = (await renderSmsTemplate("booking_cancellation")) ?? "";
       
       let bodyContent: string;
@@ -590,13 +592,13 @@ serve(async (req) => {
               </p>
               
               <p style="margin:0; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
-                We hope to see you again soon at Birdies Bayside!
+                We hope to see you again soon at ${tenant.venue_name}!
               </p>
         `;
       }
       htmlContent = await renderBrandedEmail(supabaseClient, "Booking Cancelled", bodyContent, {
         text: "Book Again",
-        url: "https://hub.birdiesbayside.com.au/booking"
+        url: tenantBookingUrl(tenant, "/booking")
       });
     } else {
       throw new Error(`Unknown notification type: ${notification_type}`);
@@ -609,7 +611,7 @@ serve(async (req) => {
 
     // Send email
     const emailResponse = await resend.emails.send({
-      from: "Birdies Bayside <info@birdiesbayside.com.au>",
+      from: `${tenant.venue_name} <${tenant.sender_email}>`,
       to: [profile.email],
       subject: subject,
       html: htmlContent,
@@ -647,8 +649,8 @@ serve(async (req) => {
           );
 
           await resend.emails.send({
-            from: "Birdies Bayside <info@birdiesbayside.com.au>",
-            to: ["admin@birdiesbayside.com.au"],
+            from: `${tenant.venue_name} <${tenant.sender_email}>`,
+            to: [tenant.admin_alert_email],
             subject: alertSubject,
             html: await renderBrandedEmail(supabaseClient, "Watched Customer Alert", alertBody),
           });
@@ -667,7 +669,7 @@ serve(async (req) => {
     if ((notification_type === "confirmation" || notification_type === "reschedule") && profile.phone) {
       // Send main booking SMS (skip silently if template was disabled in admin)
       if (smsMessage && smsMessage.trim().length > 0) {
-        smsResult = await sendSMS(profile.phone, smsMessage);
+        smsResult = await sendSMS(profile.phone, smsMessage, tenant.venue_name);
         logStep("SMS send result", smsResult);
       } else {
         logStep("SMS template disabled or empty, skipping main SMS");
@@ -678,7 +680,7 @@ serve(async (req) => {
       if (needsBoomGate && smsResult.success) {
         const gateMessage = await renderSmsTemplate("boom_gate_access");
         if (gateMessage && gateMessage.trim().length > 0) {
-          gateSmsResult = await sendSMS(profile.phone, gateMessage);
+          gateSmsResult = await sendSMS(profile.phone, gateMessage, tenant.venue_name);
           logStep("Gate SMS send result", gateSmsResult);
         } else {
           logStep("Boom gate SMS template disabled, skipping");
@@ -686,7 +688,7 @@ serve(async (req) => {
       }
 
     } else if (notification_type === "cancellation" && profile.phone && smsMessage && smsMessage.trim().length > 0) {
-      smsResult = await sendSMS(profile.phone, smsMessage);
+      smsResult = await sendSMS(profile.phone, smsMessage, tenant.venue_name);
       logStep("Cancellation SMS send result", smsResult);
     } else if (notification_type === "cancellation") {
       logStep("Cancellation SMS skipped (template disabled or no phone)");

@@ -48,7 +48,7 @@ export async function getSgtConfig(force = false): Promise<SgtClubConfig> {
   }
 
   cached = {
-    clubUrl: (row?.club_url as string) || envClub || "birdiesbayside",
+    clubUrl: (row?.club_url as string) || envClub || Deno.env.get("TENANT_SGT_CLUB_SLUG") || "",
     username: (row?.sgt_username as string) || envUser,
     password: (row?.sgt_password as string) || envPass,
     credentialsValid: Boolean(row?.credentials_valid),

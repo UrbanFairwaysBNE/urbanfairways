@@ -1,1 +1,0 @@
-drop table if exists public.sim_centre_submissions cascade;

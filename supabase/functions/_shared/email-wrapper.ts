@@ -3,6 +3,9 @@
 // so they can be edited from the admin panel and reused across every email
 // template. Individual template bodies should contain body content ONLY.
 
+import type { TenantConfig } from "./tenant.ts";
+import { tenantAddress } from "./tenant.ts";
+
 export interface EmailCta {
   text: string;
   url: string;
@@ -13,44 +16,90 @@ export interface EmailLayout {
   footer_html: string;
 }
 
+const NEUTRAL_TENANT: TenantConfig = {
+  venue_name: "Your Venue",
+  legal_entity: "",
+  abn: "",
+  booking_domain: "example.com",
+  hub_domain: "hub.example.com",
+  support_phone: "",
+  support_email: "info@example.com",
+  sender_email: "noreply@example.com",
+  admin_alert_email: "admin@example.com",
+  address_line: "",
+  suburb: "",
+  state: "",
+  postcode: "",
+  timezone: "Australia/Brisbane",
+  socials: {},
+};
+
 // --- Defaults (used as fallback if the DB lookup fails or when called in
 // a context without a Supabase client). Keep in sync with the initial rows
 // seeded by the email_layout migration. ---
-export const DEFAULT_HEADER_HTML = `<tr>
+export function defaultHeaderHtml(tenant: TenantConfig = NEUTRAL_TENANT): string {
+  return `<tr>
   <td align="center" style="background-color:#1F4C25; padding:18px; border-radius:16px 16px 0 0;">
-    <img
-      src="https://cdn.shopify.com/s/files/1/0758/7030/6550/files/NO-BG_BIRDIES-LOGOS_WORK-DOC_AMENDED-9.7.25-01.png?v=1761536603"
-      width="140"
-      alt="Birdies Bayside"
-      style="display:block; width:140px; height:auto; border:0;"
-    />
+    <div style="font-family:Anton, Impact, Arial Black, sans-serif; font-size:26px; letter-spacing:0.5px; color:#FFFFFF;">
+      ${tenant.venue_name}
+    </div>
   </td>
 </tr>`;
+}
 
-export const DEFAULT_FOOTER_HTML = `<tr>
+export function defaultFooterHtml(tenant: TenantConfig = NEUTRAL_TENANT): string {
+  const address = tenantAddress(tenant);
+  const socials = tenant.socials || {};
+
+  const socialLinks: string[] = [];
+  if (socials.instagram) {
+    socialLinks.push(
+      `<a href="${socials.instagram}" style="margin:0 8px; text-decoration:none;"><img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram" width="28" height="28" style="display:inline-block; border:0;" /></a>`,
+    );
+  }
+  if (socials.facebook) {
+    socialLinks.push(
+      `<a href="${socials.facebook}" style="margin:0 8px; text-decoration:none;"><img src="https://cdn-icons-png.flaticon.com/512/174/174848.png" alt="Facebook" width="28" height="28" style="display:inline-block; border:0;" /></a>`,
+    );
+  }
+
+  const socialsRow = socialLinks.length
+    ? `<tr><td align="center" style="padding-bottom:14px;">${socialLinks.join("")}</td></tr>`
+    : "";
+
+  const addressRow = address
+    ? `<div><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}" style="color:#FFFFFF; text-decoration:underline;">${address}</a></div>`
+    : "";
+
+  const phoneRow = tenant.support_phone
+    ? `<div><a href="tel:${tenant.support_phone.replace(/[^+\d]/g, "")}" style="color:#FFFFFF; text-decoration:underline;">${tenant.support_phone}</a></div>`
+    : "";
+
+  const domainRow = tenant.booking_domain
+    ? `<div><a href="https://${tenant.booking_domain}" style="color:#FFFFFF; text-decoration:underline;">${tenant.booking_domain}</a></div>`
+    : "";
+
+  return `<tr>
   <td style="background-color:#1F4C25; padding:22px; border-radius:0 0 16px 16px;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-      <tr>
-        <td align="center" style="padding-bottom:14px;">
-          <a href="https://www.instagram.com/birdiesbayside" style="margin:0 8px; text-decoration:none;">
-            <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram" width="28" height="28" style="display:inline-block; border:0;" />
-          </a>
-          <a href="https://www.facebook.com/share/17NifCh2vH/" style="margin:0 8px; text-decoration:none;">
-            <img src="https://cdn-icons-png.flaticon.com/512/174/174848.png" alt="Facebook" width="28" height="28" style="display:inline-block; border:0;" />
-          </a>
-        </td>
-      </tr>
+      ${socialsRow}
       <tr>
         <td align="center" style="font-family:Inter, Arial, sans-serif; font-size:14px; line-height:1.7; color:#FFFFFF;">
-          <div><a href="https://maps.app.goo.gl/vTXLZvd8XPZEeRn16" style="color:#FFFFFF; text-decoration:underline;">Unit 2, 86 Jardine Drive, Redland Bay QLD 4165</a></div>
-          <div><a href="tel:+61721468442" style="color:#FFFFFF; text-decoration:underline;">(07) 2146 8442</a></div>
-          <div><a href="https://birdiesbayside.com.au" style="color:#FFFFFF; text-decoration:underline;">birdiesbayside.com.au</a></div>
-          <div style="margin-top:10px; font-size:12px; opacity:0.75;">© Birdies Bayside</div>
+          ${addressRow}
+          ${phoneRow}
+          ${domainRow}
+          <div style="margin-top:10px; font-size:12px; opacity:0.75;">© ${tenant.venue_name}</div>
         </td>
       </tr>
     </table>
   </td>
 </tr>`;
+}
+
+// Backwards-compatible constants (neutral placeholders — prefer the
+// defaultHeaderHtml/defaultFooterHtml functions with a real tenant).
+export const DEFAULT_HEADER_HTML = defaultHeaderHtml();
+export const DEFAULT_FOOTER_HTML = defaultFooterHtml();
 
 // Sync builder — accepts optional layout override. When no override is
 // supplied (or DB lookup wasn't performed) the defaults above are used.
@@ -59,9 +108,10 @@ export function buildEmailTemplate(
   bodyContent: string,
   ctaButton?: EmailCta,
   layout?: Partial<EmailLayout>,
+  tenant: TenantConfig = NEUTRAL_TENANT,
 ): string {
-  const header = layout?.header_html || DEFAULT_HEADER_HTML;
-  const footer = layout?.footer_html || DEFAULT_FOOTER_HTML;
+  const header = layout?.header_html || defaultHeaderHtml(tenant);
+  const footer = layout?.footer_html || defaultFooterHtml(tenant);
 
   const buttonHtml = ctaButton
     ? `
@@ -84,7 +134,7 @@ export function buildEmailTemplate(
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="x-apple-disable-message-reformatting" />
-  <title>Birdies Email</title>
+  <title>${tenant.venue_name} Email</title>
   <style>
     @import url("https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600&display=swap");
   </style>
@@ -115,7 +165,10 @@ export function buildEmailTemplate(
 
 // Fetches the current email layout from the DB, falling back to defaults on
 // any error. Accepts any Supabase client that exposes `.from().select()`.
-export async function fetchEmailLayout(supabase: any): Promise<EmailLayout> {
+export async function fetchEmailLayout(
+  supabase: any,
+  tenant: TenantConfig = NEUTRAL_TENANT,
+): Promise<EmailLayout> {
   try {
     const { data } = await supabase
       .from("email_layout")
@@ -124,13 +177,13 @@ export async function fetchEmailLayout(supabase: any): Promise<EmailLayout> {
       .maybeSingle();
 
     return {
-      header_html: data?.header_html || DEFAULT_HEADER_HTML,
-      footer_html: data?.footer_html || DEFAULT_FOOTER_HTML,
+      header_html: data?.header_html || defaultHeaderHtml(tenant),
+      footer_html: data?.footer_html || defaultFooterHtml(tenant),
     };
   } catch (_err) {
     return {
-      header_html: DEFAULT_HEADER_HTML,
-      footer_html: DEFAULT_FOOTER_HTML,
+      header_html: defaultHeaderHtml(tenant),
+      footer_html: defaultFooterHtml(tenant),
     };
   }
 }
@@ -143,7 +196,8 @@ export async function renderBrandedEmail(
   heading: string,
   bodyContent: string,
   ctaButton?: EmailCta,
+  tenant: TenantConfig = NEUTRAL_TENANT,
 ): Promise<string> {
-  const layout = await fetchEmailLayout(supabase);
-  return buildEmailTemplate(heading, bodyContent, ctaButton, layout);
+  const layout = await fetchEmailLayout(supabase, tenant);
+  return buildEmailTemplate(heading, bodyContent, ctaButton, layout, tenant);
 }

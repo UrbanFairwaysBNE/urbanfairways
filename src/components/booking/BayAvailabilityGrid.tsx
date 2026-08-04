@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Bay } from "@/hooks/useBooking";
+import { formatDurationLabel } from "@/components/booking/DateTimePicker";
 
 interface BayAvailabilityGridProps {
   bays: Bay[];
@@ -126,7 +127,7 @@ export function BayAvailabilityGrid({
             <span className="font-semibold">
               {bays.find((b) => b.id === selectedBayId)?.name}
             </span>{" "}
-            selected • {selectedDuration} {selectedDuration === 1 ? "hour" : "hours"} • ${totalPrice} total
+            selected • {formatDurationLabel(selectedDuration)} • ${totalPrice} total
           </p>
         </div>
       )}

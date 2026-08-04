@@ -1,4 +1,6 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { usePricing } from "@/hooks/usePricing";
+import { tierBadgeClass } from "@/lib/tier-config";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,6 +55,7 @@ interface PaymentMethod {
 
 const MyAccount = () => {
   const { tenant } = useTenant();
+  const { pricing, getTier, defaultTier, peakRate } = usePricing();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();

@@ -23,12 +23,7 @@ import {
 import { MembershipPaymentIssueDialog } from "@/components/membership/MembershipPaymentIssueDialog";
 import { AlertCircle } from "lucide-react";
 
-const MEMBERSHIP_DETAILS: Record<string, { name: string; color: string; rate: number }> = {
-  visitor: { name: "Visitor", color: "bg-muted text-muted-foreground", rate: 35 },
-  weekday: { name: "Weekday Member", color: "bg-teal-100 text-teal-800", rate: 10 },
-  birdie: { name: "Birdie Member", color: "bg-blue-100 text-blue-800", rate: 10 },
-  eagle: { name: "Eagle Member", color: "bg-purple-100 text-purple-800", rate: 8 },
-};
+
 
 interface Profile {
   first_name: string;
@@ -344,9 +339,13 @@ const MyAccount = () => {
     return { icon: `💳 ${method.brand.charAt(0).toUpperCase() + method.brand.slice(1)}`, label: `•••• ${method.last4}` };
   };
 
-  const membershipInfo = profile?.membership_tier 
-    ? MEMBERSHIP_DETAILS[profile.membership_tier] 
-    : MEMBERSHIP_DETAILS.visitor;
+  // Tier name, badge style and rate all come from pricing config
+  const activeTier = getTier(profile?.membership_tier || defaultTier?.tier || "");
+  const membershipInfo = {
+    name: activeTier?.display_name || defaultTier?.display_name || "Walk-in",
+    color: tierBadgeClass(pricing, activeTier?.tier),
+    rate: activeTier ? Number(activeTier.hourly_rate) : peakRate,
+  };
 
   if (authLoading || isLoading) {
     return (

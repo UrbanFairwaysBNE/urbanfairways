@@ -112,7 +112,7 @@ const MarketingHome = () => {
             </Link>
           </div>
           <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-[4/3]">
-            <img src={venueInterior} alt="Indoor golf simulator bay" className="w-full h-full object-cover" />
+            <img src={simBayImage.url} alt="Urban Fairways indoor golf simulator bay in West End Brisbane" className="w-full h-full object-cover" loading="lazy" />
           </div>
         </div>
       </section>

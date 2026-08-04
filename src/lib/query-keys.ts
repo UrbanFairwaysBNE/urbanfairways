@@ -6,6 +6,8 @@ export const QUERY_KEYS = {
   // Booking system
   BAYS: ['bays'] as const,
   PRICING: ['pricing'] as const,
+  PRICING_SPECIALS: ['pricing-specials'] as const,
+
   BOOKINGS: (date?: string) => ['bookings', date] as const,
   USER_PROFILE: (userId?: string) => ['user-profile', userId] as const,
   SAVED_CARD: ['saved-card'] as const,

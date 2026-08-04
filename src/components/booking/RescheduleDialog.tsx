@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { addDurationToTime } from "@/lib/pricing-utils";
 import { format, addDays, isToday, isBefore, startOfDay } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
@@ -183,11 +184,9 @@ export const RescheduleDialog = ({
     return `${hour12}:${minutes} ${ampm}`;
   };
 
-  const calculateEndTime = (startTime: string, durationHours: number): string => {
-    const [hours, minutes] = startTime.split(":").map(Number);
-    const endHours = hours + durationHours;
-    return `${endHours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
-  };
+  const calculateEndTime = (startTime: string, durationHours: number): string =>
+    addDurationToTime(startTime, durationHours);
+
 
   const isSlotAvailable = (bayId: string, startTime: string): boolean => {
     const endTime = calculateEndTime(startTime, booking.duration_hours);

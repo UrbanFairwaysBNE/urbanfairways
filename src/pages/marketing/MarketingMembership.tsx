@@ -3,6 +3,7 @@ import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { ArrowRight, Check, Clock } from "lucide-react";
 import venueInterior from "@/assets/venue-interior.jpg";
 import { useTenant, hubUrl } from "@/config/tenant";
+import { useCasualRates } from "@/hooks/useCasualRates";
 
 const tiers = [
   {
@@ -31,6 +32,7 @@ const tiers = [
 
 const MarketingMembership = () => {
   const { tenant } = useTenant();
+  const { peakLabel, offPeakLabel, specials } = useCasualRates();
   return (
   <MarketingLayout>
     <Seo title={`Golf Memberships | ${tenant.venue_name}`} description={`Compare ${tenant.venue_name} membership tiers, included simulator hours, member pricing and automated bay access.`} path="/membership-info" />
@@ -116,7 +118,7 @@ const MarketingMembership = () => {
             <div className="mb-5">
               <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold bg-accent/10 text-accent border border-accent/20">
                 <Clock className="h-3.5 w-3.5" />
-                $XX/hr
+                {offPeakLabel ?? "—"}/hr
               </span>
             </div>
             <p className="text-sm text-foreground/60 mb-2">Off-peak hours</p>
@@ -131,7 +133,7 @@ const MarketingMembership = () => {
             <div className="mb-5">
               <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold bg-accent/10 text-accent border border-accent/20">
                 <Clock className="h-3.5 w-3.5" />
-                $XX/hr
+                {peakLabel ?? "—"}/hr
               </span>
             </div>
             <p className="text-sm text-foreground/60 mb-2">Peak hours</p>
@@ -141,6 +143,23 @@ const MarketingMembership = () => {
             </a>
           </div>
         </div>
+        {specials.length > 0 && (
+          <div className="max-w-3xl mx-auto mt-6 grid gap-3">
+            {specials.map((s) => (
+              <div
+                key={s.id}
+                className="flex items-center justify-between gap-4 rounded-xl border border-accent/30 bg-accent/5 px-5 py-4"
+              >
+                <div className="text-left">
+                  <p className="font-display uppercase tracking-wide text-primary">{s.name}</p>
+                  <p className="text-sm text-foreground/60">{s.duration_minutes} minutes of bay time</p>
+                </div>
+                <span className="font-display text-2xl text-accent">${s.price}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
         <div className="text-center mt-10">
           <a
             href={hubUrl(tenant, "/")}

@@ -6,6 +6,7 @@ import venueInterior from "@/assets/venue-interior.jpg";
 import swingLabBadge from "@/assets/swing-lab-badge.png.asset.json";
 import googlePlayBadge from "@/assets/google-play-badge.svg";
 import { useTenant, hubUrl } from "@/config/tenant";
+import { useCasualRates } from "@/hooks/useCasualRates";
 
 const getFeatures = (venueName: string) => [
   { icon: Target, title: "High-Tech Simulators", body: "Tour-accurate launch data, 4K graphics and a huge library of world-famous courses." },
@@ -25,6 +26,7 @@ const swingLabFeatures = [
 
 const MarketingHome = () => {
   const { tenant } = useTenant();
+  const { peakLabel, offPeakLabel, specials } = useCasualRates();
   const features = getFeatures(tenant.venue_name);
   return (
     <MarketingLayout>
@@ -207,7 +209,7 @@ const MarketingHome = () => {
               <div className="mb-5">
                 <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold bg-accent/10 text-accent border border-accent/20">
                   <Clock className="h-3.5 w-3.5" />
-                  $XX/hr
+                  {offPeakLabel ?? "—"}/hr
                 </span>
               </div>
               <p className="text-sm text-foreground/60 mb-2">Off-peak hours</p>
@@ -222,7 +224,7 @@ const MarketingHome = () => {
               <div className="mb-5">
                 <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold bg-accent/10 text-accent border border-accent/20">
                   <Clock className="h-3.5 w-3.5" />
-                  $XX/hr
+                  {peakLabel ?? "—"}/hr
                 </span>
               </div>
               <p className="text-sm text-foreground/60 mb-2">Peak hours</p>
@@ -232,6 +234,23 @@ const MarketingHome = () => {
               </a>
             </div>
           </div>
+          {specials.length > 0 && (
+            <div className="max-w-2xl mx-auto mt-6 grid gap-3">
+              {specials.map((s) => (
+                <div
+                  key={s.id}
+                  className="flex items-center justify-between gap-4 rounded-xl border border-accent/30 bg-accent/5 px-5 py-4"
+                >
+                  <div>
+                    <p className="font-display uppercase tracking-wide text-primary">{s.name}</p>
+                    <p className="text-sm text-foreground/60">{s.duration_minutes} minutes of bay time</p>
+                  </div>
+                  <span className="font-display text-2xl text-accent">${s.price}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
         </div>
       </section>
 

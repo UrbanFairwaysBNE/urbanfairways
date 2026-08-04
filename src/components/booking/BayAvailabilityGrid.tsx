@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Bay } from "@/hooks/useBooking";
+import { formatDurationLabel } from "@/components/booking/DateTimePicker";
 
 interface BayAvailabilityGridProps {
   bays: Bay[];
@@ -13,6 +14,10 @@ interface BayAvailabilityGridProps {
   checkAvailability: (bayId: string, startTime: string, duration: number) => boolean;
   onSelectBay: (bayId: string) => void;
   hourlyRate: number;
+  /** Session total; falls back to rate × duration when not supplied. */
+  totalPrice?: number;
+  /** Name of the applied special deal, if one beat the hourly rate. */
+  specialName?: string | null;
   isPeak?: boolean;
 }
 
@@ -24,6 +29,8 @@ export function BayAvailabilityGrid({
   checkAvailability,
   onSelectBay,
   hourlyRate,
+  totalPrice: totalPriceProp,
+  specialName,
   isPeak,
 }: BayAvailabilityGridProps) {
   if (!selectedTime) {
@@ -34,7 +41,8 @@ export function BayAvailabilityGrid({
     );
   }
 
-  const totalPrice = hourlyRate * selectedDuration;
+  const totalPrice = totalPriceProp ?? hourlyRate * selectedDuration;
+
 
   return (
     <div className="space-y-4">
@@ -54,8 +62,18 @@ export function BayAvailabilityGrid({
           )}
         </div>
         <div className="text-sm text-muted-foreground">
-          ${hourlyRate}/hr × {selectedDuration}hr = <span className="font-semibold text-accent">${totalPrice}</span>
+          {specialName ? (
+            <>
+              {specialName} = <span className="font-semibold text-accent">${totalPrice}</span>
+            </>
+          ) : (
+            <>
+              ${hourlyRate}/hr × {formatDurationLabel(selectedDuration)} ={" "}
+              <span className="font-semibold text-accent">${totalPrice}</span>
+            </>
+          )}
         </div>
+
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -109,7 +127,7 @@ export function BayAvailabilityGrid({
             <span className="font-semibold">
               {bays.find((b) => b.id === selectedBayId)?.name}
             </span>{" "}
-            selected • {selectedDuration} {selectedDuration === 1 ? "hour" : "hours"} • ${totalPrice} total
+            selected • {formatDurationLabel(selectedDuration)} • ${totalPrice} total
           </p>
         </div>
       )}

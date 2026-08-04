@@ -2,7 +2,18 @@ import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
-import { calculateHourlyRate, isPeakTime, isOffPeakTime, defaultPeakRate, formatLocalDateKey } from "@/lib/pricing-utils";
+import {
+  calculateHourlyRate,
+  isPeakTime,
+  isOffPeakTime,
+  defaultPeakRate,
+  formatLocalDateKey,
+  calculateBookingTotal,
+  addDurationToTime,
+  durationOptions,
+  type PricingSpecial,
+} from "@/lib/pricing-utils";
+
 import { TierConfig, TIER_SELECT, findTier, normaliseTier, hasSingleBayPeakLimit, isOffPeakOnlyTier } from "@/lib/tier-config";
 import { Capacitor } from "@capacitor/core";
 import { QUERY_KEYS, STALE_TIMES } from "@/lib/query-keys";
@@ -90,6 +101,17 @@ const fetchPublicHolidays = async (): Promise<PublicHoliday[]> => {
   }));
 };
 
+const fetchPricingSpecials = async (): Promise<PricingSpecial[]> => {
+  const { data, error } = await supabase
+    .from("pricing_specials")
+    .select("id, name, duration_minutes, price, applies_peak, applies_off_peak, is_active, display_order")
+    .eq("is_active", true)
+    .order("display_order");
+  if (error) throw error;
+  return (data || []).map((s: any) => ({ ...s, price: Number(s.price) }));
+};
+
+
 const fetchUserProfile = async () => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
@@ -156,12 +178,20 @@ export function useBooking() {
     staleTime: STALE_TIMES.STATIC,
   });
 
+  // Casual specials (e.g. 90 minutes for $60) - cached like pricing
+  const { data: pricingSpecials = [] } = useQuery({
+    queryKey: QUERY_KEYS.PRICING_SPECIALS,
+    queryFn: fetchPricingSpecials,
+    staleTime: STALE_TIMES.STATIC,
+  });
+
   // Public holidays - cached for 30 minutes
   const { data: publicHolidays = [] } = useQuery({
     queryKey: QUERY_KEYS.PUBLIC_HOLIDAYS,
     queryFn: fetchPublicHolidays,
     staleTime: STALE_TIMES.STATIC,
   });
+
 
   // User data - cached for 5 minutes
   const { data: userProfile } = useQuery({
@@ -201,6 +231,24 @@ export function useBooking() {
     const key = typeof date === "string" ? date : formatLocalDateKey(date);
     return publicHolidays.find(h => h.holiday_date === key) ?? null;
   }, [publicHolidays]);
+
+  /** True when the date is a public holiday (charged at the peak rate all day). */
+  const isPublicHolidayDate = useCallback((date: Date | string): boolean => {
+    const key = typeof date === "string" ? date : formatLocalDateKey(date);
+    return publicHolidays.some(h => h.holiday_date === key);
+  }, [publicHolidays]);
+
+  /** True when a date/time is peak, taking public holidays into account. */
+  const isPeakSlot = useCallback((date: Date, startTime: string): boolean => {
+    return isPeakTime(date, startTime, isPublicHolidayDate(date));
+  }, [isPublicHolidayDate]);
+
+  /** Session lengths offered, including any special durations (e.g. 1.5h). */
+  const availableDurations = useMemo(
+    () => durationOptions(pricingSpecials),
+    [pricingSpecials]
+  );
+
 
   // Memoized fetch function to avoid recreating on every render
   const fetchBookingsForDateInternal = useCallback(async (dateStr: string) => {
@@ -359,13 +407,29 @@ export function useBooking() {
     }
     
     const holidaySurchargePercent = getHolidaySurchargeForDate(date);
-    
+
     // Calculate rate based on tier, date, and time
     return calculateHourlyRate(tier, date, startTime, tierPricing, { 
       segment: customSegment, 
       holidaySurchargePercent,
+      isPublicHoliday: isPublicHolidayDate(date),
     });
   };
+
+  /**
+   * Total price for a session, applying any casual special (e.g. 90min for $60)
+   * when it beats the standard hourly rate for that exact session length.
+   */
+  const getBookingTotal = useCallback((
+    hourlyRateForSlot: number,
+    durationHours: number,
+    date?: Date,
+    startTime?: string
+  ): { total: number; special: PricingSpecial | null } => {
+    const peak = date && startTime ? isPeakTime(date, startTime, isPublicHolidayDate(date)) : false;
+    return calculateBookingTotal(hourlyRateForSlot, durationHours, pricingSpecials, peak);
+  }, [pricingSpecials, isPublicHolidayDate]);
+
 
   /**
    * Check if an off-peak-only tier can book at member rate for a given time
@@ -407,13 +471,11 @@ export function useBooking() {
   ): boolean => {
     // Only applies to tiers flagged single_bay_at_peak, during peak hours
     if (!hasSingleBayPeakLimit(tierPricing, userMembershipTier)) return false;
-    if (!isPeakTime(date, startTime)) return false;
-    
+    if (!isPeakSlot(date, startTime)) return false;
+
     // Calculate end time
-    const startHour = parseInt(startTime.split(":")[0]);
-    const startMinute = parseInt(startTime.split(":")[1]);
-    const endHour = startHour + durationHours;
-    const endTime = `${endHour.toString().padStart(2, "0")}:${startMinute.toString().padStart(2, "0")}`;
+    const endTime = addDurationToTime(startTime, durationHours);
+
     
     // Check for existing overlapping bookings by this user on a different bay
     const hasOverlap = userBookingsForDate.some(booking => 
@@ -432,8 +494,8 @@ export function useBooking() {
     startTime: string, 
     durationHours: number = 1, 
     bayId?: string
-  ): { rate: number; isPeak: boolean; isRestricted: boolean; isMultiBayRestricted: boolean; isHoliday: boolean; holidayName: string | null; surchargePercent: number } => {
-    const isPeak = isPeakTime(date, startTime);
+  ): { rate: number; total: number; special: PricingSpecial | null; isPeak: boolean; isRestricted: boolean; isMultiBayRestricted: boolean; isHoliday: boolean; holidayName: string | null; surchargePercent: number } => {
+    const isPeak = isPeakSlot(date, startTime);
     const isWeekdayRestricted = isOffPeakOnlyTier(tierPricing, userMembershipTier) && isPeak;
     const holiday = getHolidayForDate(date);
     const surchargePercent = holiday ? Number(holiday.surcharge_percent) : 0;
@@ -453,9 +515,13 @@ export function useBooking() {
     } else {
       rate = getHourlyRate(userMembershipTier, date, startTime);
     }
-    
+
+    const { total, special } = getBookingTotal(rate, durationHours, date, startTime);
+
     return { 
       rate, 
+      total,
+      special,
       isPeak, 
       isRestricted: isWeekdayRestricted, 
       isMultiBayRestricted,
@@ -465,6 +531,7 @@ export function useBooking() {
     };
   };
 
+
   /**
    * Get user's pending booking IDs for a given bay/time slot (for "see through" logic)
    */
@@ -473,10 +540,8 @@ export function useBooking() {
     startTime: string,
     durationHours: number
   ): Booking | undefined => {
-    const startHour = parseInt(startTime.split(":")[0]);
-    const startMinute = parseInt(startTime.split(":")[1]);
-    const endHour = startHour + durationHours;
-    const endTime = `${endHour.toString().padStart(2, "0")}:${startMinute.toString().padStart(2, "0")}`;
+    const endTime = addDurationToTime(startTime, durationHours);
+
     
     return userBookingsForDate.find(booking => 
       booking.bay_id === bayId && 
@@ -556,10 +621,8 @@ export function useBooking() {
     if (!user) throw new Error("Not authenticated");
 
     const dateStr = format(date, "yyyy-MM-dd");
-    const startHour = parseInt(startTime.split(":")[0]);
-    const startMinute = parseInt(startTime.split(":")[1]);
-    const endHour = startHour + durationHours;
-    const endTime = `${endHour.toString().padStart(2, "0")}:${startMinute.toString().padStart(2, "0")}`;
+    const endTime = addDurationToTime(startTime, durationHours);
+
 
     // Delete any existing PENDING bookings by this user that overlap with this slot
     // This allows users to "replace" their failed pending bookings seamlessly
@@ -592,7 +655,7 @@ export function useBooking() {
     if (customHourlyRate !== null) {
       // Custom rate always takes priority
       actualHourlyRate = customHourlyRate;
-    } else if (hasSingleBayPeakLimit(tierPricing, userMembershipTier) && isPeakTime(date, startTime)) {
+    } else if (hasSingleBayPeakLimit(tierPricing, userMembershipTier) && isPeakSlot(date, startTime)) {
       // For single-bay-limited tiers during peak: check for overlapping bookings in DB (not cached state)
       const { data: existingBookings } = await supabase
         .from("bookings")
@@ -608,6 +671,7 @@ export function useBooking() {
       );
       
       const holidaySurchargePercent = getHolidaySurchargeForDate(date);
+      const holidayFlag = isPublicHolidayDate(date);
       if (hasOverlappingBooking) {
         // Multi-bay during peak: charge visitor rate instead of member rate (+ holiday surcharge if any)
         console.log("[useBooking] Multi-bay peak restriction triggered - charging walk-in rate");
@@ -617,15 +681,17 @@ export function useBooking() {
           : baseRate;
       } else {
         // No conflict: use member rate (with holiday surcharge if applicable)
-        actualHourlyRate = calculateHourlyRate(userMembershipTier, date, startTime, tierPricing, { segment: customSegment, holidaySurchargePercent });
+        actualHourlyRate = calculateHourlyRate(userMembershipTier, date, startTime, tierPricing, { segment: customSegment, holidaySurchargePercent, isPublicHoliday: holidayFlag });
       }
     } else {
       // All other cases: use standard rate calculation (with holiday surcharge if applicable)
       const holidaySurchargePercent = getHolidaySurchargeForDate(date);
-      actualHourlyRate = calculateHourlyRate(userMembershipTier, date, startTime, tierPricing, { segment: customSegment, holidaySurchargePercent });
+      actualHourlyRate = calculateHourlyRate(userMembershipTier, date, startTime, tierPricing, { segment: customSegment, holidaySurchargePercent, isPublicHoliday: isPublicHolidayDate(date) });
     }
-    
-    const totalPrice = actualHourlyRate * durationHours;
+
+    // Apply any casual special (e.g. 90 minutes for $60) when it beats the hourly rate
+    const { total: totalPrice } = getBookingTotal(actualHourlyRate, durationHours, date, startTime);
+
     
     // Track how much to deduct from balance and charge to card
     let balanceDeduction = 0;
@@ -797,8 +863,13 @@ export function useBooking() {
     savedCard: savedCard ?? null,
     isLoadingSavedCard,
     tierPricing,
+    pricingSpecials,
+    availableDurations,
+    getBookingTotal,
+    isPeakSlot,
     getHourlyRate,
     getRateInfo,
+
     canWeekdayMemberBook,
     checkMultiBayRestriction,
     publicHolidays,

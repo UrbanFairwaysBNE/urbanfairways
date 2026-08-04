@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { usePricing } from "@/hooks/usePricing";
+import { addDurationToTime } from "@/lib/pricing-utils";
 import { tierBadgeClass } from "@/lib/tier-config";
 import { useOperatingHours } from "@/hooks/useOperatingHours";
 import { format, addDays, isSameDay } from "date-fns";
@@ -548,11 +549,8 @@ export default function AdminTimetable() {
     setEditCalendarOpen(false);
   };
 
-  const calculateEndTime = (startTime: string, durationHours: number): string => {
-    const [hour, min] = startTime.split(":").map(Number);
-    const endHour = hour + durationHours;
-    return `${endHour.toString().padStart(2, "0")}:${min.toString().padStart(2, "0")}`;
-  };
+  const calculateEndTime = (startTime: string, durationHours: number): string =>
+    addDurationToTime(startTime, durationHours);
 
   const saveBookingChanges = async () => {
     if (!selectedBooking || !editDate) return;

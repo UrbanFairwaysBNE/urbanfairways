@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { isPeakTime } from "@/lib/pricing-utils";
+import { isPeakTime, addDurationToTime } from "@/lib/pricing-utils";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Loader2, AlertCircle, Wallet, CreditCard } from "lucide-react";
 import { format } from "date-fns";
@@ -49,6 +49,10 @@ export default function Booking() {
     savedCard,
     getHourlyRate,
     getRateInfo,
+    getBookingTotal,
+    isPeakSlot,
+    availableDurations,
+
     checkMultiBayRestriction,
     getHolidaySurchargeForDate,
     fetchBookingsForDate,
@@ -194,11 +198,8 @@ export default function Booking() {
       let currentHourlyRate = getHourlyRate(userMembershipTier, selectedDate, selectedTime);
       const dateStr = format(selectedDate, "yyyy-MM-dd");
       
-      if (hasSingleBayPeakLimit(pricing, userMembershipTier) && isPeakTime(selectedDate, selectedTime)) {
-        const startHourCalc = parseInt(selectedTime.split(":")[0]);
-        const startMinuteCalc = parseInt(selectedTime.split(":")[1]);
-        const endHourCalc = startHourCalc + selectedDuration;
-        const endTimeCalc = `${endHourCalc.toString().padStart(2, "0")}:${startMinuteCalc.toString().padStart(2, "0")}`;
+      if (hasSingleBayPeakLimit(pricing, userMembershipTier) && isPeakSlot(selectedDate, selectedTime)) {
+        const endTimeCalc = addDurationToTime(selectedTime, selectedDuration);
         
         const { data: existingBookings } = await supabase
           .from("bookings")
@@ -222,12 +223,10 @@ export default function Booking() {
         }
       }
       
-      const totalPrice = currentHourlyRate * selectedDuration;
+      const { total: totalPrice } = getBookingTotal(currentHourlyRate, selectedDuration, selectedDate, selectedTime);
       
-      const startHour = parseInt(selectedTime.split(":")[0]);
-      const startMinute = parseInt(selectedTime.split(":")[1]);
-      const endHour = startHour + selectedDuration;
-      const endTime = `${endHour.toString().padStart(2, "0")}:${startMinute.toString().padStart(2, "0")}`;
+      const endTime = addDurationToTime(selectedTime, selectedDuration);
+
       
       const { data: bookingData, error } = await supabase
         .from("bookings")
@@ -298,7 +297,7 @@ export default function Booking() {
       return;
     }
 
-    const totalPrice = hourlyRate * selectedDuration;
+    const totalPrice = sessionTotal;
 
     // Free bookings bypass all payment logic - confirm directly
     if (totalPrice <= 0) {
@@ -453,7 +452,7 @@ export default function Booking() {
         return;
       }
 
-      const totalPrice = hourlyRate * selectedDuration;
+      const totalPrice = sessionTotal;
       let message = `Your bay is booked for ${format(selectedDate, "PPP")} at ${selectedTime}.`;
       if (paymentMethod === "balance") {
         message += " Balance deducted.";
@@ -504,7 +503,7 @@ export default function Booking() {
         playingComp ? COMP_NOTE : undefined
       );
 
-      const totalPrice = hourlyRate * selectedDuration;
+      const totalPrice = sessionTotal;
       toast({
         title: "Booking confirmed!",
         description: `Your bay is booked for ${format(selectedDate, "PPP")} at ${selectedTime}. $${totalPrice.toFixed(2)} deducted from your balance.`,
@@ -546,7 +545,12 @@ export default function Booking() {
     ? getHourlyRate(userMembershipTier, selectedDate, selectedTime)
     : getHourlyRate());
 
+  // Session total: hourly rate × duration, unless a casual special is cheaper
+  const sessionTotal = rateInfo?.total ?? hourlyRate * selectedDuration;
+  const appliedSpecial = rateInfo?.special ?? null;
+
   const canConfirm = selectedDate && selectedTime && selectedBayId;
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -658,6 +662,8 @@ export default function Booking() {
               selectedDate={selectedDate}
               selectedTime={selectedTime}
               selectedDuration={selectedDuration}
+              durations={availableDurations}
+
               selectedPlayers={selectedPlayers}
               onDateChange={handleDateChange}
               onTimeChange={handleTimeChange}
@@ -687,7 +693,10 @@ export default function Booking() {
                 checkAvailability={checkBayAvailability}
                 onSelectBay={setSelectedBayId}
                 hourlyRate={hourlyRate}
+                totalPrice={sessionTotal}
+                specialName={appliedSpecial?.name ?? null}
                 isPeak={rateInfo?.isPeak}
+
               />
             )}
           </CardContent>
@@ -701,7 +710,7 @@ export default function Booking() {
             </CardHeader>
             <CardContent className="space-y-4">
               {(() => {
-                const totalPrice = hourlyRate * selectedDuration;
+                const totalPrice = sessionTotal;
                 const hasEnoughBalance = depositBalance >= totalPrice;
                 const remainingAfterBalance = totalPrice - depositBalance;
 
@@ -803,7 +812,7 @@ export default function Booking() {
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                {hourlyRate * selectedDuration <= 0 
+                {sessionTotal <= 0 
                   ? "Confirming..." 
                   : selectedPaymentMethod === "balance" 
                     ? "Processing..." 
@@ -812,7 +821,7 @@ export default function Booking() {
             ) : (
               (() => {
                 if (!canConfirm) return "Confirm Booking";
-                const totalPrice = hourlyRate * selectedDuration;
+                const totalPrice = sessionTotal;
                 // Free bookings get special treatment
                 if (totalPrice <= 0) {
                   return "Confirm Free Booking";
@@ -828,7 +837,7 @@ export default function Booking() {
               })()
             )}
           </Button>
-          {canConfirm && depositBalance === 0 && hourlyRate * selectedDuration > 0 && (
+          {canConfirm && depositBalance === 0 && sessionTotal > 0 && (
             <p className="text-center text-sm text-muted-foreground">
               {isLoadingSavedCard 
                 ? "Checking payment method..."

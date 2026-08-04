@@ -49,6 +49,9 @@ interface DateTimePickerProps {
   selectedDate: Date | undefined;
   selectedTime: string | undefined;
   selectedDuration: number;
+  /** Session lengths in hours; defaults to 1–4 when not supplied. */
+  durations?: number[];
+
   selectedPlayers: number;
   onDateChange: (date: Date | undefined) => void;
   onTimeChange: (time: string) => void;
@@ -75,6 +78,17 @@ const generateTimeSlots = () => {
 const TIME_SLOTS = generateTimeSlots();
 const DURATIONS = [1, 2, 3, 4];
 const PLAYERS = [1, 2, 3, 4];
+
+/** "1 hour", "1.5 hours" → "1 hr 30 min" style labels for fractional sessions. */
+export const formatDurationLabel = (hours: number): string => {
+  const totalMinutes = Math.round(hours * 60);
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  if (m === 0) return `${h} ${h === 1 ? "hour" : "hours"}`;
+  if (h === 0) return `${m} minutes`;
+  return `${h} hr ${m} min`;
+};
+
 
 // Get the next available time slot (rounded up to nearest 30 min)
 const getNextAvailableTimeSlot = (): string => {
@@ -107,6 +121,8 @@ export function DateTimePicker({
   selectedDate,
   selectedTime,
   selectedDuration,
+  durations = DURATIONS,
+
   selectedPlayers,
   onDateChange,
   onTimeChange,
@@ -312,20 +328,21 @@ export function DateTimePicker({
         <label className="text-sm font-medium text-foreground">Duration</label>
         <Select
           value={selectedDuration.toString()}
-          onValueChange={(value) => onDurationChange(parseInt(value))}
+          onValueChange={(value) => onDurationChange(parseFloat(value))}
           disabled={compLocked}
         >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select duration" />
           </SelectTrigger>
           <SelectContent className="bg-popover">
-            {DURATIONS.map((duration) => (
+            {durations.map((duration) => (
               <SelectItem key={duration} value={duration.toString()}>
-                {duration} {duration === 1 ? "hour" : "hours"}
+                {formatDurationLabel(duration)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
+
       </div>
 
       {/* Players Selector */}

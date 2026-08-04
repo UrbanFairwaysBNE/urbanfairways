@@ -1959,7 +1959,7 @@ export type Database = {
           last_name: string
           marketing_opt_out: boolean | null
           membership_on_hold: boolean
-          membership_tier: Database["public"]["Enums"]["membership_tier"]
+          membership_tier: string
           payment_failed_at: string | null
           phone: string | null
           referral_source: string | null
@@ -1985,7 +1985,7 @@ export type Database = {
           last_name: string
           marketing_opt_out?: boolean | null
           membership_on_hold?: boolean
-          membership_tier?: Database["public"]["Enums"]["membership_tier"]
+          membership_tier?: string
           payment_failed_at?: string | null
           phone?: string | null
           referral_source?: string | null
@@ -2011,7 +2011,7 @@ export type Database = {
           last_name?: string
           marketing_opt_out?: boolean | null
           membership_on_hold?: boolean
-          membership_tier?: Database["public"]["Enums"]["membership_tier"]
+          membership_tier?: string
           payment_failed_at?: string | null
           phone?: string | null
           referral_source?: string | null
@@ -3418,6 +3418,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_paying_member: { Args: { _user_id: string }; Returns: boolean }
       sgt_is_full_18: {
         Args: { hole_data: Json; in_gross: number; out_gross: number }
         Returns: boolean
@@ -3441,13 +3442,6 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
-      membership_tier:
-        | "visitor"
-        | "weekday"
-        | "par"
-        | "birdie"
-        | "eagle"
-        | "albatross"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3576,14 +3570,6 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
-      membership_tier: [
-        "visitor",
-        "weekday",
-        "par",
-        "birdie",
-        "eagle",
-        "albatross",
-      ],
     },
   },
 } as const

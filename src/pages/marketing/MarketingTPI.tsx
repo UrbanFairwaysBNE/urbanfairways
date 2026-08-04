@@ -34,30 +34,28 @@ const MarketingTPI = () => {
       </section>
 
       <section className="py-12 sm:py-20">
-        <div className="container mx-auto px-4 max-w-6xl">
-          <div className="grid lg:grid-cols-[minmax(0,340px)_1fr] gap-10 lg:gap-14 items-start">
-            <figure className="lg:sticky lg:top-28">
-              <div className="relative">
-                <div className="absolute -inset-3 rounded-lg border border-accent/30 hidden sm:block" aria-hidden />
-                <img
-                  src={samPhoto.url}
-                  alt="Sam Brooks, TPI certified golf coach at Urban Fairways"
-                  loading="lazy"
-                  className="relative w-full max-w-[340px] mx-auto rounded-lg object-cover aspect-[3/4] shadow-lg"
-                />
-              </div>
-              <figcaption className="mt-5 text-center lg:text-left">
-                <p className="font-display text-primary text-lg tracking-wide uppercase">Sam Brooks</p>
-                <p className="text-sm text-foreground/60">TPI Certified Coach</p>
-              </figcaption>
-            </figure>
+        <div className="container mx-auto px-4 max-w-4xl">
+          <p className="text-accent font-display tracking-[0.2em] uppercase text-sm mb-3">Meet your coach</p>
+          <h2 className="font-display text-3xl sm:text-4xl text-primary leading-tight mb-6">
+            TPI Assessment Screening
+          </h2>
 
-            <div>
-              <p className="text-accent font-display tracking-[0.2em] uppercase text-sm mb-3">Meet your coach</p>
-              <h2 className="font-display text-3xl sm:text-4xl text-primary leading-tight mb-6">
-                TPI Assessment Screening
-              </h2>
-              <div className="space-y-4 text-foreground/80 leading-relaxed">
+          <figure className="float-none sm:float-left sm:mr-6 mb-5 w-[150px] sm:w-[180px] mx-auto sm:mx-0">
+            <img
+              src={samPhoto.url}
+              alt="Sam Brooks, TPI certified golf coach at Urban Fairways"
+              loading="lazy"
+              className="w-full rounded-md object-cover aspect-[3/4] shadow-md"
+            />
+            <figcaption className="mt-2 text-center sm:text-left">
+              <p className="font-display text-primary text-sm tracking-wide uppercase">Sam Brooks</p>
+              <p className="text-xs text-foreground/60">TPI Certified Coach</p>
+            </figcaption>
+          </figure>
+
+          <div>
+            <div className="space-y-4 text-foreground/80 leading-relaxed">
+
                 <p>
                   I'm a dedicated golf coach specializing in a results-driven blend of TPI (Titleist Performance
                   Institute) methods, traditional coaching principles, and advanced swing analysis.

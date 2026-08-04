@@ -1,4 +1,8 @@
-// Peak/off-peak pricing utilities
+// Peak/off-peak pricing utilities.
+// All rates and tier behaviour come from `pricing_config` (see src/lib/tier-config.ts).
+// Nothing here hardcodes a tier key, tier name or dollar amount.
+
+import { TierConfig, findTier, getDefaultTier } from "@/lib/tier-config";
 
 /**
  * Determines if a given date and time is during peak hours.
@@ -8,86 +12,70 @@
 export function isPeakTime(date: Date, startTime: string): boolean {
   const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
   const hour = parseInt(startTime.split(":")[0], 10);
-  
+
   // Weekend (Friday = 5, Saturday = 6, Sunday = 0) is always peak
   if (dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6) {
     return true;
   }
-  
+
   // Monday-Thursday: peak if 4pm (16:00) or later
   return hour >= 16;
 }
 
 /**
- * Checks if a booking time is valid for a Weekday membership.
- * Weekday members can only book Mon-Thu before 4pm at member rate.
+ * True when a time falls in the off-peak window. Tiers flagged
+ * `restricted_to_off_peak` only get their member rate in this window.
  */
-export function isWeekdayMemberTime(date: Date, startTime: string): boolean {
-  const dayOfWeek = date.getDay();
-  const hour = parseInt(startTime.split(":")[0], 10);
-  
-  // Must be Monday (1) through Thursday (4)
-  if (dayOfWeek < 1 || dayOfWeek > 4) {
-    return false;
-  }
-  
-  // Must be before 4pm
-  return hour < 16;
+export function isOffPeakTime(date: Date, startTime: string): boolean {
+  return !isPeakTime(date, startTime);
 }
 
-// Visitor pricing constants
-export const VISITOR_PEAK_RATE = 35;
-export const VISITOR_OFF_PEAK_RATE = 30;
+/** Peak rate of the venue's walk-in tier (0 when no pricing is configured). */
+export function defaultPeakRate(tiers: TierConfig[]): number {
+  const def = getDefaultTier(tiers);
+  return def ? Number(def.hourly_rate) : 0;
+}
+
+/** Off-peak rate of the venue's walk-in tier (falls back to its peak rate). */
+export function defaultOffPeakRate(tiers: TierConfig[]): number {
+  const def = getDefaultTier(tiers);
+  if (!def) return 0;
+  return Number(def.off_peak_hourly_rate ?? def.hourly_rate);
+}
 
 /**
- * Gets the appropriate hourly rate based on membership tier, date, and time.
- * 
- * Visitor rates:
- *   - Peak: $35/hr
- *   - Off-peak: $30/hr
- * 
- * Weekday Member:
- *   - Weekdays before 4pm: member rate
- *   - Other times: Visitor peak rate ($35/hr)
- * 
- * Birdie Member: member rate (anytime)
- * Eagle Member: member rate (anytime)
+ * Gets the hourly rate for a tier at a given date/time, driven entirely by the
+ * tier row:
+ *   - `off_peak_hourly_rate` is used outside peak hours when set
+ *   - `restricted_to_off_peak` tiers pay the walk-in peak rate during peak
+ *   - unknown/unconfigured tiers fall back to the walk-in tier's rate
+ * Returns 0 when the venue has no pricing configured at all.
  */
 export function calculateHourlyRate(
   tier: string,
   date: Date,
   startTime: string,
-  tierPricing: Record<string, number>,
+  tiers: TierConfig[],
   options?: { segment?: string | null; holidaySurchargePercent?: number }
 ): number {
   const isPeak = isPeakTime(date, startTime);
-  
+  const walkInPeak = defaultPeakRate(tiers);
+
   let baseRate: number;
 
-  // Staff get free play during off-peak, full visitor rate during peak
+  // Staff get free play during off-peak, walk-in rate during peak
   if (options?.segment === "staff") {
-    baseRate = isPeak ? VISITOR_PEAK_RATE : 0;
+    baseRate = isPeak ? walkInPeak : 0;
   } else {
-    switch (tier.toLowerCase()) {
-      case "visitor":
-        baseRate = isPeak ? VISITOR_PEAK_RATE : VISITOR_OFF_PEAK_RATE;
-        break;
-      case "weekday":
-        // Weekday members pay their rate for off-peak weekday slots
-        // Otherwise they pay visitor peak rate
-        baseRate = isWeekdayMemberTime(date, startTime) 
-          ? (tierPricing.weekday || 10) 
-          : VISITOR_PEAK_RATE;
-        break;
-      case "birdie":
-        baseRate = tierPricing.birdie || 10;
-        break;
-      case "eagle":
-        baseRate = tierPricing.eagle || 8;
-        break;
-      default:
-        // Unknown tier defaults to peak visitor rate
-        baseRate = VISITOR_PEAK_RATE;
+    const config = findTier(tiers, tier);
+    if (!config) {
+      baseRate = isPeak ? walkInPeak : defaultOffPeakRate(tiers);
+    } else if (config.restricted_to_off_peak && isPeak) {
+      baseRate = walkInPeak;
+    } else if (!isPeak && config.off_peak_hourly_rate !== null) {
+      baseRate = Number(config.off_peak_hourly_rate);
+    } else {
+      baseRate = Number(config.hourly_rate);
     }
   }
 

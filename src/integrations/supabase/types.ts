@@ -1877,11 +1877,20 @@ export type Database = {
       pricing_config: {
         Row: {
           created_at: string
+          description: string | null
           display_name: string
           display_order: number
+          features: Json
+          grants_league_access: boolean
+          grants_range_access: boolean
           hourly_rate: number
           id: string
+          is_default: boolean
           is_subscription: boolean
+          off_peak_hourly_rate: number | null
+          restricted_to_off_peak: boolean
+          restrictions: string | null
+          single_bay_at_peak: boolean
           stripe_price_id: string | null
           stripe_product_id: string | null
           tier: string
@@ -1890,11 +1899,20 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          description?: string | null
           display_name: string
           display_order?: number
+          features?: Json
+          grants_league_access?: boolean
+          grants_range_access?: boolean
           hourly_rate: number
           id?: string
+          is_default?: boolean
           is_subscription?: boolean
+          off_peak_hourly_rate?: number | null
+          restricted_to_off_peak?: boolean
+          restrictions?: string | null
+          single_bay_at_peak?: boolean
           stripe_price_id?: string | null
           stripe_product_id?: string | null
           tier: string
@@ -1903,11 +1921,20 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          description?: string | null
           display_name?: string
           display_order?: number
+          features?: Json
+          grants_league_access?: boolean
+          grants_range_access?: boolean
           hourly_rate?: number
           id?: string
+          is_default?: boolean
           is_subscription?: boolean
+          off_peak_hourly_rate?: number | null
+          restricted_to_off_peak?: boolean
+          restrictions?: string | null
+          single_bay_at_peak?: boolean
           stripe_price_id?: string | null
           stripe_product_id?: string | null
           tier?: string
@@ -1932,7 +1959,7 @@ export type Database = {
           last_name: string
           marketing_opt_out: boolean | null
           membership_on_hold: boolean
-          membership_tier: Database["public"]["Enums"]["membership_tier"]
+          membership_tier: string
           payment_failed_at: string | null
           phone: string | null
           referral_source: string | null
@@ -1958,7 +1985,7 @@ export type Database = {
           last_name: string
           marketing_opt_out?: boolean | null
           membership_on_hold?: boolean
-          membership_tier?: Database["public"]["Enums"]["membership_tier"]
+          membership_tier?: string
           payment_failed_at?: string | null
           phone?: string | null
           referral_source?: string | null
@@ -1984,7 +2011,7 @@ export type Database = {
           last_name?: string
           marketing_opt_out?: boolean | null
           membership_on_hold?: boolean
-          membership_tier?: Database["public"]["Enums"]["membership_tier"]
+          membership_tier?: string
           payment_failed_at?: string | null
           phone?: string | null
           referral_source?: string | null
@@ -3391,6 +3418,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_paying_member: { Args: { _user_id: string }; Returns: boolean }
       sgt_is_full_18: {
         Args: { hole_data: Json; in_gross: number; out_gross: number }
         Returns: boolean
@@ -3414,13 +3442,6 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
-      membership_tier:
-        | "visitor"
-        | "weekday"
-        | "par"
-        | "birdie"
-        | "eagle"
-        | "albatross"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3549,14 +3570,6 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
-      membership_tier: [
-        "visitor",
-        "weekday",
-        "par",
-        "birdie",
-        "eagle",
-        "albatross",
-      ],
     },
   },
 } as const

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { usePricing } from "@/hooks/usePricing";
 import { format } from "date-fns";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -76,13 +77,7 @@ interface CustomerFilter {
   booking_count?: string;
 }
 
-const MEMBERSHIP_OPTIONS = [
-  { value: "all", label: "All Customers" },
-  { value: "visitor", label: "Visitor" },
-  { value: "weekday", label: "Weekday" },
-  { value: "birdie", label: "Birdie" },
-  { value: "eagle", label: "Eagle" },
-];
+const ALL_CUSTOMERS_OPTION = { value: "all", label: "All Customers" };
 
 const BOOKING_OPTIONS = [
   { value: "all", label: "Any Booking Count" },
@@ -100,6 +95,7 @@ const SEGMENT_OPTIONS = [
 
 export default function AdminMarketing() {
   const { isLoading: authLoading, isAdmin } = useAdminAuth();
+  const { pricing } = usePricing();
   const { toast } = useToast();
   
   const [activeTab, setActiveTab] = useState("campaigns");
@@ -286,7 +282,7 @@ export default function AdminMarketing() {
       .eq("marketing_opt_out", false);
     
     if (membershipFilter !== "all") {
-      query = query.eq("membership_tier", membershipFilter as "visitor" | "weekday" | "birdie" | "eagle");
+      query = query.eq("membership_tier", membershipFilter);
     }
 
     // Apply segment filter
@@ -395,7 +391,7 @@ export default function AdminMarketing() {
         .eq("marketing_opt_out", false);
       
       if (membershipFilter !== "all") {
-        recipientQuery = recipientQuery.eq("membership_tier", membershipFilter as "visitor" | "weekday" | "birdie" | "eagle");
+        recipientQuery = recipientQuery.eq("membership_tier", membershipFilter);
       }
 
       // Apply segment filter
@@ -877,9 +873,12 @@ export default function AdminMarketing() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {MEMBERSHIP_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
+                        <SelectItem value={ALL_CUSTOMERS_OPTION.value}>
+                          {ALL_CUSTOMERS_OPTION.label}
+                        </SelectItem>
+                        {pricing.map((t) => (
+                          <SelectItem key={t.tier} value={t.tier}>
+                            {t.display_name}
                           </SelectItem>
                         ))}
                       </SelectContent>

@@ -26,13 +26,8 @@ import { toast } from "@/hooks/use-toast";
 import venueLogo from "@/assets/venue-logo.png";
 import { MembershipPaymentIssueDialog } from "@/components/membership/MembershipPaymentIssueDialog";
 import { useTenant } from "@/config/tenant";
-
-const MEMBERSHIP_DISPLAY: Record<string, string> = {
-  visitor: "Visitor",
-  weekday: "Weekday Member",
-  birdie: "Birdie Member",
-  eagle: "Eagle Member",
-};
+import { usePricing } from "@/hooks/usePricing";
+import { hasSingleBayPeakLimit, isOffPeakOnlyTier } from "@/lib/tier-config";
 
 const PENDING_BOOKING_KEY = "bb:pendingBookingId";
 
@@ -40,6 +35,8 @@ export default function Booking() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { tenant } = useTenant();
+  const { pricing, defaultTier, getTierLabel, peakRate: walkInPeakRate } = usePricing();
+  const walkInLabel = defaultTier?.display_name || "Walk-in";
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
   const {
     bays,
@@ -197,7 +194,7 @@ export default function Booking() {
       let currentHourlyRate = getHourlyRate(userMembershipTier, selectedDate, selectedTime);
       const dateStr = format(selectedDate, "yyyy-MM-dd");
       
-      if (["birdie", "eagle"].includes(userMembershipTier) && isPeakTime(selectedDate, selectedTime)) {
+      if (hasSingleBayPeakLimit(pricing, userMembershipTier) && isPeakTime(selectedDate, selectedTime)) {
         const startHourCalc = parseInt(selectedTime.split(":")[0]);
         const startMinuteCalc = parseInt(selectedTime.split(":")[1]);
         const endHourCalc = startHourCalc + selectedDuration;
@@ -217,11 +214,11 @@ export default function Booking() {
         });
         
         if (hasOverlap) {
-          console.log("[Booking] Multi-bay peak restriction triggered - charging visitor rate $35/hr");
+          console.log("[Booking] Multi-bay peak restriction triggered - charging walk-in rate");
           const holidaySurcharge = getHolidaySurchargeForDate(selectedDate);
           currentHourlyRate = holidaySurcharge > 0
-            ? Math.round(35 * (1 + holidaySurcharge / 100) * 100) / 100
-            : 35; // VISITOR_PEAK_RATE
+            ? Math.round(walkInPeakRate * (1 + holidaySurcharge / 100) * 100) / 100
+            : walkInPeakRate;
         }
       }
       
@@ -582,11 +579,11 @@ export default function Booking() {
               <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="font-display text-base text-destructive">
-                  Membership payment failed, paying Visitor rates
+                  Membership payment failed, paying {walkInLabel} rates
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Your last {MEMBERSHIP_DISPLAY[actualMembershipTier] || "Member"} payment
-                  didn't go through. You can still book at <strong>$35/hr visitor rate</strong>,
+                  Your last {getTierLabel(actualMembershipTier) || "Member"} payment
+                  didn't go through. You can still book at the <strong>${walkInPeakRate}/hr {walkInLabel.toLowerCase()} rate</strong>,
                   or retry your membership payment now to get member pricing back.
                 </p>
                 <Button
@@ -605,7 +602,7 @@ export default function Booking() {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-secondary rounded-full">
             <span className="text-sm text-secondary-foreground">
-              {MEMBERSHIP_DISPLAY[userMembershipTier]}
+              {getTierLabel(userMembershipTier)}
             </span>
             <span className="text-sm font-semibold text-accent">
               ${hourlyRate}/hr
@@ -614,29 +611,29 @@ export default function Booking() {
           
           {(rateInfo?.isRestricted || rateInfo?.isMultiBayRestricted) && selectedTime && (
             <Badge variant="outline" className="text-amber-600 border-amber-300 bg-amber-50">
-              Visitor Rate Applied
+              {walkInLabel} Rate Applied
             </Badge>
           )}
         </div>
 
-        {/* Multi-bay restriction warning for Birdie/Eagle members */}
+        {/* Multi-bay restriction warning for single-bay-limited tiers */}
         {rateInfo?.isMultiBayRestricted && (
           <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
             <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
             <div>
               <strong>Additional bay booking.</strong> You already have a bay booked at this time. 
-              Additional bays during peak hours are charged at visitor rates ($35/hr).
+              Additional bays during peak hours are charged at {defaultTier?.display_name || "walk-in"} rates (${walkInPeakRate}/hr).
             </div>
           </div>
         )}
 
-        {/* Weekday member restriction warning */}
-        {userMembershipTier === "weekday" && rateInfo?.isRestricted && (
+        {/* Off-peak-only tier restriction warning */}
+        {isOffPeakOnlyTier(pricing, userMembershipTier) && rateInfo?.isRestricted && (
           <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
             <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
             <div>
-              <strong>Peak time selected.</strong> As a Weekday member, you get $10/hr for Monday-Thursday before 4pm only. 
-              This booking will be charged at the visitor peak rate ($35/hr).
+              <strong>Peak time selected.</strong> As a {getTierLabel(userMembershipTier)} member, your member rate applies during off-peak hours only. 
+              This booking will be charged at the {defaultTier?.display_name || "walk-in"} peak rate (${walkInPeakRate}/hr).
             </div>
           </div>
         )}

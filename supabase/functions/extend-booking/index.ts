@@ -1,14 +1,13 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
+import { loadTiers, calculateTierHourlyRate, TierRow } from "../_shared/tiers.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const VISITOR_PEAK_RATE = 35;
-const VISITOR_OFF_PEAK_RATE = 30;
 const MAX_TOTAL_HOURS = 4;
 
 function isPeakTime(dateStr: string, startTime: string): boolean {
@@ -19,41 +18,14 @@ function isPeakTime(dateStr: string, startTime: string): boolean {
   return hour >= 16;
 }
 
-function isWeekdayMemberTime(dateStr: string, startTime: string): boolean {
-  const date = new Date(dateStr + "T00:00:00");
-  const dayOfWeek = date.getDay();
-  const hour = parseInt(startTime.split(":")[0], 10);
-  if (dayOfWeek < 1 || dayOfWeek > 4) return false;
-  return hour < 16;
-}
-
 function calculateHourlyRate(
   tier: string,
   dateStr: string,
   startTime: string,
-  pricingConfig: Record<string, number>,
+  tiers: TierRow[],
   customHourlyRate: number | null,
 ): number {
-  if (customHourlyRate !== null && customHourlyRate > 0) return customHourlyRate;
-  const isPeak = isPeakTime(dateStr, startTime);
-  switch (tier.toLowerCase()) {
-    case "visitor":
-      return isPeak ? VISITOR_PEAK_RATE : VISITOR_OFF_PEAK_RATE;
-    case "weekday":
-      return isWeekdayMemberTime(dateStr, startTime)
-        ? (pricingConfig.weekday || 10)
-        : VISITOR_PEAK_RATE;
-    case "par":
-      return pricingConfig.par || 12;
-    case "birdie":
-      return pricingConfig.birdie || 10;
-    case "eagle":
-      return pricingConfig.eagle || 9;
-    case "albatross":
-      return pricingConfig.albatross || 8;
-    default:
-      return VISITOR_PEAK_RATE;
-  }
+  return calculateTierHourlyRate(tiers, tier, isPeakTime(dateStr, startTime), customHourlyRate);
 }
 
 // Sum the cost of `hours` hourly slots starting at startTime on dateStr,
@@ -63,7 +35,7 @@ function calculateExtensionCost(
   dateStr: string,
   startTime: string,
   hours: number,
-  pricingConfig: Record<string, number>,
+  tiers: TierRow[],
   customHourlyRate: number | null,
 ): number {
   const [h, m] = startTime.split(":").map(Number);
@@ -71,7 +43,7 @@ function calculateExtensionCost(
   for (let i = 0; i < hours; i++) {
     const slotHour = h + i;
     const slot = `${slotHour.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
-    total += calculateHourlyRate(tier, dateStr, slot, pricingConfig, customHourlyRate);
+    total += calculateHourlyRate(tier, dateStr, slot, tiers, customHourlyRate);
   }
   return total;
 }
@@ -185,20 +157,14 @@ serve(async (req) => {
       .single();
     if (pErr || !profile) throw new Error("Could not fetch profile");
 
-    const { data: pricingRows } = await supabaseAdmin
-      .from("pricing_config")
-      .select("tier, hourly_rate");
-    const pricingConfig: Record<string, number> = {};
-    (pricingRows || []).forEach((r: any) => {
-      pricingConfig[r.tier.toLowerCase()] = r.hourly_rate;
-    });
+    const tiers = await loadTiers(supabaseAdmin);
 
     const extensionCost = calculateExtensionCost(
       profile.membership_tier,
       booking.booking_date,
       booking.end_time, // extension begins where booking currently ends
       additional_hours,
-      pricingConfig,
+      tiers,
       profile.custom_hourly_rate,
     );
 

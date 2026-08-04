@@ -3,6 +3,7 @@ import Stripe from "npm:stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { Resend } from "npm:resend@2.0.0";
 import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
+import { loadTiers, TierRow } from "../_shared/tiers.ts";
 import { getTenant, tenantHubUrl } from "../_shared/tenant.ts";
 
 const corsHeaders = {
@@ -56,16 +57,25 @@ const triggerBookingConfirmation = async (bookingId: string) => {
   return { success: true, status: response.status, response: responseBody };
 };
 
-const TIER_NAMES: Record<string, string> = {
-  "weekday": "Weekday",
-  "birdie": "Birdie",
-  "eagle": "Eagle",
-};
-
-const TIER_WEEKLY_PRICES: Record<string, string> = {
-  "weekday": "$15.00",
-  "birdie": "$27.00",
-  "eagle": "$35.00",
+// Tier names, prices and ranking are all read from `pricing_config`.
+const buildTierMaps = (tiers: TierRow[]) => {
+  const ordered = [...tiers]
+    .filter((t) => t.is_subscription && !t.is_default)
+    .sort((a, b) => a.display_order - b.display_order);
+  const names: Record<string, string> = {};
+  const prices: Record<string, string> = {};
+  const rank: Record<string, number> = {};
+  ordered.forEach((t, i) => {
+    names[t.tier] = t.display_name || t.tier;
+    prices[t.tier] = t.weekly_subscription_price !== null && t.weekly_subscription_price !== undefined
+      ? `$${Number(t.weekly_subscription_price).toFixed(2)}`
+      : "";
+    rank[t.tier] = i + 1;
+  });
+  tiers.filter((t) => t.is_default).forEach((t) => {
+    names[t.tier] = t.display_name || t.tier;
+  });
+  return { names, prices, rank, walkInTier: tiers.find((t) => t.is_default)?.tier ?? "visitor" };
 };
 
 // Replace template tags with actual values
@@ -216,6 +226,13 @@ serve(async (req) => {
 
     // Load dynamic price to tier map
     const PRICE_TO_TIER = await getPriceToTierMap(supabaseAdmin);
+    const configuredTiers = await loadTiers(supabaseAdmin);
+    const {
+      names: TIER_NAMES,
+      prices: TIER_WEEKLY_PRICES,
+      rank: TIER_RANK,
+      walkInTier: WALK_IN_TIER,
+    } = buildTierMaps(configuredTiers);
 
     // ─── SUBSCRIPTION CREATED / UPDATED ───
     if (event.type === "customer.subscription.created" || event.type === "customer.subscription.updated") {
@@ -273,12 +290,11 @@ serve(async (req) => {
           }
 
           const previousTier = profile?.membership_tier;
-          const isNewMembership = previousTier === "visitor" || !previousTier;
+          const isNewMembership = previousTier === WALK_IN_TIER || !previousTier;
           const isTierChange = !isNewMembership && previousTier && previousTier !== newTier;
           const previousTierName = previousTier ? (TIER_NAMES[previousTier] || previousTier) : "";
 
-          // Rank tiers to detect upgrade vs downgrade
-          const TIER_RANK: Record<string, number> = { weekday: 1, birdie: 2, eagle: 3 };
+          // Rank tiers (by configured display order) to detect upgrade vs downgrade
           const isUpgrade = isTierChange && (TIER_RANK[newTier] || 0) > (TIER_RANK[previousTier || ""] || 0);
 
           const { error } = await supabaseAdmin
@@ -480,7 +496,7 @@ serve(async (req) => {
           });
         }
 
-        const alreadyVisitor = profile?.membership_tier === "visitor";
+        const alreadyVisitor = profile?.membership_tier === WALK_IN_TIER;
         const firstName = profile?.first_name || customer.name?.split(" ")[0] || "there";
         const lastName = profile?.last_name || "";
         const previousTier = alreadyVisitor ? "Member" : (profile?.membership_tier ? TIER_NAMES[profile.membership_tier] || profile.membership_tier : "Member");
@@ -492,16 +508,16 @@ serve(async (req) => {
         if (!alreadyVisitor) {
           const { error } = await supabaseAdmin
             .from("profiles")
-            .update({ membership_tier: "visitor" })
+            .update({ membership_tier: WALK_IN_TIER })
             .eq("email", email);
 
           if (error) {
             logStep("Error resetting profile", { error: error.message });
             throw error;
           }
-          logStep("Membership tier reset to visitor");
+          logStep("Membership tier reset to the walk-in tier");
         } else {
-          logStep("Already visitor (cancelled by admin), proceeding to send email");
+          logStep("Already on walk-in tier (cancelled by admin), proceeding to send email");
         }
 
         // Remove from SGT tour
@@ -561,8 +577,8 @@ serve(async (req) => {
                     <h3 style="margin:0 0 10px 0; font-family:Archivo, Impact, Arial Black, sans-serif; color:#2F3134;">What happened?</h3>
                     <ul style="margin:0; padding-left:20px;">
                       <li style="margin-bottom:8px;">Your card on file was declined when we tried to take your membership payment</li>
-                      <li style="margin-bottom:8px;">Your membership has been cancelled and your account has been moved to <strong>Visitor</strong> status</li>
-                      <li style="margin-bottom:8px;">You can still book sessions at our standard visitor rates</li>
+                      <li style="margin-bottom:8px;">Your membership has been cancelled and your account has been moved to <strong>${TIER_NAMES[WALK_IN_TIER] || "walk-in"}</strong> status</li>
+                      <li style="margin-bottom:8px;">You can still book sessions at our standard walk-in rates</li>
                     </ul>
                   </td>
                 </tr>
@@ -586,7 +602,7 @@ serve(async (req) => {
                 Hi ${firstName}, your <strong>${previousTier}</strong> membership has been cancelled.
               </p>
               <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
-                Your account has been reverted to Visitor status. You can still book sessions at our standard visitor rates.
+                Your account has been reverted to Visitor status. You can still book sessions at our standard walk-in rates.
               </p>
               <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 If you'd like to rejoin, simply re-register for a membership through your account.

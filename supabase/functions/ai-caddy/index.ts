@@ -1,6 +1,7 @@
 // AI Caddy — admin/staff support assistant
 // Non-streaming chat with tool-calling. Uses Lovable AI Gateway.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { loadTiers, TierRow } from "../_shared/tiers.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { getTenant, type TenantConfig } from "../_shared/tenant.ts";
 
@@ -686,7 +687,30 @@ async function execTool(name: string, args: any, userId: string, threadId: strin
   }
 }
 
-function buildSystemPrompt(tenant: TenantConfig): string {
+function describeTiers(tiers: TierRow[]): string {
+  if (!tiers.length) return "- No membership tiers or rates are configured yet in pricing_config.";
+  return tiers
+    .slice()
+    .sort((a, b) => a.display_order - b.display_order)
+    .map((t) => {
+      const bits: string[] = [];
+      if (t.is_subscription && t.weekly_subscription_price != null)
+        bits.push(`$${Number(t.weekly_subscription_price).toFixed(2)}/wk`);
+      bits.push(`peak $${Number(t.hourly_rate).toFixed(2)}/hr`);
+      if (t.off_peak_hourly_rate != null) bits.push(`off-peak $${Number(t.off_peak_hourly_rate).toFixed(2)}/hr`);
+      if (t.restricted_to_off_peak) bits.push("member rate applies off-peak only");
+      if (t.single_bay_at_peak) bits.push("one bay at member rate during peak");
+      if (t.grants_league_access) bits.push("league access");
+      if (t.grants_range_access) bits.push("range access");
+      if (t.is_default) bits.push("default walk-in tier");
+      return `- **${t.display_name || t.tier}**: ${bits.join(", ")}.`;
+    })
+    .join("\n");
+}
+
+function buildSystemPrompt(tenant: TenantConfig, tiers: TierRow[]): string {
+  const walkIn = tiers.find((t) => t.is_default);
+  const walkInRate = walkIn ? `$${Number(walkIn.hourly_rate).toFixed(2)}/hr` : "the configured walk-in rate";
   return `You are AI Caddy, the in-admin assistant for ${tenant.venue_name} — an indoor golf simulator centre. You support the owner/staff with investigations, reporting, and a small set of safe actions.
 
 # BUSINESS CONTEXT
@@ -698,13 +722,10 @@ function buildSystemPrompt(tenant: TenantConfig): string {
   - **${tenant.hub_domain}** — Member Hub: member dashboard, league (SGT), clubhouse social, in-bay ordering (QR), bay controller.
 - Brisbane timezone (Australia/Brisbane, AEST/UTC+10, no DST) is used everywhere.
 
-## Pricing & membership tiers
-- **Visitor** (no membership): Peak $35/hr, Off-Peak $25/hr. Off-peak = weekdays before 4pm.
-- **Weekday member** ($15/wk): $10/hr Mon–Thu before 4pm. Outside that window pays visitor rates.
-- **Birdie member** ($27/wk): $10/hr anytime + SGT league access.
-- **Eagle member** ($35/wk): $8/hr anytime + SGT league + priority.
-- Members get one bay at member rate; additional simultaneous bays charged at $35/hr peak.
-- Membership billed weekly via Stripe. Payment failure → flagged, pushed to visitor pricing until they retry. Second failure → downgrade to visitor.
+## Pricing & membership tiers (live from pricing_config)
+${describeTiers(tiers)}
+- Members get one bay at member rate where that tier is flagged; additional simultaneous bays are charged at the walk-in peak rate (${walkInRate}).
+- Membership is billed weekly via Stripe. Payment failure → flagged, pushed to walk-in pricing until they retry. Second failure → downgraded to the walk-in tier.
 
 ## Bookings & operations
 - Slots in 30-min increments, 1–4 hr bookings, open 8am–10pm.
@@ -749,7 +770,7 @@ For business/strategic questions ("is it worth staffing X", "should we run a pro
 - Always cite IDs (booking id, user id, stripe id) when investigating individual issues.
 - DESTRUCTIVE tools (refund_booking, adjust_customer_credit, create_booking, update_customer, create_customer, cancel_membership): ALWAYS first call WITHOUT confirmed=true so the UI flags it; summarise exactly what will happen in plain English (who/what/when/$), wait for explicit user confirmation ("yes", "do it", "go ahead"), then re-call with confirmed=true.
 - Prefer the dedicated action tools over telling the user to do it manually — they go through the same backend the admin UI uses (so notifications, Stripe, audit logs all fire correctly).
-- When creating a booking: confirm bay (find via get_recent_edge_logs or ask), date, start time, duration, customer name + user_id, and hourly rate. Use $35/hr default unless the user specifies.
+- When creating a booking: confirm bay (find via get_recent_edge_logs or ask), date, start time, duration, customer name + user_id, and hourly rate. Use ${walkInRate} (the walk-in rate) unless the user specifies.
 - When updating a customer: only touch the field(s) explicitly requested. Never change email — that's not in the toolset.
 - Never reveal secrets, env vars, or raw SQL. Never invent data — if you don't have it, say so.
 - All times = Australia/Brisbane.
@@ -783,7 +804,7 @@ Deno.serve(async (req) => {
     const tenant = await getTenant();
 
     // Tool-call loop
-    const convo: any[] = [{ role: "system", content: buildSystemPrompt(tenant) }, ...messages];
+    const convo: any[] = [{ role: "system", content: buildSystemPrompt(tenant, await loadTiers(admin)) }, ...messages];
     const toolCallsTrace: any[] = [];
     const MAX_STEPS = 25;
     for (let step = 0; step < MAX_STEPS; step++) {

@@ -10,38 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import venueLogo from "@/assets/venue-logo.png";
 import { useTenant } from "@/config/tenant";
 import { usePricing, PricingTier } from "@/hooks/usePricing";
-import { VISITOR_PEAK_RATE, VISITOR_OFF_PEAK_RATE } from "@/lib/pricing-utils";
+import { getDefaultTier, isDefaultTier, subscriptionTiers as getSubscriptionTiers } from "@/lib/tier-config";
 import { useSavedCard } from "@/hooks/useSavedCard";
 import { NoCardDialog } from "@/components/booking/NoCardDialog";
-
-interface MembershipTierConfig {
-  features: string[];
-  color: string;
-  badgeColor: string;
-  popular?: boolean;
-  restrictions?: string;
-}
-
-// Static config for features and styling (these don't change with pricing)
-const TIER_CONFIG: Record<string, MembershipTierConfig> = {
-  weekday: {
-    features: ["Weekdays before 4pm only", "Swing Lab access", "Cancel any time"],
-    color: "border-teal-500",
-    badgeColor: "bg-teal-100 text-teal-800",
-    restrictions: "Peak times charged at visitor rate",
-  },
-  birdie: {
-    features: ["Play anytime", "League Access", "Swing Lab access", "Cancel any time"],
-    color: "border-blue-500",
-    badgeColor: "bg-blue-100 text-blue-800",
-    popular: true,
-  },
-  eagle: {
-    features: ["Play anytime", "League Access", "Swing Lab access", "Priority booking", "Cancel any time"],
-    color: "border-purple-500",
-    badgeColor: "bg-purple-100 text-purple-800",
-  },
-};
 
 const Membership = () => {
   const { tenant } = useTenant();
@@ -56,13 +27,13 @@ const Membership = () => {
   const [pendingTier, setPendingTier] = useState<PricingTier | null>(null);
   const [showNoCardDialog, setShowNoCardDialog] = useState(false);
 
-  // Get subscription tiers (exclude visitor) from pricing config
-  const subscriptionTiers = pricing.filter(p => p.is_subscription && p.tier !== 'visitor');
-  
-  // Get visitor pricing for display
-  const visitorPricing = pricing.find(p => p.tier === 'visitor');
-  const peakRate = visitorPricing?.hourly_rate ?? VISITOR_PEAK_RATE;
-  const offPeakRate = VISITOR_OFF_PEAK_RATE;
+  // Subscription tiers and the walk-in tier come entirely from pricing config
+  const subscriptionTiers = getSubscriptionTiers(pricing);
+  const visitorPricing = getDefaultTier(pricing);
+  const peakRate = visitorPricing ? Number(visitorPricing.hourly_rate) : 0;
+  const offPeakRate = visitorPricing
+    ? Number(visitorPricing.off_peak_hourly_rate ?? visitorPricing.hourly_rate)
+    : 0;
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -182,8 +153,7 @@ const Membership = () => {
   }
 
   const isCurrentTier = (tierKey: string) => currentTier === tierKey;
-  const hasActiveMembership = currentTier !== "visitor";
-  const currentTierConfig = TIER_CONFIG[currentTier];
+  const hasActiveMembership = !isDefaultTier(pricing, currentTier);
   const currentTierPricing = pricing.find(p => p.tier === currentTier);
 
   return (
@@ -214,7 +184,7 @@ const Membership = () => {
       <main className="flex-1 p-6">
         <div className="container max-w-4xl mx-auto">
           {/* Current membership info */}
-          {hasActiveMembership && currentTierConfig && (
+          {hasActiveMembership && currentTierPricing && (
             <Card className="mb-8">
               <CardHeader>
                 <div className="flex items-center gap-3">
@@ -223,10 +193,10 @@ const Membership = () => {
                     <CardTitle>Your Current Membership</CardTitle>
                     <CardDescription>
                       You are currently on the{" "}
-                      <Badge className={currentTierConfig.badgeColor}>
-                        {currentTierPricing?.display_name || currentTier}
+                      <Badge variant="outline">
+                        {currentTierPricing.display_name || currentTier}
                       </Badge>{" "}
-                      plan at <span className="font-semibold">${currentTierPricing?.hourly_rate ?? 35}/hour</span>
+                      plan at <span className="font-semibold">${currentTierPricing.hourly_rate}/hour</span>
                     </CardDescription>
                   </div>
                 </div>
@@ -245,12 +215,13 @@ const Membership = () => {
             </p>
           </div>
 
-          {/* Visitor pricing info */}
+          {/* Walk-in pricing info */}
+          {visitorPricing && (
           <Card className="mb-8 border-dashed">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Clock className="h-5 w-5" />
-                Visitor Pricing
+                {visitorPricing.display_name} Pricing
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -268,25 +239,30 @@ const Membership = () => {
               </div>
             </CardContent>
           </Card>
+          )}
 
           {/* Membership tiers grid */}
+          {subscriptionTiers.length === 0 && (
+            <Card className="border-dashed">
+              <CardContent className="py-12 text-center space-y-2">
+                <Crown className="h-8 w-8 mx-auto text-muted-foreground" />
+                <p className="font-semibold">No membership plans yet</p>
+                <p className="text-sm text-muted-foreground">
+                  Memberships aren't available at {tenant.venue_name} right now. Book as a walk-in any time.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {subscriptionTiers.map((tier) => {
-              const config = TIER_CONFIG[tier.tier];
-              if (!config) return null;
-              
               return (
                 <Card 
                   key={tier.tier} 
-                  className={`relative flex flex-col ${config.color} border-2 ${
+                  className={`relative flex flex-col border-2 border-border ${
                     isCurrentTier(tier.tier) ? "ring-2 ring-accent ring-offset-2" : ""
                   }`}
                 >
-                  {config.popular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <Badge className="bg-accent text-accent-foreground">Most Popular</Badge>
-                    </div>
-                  )}
                   {isCurrentTier(tier.tier) && (
                     <div className="absolute -top-3 right-4">
                       <Badge variant="outline" className="bg-background">Your Plan</Badge>
@@ -303,7 +279,7 @@ const Membership = () => {
                   
                   <CardContent className="flex-1 flex flex-col">
                     <ul className="space-y-3 mb-4 flex-1">
-                      {config.features.map((feature, index) => (
+                      {tier.features.map((feature, index) => (
                         <li key={index} className="flex items-center gap-2 text-sm">
                           <Check className="h-4 w-4 text-accent flex-shrink-0" />
                           <span>{feature}</span>
@@ -311,10 +287,10 @@ const Membership = () => {
                       ))}
                     </ul>
                     
-                    {config.restrictions && (
+                    {tier.restrictions && (
                       <div className="flex items-start gap-2 text-xs text-amber-600 bg-amber-50 p-2 rounded mb-4">
                         <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                        <span>{config.restrictions}</span>
+                        <span>{tier.restrictions}</span>
                       </div>
                     )}
                     
@@ -352,6 +328,7 @@ const Membership = () => {
           </div>
 
           {/* Break-even comparison */}
+          {subscriptionTiers.length > 0 && (
           <Card className="mt-8">
             <CardHeader>
               <CardTitle className="text-lg">Which membership is right for you?</CardTitle>
@@ -361,18 +338,20 @@ const Membership = () => {
                 {subscriptionTiers.map((tier) => {
                   const weeklyPrice = tier.weekly_subscription_price ?? 0;
                   const hourlyRate = tier.hourly_rate;
-                  const breakEvenVsPeak = Math.ceil(weeklyPrice / (peakRate - hourlyRate));
+                  const saving = peakRate - hourlyRate;
+                  const breakEvenVsPeak = saving > 0 ? Math.ceil(weeklyPrice / saving) : null;
                   
                   return (
                     <p key={tier.tier}>
                       <strong>{tier.display_name} (${weeklyPrice}/wk):</strong>{" "}
-                      ${hourlyRate}/hr rate. Break-even at ~{breakEvenVsPeak} hours/week vs peak visitor rate.
+                      ${hourlyRate}/hr rate.{breakEvenVsPeak !== null && ` Break-even at ~${breakEvenVsPeak} hours/week vs the peak walk-in rate.`}
                     </p>
                   );
                 })}
               </div>
             </CardContent>
           </Card>
+          )}
 
           {/* Footer note */}
           <p className="text-center text-sm text-muted-foreground mt-8">

@@ -1,4 +1,5 @@
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { usePricing } from "@/hooks/usePricing";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, DollarSign, TrendingUp, Users, UserCheck, Repeat, ChevronDown } from "lucide-react";
@@ -16,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 type TimeFilter = "today" | "week" | "month" | "quarter";
-type MemberTierFilter = "all" | "weekday" | "birdie" | "eagle";
+type MemberTierFilter = string;
 type MemberRevenueFilter = "weekly" | "monthly" | "quarterly";
 
 interface DashboardStats {
@@ -35,12 +36,7 @@ const timeFilterLabels: Record<TimeFilter, string> = {
   quarter: "This Quarter",
 };
 
-const memberTierLabels: Record<MemberTierFilter, string> = {
-  all: "All Members",
-  weekday: "Weekday",
-  birdie: "Birdie",
-  eagle: "Eagle",
-};
+
 
 const memberRevenueLabels: Record<MemberRevenueFilter, string> = {
   weekly: "Weekly",
@@ -56,6 +52,12 @@ const tierDisplayNames: Record<string, string> = {
 
 export default function AdminDashboard() {
   const { isAdmin, isLoading } = useAdminAuth();
+  const { pricing, defaultTier, memberTiers } = usePricing();
+  const walkInTier = defaultTier?.tier ?? "visitor";
+  const memberTierLabels: Record<string, string> = {
+    all: "All Members",
+    ...Object.fromEntries(pricing.map((t) => [t.tier, t.display_name])),
+  };
   const [stats, setStats] = useState<DashboardStats>({
     bookings: 0,
     revenue: 0,
@@ -257,7 +259,7 @@ export default function AdminDashboard() {
     let membersQuery = supabase
       .from('profiles')
       .select('membership_tier')
-      .neq('membership_tier', 'visitor');
+      .neq('membership_tier', walkInTier);
     
     if (memberTierFilter !== "all") {
       membersQuery = supabase
@@ -279,7 +281,7 @@ export default function AdminDashboard() {
     const { data: allMembers } = await supabase
       .from('profiles')
       .select('membership_tier')
-      .neq('membership_tier', 'visitor');
+      .neq('membership_tier', walkInTier);
 
     const weeklyTotal = allMembers?.reduce((sum, m) => {
       const fee = weeklyFees[m.membership_tier as string] || 0;
@@ -511,7 +513,7 @@ export default function AdminDashboard() {
                 <FilterDropdown
                   value={memberTierFilter}
                   onChange={setMemberTierFilter}
-                  options={["all", "weekday", "birdie", "eagle"]}
+                  options={["all", ...memberTiers.map((t) => t.tier)]}
                   labels={memberTierLabels}
                 />
               </div>

@@ -1,15 +1,12 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
+import { loadTiers, calculateTierHourlyRate, TierRow } from "../_shared/tiers.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
-
-// Pricing constants (must match frontend)
-const VISITOR_PEAK_RATE = 35;
-const VISITOR_OFF_PEAK_RATE = 30;
 
 /**
  * Determines if a given date and time is during peak hours.
@@ -30,66 +27,16 @@ function isPeakTime(dateStr: string, startTime: string): boolean {
 }
 
 /**
- * Checks if a time is valid for weekday member rate.
- */
-function isWeekdayMemberTime(dateStr: string, startTime: string): boolean {
-  const date = new Date(dateStr + "T00:00:00");
-  const dayOfWeek = date.getDay();
-  const hour = parseInt(startTime.split(":")[0], 10);
-  
-  // Must be Monday (1) through Thursday (4)
-  if (dayOfWeek < 1 || dayOfWeek > 4) {
-    return false;
-  }
-  
-  // Must be before 4pm
-  return hour < 16;
-}
-
-/**
- * Calculate hourly rate based on tier and time
+ * Data-driven hourly rate: every tier's metadata comes from `pricing_config`.
  */
 function calculateHourlyRate(
   tier: string,
   dateStr: string,
   startTime: string,
-  pricingConfig: Record<string, number>,
+  tiers: TierRow[],
   customHourlyRate: number | null
 ): number {
-  // Custom rate always takes precedence
-  if (customHourlyRate !== null && customHourlyRate > 0) {
-    return customHourlyRate;
-  }
-
-  const isPeak = isPeakTime(dateStr, startTime);
-  
-  switch (tier.toLowerCase()) {
-    case "visitor":
-      return isPeak ? VISITOR_PEAK_RATE : VISITOR_OFF_PEAK_RATE;
-    
-    case "weekday":
-      // Weekday members pay their rate for off-peak weekday slots
-      // Otherwise they pay visitor peak rate
-      return isWeekdayMemberTime(dateStr, startTime) 
-        ? (pricingConfig.weekday || 10) 
-        : VISITOR_PEAK_RATE;
-    
-    case "par":
-      return pricingConfig.par || 12;
-    
-    case "birdie":
-      return pricingConfig.birdie || 10;
-    
-    case "eagle":
-      return pricingConfig.eagle || 9;
-    
-    case "albatross":
-      return pricingConfig.albatross || 8;
-    
-    default:
-      // Unknown tier defaults to peak visitor rate
-      return VISITOR_PEAK_RATE;
-  }
+  return calculateTierHourlyRate(tiers, tier, isPeakTime(dateStr, startTime), customHourlyRate);
 }
 
 serve(async (req) => {
@@ -184,19 +131,9 @@ serve(async (req) => {
       balance: profile.deposit_balance 
     });
 
-    // Fetch pricing config
-    const { data: pricingRows, error: pricingError } = await supabaseAdmin
-      .from("pricing_config")
-      .select("tier, hourly_rate");
-
-    const pricingConfig: Record<string, number> = {};
-    if (pricingRows) {
-      pricingRows.forEach((row: { tier: string; hourly_rate: number }) => {
-        pricingConfig[row.tier.toLowerCase()] = row.hourly_rate;
-      });
-    }
-
-    console.log("[RESCHEDULE] Pricing config:", pricingConfig);
+    // Tier metadata is fully data-driven
+    const tiers = await loadTiers(supabaseAdmin);
+    console.log("[RESCHEDULE] Tiers configured:", tiers.length);
 
     // Calculate new end time based on duration
     const [startHours, startMinutes] = new_start_time.split(":").map(Number);
@@ -208,7 +145,7 @@ serve(async (req) => {
       profile.membership_tier,
       new_date,
       new_start_time,
-      pricingConfig,
+      tiers,
       profile.custom_hourly_rate
     );
 

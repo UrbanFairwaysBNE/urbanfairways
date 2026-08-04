@@ -23,6 +23,7 @@ import { CalendarIcon, Clock, MapPin, Loader2, ArrowUp, ArrowDown } from "lucide
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { calculateHourlyRate, isPeakTime, getPricingLabel } from "@/lib/pricing-utils";
+import { TierConfig, TIER_SELECT, findTier, isDefaultTier, normaliseTier } from "@/lib/tier-config";
 
 interface Booking {
   id: string;
@@ -88,7 +89,7 @@ export const RescheduleDialog = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [pricingConfig, setPricingConfig] = useState<Record<string, number>>({});
+  const [pricingConfig, setPricingConfig] = useState<TierConfig[]>([]);
 
   // Reset state when dialog opens
   useEffect(() => {
@@ -139,14 +140,11 @@ export const RescheduleDialog = ({
   const fetchPricing = async () => {
     const { data, error } = await supabase
       .from("pricing_config")
-      .select("tier, hourly_rate");
+      .select(TIER_SELECT)
+      .order("display_order");
 
     if (!error && data) {
-      const config: Record<string, number> = {};
-      data.forEach((row) => {
-        config[row.tier.toLowerCase()] = row.hourly_rate;
-      });
-      setPricingConfig(config);
+      setPricingConfig((data as Record<string, unknown>[]).map(normaliseTier));
     }
   };
 
@@ -333,9 +331,11 @@ export const RescheduleDialog = ({
   const availableTimeSlots = getAvailableTimeSlots();
   const availableBays = getAvailableBays();
 
-  // Determine if price changes apply (visitor or weekday member only)
-  const showPriceChanges = userProfile && 
-    (userProfile.membership_tier === "visitor" || userProfile.membership_tier === "weekday") &&
+  // Price changes only apply to tiers whose rate varies with peak/off-peak
+  const showPriceChanges = userProfile &&
+    (isDefaultTier(pricingConfig, userProfile.membership_tier) ||
+      !!findTier(pricingConfig, userProfile.membership_tier)?.restricted_to_off_peak ||
+      findTier(pricingConfig, userProfile.membership_tier)?.off_peak_hourly_rate != null) &&
     !hasCustomRate;
 
   return (

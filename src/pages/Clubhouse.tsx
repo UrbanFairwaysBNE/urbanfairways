@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import venueLogo from "@/assets/venue-logo.png";
 import { useTenant } from "@/config/tenant";
+import { usePricing } from "@/hooks/usePricing";
+import { isDefaultTier } from "@/lib/tier-config";
 
 interface Post {
   id: string;
@@ -36,10 +38,11 @@ interface Comment {
   author_name?: string;
 }
 
-type MembershipTier = "visitor" | "weekday" | "birdie" | "eagle";
+type MembershipTier = string;
 
 const Clubhouse = () => {
   const { tenant } = useTenant();
+  const { pricing } = usePricing();
   const { user, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[]>([]);
@@ -94,9 +97,9 @@ const Clubhouse = () => {
   }, [user]);
 
   useEffect(() => {
-    if (membershipTier === "visitor") return;
+    if (isDefaultTier(pricing, membershipTier)) return;
     fetchPosts();
-  }, [user, membershipTier]);
+  }, [user, membershipTier, pricing]);
 
   const fetchPosts = async () => {
     if (!user) return;
@@ -400,7 +403,7 @@ const Clubhouse = () => {
     fetchComments(post.id);
   };
 
-  const isMember = membershipTier !== "visitor";
+  const isMember = !isDefaultTier(pricing, membershipTier);
 
   if (isLoading) {
     return (

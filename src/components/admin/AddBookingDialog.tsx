@@ -24,7 +24,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CalendarIcon, Plus, UserPlus, Ban } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { calculateHourlyRate, isWeekdayMemberTime, getPricingLabel } from "@/lib/pricing-utils";
+import { calculateHourlyRate, isOffPeakTime, getPricingLabel } from "@/lib/pricing-utils";
+import { TierConfig, TIER_SELECT, findTier, isDefaultTier, normaliseTier, tierLabel } from "@/lib/tier-config";
 
 interface Bay {
   id: string;
@@ -52,14 +53,6 @@ interface AddBookingDialogProps {
   initialBayId?: string;
   onBookingCreated: () => void;
 }
-
-// Fallback pricing - will be overridden by database values
-const FALLBACK_RATES: Record<string, number> = {
-  visitor: 30,
-  weekday: 10,
-  birdie: 10,
-  eagle: 8,
-};
 
 // Operating hours time options
 const TIME_OPTIONS: { value: string; label: string }[] = [];
@@ -130,7 +123,7 @@ export function AddBookingDialog({
   const [isCreatingCustomer, setIsCreatingCustomer] = useState(false);
 
   // Pricing from database
-  const [tierRates, setTierRates] = useState<Record<string, number>>(FALLBACK_RATES);
+  const [tierRates, setTierRates] = useState<TierConfig[]>([]);
 
   // Selected customer details
   const selectedCustomer = customers.find(c => c.user_id === selectedCustomerId);
@@ -140,14 +133,11 @@ export function AddBookingDialog({
     const fetchPricing = async () => {
       const { data, error } = await supabase
         .from("pricing_config")
-        .select("tier, hourly_rate");
+        .select(TIER_SELECT)
+        .order("display_order");
 
       if (!error && data) {
-        const rates: Record<string, number> = {};
-        data.forEach((p: { tier: string; hourly_rate: number }) => {
-          rates[p.tier] = Number(p.hourly_rate);
-        });
-        setTierRates(rates);
+        setTierRates((data as Record<string, unknown>[]).map(normaliseTier));
       }
     };
     fetchPricing();
@@ -266,38 +256,35 @@ export function AddBookingDialog({
   const getPricingInfo = (): { label: string; isRestricted: boolean } | null => {
     if (!selectedCustomer || !bookingDate || !startTime) return null;
     
-    const tier = selectedCustomer.membership_tier.toLowerCase();
-    
+    const tierKey = selectedCustomer.membership_tier;
+    const config = findTier(tierRates, tierKey);
+    const label = tierLabel(tierRates, tierKey) || tierKey;
+
     // Custom rate - no peak/off-peak applies
     if (selectedCustomer.custom_hourly_rate !== null) {
       return { label: "custom rate", isRestricted: false };
     }
-    
-    // Weekday members have restrictions
-    if (tier === "weekday") {
-      const canUseRate = isWeekdayMemberTime(bookingDate, startTime);
-      if (!canUseRate) {
-        return { label: "visitor rate (outside weekday hours)", isRestricted: true };
+
+    // Off-peak-only tiers lose their member rate during peak
+    if (config?.restricted_to_off_peak) {
+      if (!isOffPeakTime(bookingDate, startTime)) {
+        return { label: "walk-in rate (outside off-peak hours)", isRestricted: true };
       }
-      return { label: "weekday member rate", isRestricted: false };
+      return { label: `${label} rate`, isRestricted: false };
     }
-    
-    // Visitors have peak/off-peak
-    if (tier === "visitor") {
+
+    // Walk-in tier has peak/off-peak
+    if (isDefaultTier(tierRates, tierKey)) {
       return { label: getPricingLabel(bookingDate, startTime), isRestricted: false };
     }
-    
-    // Other members (birdie, eagle) - flat rate
-    return { label: `${tier} member rate`, isRestricted: false };
+
+    return { label: `${label} rate`, isRestricted: false };
   };
 
   const getMembershipColor = (tier: string) => {
-    switch (tier?.toLowerCase()) {
-      case "eagle": return "bg-amber-500/10 text-amber-600 border-amber-200";
-      case "birdie": return "bg-blue-500/10 text-blue-600 border-blue-200";
-      case "weekday": return "bg-teal-500/10 text-teal-600 border-teal-200";
-      default: return "bg-muted text-muted-foreground";
-    }
+    return isDefaultTier(tierRates, tier)
+      ? "bg-muted text-muted-foreground"
+      : "bg-accent/10 text-accent border-accent/20";
   };
 
   const createNewCustomer = async () => {
@@ -656,7 +643,7 @@ export function AddBookingDialog({
                             <span className="text-muted-foreground ml-2">{customer.email}</span>
                           </div>
                           <Badge className={`text-[10px] ${getMembershipColor(customer.membership_tier)}`}>
-                            {customer.membership_tier}
+                            {tierLabel(tierRates, customer.membership_tier) || customer.membership_tier}
                           </Badge>
                         </button>
                         ))
@@ -683,7 +670,7 @@ export function AddBookingDialog({
                         {selectedCustomer.first_name} {selectedCustomer.last_name}
                       </span>
                       <Badge className={getMembershipColor(selectedCustomer.membership_tier)}>
-                        {selectedCustomer.membership_tier} - ${getCalculatedHourlyRate()}/hr
+                        {tierLabel(tierRates, selectedCustomer.membership_tier) || selectedCustomer.membership_tier} - ${getCalculatedHourlyRate()}/hr
                       </Badge>
                     </div>
                   </div>

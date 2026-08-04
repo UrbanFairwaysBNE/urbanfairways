@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { LogOut, Calendar, Settings, ClipboardList, Trophy, Lock, Users, Info, Megaphone, Plus, Trash2, CalendarDays } from "lucide-react";
 import venueLogo from "@/assets/venue-logo.png";
 import { useTenant } from "@/config/tenant";
+import { usePricing } from "@/hooks/usePricing";
 import swingLabBadge from "@/assets/swing-lab-badge.png.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 import { NotificationBell } from "@/components/NotificationBell";
@@ -17,10 +18,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
-type MembershipTier = "visitor" | "weekday" | "birdie" | "eagle";
+type MembershipTier = string;
 
 const Dashboard = () => {
   const { tenant } = useTenant();
+  const { hasLeagueAccess: hasLeagueTierAccess, hasRangeAccess: hasRangeTierAccess } = usePricing();
   const { user, isAuthenticated, isLoading, signOut } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -190,8 +192,8 @@ const Dashboard = () => {
   if (!isAuthenticated) return null;
 
   const firstName = user?.user_metadata?.first_name || "Member";
-  const hasLeagueAccess = ["birdie", "eagle"].includes(membershipTier) || isStaff || isAdmin;
-  const hasRangeAccess = ["weekday", "birdie", "eagle"].includes(membershipTier) || isStaff || isAdmin;
+  const hasLeagueAccess = hasLeagueTierAccess(membershipTier) || isStaff || isAdmin;
+  const hasRangeAccess = hasRangeTierAccess(membershipTier) || isStaff || isAdmin;
 
   return (
     <div className="min-h-screen flex flex-col">

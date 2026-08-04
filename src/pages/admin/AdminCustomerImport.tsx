@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+import { usePricing } from "@/hooks/usePricing";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,10 +23,13 @@ interface ImportRow {
   message?: string;
 }
 
-const VALID_TIERS = ['visitor', 'weekday', 'birdie', 'eagle'];
+
 
 export default function AdminCustomerImport() {
   const { isAdmin, isLoading: authLoading } = useAdminAuth();
+  const { pricing, defaultTier } = usePricing();
+  const walkInTier = defaultTier?.tier ?? 'visitor';
+  const validTiers = pricing.map((t) => t.tier.toLowerCase());
   const [csvData, setCsvData] = useState<ImportRow[]>([]);
   const [isImporting, setIsImporting] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
@@ -52,7 +56,7 @@ export default function AdminCustomerImport() {
         lastName,
         email: email.toLowerCase(),
         phone,
-        membershipTier: VALID_TIERS.includes(tier) ? tier : 'visitor',
+        membershipTier: validTiers.includes(tier) ? tier : walkInTier,
         status: 'pending' as const
       };
     }).filter(row => row.email && row.email.includes('@'));

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>How to Use Birdies - Complete Guide</title>
+    <title>Quick Start Guide - Your Venue</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <!-- Google Fonts -->
@@ -16,30 +16,30 @@
 
     <style>
       /* ========================================
-         BIRDIES HOW-TO GUIDE EMBED STYLES
+         QUICK START GUIDE EMBED STYLES
          Copy everything inside this <style> tag
          ======================================== */
 
       :root {
-        /* Birdies Brand Colors */
-        --birdies-green: #1f4c25;
-        --birdies-orange: #ec622d;
-        --birdies-cream: #fff5e4;
-        --birdies-green-light: #2d6b35;
+        /* Brand Colors */
+        --brand-primary: #2f3134;
+        --brand-accent: #b5772a;
+        --brand-surface: #f5f3ef;
+        --brand-primary-light: #45484c;
 
-        /* Section Colors - All using Birdies Orange for consistency */
-        --section-1-color: #ec622d;
-        --section-2-color: #ec622d;
-        --section-3-color: #ec622d;
-        --section-4-color: #ec622d;
-        --section-5-color: #ec622d;
-        --section-6-color: #ec622d;
+        /* Section Colors - All using brand accent for consistency */
+        --section-1-color: #b5772a;
+        --section-2-color: #b5772a;
+        --section-3-color: #b5772a;
+        --section-4-color: #b5772a;
+        --section-5-color: #b5772a;
+        --section-6-color: #b5772a;
 
         /* Neutrals */
-        --text-primary: #1a2e1c;
-        --text-muted: #5a6b5c;
-        --border-color: #d4ddd5;
-        --card-bg: #fffbf5;
+        --text-primary: #26282b;
+        --text-muted: #6b6d70;
+        --border-color: #dcd8d0;
+        --card-bg: #fffdfa;
         --white: #ffffff;
       }
 
@@ -49,30 +49,30 @@
         padding: 0;
       }
 
-      .birdies-guide-section {
+      .brand-guide-section {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        background-color: var(--birdies-cream);
+        background-color: var(--brand-surface);
         padding: 3rem 1.5rem;
         color: var(--text-primary);
       }
 
-      .birdies-guide-container {
+      .brand-guide-container {
         max-width: 900px;
         margin: 0 auto;
       }
 
       /* Typography */
-      .birdies-heading {
+      .brand-heading {
         font-family: 'Anton', sans-serif;
         font-size: 2.5rem;
-        color: var(--birdies-green);
+        color: var(--brand-primary);
         text-align: center;
         margin-bottom: 0.75rem;
         letter-spacing: 0.02em;
         text-transform: uppercase;
       }
 
-      .birdies-subheading {
+      .brand-subheading {
         text-align: center;
         color: var(--text-muted);
         max-width: 700px;
@@ -84,7 +84,7 @@
       /* Table of Contents */
       .toc-card {
         background: var(--card-bg);
-        border: 2px solid var(--birdies-green);
+        border: 2px solid var(--brand-primary);
         border-radius: 0.75rem;
         padding: 1.5rem 2rem;
         margin-bottom: 3rem;
@@ -93,7 +93,7 @@
       .toc-title {
         font-family: 'Anton', sans-serif;
         font-size: 1.25rem;
-        color: var(--birdies-green);
+        color: var(--brand-primary);
         margin-bottom: 1rem;
         text-transform: uppercase;
         letter-spacing: 0.02em;
@@ -139,7 +139,7 @@
       }
 
       .toc-link:hover {
-        color: var(--birdies-orange);
+        color: var(--brand-accent);
       }
 
       /* Guide Section */
@@ -199,7 +199,7 @@
       .section-title {
         font-family: 'Anton', sans-serif;
         font-size: 1.5rem;
-        color: var(--birdies-green);
+        color: var(--brand-primary);
         text-transform: uppercase;
         letter-spacing: 0.02em;
       }
@@ -223,7 +223,7 @@
       .section-content h4 {
         font-weight: 600;
         margin: 1.5rem 0 0.75rem;
-        color: var(--birdies-green);
+        color: var(--brand-primary);
       }
 
       /* Steps List */
@@ -244,7 +244,7 @@
         width: 24px;
         height: 24px;
         border-radius: 50%;
-        background: var(--birdies-orange);
+        background: var(--brand-accent);
         color: var(--white);
         display: flex;
         align-items: center;
@@ -302,7 +302,7 @@
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        background: var(--birdies-green);
+        background: var(--brand-primary);
         color: var(--white);
         padding: 0.75rem 1.25rem;
         border-radius: 0.5rem;
@@ -313,7 +313,7 @@
       }
 
       .external-link-btn:hover {
-        background: var(--birdies-green-light);
+        background: var(--brand-primary-light);
       }
 
       .external-link-btn:active {
@@ -353,7 +353,7 @@
         width: 32px;
         height: 32px;
         border-radius: 0.375rem;
-        background: var(--birdies-cream);
+        background: var(--brand-surface);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -363,7 +363,7 @@
       .feature-icon svg {
         width: 18px;
         height: 18px;
-        color: var(--birdies-orange);
+        color: var(--brand-accent);
       }
 
       .feature-text h5 {
@@ -375,29 +375,6 @@
       .feature-text p {
         font-size: 0.85rem;
         color: var(--text-muted);
-        margin: 0;
-      }
-
-      /* Screenshot Placeholder */
-      .screenshot-placeholder {
-        background: linear-gradient(135deg, #e8e4df 0%, #d4ddd5 100%);
-        border: 2px dashed var(--border-color);
-        border-radius: 0.75rem;
-        padding: 3rem 2rem;
-        text-align: center;
-        margin: 1.5rem 0;
-      }
-
-      .screenshot-placeholder svg {
-        width: 48px;
-        height: 48px;
-        color: var(--text-muted);
-        margin-bottom: 0.75rem;
-      }
-
-      .screenshot-placeholder p {
-        color: var(--text-muted);
-        font-size: 0.9rem;
         margin: 0;
       }
 
@@ -423,7 +400,7 @@
       }
 
       .guide-footer .contact-link {
-        color: var(--birdies-green);
+        color: var(--brand-primary);
         font-weight: 600;
         text-decoration: none;
       }
@@ -434,7 +411,7 @@
 
       /* Responsive */
       @media (max-width: 768px) {
-        .birdies-heading {
+        .brand-heading {
           font-size: 2rem;
         }
 
@@ -449,12 +426,12 @@
     </style>
   </head>
   <body>
-    <section class="birdies-guide-section">
-      <div class="birdies-guide-container">
-        <h1 class="birdies-heading">How to Use Birdies</h1>
+    <section class="brand-guide-section">
+      <div class="brand-guide-container">
+        <h1 class="brand-heading">Quick Start Guide</h1>
 
-        <p class="birdies-subheading">
-          Welcome to Birdies! This comprehensive guide will walk you through everything you need to know — from making
+        <p class="brand-subheading">
+          Welcome to Your Venue! This guide will walk you through everything you need to know — from making
           your first booking to playing league rounds on our simulators.
         </p>
 
@@ -468,7 +445,7 @@
             </li>
             <li class="toc-item">
               <span class="toc-number" style="background-color: var(--section-2-color);">2</span>
-              <a href="#section-2" class="toc-link">Accessing the Centre</a>
+              <a href="#section-2" class="toc-link">Accessing the Venue</a>
             </li>
             <li class="toc-item">
               <span class="toc-number" style="background-color: var(--section-3-color);">3</span>
@@ -480,11 +457,11 @@
             </li>
             <li class="toc-item">
               <span class="toc-number" style="background-color: var(--section-5-color);">5</span>
-              <a href="#section-5" class="toc-link">Using GSPRO Software</a>
+              <a href="#section-5" class="toc-link">Using the Simulator Software</a>
             </li>
             <li class="toc-item">
               <span class="toc-number" style="background-color: var(--section-6-color);">6</span>
-              <a href="#section-6" class="toc-link">Playing a Birdies League Round</a>
+              <a href="#section-6" class="toc-link">Playing a League Round</a>
             </li>
             <li class="toc-item">
               <span class="toc-number" style="background-color: var(--section-1-color);">7</span>
@@ -501,7 +478,7 @@
           </div>
           <div class="section-content">
             <p>
-              Getting started with Birdies is easy! Create your account on our Birdies Hub to manage bookings, track
+              Getting started is easy! Create your account on our booking Hub to manage bookings, track
               your rounds, and access member perks.
             </p>
 
@@ -509,7 +486,7 @@
             <ul class="steps-list">
               <li>
                 <span class="step-icon">1</span>
-                <span>Visit the Birdies Hub at hub.birdiesbayside.com.au or download the Birdies app</span>
+                <span>Visit the Hub or download our app</span>
               </li>
               <li>
                 <span class="step-icon">2</span>
@@ -529,7 +506,7 @@
             <ul class="steps-list">
               <li>
                 <span class="step-icon">1</span>
-                <span>Log in to the Birdies Hub and tap "Book Now"</span>
+                <span>Log in to the Hub and tap "Book Now"</span>
               </li>
               <li>
                 <span class="step-icon">2</span>
@@ -571,15 +548,15 @@
           </div>
         </div>
 
-        <!-- Section 2: Accessing the Centre -->
+        <!-- Section 2: Accessing the Venue -->
         <div id="section-2" class="guide-section section-2">
           <div class="section-header">
             <span class="section-number">2</span>
-            <h3 class="section-title">Accessing the Centre</h3>
+            <h3 class="section-title">Accessing the Venue</h3>
           </div>
           <div class="section-content">
             <p>
-              Birdies operates without staff during off-peak hours. Here's everything you need to know about getting in
+              We operate without staff during off-peak hours. Here's everything you need to know about getting in
               for your session.
             </p>
 
@@ -589,7 +566,7 @@
             <ul class="steps-list">
               <li>
                 <span class="step-icon">1</span>
-                <span>Arrive at the Birdies facility a few minutes before your booking time</span>
+                <span>Arrive at the venue a few minutes before your booking time</span>
               </li>
               <li>
                 <span class="step-icon">2</span>
@@ -601,9 +578,7 @@
               </li>
             </ul>
 
-            <p><strong></strong></p>
-
-            <h4>Boom Gate Access</h4>
+            <h4>Parking / Gate Access</h4>
             <div class="info-box warning">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -621,8 +596,8 @@
                 <line x1="12" y1="17" x2="12.01" y2="17"></line>
               </svg>
               <p>
-                <strong>Important:</strong> If you are booking after dark (or before light) you will need to open the
-                business park boom gate. We will include a link to get the boom gate app in your booking email.
+                <strong>Important:</strong> If you are booking outside daylight hours, check your booking
+                confirmation email for any additional site access instructions.
               </p>
             </div>
           </div>
@@ -636,8 +611,8 @@
           </div>
           <div class="section-content">
             <p>
-              Our bays are designed for a seamless, automated experience. When your session starts, everything powers on
-              automatically!
+              Our bays are designed for a seamless, automated experience. When your session starts, everything powers
+              on automatically!
             </p>
 
             <h4>Bay Automation</h4>
@@ -647,15 +622,15 @@
               <li>
                 <span class="step-icon">1</span>
                 <span
-                  ><strong>Automatic Power On:</strong> 3 minutes before your session, the bay will turn on the bay
-                  power first — please warm up</span
+                  ><strong>Automatic Power On:</strong> A few minutes before your session, the bay will turn on
+                  automatically — please warm up</span
                 >
               </li>
               <li>
                 <span class="step-icon">2</span>
                 <span
-                  ><strong>Software Launch:</strong> GSPRO will begin launching approx 1 minute before your booking
-                  time. Please wait until the welcome window closes, then you can begin your session</span
+                  ><strong>Software Launch:</strong> The simulator software will begin launching shortly before your
+                  booking time. Please wait until the welcome window closes, then you can begin your session</span
                 >
               </li>
             </ul>
@@ -678,35 +653,17 @@
               </svg>
               <p>
                 You will receive warnings when your session is about to finish, giving you enough time to book extra
-                time if required. Your bay will close the apps and shut down when your session finishes. If someone has
-                booked after you, the bay will remain on and they can take over your session.
+                time if required. Your bay will close the apps and shut down when your session finishes. If someone
+                has booked after you, the bay will remain on and they can take over your session.
               </p>
             </div>
 
             <h4>Bay Tips</h4>
             <p>
               You must place the ball in the hitting zone for the simulators to work. Place your ball in the middle
-              strip, in the front half towards the screen. Please do not stand on the putting turf, and ensure your feet
-              are always on the hitting surface.
+              strip, in the front half towards the screen. Please do not stand on the putting turf, and ensure your
+              feet are always on the hitting surface.
             </p>
-
-            <!-- FIXED: Actual image instead of SVG placeholder -->
-            <img
-              src="https://cdn.shopify.com/s/files/1/0758/7030/6550/files/Screenshot_2026-01-22_at_9.43.53_am.png?v=1769039118"
-              alt="Bay setup and ball placement"
-              class="guide-image"
-            />
-
-            <p>
-              GSPRO on the impact screen will show green indicators either side of the ball to let you know that the
-              ball is in the correct zone and you are ready to hit!
-            </p>
-
-            <img
-              src="https://cdn.shopify.com/s/files/1/0758/7030/6550/files/Screenshot_2026-01-22_at_9.44.49_am.png?v=1769039109"
-              alt="GSPRO green indicators showing ball in correct position"
-              class="guide-image"
-            />
           </div>
         </div>
 
@@ -718,8 +675,8 @@
           </div>
           <div class="section-content">
             <p>
-              Joining as a Birdies member unlocks discounted rates, league access, and exclusive perks. All memberships
-              are billed weekly with no lock-in contracts.
+              Joining as a member unlocks discounted rates, league access, and exclusive perks. All memberships
+              are billed on a regular schedule with no lock-in contracts.
             </p>
 
             <h4>Available Membership Tiers</h4>
@@ -741,7 +698,7 @@
                 </div>
                 <div class="feature-text">
                   <h5>Visitor (Pay as you play)</h5>
-                  <p>Peak: $35/hr • Off-Peak: $30/hr • No commitment</p>
+                  <p>No commitment — book as you go</p>
                 </div>
               </div>
               <div class="feature-item">
@@ -762,8 +719,8 @@
                   </svg>
                 </div>
                 <div class="feature-text">
-                  <h5>Weekday Membership</h5>
-                  <p>$10/hr • Mon-Thu before 4pm • $15/week</p>
+                  <h5>Off-Peak Membership</h5>
+                  <p>Discounted off-peak hourly rate</p>
                 </div>
               </div>
               <div class="feature-item">
@@ -780,8 +737,8 @@
                   </svg>
                 </div>
                 <div class="feature-text">
-                  <h5>Birdie Membership</h5>
-                  <p>$10/hr anytime • League access • $27/week</p>
+                  <h5>Standard Membership</h5>
+                  <p>Anytime rate plus league access</p>
                 </div>
               </div>
               <div class="feature-item">
@@ -798,8 +755,8 @@
                   </svg>
                 </div>
                 <div class="feature-text">
-                  <h5>Eagle Membership</h5>
-                  <p>$8/hr anytime • Priority booking • $35/week</p>
+                  <h5>Premium Membership</h5>
+                  <p>Best rate anytime, plus priority booking</p>
                 </div>
               </div>
             </div>
@@ -808,7 +765,7 @@
             <ul class="steps-list">
               <li>
                 <span class="step-icon">1</span>
-                <span>Log in to the Birdies Hub</span>
+                <span>Log in to the Hub</span>
               </li>
               <li>
                 <span class="step-icon">2</span>
@@ -820,43 +777,26 @@
               </li>
               <li>
                 <span class="step-icon">4</span>
-                <span>Complete payment setup — you'll be billed weekly</span>
+                <span>Complete payment setup</span>
               </li>
             </ul>
-
-            <a href="https://birdiesbayside.com.au/pages/membership" target="_blank" class="external-link-btn">
-              View Membership Options
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                <polyline points="15 3 21 3 21 9"></polyline>
-                <line x1="10" y1="14" x2="21" y2="3"></line>
-              </svg>
-            </a>
           </div>
         </div>
 
-        <!-- Section 5: Using GSPRO Software -->
+        <!-- Section 5: Using the Simulator Software -->
         <div id="section-5" class="guide-section section-5">
           <div class="section-header">
             <span class="section-number">5</span>
-            <h3 class="section-title">Using GSPRO Software</h3>
+            <h3 class="section-title">Using the Simulator Software</h3>
           </div>
           <div class="section-content">
             <p>
-              GSPRO is the golf simulation software that powers the experience at Birdies. It features stunning
-              graphics, accurate physics, and hundreds of real-world courses.
+              Our simulators run on golf simulation software featuring stunning graphics, accurate physics, and
+              hundreds of real-world courses.
             </p>
 
-            <h4>Getting Started with GSPRO</h4>
-            <p>When you arrive at your bay, GSPRO will already be running and ready. Here's what you can do:</p>
+            <h4>Getting Started</h4>
+            <p>When you arrive at your bay, the software will already be running and ready. Here's what you can do:</p>
 
             <div class="feature-grid">
               <div class="feature-item">
@@ -898,7 +838,7 @@
                 </div>
                 <div class="feature-text">
                   <h5>Practice</h5>
-                  <p>Practice at the driving range, or on course practice to drop the ball anywhere</p>
+                  <p>Practice at the driving range, or drop the ball anywhere on the course</p>
                 </div>
               </div>
               <div class="feature-item">
@@ -941,44 +881,10 @@
                 </div>
                 <div class="feature-text">
                   <h5>Tournaments</h5>
-                  <p>For Birdies League players only — reach out to get started!</p>
+                  <p>For league players only — reach out to get started!</p>
                 </div>
               </div>
             </div>
-
-            <div class="info-box">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="16" x2="12" y2="12"></line>
-                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-              </svg>
-              <p>Want to learn more? GSPRO has a comprehensive knowledge base with detailed guides.</p>
-            </div>
-
-            <a href="https://gspro.gitbook.io/gspro-knowledge-base" target="_blank" class="external-link-btn">
-              View GSPRO Manual
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                <polyline points="15 3 21 3 21 9"></polyline>
-                <line x1="10" y1="14" x2="21" y2="3"></line>
-              </svg>
-            </a>
           </div>
         </div>
 
@@ -986,38 +892,37 @@
         <div id="section-6" class="guide-section section-6">
           <div class="section-header">
             <span class="section-number">6</span>
-            <h3 class="section-title">Playing a Birdies League Round</h3>
+            <h3 class="section-title">Playing a League Round</h3>
           </div>
           <div class="section-content">
             <p>
-              Birdies League uses the SimGolf Tour (SGT) platform to track handicaps, run tournaments, and manage
-              leaderboards. Here's how to participate in league play.
+              Our league uses an online platform to track handicaps, run tournaments, and manage leaderboards. Here's
+              how to participate in league play.
             </p>
 
-            <h4>Getting Started with Birdies League</h4>
+            <h4>Getting Started with the League</h4>
             <ul class="steps-list">
               <li>
                 <span class="step-icon">1</span>
-                <span>Sign up to the Birdies League in the Hub</span>
+                <span>Sign up to the league in the Hub</span>
               </li>
               <li>
                 <span class="step-icon">2</span>
                 <span
-                  >Your account will automatically be detected when booking a bay, so the SGT icon will show on the
-                  GSPRO menu</span
+                  >Your account will automatically be detected when booking a bay, so the league icon will show on
+                  the simulator menu</span
                 >
               </li>
               <li>
                 <span class="step-icon">3</span>
                 <span
-                  >Click the SGT icon and follow instructions to add yourself as a Player in GSPRO and access
-                  tournaments</span
+                  >Click the icon and follow instructions to add yourself as a player and access tournaments</span
                 >
               </li>
             </ul>
 
             <h4>Viewing Your League Stats</h4>
-            <p>After playing league rounds, you can view your stats and standings directly in the Birdies Hub:</p>
+            <p>After playing league rounds, you can view your stats and standings directly in the Hub:</p>
 
             <ul class="steps-list">
               <li>
@@ -1027,7 +932,7 @@
                   height="20"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="var(--birdies-orange)"
+                  stroke="var(--brand-accent)"
                   stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -1045,7 +950,7 @@
                   height="20"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="var(--birdies-orange)"
+                  stroke="var(--brand-accent)"
                   stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -1062,7 +967,7 @@
                   height="20"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="var(--birdies-orange)"
+                  stroke="var(--brand-accent)"
                   stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -1083,14 +988,18 @@
             <h3 class="section-title">Understanding Handicaps in League Play</h3>
           </div>
           <div class="section-content">
-            <h4>How Handicaps Work in Birdies League</h4>
+            <h4>How Handicaps Work in Our League</h4>
             <p>
-              When you join the Birdies league, your handicap determines how you compete fairly against other players of different skill levels. We use our own <strong>Birdies Custom Handicap</strong> system designed to keep weekly competition fair across all skill levels.
+              When you join the league, your handicap determines how you compete fairly against other players of
+              different skill levels. We use our own custom handicap system designed to keep weekly competition fair
+              across all skill levels.
             </p>
 
             <h4>Your First 6 Rounds (Approx. 3 Weeks)</h4>
             <p>
-              When a new player is approved by our admin team, they're assigned a <strong>Starting Handicap</strong> based on their experience level. This starting handicap is <strong>locked in for your first 6 rounds</strong> — around 3 weeks of league play (2 tournament rounds per week).
+              When a new player is approved by our admin team, they're assigned a <strong>Starting Handicap</strong>
+              based on their experience level. This starting handicap is <strong>locked in for your first 6
+              rounds</strong> — around 3 weeks of league play (2 tournament rounds per week).
             </p>
             <div class="info-box success">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1098,13 +1007,16 @@
                 <polyline points="22 4 12 14.01 9 11.01"></polyline>
               </svg>
               <p>
-                <strong>Example:</strong> If you're assigned a starting handicap of 15, you'll use that exact value for your first 6 rounds — no automatic adjustments during this settling-in period.
+                <strong>Example:</strong> If you're assigned a starting handicap of 15, you'll use that exact value
+                for your first 6 rounds — no automatic adjustments during this settling-in period.
               </p>
             </div>
 
             <h4>After 6 Rounds — Weekly Auto-Adjusted Handicap</h4>
             <p>
-              Once you've completed 6 rounds, your handicap automatically adjusts every week based on your <strong>best 3 scores from your most recent 6 rounds</strong>. This rolling system rewards consistency and ensures your handicap reflects your current form.
+              Once you've completed 6 rounds, your handicap automatically adjusts every week based on your
+              <strong>best 3 scores from your most recent 6 rounds</strong>. This rolling system rewards consistency
+              and ensures your handicap reflects your current form.
             </p>
             <ul class="steps-list">
               <li>
@@ -1123,13 +1035,14 @@
 
             <h4>Why This Approach?</h4>
             <p>
-              Our Birdies Custom Handicap system is designed to keep competition fair for everyone — not just the lowest handicappers:
+              Our custom handicap system is designed to keep competition fair for everyone — not just the lowest
+              handicappers:
             </p>
             <div class="feature-grid">
               <div class="feature-item">
                 <div class="feature-icon">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8m3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"></svg>
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8m3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"></path>
                   </svg>
                 </div>
                 <div class="feature-text">
@@ -1148,53 +1061,12 @@
                   <p>Only your last 6 rounds are used — old scores roll off</p>
                 </div>
               </div>
-              <div class="feature-item">
-                <div class="feature-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8m-1-13h2v6h-2zm0 8h2v2h-2z"></svg>
-                  </svg>
-                </div>
-                <div class="feature-text">
-                  <h5>Weekly Auto-Updates</h5>
-                  <p>Your handicap moves with you every week</p>
-                </div>
-              </div>
-              <div class="feature-item">
-                <div class="feature-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
-                </div>
-                <div class="feature-text">
-                  <h5>Open to All Skill Levels</h5>
-                  <p>Higher handicappers get a real shot at winning</p>
-                </div>
-              </div>
             </div>
-
-            <div class="info-box warning">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3.05h16.94a2 2 0 0 0 1.71-3.05L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                <line x1="12" y1="9" x2="12" y2="13"></line>
-                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-              </svg>
-              <p>
-                <strong>Important:</strong> Your handicap reflects your <em>best</em> recent form (best 3 of last 6). Stay consistent — one big round won't tank you, and good form will be rewarded!
-              </p>
-            </div>
-
-            <h4>Questions About Your Handicap?</h4>
-            <p>
-              If you have questions about how your handicap is calculated or need any clarification, our admin team is here to help. Reach out to us through the Birdies Hub messaging system.
-            </p>
           </div>
         </div>
 
-        <!-- Footer -->
         <div class="guide-footer">
-          <p>Still have questions? We're here to help!</p>
-          <a href="mailto:info@birdiesbayside.com.au" class="contact-link">Contact Us</a>
+          <p>Still have questions? Reach out to our team using the contact details on your booking confirmation.</p>
         </div>
       </div>
     </section>

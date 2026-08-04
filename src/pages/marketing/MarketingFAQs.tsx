@@ -7,11 +7,11 @@ const getGroups = (venueName: string) => [
   {
     section: `Visiting ${venueName}`,
     items: [
-      { q: "Do I need to be a member?", a: "No, visitors are always welcome. Just book a bay online and turn up. Pay-as-you-go rates are $30/hr off-peak and $35/hr peak, per bay for up to 4 players." },
-      { q: "When are we open?", a: "Members have access from 5am - 11pm via the automated bays. Staffed hours vary, check the banner at the top of the site or call us." },
-      { q: "How many people can fit in a bay?", a: "Each bay comfortably fits up to 4 players. You can play stroke play, scramble, closest-to-pin and more, all on the same booking." },
+      { q: "Do I need to be a member?", a: "No, visitors are always welcome. Just book a bay online and turn up. Pay-as-you-go rates apply off-peak and peak, per bay for a small group of players." },
+      { q: "When are we open?", a: "Members have access via the automated bays during extended hours. Staffed hours vary, check the banner at the top of the site or call us." },
+      { q: "How many people can fit in a bay?", a: "Each bay comfortably fits a small group of players. You can play stroke play, scramble, closest-to-pin and more, all on the same booking." },
       { q: "Do you provide clubs?", a: "Yes, we have rental clubs available at the centre. Just let us know when you book." },
-      { q: "Is there a bar on site?", a: `Yes, the ${venueName} Bar is open during staffed hours serving a range of drinks. Grab a cold one while you play or wind down after your round.` },
+      { q: "Is there a bar on site?", a: `Yes, our on-site bar is open during staffed hours serving a range of drinks. Grab a cold one while you play or wind down after your round.` },
     ],
   },
   {
@@ -25,10 +25,10 @@ const getGroups = (venueName: string) => [
   {
     section: "Membership",
     items: [
-      { q: "What memberships are available?", a: "We offer three weekly plans: Weekday ($15), Birdie ($27) and Eagle ($35). All include discounted bay rates and no lock-in contracts." },
+      { q: "What memberships are available?", a: "We offer a few weekly plans at different price points. All include discounted bay rates and no lock-in contracts." },
       { q: "Can I cancel any time?", a: "Yes, all memberships can be cancelled at any time. We don't refund the most recent weekly payment." },
-      { q: "What's the difference between Birdie and Eagle?", a: "Eagle members get a lower hourly rate ($8 vs $10) and priority booking. Both tiers include access to the League." },
-      { q: "Can Weekday members join competitions?", a: "Yes, Weekday members can join our Wednesday local comp. The full League season is a perk reserved for Birdie and Eagle members." },
+      { q: "What's the difference between membership tiers?", a: "Higher tiers get a lower hourly rate and priority booking. All tiers include access to the League." },
+      { q: "Can all members join competitions?", a: "Entry-level members can join our local weekly comp. The full League season is a perk reserved for higher membership tiers." },
     ],
   },
   {
@@ -46,7 +46,7 @@ const MarketingFAQs = () => {
   const groups = getGroups(tenant.venue_name);
   return (
   <MarketingLayout>
-    <Seo title={`FAQs | ${tenant.venue_name} Indoor Golf`} description={`Answers on booking, pricing, memberships, bay access, rental clubs, gift cards and the ${tenant.venue_name} League at our Redland Bay centre.`} path="/faqs" />
+    <Seo title={`FAQs | ${tenant.venue_name} Indoor Golf`} description={`Answers on booking, pricing, memberships, bay access, rental clubs, gift cards and the ${tenant.venue_name} League.`} path="/faqs" />
     <section className="bg-primary text-primary-foreground py-12 sm:py-20">
       <div className="container mx-auto px-4 max-w-3xl text-center">
         <p className="text-accent font-display tracking-[0.25em] uppercase text-sm mb-2">FAQs</p>

@@ -871,9 +871,12 @@ export default function AdminMarketing() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {MEMBERSHIP_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
+                        <SelectItem value={ALL_CUSTOMERS_OPTION.value}>
+                          {ALL_CUSTOMERS_OPTION.label}
+                        </SelectItem>
+                        {pricing.map((t) => (
+                          <SelectItem key={t.tier} value={t.tier}>
+                            {t.display_name}
                           </SelectItem>
                         ))}
                       </SelectContent>

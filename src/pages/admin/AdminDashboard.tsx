@@ -35,12 +35,7 @@ const timeFilterLabels: Record<TimeFilter, string> = {
   quarter: "This Quarter",
 };
 
-const memberTierLabels: Record<MemberTierFilter, string> = {
-  all: "All Members",
-  weekday: "Weekday",
-  birdie: "Birdie",
-  eagle: "Eagle",
-};
+
 
 const memberRevenueLabels: Record<MemberRevenueFilter, string> = {
   weekly: "Weekly",
@@ -257,7 +252,7 @@ export default function AdminDashboard() {
     let membersQuery = supabase
       .from('profiles')
       .select('membership_tier')
-      .neq('membership_tier', 'visitor');
+      .neq('membership_tier', walkInTier);
     
     if (memberTierFilter !== "all") {
       membersQuery = supabase
@@ -279,7 +274,7 @@ export default function AdminDashboard() {
     const { data: allMembers } = await supabase
       .from('profiles')
       .select('membership_tier')
-      .neq('membership_tier', 'visitor');
+      .neq('membership_tier', walkInTier);
 
     const weeklyTotal = allMembers?.reduce((sum, m) => {
       const fee = weeklyFees[m.membership_tier as string] || 0;
@@ -511,7 +506,7 @@ export default function AdminDashboard() {
                 <FilterDropdown
                   value={memberTierFilter}
                   onChange={setMemberTierFilter}
-                  options={["all", "weekday", "birdie", "eagle"]}
+                  options={["all", ...memberTiers.map((t) => t.tier)]}
                   labels={memberTierLabels}
                 />
               </div>

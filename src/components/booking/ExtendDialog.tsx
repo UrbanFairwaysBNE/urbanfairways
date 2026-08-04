@@ -95,9 +95,7 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
 
       if (profRes.data) setProfile(profRes.data as Profile);
       if (priceRes.data) {
-        const cfg: Record<string, number> = {};
-        priceRes.data.forEach((r: any) => { cfg[r.tier.toLowerCase()] = r.hourly_rate; });
-        setPricingConfig(cfg);
+        setPricingConfig((priceRes.data as Record<string, unknown>[]).map(normaliseTier));
       }
       setNextBookingStart(nextRes.data?.[0]?.start_time?.slice(0, 5) ?? null);
       setCloseTime(

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { isPeakTime } from "@/lib/pricing-utils";
+import { isPeakTime, addDurationToTime } from "@/lib/pricing-utils";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Loader2, AlertCircle, Wallet, CreditCard } from "lucide-react";
 import { format } from "date-fns";

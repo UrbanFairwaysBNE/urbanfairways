@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
     const rows = Object.entries(data || {})
       .map(
         ([k, v]) =>
-          `<tr><td style="padding:6px 10px;border-bottom:1px solid #eee;font-weight:600;color:#1F4C25;vertical-align:top;width:240px;">${safe(
+          `<tr><td style="padding:6px 10px;border-bottom:1px solid #eee;font-weight:600;color:#2F3134;vertical-align:top;width:240px;">${safe(
             k,
           )}</td><td style="padding:6px 10px;border-bottom:1px solid #eee;color:#222;white-space:pre-wrap;">${safe(
             v,
@@ -29,8 +29,8 @@ Deno.serve(async (req) => {
       .join("");
 
     const html = `
-      <div style="font-family:Arial,sans-serif;max-width:780px;margin:0 auto;padding:20px;background:#FFF5E4;">
-        <div style="background:#1F4C25;color:#fff;padding:18px 22px;border-radius:12px 12px 0 0;">
+      <div style="font-family:Arial,sans-serif;max-width:780px;margin:0 auto;padding:20px;background:#F5F3EF;">
+        <div style="background:#2F3134;color:#fff;padding:18px 22px;border-radius:12px 12px 0 0;">
           <h2 style="margin:0;font-size:20px;">Sim Centre Questionnaire Submission</h2>
           <p style="margin:6px 0 0;font-size:14px;opacity:.9;">${safe(tradingName) || "(no trading name)"} — ${safe(contactEmail) || "(no contact email)"}</p>
         </div>

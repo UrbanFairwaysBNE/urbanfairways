@@ -84,13 +84,13 @@ serve(async (req) => {
 
     // Build branded email matching other tenant emails
     const bodyContent = `
-              <p style="font-family:Inter, Arial, sans-serif; font-size:15px; line-height:1.6; color:#333333; margin:0 0 16px;">
+              <p style="font-family:Manrope, Arial, sans-serif; font-size:15px; line-height:1.6; color:#333333; margin:0 0 16px;">
                 Hi ${name}!
               </p>
-              <p style="font-family:Inter, Arial, sans-serif; font-size:15px; line-height:1.6; color:#333333; margin:0 0 16px;">
+              <p style="font-family:Manrope, Arial, sans-serif; font-size:15px; line-height:1.6; color:#333333; margin:0 0 16px;">
                 You've been invited to set up your password for your ${tenant.venue_name} account, or you requested a password reset.
               </p>
-              <p style="font-family:Inter, Arial, sans-serif; font-size:15px; line-height:1.6; color:#333333; margin:0 0 6px;">
+              <p style="font-family:Manrope, Arial, sans-serif; font-size:15px; line-height:1.6; color:#333333; margin:0 0 6px;">
                 Click the button below to set your password:
               </p>
     `;
@@ -103,46 +103,46 @@ serve(async (req) => {
   <meta name="x-apple-disable-message-reformatting" />
   <title>Set Your ${tenant.venue_name} Password</title>
   <style>
-    @import url("https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600&display=swap");
+    @import url("https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Manrope:wght@400;600&display=swap");
   </style>
 </head>
-<body style="margin:0; padding:0; background-color:#FFF5E4;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#FFF5E4;">
+<body style="margin:0; padding:0; background-color:#F5F3EF;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F5F3EF;">
     <tr>
       <td align="center" style="padding:24px 12px;">
         <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px; width:100%;">
           <!-- HEADER -->
           <tr>
-            <td align="center" style="background-color:#1F4C25; padding:18px; border-radius:16px 16px 0 0;">
-              <div style="font-family:Anton, Impact, Arial Black, sans-serif; font-size:26px; color:#FFFFFF; text-align:center; letter-spacing:0.5px;">${tenant.venue_name}</div>
+            <td align="center" style="background-color:#2F3134; padding:18px; border-radius:16px 16px 0 0;">
+              <div style="font-family:Archivo, Impact, Arial Black, sans-serif; font-size:26px; color:#FFFFFF; text-align:center; letter-spacing:0.5px;">${tenant.venue_name}</div>
             </td>
           </tr>
           <!-- BODY -->
           <tr>
-            <td style="background-color:#FFF5E4; padding:26px 22px; border-left:1px solid rgba(31,76,37,0.12); border-right:1px solid rgba(31,76,37,0.12);">
-              <h1 style="margin:0 0 14px; font-family:Anton, Impact, Arial Black, sans-serif; font-size:34px; line-height:1.1; color:#1F4C25; text-align:center;">
+            <td style="background-color:#F5F3EF; padding:26px 22px; border-left:1px solid rgba(47,49,52,0.12); border-right:1px solid rgba(47,49,52,0.12);">
+              <h1 style="margin:0 0 14px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:34px; line-height:1.1; color:#2F3134; text-align:center;">
                 Set Your Password
               </h1>
               ${bodyContent}
               <!-- BUTTON -->
               <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:22px auto 0;">
                 <tr>
-                  <td bgcolor="#EC622D" style="border-radius:12px;">
+                  <td bgcolor="#B5772A" style="border-radius:12px;">
                     <a href="${resetLink}"
-                       style="display:inline-block; padding:14px 24px; font-family:Anton, Impact, Arial Black, sans-serif; font-size:18px; letter-spacing:0.3px; color:#FFFFFF; text-decoration:none;">
+                       style="display:inline-block; padding:14px 24px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:18px; letter-spacing:0.3px; color:#FFFFFF; text-decoration:none;">
                       Set Password
                     </a>
                   </td>
                 </tr>
               </table>
-              <p style="font-family:Inter, Arial, sans-serif; font-size:13px; line-height:1.5; color:#999999; margin:24px 0 0; text-align:center;">
+              <p style="font-family:Manrope, Arial, sans-serif; font-size:13px; line-height:1.5; color:#999999; margin:24px 0 0; text-align:center;">
                 This link will expire in 24 hours. If you didn't request this email, you can safely ignore it.
               </p>
             </td>
           </tr>
           <!-- FOOTER -->
           <tr>
-            <td style="background-color:#1F4C25; padding:22px; border-radius:0 0 16px 16px;">
+            <td style="background-color:#2F3134; padding:22px; border-radius:0 0 16px 16px;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td align="center" style="padding-bottom:14px;">
@@ -155,7 +155,7 @@ serve(async (req) => {
                   </td>
                 </tr>
                 <tr>
-                  <td align="center" style="font-family:Inter, Arial, sans-serif; font-size:14px; line-height:1.7; color:#FFFFFF;">
+                  <td align="center" style="font-family:Manrope, Arial, sans-serif; font-size:14px; line-height:1.7; color:#FFFFFF;">
                     <div>${tenantAddress(tenant)}</div>
                     <div><a href="tel:${tenant.support_phone}" style="color:#FFFFFF; text-decoration:underline;">${tenant.support_phone}</a></div>
                     <div><a href="${tenantBookingUrl(tenant)}" style="color:#FFFFFF; text-decoration:underline;">${tenant.booking_domain}</a></div>

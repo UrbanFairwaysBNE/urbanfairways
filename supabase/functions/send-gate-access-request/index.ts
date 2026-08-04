@@ -28,16 +28,16 @@ Deno.serve(async (req) => {
         .replace(/>/g, "&gt;");
 
     const html = `
-      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#FFF5E4;">
-        <div style="background:#1F4C25;color:#fff;padding:18px 22px;border-radius:12px 12px 0 0;">
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#F5F3EF;">
+        <div style="background:#2F3134;color:#fff;padding:18px 22px;border-radius:12px 12px 0 0;">
           <h2 style="margin:0;font-size:20px;">New Gate Access Request</h2>
           <p style="margin:6px 0 0;font-size:13px;opacity:.9;">Approve in the app to send Noke SMS invite.</p>
         </div>
         <div style="background:#fff;padding:20px 22px;border:1px solid #e5e5e5;border-top:none;border-radius:0 0 12px 12px;">
           <table style="width:100%;border-collapse:collapse;font-size:14px;">
-            <tr><td style="padding:8px 0;font-weight:600;color:#1F4C25;width:120px;">Full Name</td><td style="padding:8px 0;color:#222;">${safe(fullName)}</td></tr>
-            <tr><td style="padding:8px 0;font-weight:600;color:#1F4C25;">Email</td><td style="padding:8px 0;color:#222;">${safe(email)}</td></tr>
-            <tr><td style="padding:8px 0;font-weight:600;color:#1F4C25;">Phone</td><td style="padding:8px 0;color:#222;">${safe(phone)}</td></tr>
+            <tr><td style="padding:8px 0;font-weight:600;color:#2F3134;width:120px;">Full Name</td><td style="padding:8px 0;color:#222;">${safe(fullName)}</td></tr>
+            <tr><td style="padding:8px 0;font-weight:600;color:#2F3134;">Email</td><td style="padding:8px 0;color:#222;">${safe(email)}</td></tr>
+            <tr><td style="padding:8px 0;font-weight:600;color:#2F3134;">Phone</td><td style="padding:8px 0;color:#222;">${safe(phone)}</td></tr>
           </table>
         </div>
       </div>`;

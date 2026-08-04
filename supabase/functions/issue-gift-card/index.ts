@@ -122,35 +122,35 @@ serve(async (req: Request): Promise<Response> => {
 
       const messageBlock = personalMessage
         ? `
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #EC622D;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #B5772A;">
           <tr>
-            <td style="padding:18px 22px; font-family:Inter, Arial, sans-serif; font-size:15px; line-height:1.6; color:#1F4C25; font-style:italic;">
+            <td style="padding:18px 22px; font-family:Manrope, Arial, sans-serif; font-size:15px; line-height:1.6; color:#2F3134; font-style:italic;">
               "${escapeHtml(personalMessage)}"
-              <div style="margin-top:10px; font-style:normal; font-size:13px; color:#1F4C25; opacity:0.7;">— ${escapeHtml(senderName)}</div>
+              <div style="margin-top:10px; font-style:normal; font-size:13px; color:#2F3134; opacity:0.7;">— ${escapeHtml(senderName)}</div>
             </td>
           </tr>
         </table>
         `
-        : `<p style="margin:0 0 14px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">From <strong>${escapeHtml(senderName)}</strong></p>`;
+        : `<p style="margin:0 0 14px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">From <strong>${escapeHtml(senderName)}</strong></p>`;
 
       const amountBlock = `
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1F4C25; border-radius:12px; margin:18px 0;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#2F3134; border-radius:12px; margin:18px 0;">
           <tr>
             <td style="padding:30px; text-align:center;">
-              <p style="margin:0 0 8px; font-family:Inter, Arial, sans-serif; font-size:14px; color:#FFF5E4; opacity:0.9; letter-spacing:1px; text-transform:uppercase;">Gift Card Value</p>
-              <p style="margin:0; font-family:Anton, Impact, Arial Black, sans-serif; font-size:56px; color:#EC622D;">$${amount.toFixed(2)}</p>
+              <p style="margin:0 0 8px; font-family:Manrope, Arial, sans-serif; font-size:14px; color:#F5F3EF; opacity:0.9; letter-spacing:1px; text-transform:uppercase;">Gift Card Value</p>
+              <p style="margin:0; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:56px; color:#B5772A;">$${amount.toFixed(2)}</p>
             </td>
           </tr>
         </table>
       `;
 
       const intro = autoApplied
-        ? `<p style="margin:0 0 14px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">Hi ${escapeHtml(recipientName)}, great news — <strong>${escapeHtml(senderName)}</strong> has gifted you ${tenant.venue_name} credit, and we've already added it to your account.</p>`
-        : `<p style="margin:0 0 14px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">Hi ${escapeHtml(recipientName)}, <strong>${escapeHtml(senderName)}</strong> wants you to enjoy a session at ${tenant.venue_name} on them.</p>`;
+        ? `<p style="margin:0 0 14px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">Hi ${escapeHtml(recipientName)}, great news — <strong>${escapeHtml(senderName)}</strong> has gifted you ${tenant.venue_name} credit, and we've already added it to your account.</p>`
+        : `<p style="margin:0 0 14px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">Hi ${escapeHtml(recipientName)}, <strong>${escapeHtml(senderName)}</strong> wants you to enjoy a session at ${tenant.venue_name} on them.</p>`;
 
       const footer = autoApplied
-        ? `<p style="margin:18px 0 0; font-family:Inter, Arial, sans-serif; font-size:15px; line-height:1.6; color:#1F4C25; text-align:center;">Book a bay and your credit will apply automatically at checkout.</p>`
-        : `<p style="margin:18px 0 0; font-family:Inter, Arial, sans-serif; font-size:15px; line-height:1.6; color:#1F4C25; text-align:center;">Create your free account using <strong>this email address</strong> and your credit applies automatically.</p>`;
+        ? `<p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:15px; line-height:1.6; color:#2F3134; text-align:center;">Book a bay and your credit will apply automatically at checkout.</p>`
+        : `<p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:15px; line-height:1.6; color:#2F3134; text-align:center;">Create your free account using <strong>this email address</strong> and your credit applies automatically.</p>`;
 
       const body = intro + messageBlock + amountBlock + footer;
 
@@ -182,25 +182,25 @@ serve(async (req: Request): Promise<Response> => {
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0;">
           <tr>
             <td>
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFF5E4; border:3px dashed #1F4C25; border-radius:18px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F5F3EF; border:3px dashed #2F3134; border-radius:18px;">
                 <tr>
                   <td style="padding:34px 28px; text-align:center;">
-                    <p style="margin:0 0 6px; font-family:Inter, Arial, sans-serif; font-size:13px; color:#1F4C25; letter-spacing:2px; text-transform:uppercase; opacity:0.8;">${escapeHtml(tenant.venue_name)} Gift Card</p>
-                    <p style="margin:0 0 18px; font-family:Anton, Impact, Arial Black, sans-serif; font-size:64px; line-height:1; color:#EC622D;">$${amount.toFixed(2)}</p>
-                    <p style="margin:0 0 6px; font-family:Inter, Arial, sans-serif; font-size:14px; color:#1F4C25; opacity:0.75;">To</p>
-                    <p style="margin:0 0 18px; font-family:Anton, Impact, Arial Black, sans-serif; font-size:28px; color:#1F4C25;">${escapeHtml(recipientName)}</p>
-                    ${personalMessage ? `<p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:15px; line-height:1.5; color:#1F4C25; font-style:italic; padding:0 12px;">"${escapeHtml(personalMessage)}"</p>` : ""}
-                    <p style="margin:0 0 4px; font-family:Inter, Arial, sans-serif; font-size:13px; color:#1F4C25; opacity:0.75;">From</p>
-                    <p style="margin:0 0 22px; font-family:Anton, Impact, Arial Black, sans-serif; font-size:22px; color:#1F4C25;">${escapeHtml(senderName)}</p>
-                    <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="background-color:#1F4C25; border-radius:10px;">
+                    <p style="margin:0 0 6px; font-family:Manrope, Arial, sans-serif; font-size:13px; color:#2F3134; letter-spacing:2px; text-transform:uppercase; opacity:0.8;">${escapeHtml(tenant.venue_name)} Gift Card</p>
+                    <p style="margin:0 0 18px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:64px; line-height:1; color:#B5772A;">$${amount.toFixed(2)}</p>
+                    <p style="margin:0 0 6px; font-family:Manrope, Arial, sans-serif; font-size:14px; color:#2F3134; opacity:0.75;">To</p>
+                    <p style="margin:0 0 18px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:28px; color:#2F3134;">${escapeHtml(recipientName)}</p>
+                    ${personalMessage ? `<p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:15px; line-height:1.5; color:#2F3134; font-style:italic; padding:0 12px;">"${escapeHtml(personalMessage)}"</p>` : ""}
+                    <p style="margin:0 0 4px; font-family:Manrope, Arial, sans-serif; font-size:13px; color:#2F3134; opacity:0.75;">From</p>
+                    <p style="margin:0 0 22px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:22px; color:#2F3134;">${escapeHtml(senderName)}</p>
+                    <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="background-color:#2F3134; border-radius:10px;">
                       <tr>
                         <td style="padding:12px 18px; text-align:center;">
-                          <div style="font-family:Inter, Arial, sans-serif; font-size:11px; color:#FFF5E4; letter-spacing:1px; text-transform:uppercase; opacity:0.85;">Redemption Code</div>
-                          <div style="font-family:'Courier New', monospace; font-size:22px; font-weight:bold; color:#FFF5E4; letter-spacing:2px; margin-top:4px;">${escapeHtml(redemptionCode || "")}</div>
+                          <div style="font-family:Manrope, Arial, sans-serif; font-size:11px; color:#F5F3EF; letter-spacing:1px; text-transform:uppercase; opacity:0.85;">Redemption Code</div>
+                          <div style="font-family:'Courier New', monospace; font-size:22px; font-weight:bold; color:#F5F3EF; letter-spacing:2px; margin-top:4px;">${escapeHtml(redemptionCode || "")}</div>
                         </td>
                       </tr>
                     </table>
-                    <p style="margin:14px 0 0; font-family:Inter, Arial, sans-serif; font-size:11px; line-height:1.5; color:#1F4C25; opacity:0.8;">Create a free account at <strong>${tenant.hub_domain}</strong><br/>then enter this code under <strong>My Account → Redeem Gift Card</strong></p>
+                    <p style="margin:14px 0 0; font-family:Manrope, Arial, sans-serif; font-size:11px; line-height:1.5; color:#2F3134; opacity:0.8;">Create a free account at <strong>${tenant.hub_domain}</strong><br/>then enter this code under <strong>My Account → Redeem Gift Card</strong></p>
                   </td>
                 </tr>
               </table>
@@ -210,14 +210,14 @@ serve(async (req: Request): Promise<Response> => {
       `;
 
       const body = `
-        <p style="margin:0 0 14px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">Your gift card is ready! Print this email (or just the card below) and give it to <strong>${escapeHtml(recipientName)}</strong>.</p>
+        <p style="margin:0 0 14px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">Your gift card is ready! Print this email (or just the card below) and give it to <strong>${escapeHtml(recipientName)}</strong>.</p>
         ${printableCard}
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:22px 0 0; border:1px solid rgba(31,76,37,0.15);">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:22px 0 0; border:1px solid rgba(47,49,52,0.15);">
           <tr>
             <td style="padding:20px 22px;">
-              <p style="margin:0 0 10px; font-family:Anton, Impact, Arial Black, sans-serif; font-size:18px; color:#1F4C25; text-align:center; letter-spacing:0.5px;">How ${escapeHtml(recipientName)} Redeems Their Gift</p>
-              <ol style="margin:0; padding-left:22px; font-family:Inter, Arial, sans-serif; font-size:14px; line-height:1.7; color:#1F4C25;">
-                <li>Head to <a href="${tenantHubUrl(tenant, "/")}" style="color:#EC622D; text-decoration:underline;"><strong>${tenant.hub_domain}</strong></a> and create a free account (or sign in).</li>
+              <p style="margin:0 0 10px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:18px; color:#2F3134; text-align:center; letter-spacing:0.5px;">How ${escapeHtml(recipientName)} Redeems Their Gift</p>
+              <ol style="margin:0; padding-left:22px; font-family:Manrope, Arial, sans-serif; font-size:14px; line-height:1.7; color:#2F3134;">
+                <li>Head to <a href="${tenantHubUrl(tenant, "/")}" style="color:#B5772A; text-decoration:underline;"><strong>${tenant.hub_domain}</strong></a> and create a free account (or sign in).</li>
                 <li>Go to <strong>My Account</strong> and find the <strong>"Redeem Gift Card"</strong> section.</li>
                 <li>Enter the redemption code above — credit applies to their account instantly.</li>
                 <li>Book a bay and the credit is automatically used at checkout.</li>

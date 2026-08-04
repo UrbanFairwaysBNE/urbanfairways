@@ -95,20 +95,20 @@ export default function EmbedTVStandings() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[hsl(37,100%,95%)] flex items-center justify-center">
-        <Loader2 className="h-16 w-16 text-[hsl(18,84%,55%)] animate-spin" />
+      <div className="min-h-screen bg-[hsl(40,20%,95%)] flex items-center justify-center">
+        <Loader2 className="h-16 w-16 text-[hsl(32,62%,44%)] animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[hsl(37,100%,95%)] p-8 flex flex-col">
+    <div className="min-h-screen bg-[hsl(40,20%,95%)] p-8 flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-6">
           <img src={venueLogo} alt={tenant.venue_name} className="h-16" />
           <div>
-            <h1 className="font-bold text-4xl text-[hsl(128,42%,21%)] tracking-tight">
+            <h1 className="font-bold text-4xl text-[hsl(220,4%,20%)] tracking-tight">
               MONTHLY WINNER
             </h1>
             <p className="text-xl text-[hsl(128,20%,40%)]">
@@ -117,7 +117,7 @@ export default function EmbedTVStandings() {
           </div>
         </div>
         <div className="text-right">
-          <div className="px-6 py-3 bg-[hsl(18,84%,55%)] text-white rounded-lg text-xl font-bold">
+          <div className="px-6 py-3 bg-[hsl(32,62%,44%)] text-white rounded-lg text-xl font-bold">
             {currentMonth.toUpperCase().split(" ")[0]}
           </div>
           <p className="text-sm text-[hsl(128,20%,40%)] mt-2">
@@ -129,7 +129,7 @@ export default function EmbedTVStandings() {
       {/* Standings Table */}
       <div className="flex-1 bg-white rounded-2xl border-2 border-[hsl(128,20%,85%)] overflow-hidden shadow-lg">
         {/* Table Header */}
-        <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-[hsl(128,42%,21%)] text-xl font-bold text-white">
+        <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-[hsl(220,4%,20%)] text-xl font-bold text-white">
           <div className="col-span-1 text-center">#</div>
           <div className="col-span-5">Player</div>
           <div className="col-span-2 text-center">Rounds</div>
@@ -163,14 +163,14 @@ export default function EmbedTVStandings() {
                     {getPositionIcon(position)}
                     <span className={cn(
                       "font-bold text-2xl",
-                      position <= 3 ? "text-[hsl(128,42%,21%)]" : "text-[hsl(128,20%,40%)]"
+                      position <= 3 ? "text-[hsl(220,4%,20%)]" : "text-[hsl(128,20%,40%)]"
                     )}>
                       {position}
                     </span>
                   </div>
 
                   <div className="col-span-5">
-                    <p className="font-bold text-2xl text-[hsl(128,42%,21%)]">
+                    <p className="font-bold text-2xl text-[hsl(220,4%,20%)]">
                       {standing.player_name}
                     </p>
                   </div>
@@ -193,7 +193,7 @@ export default function EmbedTVStandings() {
                   <div className="col-span-2 text-center">
                     <span className={cn(
                       "px-4 py-2 rounded-lg font-bold text-2xl",
-                      "bg-[hsl(18,84%,55%)]/10 text-[hsl(18,84%,55%)]",
+                      "bg-[hsl(32,62%,44%)]/10 text-[hsl(32,62%,44%)]",
                     )}>
                       {formatPoints(standing.total_net_score)}
                     </span>

@@ -31,13 +31,13 @@ serve(async (req) => {
   <meta name="x-apple-disable-message-reformatting" />
   <title>Birdies Email</title>
   <style>
-    @import url("https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600&display=swap");
+    @import url("https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Manrope:wght@400;600&display=swap");
   </style>
 </head>
 
-<body style="margin:0; padding:0; background-color:#FFF5E4;">
+<body style="margin:0; padding:0; background-color:#F5F3EF;">
 
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#FFF5E4;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F5F3EF;">
 <tr>
 <td align="center" style="padding:24px 12px;">
 
@@ -45,45 +45,45 @@ serve(async (req) => {
 
 <!-- Header -->
 <tr>
-<td align="center" style="background-color:#1F4C25; padding:18px; border-radius:16px 16px 0 0;">
+<td align="center" style="background-color:#2F3134; padding:18px; border-radius:16px 16px 0 0;">
   <img src="https://cdn.shopify.com/s/files/1/0758/7030/6550/files/NO-BG_BIRDIES-LOGOS_WORK-DOC_AMENDED-9.7.25-01.png?v=1761536603" width="140" alt="Birdies Bayside" style="display:block; width:140px; height:auto; border:0;" />
 </td>
 </tr>
 
 <!-- Main Content -->
 <tr>
-<td style="background-color:#FFF5E4; padding:26px 22px; border-left:1px solid rgba(31,76,37,0.12); border-right:1px solid rgba(31,76,37,0.12);">
+<td style="background-color:#F5F3EF; padding:26px 22px; border-left:1px solid rgba(47,49,52,0.12); border-right:1px solid rgba(47,49,52,0.12);">
 
-<h1 style="margin:0 0 14px; font-family:Anton, Impact, Arial Black, sans-serif; font-size:34px; line-height:1.1; color:#1F4C25; text-align:center;">
+<h1 style="margin:0 0 14px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:34px; line-height:1.1; color:#2F3134; text-align:center;">
 🏆 Congratulations! 🏆
 </h1>
 
-<p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+<p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
 Hi ${playerName},
 </p>
 
-<p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+<p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
 Amazing work! You've won this week's Birdies League tournament!
 </p>
 
 <!-- Prize Box -->
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1F4C25; border-radius:12px; margin:18px 0;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#2F3134; border-radius:12px; margin:18px 0;">
 <tr>
 <td style="padding:30px; text-align:center;">
 
-<p style="margin:0 0 6px; font-family:Inter, Arial, sans-serif; font-size:14px; color:#FFF5E4; opacity:0.9;">
+<p style="margin:0 0 6px; font-family:Manrope, Arial, sans-serif; font-size:14px; color:#F5F3EF; opacity:0.9;">
 Tournament
 </p>
 
-<p style="margin:0 0 16px; font-family:Inter, Arial, sans-serif; font-size:18px; color:#FFFFFF; font-weight:600;">
+<p style="margin:0 0 16px; font-family:Manrope, Arial, sans-serif; font-size:18px; color:#FFFFFF; font-weight:600;">
 ${tournamentName}
 </p>
 
-<p style="margin:0 0 8px; font-family:Inter, Arial, sans-serif; font-size:14px; color:#FFF5E4; opacity:0.9;">
+<p style="margin:0 0 8px; font-family:Manrope, Arial, sans-serif; font-size:14px; color:#F5F3EF; opacity:0.9;">
 Your Prize
 </p>
 
-<p style="margin:0; font-family:Anton, Impact, Arial Black, sans-serif; font-size:52px; color:#EC622D;">
+<p style="margin:0; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:52px; color:#B5772A;">
 ${prizeAmount}
 </p>
 
@@ -91,26 +91,26 @@ ${prizeAmount}
 </tr>
 </table>
 
-<p style="margin:18px 0; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+<p style="margin:18px 0; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
 Your credit has been added to your Birdies account and can be used for:
 </p>
 
-<ul style="margin:0 0 20px; padding-left:20px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.8; color:#1F4C25;">
+<ul style="margin:0 0 20px; padding-left:20px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.8; color:#2F3134;">
 <li>Future bay bookings</li>
 <li>In-store purchases at Birdies</li>
 </ul>
 
-<p style="margin:18px 0; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+<p style="margin:18px 0; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
 Keep up the momentum! See you at the next tournament.
 </p>
 
 <!-- Button -->
 <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:22px auto 0;">
 <tr>
-<td bgcolor="#EC622D" style="border-radius:12px;">
+<td bgcolor="#B5772A" style="border-radius:12px;">
 
 <a href="https://hub.birdiesbayside.com.au/my-account"
-style="display:inline-block; padding:14px 28px; font-family:Anton, Impact, Arial Black, sans-serif; font-size:18px; letter-spacing:0.3px; color:#FFFFFF; text-decoration:none;">
+style="display:inline-block; padding:14px 28px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:18px; letter-spacing:0.3px; color:#FFFFFF; text-decoration:none;">
 View My Account
 </a>
 
@@ -123,7 +123,7 @@ View My Account
 
 <!-- Footer -->
 <tr>
-<td style="background-color:#1F4C25; padding:22px; border-radius:0 0 16px 16px;">
+<td style="background-color:#2F3134; padding:22px; border-radius:0 0 16px 16px;">
 
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
 
@@ -142,7 +142,7 @@ View My Account
 </tr>
 
 <tr>
-<td align="center" style="font-family:Inter, Arial, sans-serif; font-size:12px; color:#FFF5E4; opacity:0.8;">
+<td align="center" style="font-family:Manrope, Arial, sans-serif; font-size:12px; color:#F5F3EF; opacity:0.8;">
 <p style="margin:0; padding:0 8px;">© 2025 Birdies Bayside. All rights reserved.</p>
 </td>
 </tr>

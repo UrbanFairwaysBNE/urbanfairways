@@ -85,10 +85,10 @@ serve(async (req) => {
       logStep("Using custom email template body with shared wrapper");
     } else {
       bodyContent = `
-        <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">Hi ${first_name}, your membership at ${tenant.venue_name} has been placed on hold.</p>
+        <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">Hi ${first_name}, your membership at ${tenant.venue_name} has been placed on hold.</p>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FEF3C7; border-radius:12px; margin:18px 0; border-left:4px solid #D97706;">
-          <tr><td style="padding:20px; font-family:Inter, Arial, sans-serif; font-size:15px; color:#92400E;">
-            <h3 style="margin:0 0 10px 0; font-family:Anton, Impact, Arial Black, sans-serif; color:#92400E;">What This Means</h3>
+          <tr><td style="padding:20px; font-family:Manrope, Arial, sans-serif; font-size:15px; color:#92400E;">
+            <h3 style="margin:0 0 10px 0; font-family:Archivo, Impact, Arial Black, sans-serif; color:#92400E;">What This Means</h3>
             <ul style="margin:0; padding-left:20px;">
               <li style="margin-bottom:8px;">You will not be able to book bays while your membership is on hold</li>
               <li style="margin-bottom:8px;">Your membership tier has been preserved</li>
@@ -96,7 +96,7 @@ serve(async (req) => {
             </ul>
           </td></tr>
         </table>
-        <p style="margin:18px 0 0; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">If you have any questions or would like to reactivate your membership, please contact us.</p>
+        <p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">If you have any questions or would like to reactivate your membership, please contact us.</p>
       `;
       logStep("Using default email template body");
     }

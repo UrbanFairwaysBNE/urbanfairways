@@ -36,20 +36,20 @@ export default function EmbedTVLastWeek() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[hsl(37,100%,95%)] flex items-center justify-center">
-        <Loader2 className="h-16 w-16 text-[hsl(18,84%,55%)] animate-spin" />
+      <div className="min-h-screen bg-[hsl(40,20%,95%)] flex items-center justify-center">
+        <Loader2 className="h-16 w-16 text-[hsl(32,62%,44%)] animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[hsl(37,100%,95%)] p-8 flex flex-col">
+    <div className="min-h-screen bg-[hsl(40,20%,95%)] p-8 flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-6">
           <img src={venueLogo} alt={tenant.venue_name} className="h-16" />
           <div>
-            <h1 className="font-bold text-4xl text-[hsl(128,42%,21%)] tracking-tight">
+            <h1 className="font-bold text-4xl text-[hsl(220,4%,20%)] tracking-tight">
               {previousTournament?.name || "Previous Week"}
             </h1>
             <p className="text-xl text-[hsl(128,20%,40%)]">
@@ -58,7 +58,7 @@ export default function EmbedTVLastWeek() {
           </div>
         </div>
         <div className="text-right">
-          <div className="px-6 py-3 bg-[hsl(18,84%,55%)] text-white rounded-lg text-xl font-bold">
+          <div className="px-6 py-3 bg-[hsl(32,62%,44%)] text-white rounded-lg text-xl font-bold">
             PREVIOUS WEEK
           </div>
           {lastUpdated && (
@@ -72,7 +72,7 @@ export default function EmbedTVLastWeek() {
       {/* Leaderboard Table */}
       <div className="flex-1 bg-white rounded-2xl border-2 border-[hsl(128,20%,85%)] overflow-hidden shadow-lg">
         {/* Table Header */}
-        <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-[hsl(128,42%,21%)] text-xl font-bold text-white">
+        <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-[hsl(220,4%,20%)] text-xl font-bold text-white">
           <div className="col-span-1 text-center">#</div>
           <div className="col-span-4">Player</div>
           <div className="col-span-1 text-center">HCP</div>
@@ -105,14 +105,14 @@ export default function EmbedTVLastWeek() {
                   {getPositionIcon(result.position)}
                   <span className={cn(
                     "font-bold text-2xl",
-                    result.position <= 3 ? "text-[hsl(128,42%,21%)]" : "text-[hsl(128,20%,40%)]"
+                    result.position <= 3 ? "text-[hsl(220,4%,20%)]" : "text-[hsl(128,20%,40%)]"
                   )}>
                     {result.position}
                   </span>
                 </div>
 
                 <div className="col-span-4">
-                  <p className="font-bold text-2xl text-[hsl(128,42%,21%)]">{result.playerName}</p>
+                  <p className="font-bold text-2xl text-[hsl(220,4%,20%)]">{result.playerName}</p>
                 </div>
 
                 <div className="col-span-1 text-center text-xl text-[hsl(128,20%,40%)]">

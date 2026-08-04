@@ -16,29 +16,29 @@ const buildEmailHtml = (tenant: TenantConfig, heading: string, bodyContent: stri
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>${tenant.venue_name} Email</title>
   <style>
-    @import url("https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600&display=swap");
+    @import url("https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Manrope:wght@400;600&display=swap");
   </style>
 </head>
-<body style="margin:0; padding:0; background-color:#FFF5E4;">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#FFF5E4;">
+<body style="margin:0; padding:0; background-color:#F5F3EF;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F5F3EF;">
 <tr><td align="center" style="padding:24px 12px;">
 <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px; width:100%;">
   <tr>
-    <td align="center" style="background-color:#1F4C25; padding:18px; border-radius:16px 16px 0 0;">
-      <div style="font-family:Anton, Impact, Arial Black, sans-serif; font-size:26px; color:#FFFFFF; text-align:center; letter-spacing:0.5px;">${tenant.venue_name}</div>
+    <td align="center" style="background-color:#2F3134; padding:18px; border-radius:16px 16px 0 0;">
+      <div style="font-family:Archivo, Impact, Arial Black, sans-serif; font-size:26px; color:#FFFFFF; text-align:center; letter-spacing:0.5px;">${tenant.venue_name}</div>
     </td>
   </tr>
   <tr>
-    <td style="background-color:#FFF5E4; padding:26px 22px; border-left:1px solid rgba(31,76,37,0.12); border-right:1px solid rgba(31,76,37,0.12);">
-      <h1 style="margin:0 0 14px; font-family:Anton, Impact, Arial Black, sans-serif; font-size:34px; line-height:1.1; color:#1F4C25; text-align:center;">
+    <td style="background-color:#F5F3EF; padding:26px 22px; border-left:1px solid rgba(47,49,52,0.12); border-right:1px solid rgba(47,49,52,0.12);">
+      <h1 style="margin:0 0 14px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:34px; line-height:1.1; color:#2F3134; text-align:center;">
         ${heading}
       </h1>
       ${bodyContent}
       <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:22px auto 0;">
         <tr>
-          <td bgcolor="#EC622D" style="border-radius:12px;">
+          <td bgcolor="#B5772A" style="border-radius:12px;">
             <a href="${tenantHubUrl(tenant, "/admin/sgt-manager")}"
-               style="display:inline-block; padding:14px 24px; font-family:Anton, Impact, Arial Black, sans-serif; font-size:18px; letter-spacing:0.3px; color:#FFFFFF; text-decoration:none;">
+               style="display:inline-block; padding:14px 24px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:18px; letter-spacing:0.3px; color:#FFFFFF; text-decoration:none;">
               ${ctaText}
             </a>
           </td>
@@ -47,9 +47,9 @@ const buildEmailHtml = (tenant: TenantConfig, heading: string, bodyContent: stri
     </td>
   </tr>
   <tr>
-    <td style="background-color:#1F4C25; padding:22px; border-radius:0 0 16px 16px;">
+    <td style="background-color:#2F3134; padding:22px; border-radius:0 0 16px 16px;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr><td align="center" style="font-family:Inter, Arial, sans-serif; font-size:12px; color:#FFF5E4; opacity:0.8;">
+        <tr><td align="center" style="font-family:Manrope, Arial, sans-serif; font-size:12px; color:#F5F3EF; opacity:0.8;">
           <p style="margin:0;">© ${tenant.venue_name}</p>
         </td></tr>
       </table>
@@ -94,7 +94,7 @@ serve(async (req) => {
         .maybeSingle();
 
       const tournamentInfo = recentTournament
-        ? `<p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+        ? `<p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
             Latest completed tournament: <strong>${recentTournament.name}</strong>${recentTournament.course_name ? ` (${recentTournament.course_name})` : ""}
           </p>`
         : "";
@@ -103,11 +103,11 @@ serve(async (req) => {
       htmlContent = buildEmailHtml(
         tenant,
         "Weekly Winner Reminder",
-        `<p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+        `<p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
           It's Monday morning! Time to review and confirm this week's ${tenant.venue_name} League winner.
         </p>
         ${tournamentInfo}
-        <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+        <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
           Head to the SGT Manager to approve the weekly prize and send the winner notification.
         </p>`,
         "Confirm Weekly Winner",
@@ -122,10 +122,10 @@ serve(async (req) => {
       htmlContent = buildEmailHtml(
         tenant,
         "Monthly Winner Reminder",
-        `<p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+        `<p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
           It's the start of a new month! Time to confirm the monthly league winner for <strong>${monthName}</strong>.
         </p>
-        <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+        <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
           Head to the SGT Manager to review the monthly standings and approve the monthly prize.
         </p>`,
         "Confirm Monthly Winner",

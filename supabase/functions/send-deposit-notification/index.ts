@@ -129,30 +129,30 @@ serve(async (req) => {
       let creditReasonText = "";
       if (credit_type === 'google_review') {
         creditReasonText = `
-              <p style="margin:18px 0 0; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+              <p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 <strong>Thank you for your Google review!</strong> 🌟
               </p>`;
       }
       
       const bodyContent = `
-              <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+              <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 Hi ${profile.first_name}, great news! Credit has been added to your ${tenant.venue_name} account.
               </p>
               
               ${creditReasonText}
               
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #EC622D;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #B5772A;">
                 <tr>
-                  <td style="padding:20px; font-family:Inter, Arial, sans-serif; text-align:center;">
-                    <p style="margin:5px 0; font-size:18px; color:#1F4C25;"><strong>Amount Added:</strong></p>
-                    <p style="margin:5px 0; font-size:32px; color:#1F4C25; font-family:Anton, Impact, Arial Black, sans-serif;"><strong>$${amount.toFixed(2)}</strong></p>
+                  <td style="padding:20px; font-family:Manrope, Arial, sans-serif; text-align:center;">
+                    <p style="margin:5px 0; font-size:18px; color:#2F3134;"><strong>Amount Added:</strong></p>
+                    <p style="margin:5px 0; font-size:32px; color:#2F3134; font-family:Archivo, Impact, Arial Black, sans-serif;"><strong>$${amount.toFixed(2)}</strong></p>
                     <hr style="border: none; border-top: 1px solid #eee; margin: 15px 0;">
-                    <p style="margin:5px 0; font-size:16px; color:#1F4C25;"><strong>New Balance:</strong> $${new_balance.toFixed(2)}</p>
+                    <p style="margin:5px 0; font-size:16px; color:#2F3134;"><strong>New Balance:</strong> $${new_balance.toFixed(2)}</p>
                   </td>
                 </tr>
               </table>
               
-              <p style="margin:18px 0 0; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+              <p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 You can use your credit balance when booking a bay - just select "Use Balance" at checkout!
               </p>
       `;

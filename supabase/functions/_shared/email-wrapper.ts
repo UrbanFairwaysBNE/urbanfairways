@@ -39,8 +39,8 @@ const NEUTRAL_TENANT: TenantConfig = {
 // seeded by the email_layout migration. ---
 export function defaultHeaderHtml(tenant: TenantConfig = NEUTRAL_TENANT): string {
   return `<tr>
-  <td align="center" style="background-color:#1F4C25; padding:18px; border-radius:16px 16px 0 0;">
-    <div style="font-family:Anton, Impact, Arial Black, sans-serif; font-size:26px; letter-spacing:0.5px; color:#FFFFFF;">
+  <td align="center" style="background-color:#2F3134; padding:18px; border-radius:16px 16px 0 0;">
+    <div style="font-family:Archivo, Impact, Arial Black, sans-serif; font-size:26px; letter-spacing:0.5px; color:#FFFFFF;">
       ${tenant.venue_name}
     </div>
   </td>
@@ -80,11 +80,11 @@ export function defaultFooterHtml(tenant: TenantConfig = NEUTRAL_TENANT): string
     : "";
 
   return `<tr>
-  <td style="background-color:#1F4C25; padding:22px; border-radius:0 0 16px 16px;">
+  <td style="background-color:#2F3134; padding:22px; border-radius:0 0 16px 16px;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
       ${socialsRow}
       <tr>
-        <td align="center" style="font-family:Inter, Arial, sans-serif; font-size:14px; line-height:1.7; color:#FFFFFF;">
+        <td align="center" style="font-family:Manrope, Arial, sans-serif; font-size:14px; line-height:1.7; color:#FFFFFF;">
           ${addressRow}
           ${phoneRow}
           ${domainRow}
@@ -117,9 +117,9 @@ export function buildEmailTemplate(
     ? `
               <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:22px auto 0;">
                 <tr>
-                  <td bgcolor="#EC622D" style="border-radius:12px;">
+                  <td bgcolor="#B5772A" style="border-radius:12px;">
                     <a href="${ctaButton.url}"
-                       style="display:inline-block; padding:14px 24px; font-family:Anton, Impact, Arial Black, sans-serif; font-size:18px; letter-spacing:0.3px; color:#FFFFFF; text-decoration:none;">
+                       style="display:inline-block; padding:14px 24px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:18px; letter-spacing:0.3px; color:#FFFFFF; text-decoration:none;">
                       ${ctaButton.text}
                     </a>
                   </td>
@@ -136,18 +136,18 @@ export function buildEmailTemplate(
   <meta name="x-apple-disable-message-reformatting" />
   <title>${tenant.venue_name} Email</title>
   <style>
-    @import url("https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600&display=swap");
+    @import url("https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Manrope:wght@400;600&display=swap");
   </style>
 </head>
-<body style="margin:0; padding:0; background-color:#FFF5E4;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#FFF5E4;">
+<body style="margin:0; padding:0; background-color:#F5F3EF;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F5F3EF;">
     <tr>
       <td align="center" style="padding:24px 12px;">
         <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px; width:100%;">
           ${header}
           <tr>
-            <td style="background-color:#FFF5E4; padding:26px 22px; border-left:1px solid rgba(31,76,37,0.12); border-right:1px solid rgba(31,76,37,0.12);">
-              <h1 style="margin:0 0 14px; font-family:Anton, Impact, Arial Black, sans-serif; font-size:34px; line-height:1.1; color:#1F4C25; text-align:center;">
+            <td style="background-color:#F5F3EF; padding:26px 22px; border-left:1px solid rgba(47,49,52,0.12); border-right:1px solid rgba(47,49,52,0.12);">
+              <h1 style="margin:0 0 14px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:34px; line-height:1.1; color:#2F3134; text-align:center;">
                 ${heading}
               </h1>
               ${bodyContent}

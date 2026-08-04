@@ -13,9 +13,9 @@ import { useTenant, hubUrl } from "@/config/tenant";
 
 
 // Brand tokens (locked to iframe so it renders consistently inside Shopify)
-const GREEN = "hsl(128,42%,21%)";
-const ORANGE = "hsl(18,84%,55%)";
-const CREAM = "hsl(37,100%,95%)";
+const GREEN = "hsl(220,4%,20%)";
+const ORANGE = "hsl(32,62%,44%)";
+const CREAM = "hsl(40,20%,95%)";
 const CREAM_DEEP = "hsl(37,40%,90%)";
 const MUTED = "hsl(128,20%,40%)";
 const BORDER = "hsl(128,20%,85%)";

@@ -108,13 +108,13 @@ export default function EmbedLocalCompLeaderboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[hsl(37,100%,95%)] p-4 md:p-6">
+    <div className="min-h-screen bg-[hsl(40,20%,95%)] p-4 md:p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <img src={venueMark} alt={tenant.venue_name} className="h-10" />
           <div>
-            <h1 className="font-bold text-xl text-[hsl(128,42%,21%)]">AMBROSE COMP</h1>
+            <h1 className="font-bold text-xl text-[hsl(220,4%,20%)]">AMBROSE COMP</h1>
             <p className="text-sm text-[hsl(128,20%,40%)]">2-Man Ambrose Results</p>
           </div>
         </div>
@@ -138,7 +138,7 @@ export default function EmbedLocalCompLeaderboard() {
                         ({format(new Date(c.date + "T00:00:00"), "dd MMM")})
                       </span>
                       {competitions[0].id === c.id && (
-                        <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-[hsl(18,84%,55%)] text-white rounded">
+                        <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-[hsl(32,62%,44%)] text-white rounded">
                           LATEST
                         </span>
                       )}
@@ -163,17 +163,17 @@ export default function EmbedLocalCompLeaderboard() {
       {/* Leaderboard */}
       {isLoading ? (
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-8 w-8 text-[hsl(18,84%,55%)] animate-spin" />
+          <Loader2 className="h-8 w-8 text-[hsl(32,62%,44%)] animate-spin" />
         </div>
       ) : sortedTeams.length === 0 ? (
         <div className="bg-white rounded-xl border border-[hsl(128,20%,85%)] p-12 text-center">
-          <h3 className="font-bold text-lg text-[hsl(128,42%,21%)] mb-2">NO RESULTS YET</h3>
+          <h3 className="font-bold text-lg text-[hsl(220,4%,20%)] mb-2">NO RESULTS YET</h3>
           <p className="text-[hsl(128,20%,40%)]">Results will appear once scores are entered</p>
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-[hsl(128,20%,85%)] overflow-hidden shadow-sm">
           {/* Desktop Header */}
-          <div className="hidden sm:grid grid-cols-12 gap-2 px-4 py-3 bg-[hsl(128,42%,21%)] text-sm font-medium text-white">
+          <div className="hidden sm:grid grid-cols-12 gap-2 px-4 py-3 bg-[hsl(220,4%,20%)] text-sm font-medium text-white">
             <div className="col-span-1 text-center">#</div>
             <div className="col-span-3">Team</div>
             <div className="col-span-3">Players</div>
@@ -183,7 +183,7 @@ export default function EmbedLocalCompLeaderboard() {
           </div>
 
           {/* Mobile Header */}
-          <div className="grid sm:hidden grid-cols-12 gap-1 px-3 py-2 bg-[hsl(128,42%,21%)] text-xs font-medium text-white">
+          <div className="grid sm:hidden grid-cols-12 gap-1 px-3 py-2 bg-[hsl(220,4%,20%)] text-xs font-medium text-white">
             <div className="col-span-1 text-center">#</div>
             <div className="col-span-4">Team</div>
             <div className="col-span-2 text-center">HCP</div>
@@ -208,7 +208,7 @@ export default function EmbedLocalCompLeaderboard() {
                     <span className="hidden sm:inline">{getPositionIcon(pos)}</span>
                     <span className={cn(
                       "font-bold text-xs sm:text-base",
-                      pos <= 3 ? "text-[hsl(128,42%,21%)]" : "text-[hsl(128,20%,40%)]"
+                      pos <= 3 ? "text-[hsl(220,4%,20%)]" : "text-[hsl(128,20%,40%)]"
                     )}>
                       {pos}
                     </span>
@@ -216,7 +216,7 @@ export default function EmbedLocalCompLeaderboard() {
 
                   {/* Desktop: Team + Players columns */}
                   <div className="hidden sm:block col-span-3">
-                    <p className="font-semibold text-[hsl(128,42%,21%)] truncate">{team.team_name}</p>
+                    <p className="font-semibold text-[hsl(220,4%,20%)] truncate">{team.team_name}</p>
                   </div>
                   <div className="hidden sm:block col-span-3">
                     <p className="text-sm text-[hsl(128,20%,40%)] truncate">
@@ -226,7 +226,7 @@ export default function EmbedLocalCompLeaderboard() {
 
                   {/* Mobile: Combined team column */}
                   <div className="sm:hidden col-span-4">
-                    <p className="font-semibold text-xs text-[hsl(128,42%,21%)] truncate">{team.team_name}</p>
+                    <p className="font-semibold text-xs text-[hsl(220,4%,20%)] truncate">{team.team_name}</p>
                     <p className="text-[10px] text-[hsl(128,20%,40%)] truncate">
                       {team.player1_name} & {team.player2_name}
                     </p>
@@ -243,7 +243,7 @@ export default function EmbedLocalCompLeaderboard() {
                   <div className="col-span-3 sm:col-span-2 text-center">
                     <span className={cn(
                       "font-bold text-sm sm:text-base",
-                      isWinner ? "text-[hsl(18,84%,55%)]" : "text-[hsl(128,42%,21%)]"
+                      isWinner ? "text-[hsl(32,62%,44%)]" : "text-[hsl(220,4%,20%)]"
                     )}>
                       {team.net_score !== null ? team.net_score : "-"}
                     </span>

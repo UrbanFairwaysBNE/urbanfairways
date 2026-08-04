@@ -456,20 +456,20 @@ serve(async (req) => {
 
       // Build Google Review CTA block (only for confirmations, not reschedules, and not if already rewarded)
       const reviewCtaHtml = (!isReschedule && !hasReviewReward) ? `
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border:1px solid rgba(31,76,37,0.12);">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border:1px solid rgba(47,49,52,0.12);">
                 <tr>
                   <td style="padding:20px; text-align:center;">
-                    <p style="margin:0 0 8px; font-family:Anton, Impact, Arial Black, sans-serif; font-size:18px; color:#1F4C25;">
+                    <p style="margin:0 0 8px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:18px; color:#2F3134;">
                       ENJOYING ${tenant.venue_name.toUpperCase()}? ⭐
                     </p>
-                    <p style="margin:0 0 14px; font-family:Inter, Arial, sans-serif; font-size:14px; color:#1F4C25; line-height:1.5;">
+                    <p style="margin:0 0 14px; font-family:Manrope, Arial, sans-serif; font-size:14px; color:#2F3134; line-height:1.5;">
                       Leave us a Google Review and receive <strong>$15 credit</strong> on your next visit!
                     </p>
                     <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0">
                       <tr>
-                        <td bgcolor="#EC622D" style="border-radius:8px;">
+                        <td bgcolor="#B5772A" style="border-radius:8px;">
                           <a href="https://g.page/r/CSMrsLoxE318EBM/review"
-                             style="display:inline-block; padding:10px 20px; font-family:Inter, Arial, sans-serif; font-size:14px; font-weight:600; color:#FFFFFF; text-decoration:none;">
+                             style="display:inline-block; padding:10px 20px; font-family:Manrope, Arial, sans-serif; font-size:14px; font-weight:600; color:#FFFFFF; text-decoration:none;">
                             Leave a Review →
                           </a>
                         </td>
@@ -515,13 +515,13 @@ serve(async (req) => {
           : `Hi ${profile.first_name}, your golf simulator booking has been confirmed!`;
         
         const bodyContent = `
-              <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+              <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 ${introText}
               </p>
               
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #EC622D;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #B5772A;">
                 <tr>
-                  <td style="padding:20px; font-family:Inter, Arial, sans-serif; font-size:15px; color:#1F4C25;">
+                  <td style="padding:20px; font-family:Manrope, Arial, sans-serif; font-size:15px; color:#2F3134;">
                     <p style="margin:5px 0;"><strong>Date:</strong> ${bookingDate}</p>
                     <p style="margin:5px 0;"><strong>Time:</strong> ${startTime12hr} - ${endTime12hr}</p>
                     <p style="margin:5px 0;"><strong>Duration:</strong> ${booking.duration_hours} hour${booking.duration_hours > 1 ? "s" : ""}</p>
@@ -533,14 +533,14 @@ serve(async (req) => {
                 </tr>
               </table>
               
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1F4C25; border-radius:12px; margin:18px 0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#2F3134; border-radius:12px; margin:18px 0;">
                 <tr>
-                  <td style="padding:20px; font-family:Inter, Arial, sans-serif; font-size:15px; color:#FFF5E4; text-align:center;">
+                  <td style="padding:20px; font-family:Manrope, Arial, sans-serif; font-size:15px; color:#F5F3EF; text-align:center;">
                     <p style="margin:0 0 10px 0;"><strong>Door Access Code:</strong> 7675#</p>
                     ${needsBoomGate ? `
                     <p style="margin:0; font-size:14px;">
                       <strong>IMPORTANT:</strong> You will require Boom gate access for your booking time.<br/>
-                      <a href="${tenantBookingUrl(tenant, "/gate-access")}" style="color:#EC622D;">Request gate access here</a>
+                      <a href="${tenantBookingUrl(tenant, "/gate-access")}" style="color:#B5772A;">Request gate access here</a>
                     </p>
                     ` : ''}
                   </td>
@@ -551,7 +551,7 @@ serve(async (req) => {
 
               ${reviewCtaHtml}
               
-              <p style="margin:18px 0 0; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+              <p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 We look forward to seeing you at ${tenant.venue_name}!
               </p>
         `;
@@ -572,13 +572,13 @@ serve(async (req) => {
         logStep("Using custom email template with wrapper");
       } else {
         bodyContent = `
-              <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+              <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 Hi ${profile.first_name}, your booking has been cancelled.
               </p>
               
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #666666;">
                 <tr>
-                  <td style="padding:20px; font-family:Inter, Arial, sans-serif; font-size:15px; color:#1F4C25;">
+                  <td style="padding:20px; font-family:Manrope, Arial, sans-serif; font-size:15px; color:#2F3134;">
                     <p style="margin:5px 0;"><strong>Date:</strong> ${bookingDate}</p>
                     <p style="margin:5px 0;"><strong>Time:</strong> ${startTime12hr} - ${endTime12hr}</p>
                     <p style="margin:5px 0;"><strong>Bay:</strong> ${bayName}</p>
@@ -587,11 +587,11 @@ serve(async (req) => {
                 </tr>
               </table>
               
-              <p style="margin:18px 0; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+              <p style="margin:18px 0; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 If you didn't request this cancellation or need assistance, please contact us.
               </p>
               
-              <p style="margin:0; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
+              <p style="margin:0; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 We hope to see you again soon at ${tenant.venue_name}!
               </p>
         `;
@@ -644,7 +644,7 @@ serve(async (req) => {
           );
           const alertBody = replaceTemplateTags(
             (alertTpl as any)?.html_content ||
-              `<p style="font-family:Inter, Arial, sans-serif; color:#1F4C25; text-align:center;"><strong>{first_name} {last_name}</strong> ({email}) has just made a new booking.</p>`,
+              `<p style="font-family:Manrope, Arial, sans-serif; color:#2F3134; text-align:center;"><strong>{first_name} {last_name}</strong> ({email}) has just made a new booking.</p>`,
             alertTagsExt,
           );
 

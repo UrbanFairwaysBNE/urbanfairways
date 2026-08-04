@@ -51,30 +51,30 @@ const buildFeedbackEmail = (tenant: TenantConfig, _firstName: string, _feedbackU
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    @import url("https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600&display=swap");
+    @import url("https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Manrope:wght@400;600&display=swap");
   </style>
 </head>
-<body style="margin:0; padding:0; background-color:#FFF5E4;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#FFF5E4;">
+<body style="margin:0; padding:0; background-color:#F5F3EF;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F5F3EF;">
     <tr>
       <td align="center" style="padding:24px 12px;">
         <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px; width:100%;">
           <!-- HEADER -->
           <tr>
-            <td align="center" style="background-color:#1F4C25; padding:18px; border-radius:16px 16px 0 0;">
-              <div style="font-family:Anton, Impact, Arial Black, sans-serif; font-size:26px; color:#FFFFFF; text-align:center; letter-spacing:0.5px;">${tenant.venue_name}</div>
+            <td align="center" style="background-color:#2F3134; padding:18px; border-radius:16px 16px 0 0;">
+              <div style="font-family:Archivo, Impact, Arial Black, sans-serif; font-size:26px; color:#FFFFFF; text-align:center; letter-spacing:0.5px;">${tenant.venue_name}</div>
             </td>
           </tr>
           <!-- BODY -->
           <tr>
-            <td style="background-color:#FFF5E4; padding:30px 22px; border-left:1px solid rgba(31,76,37,0.12); border-right:1px solid rgba(31,76,37,0.12);">
-              <h1 style="margin:0 0 16px; font-family:Anton, Impact, Arial Black, sans-serif; font-size:30px; line-height:1.1; color:#1F4C25; text-align:center;">
+            <td style="background-color:#F5F3EF; padding:30px 22px; border-left:1px solid rgba(47,49,52,0.12); border-right:1px solid rgba(47,49,52,0.12);">
+              <h1 style="margin:0 0 16px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:30px; line-height:1.1; color:#2F3134; text-align:center;">
                 THANKS FOR PLAYING!
               </h1>
-              <p style="font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center; margin:0 0 8px;">
+              <p style="font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center; margin:0 0 8px;">
                 Hey {{first_name}},
               </p>
-              <p style="font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center; margin:0 0 24px;">
+              <p style="font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center; margin:0 0 24px;">
                 Thanks for your first session at ${tenant.venue_name} — we hope you had a blast! We'd love to hear how it went. It only takes 10 seconds.
               </p>
               
@@ -83,38 +83,38 @@ const buildFeedbackEmail = (tenant: TenantConfig, _firstName: string, _feedbackU
                 <tr>
                   <td align="center" style="padding:0 8px;">
                     <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="{{feedback_url_bad}}" style="height:56px;v-text-anchor:middle;width:56px;" arcsize="21%" fillcolor="#FEE2E2" stroke="f"><v:textbox><center><![endif]-->
-                    <a href="{{feedback_url_bad}}" target="_blank" rel="noopener noreferrer" style="display:block; padding:14px 20px; font-family:Inter, Arial, sans-serif; font-size:28px; line-height:28px; text-decoration:none; background-color:#FEE2E2; border-radius:12px; text-align:center; mso-hide:all;">&#128543;</a>
+                    <a href="{{feedback_url_bad}}" target="_blank" rel="noopener noreferrer" style="display:block; padding:14px 20px; font-family:Manrope, Arial, sans-serif; font-size:28px; line-height:28px; text-decoration:none; background-color:#FEE2E2; border-radius:12px; text-align:center; mso-hide:all;">&#128543;</a>
                     <!--[if mso]></center></v:textbox></v:roundrect><![endif]-->
                   </td>
                   <td align="center" style="padding:0 8px;">
                     <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="{{feedback_url_ok}}" style="height:56px;v-text-anchor:middle;width:56px;" arcsize="21%" fillcolor="#FEF3C7" stroke="f"><v:textbox><center><![endif]-->
-                    <a href="{{feedback_url_ok}}" target="_blank" rel="noopener noreferrer" style="display:block; padding:14px 20px; font-family:Inter, Arial, sans-serif; font-size:28px; line-height:28px; text-decoration:none; background-color:#FEF3C7; border-radius:12px; text-align:center; mso-hide:all;">&#128528;</a>
+                    <a href="{{feedback_url_ok}}" target="_blank" rel="noopener noreferrer" style="display:block; padding:14px 20px; font-family:Manrope, Arial, sans-serif; font-size:28px; line-height:28px; text-decoration:none; background-color:#FEF3C7; border-radius:12px; text-align:center; mso-hide:all;">&#128528;</a>
                     <!--[if mso]></center></v:textbox></v:roundrect><![endif]-->
                   </td>
                   <td align="center" style="padding:0 8px;">
                     <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="{{feedback_url_good}}" style="height:56px;v-text-anchor:middle;width:56px;" arcsize="21%" fillcolor="#D1FAE5" stroke="f"><v:textbox><center><![endif]-->
-                    <a href="{{feedback_url_good}}" target="_blank" rel="noopener noreferrer" style="display:block; padding:14px 20px; font-family:Inter, Arial, sans-serif; font-size:28px; line-height:28px; text-decoration:none; background-color:#D1FAE5; border-radius:12px; text-align:center; mso-hide:all;">&#128522;</a>
+                    <a href="{{feedback_url_good}}" target="_blank" rel="noopener noreferrer" style="display:block; padding:14px 20px; font-family:Manrope, Arial, sans-serif; font-size:28px; line-height:28px; text-decoration:none; background-color:#D1FAE5; border-radius:12px; text-align:center; mso-hide:all;">&#128522;</a>
                     <!--[if mso]></center></v:textbox></v:roundrect><![endif]-->
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding:4px 8px 0; text-align:center; font-family:Inter, Arial, sans-serif; font-size:12px; color:#1F4C25;"><a href="{{feedback_url_bad}}" target="_blank" rel="noopener noreferrer" style="color:#1F4C25; text-decoration:none;">Bad</a></td>
-                  <td style="padding:4px 8px 0; text-align:center; font-family:Inter, Arial, sans-serif; font-size:12px; color:#1F4C25;"><a href="{{feedback_url_ok}}" target="_blank" rel="noopener noreferrer" style="color:#1F4C25; text-decoration:none;">OK</a></td>
-                  <td style="padding:4px 8px 0; text-align:center; font-family:Inter, Arial, sans-serif; font-size:12px; color:#1F4C25;"><a href="{{feedback_url_good}}" target="_blank" rel="noopener noreferrer" style="color:#1F4C25; text-decoration:none;">Good</a></td>
+                  <td style="padding:4px 8px 0; text-align:center; font-family:Manrope, Arial, sans-serif; font-size:12px; color:#2F3134;"><a href="{{feedback_url_bad}}" target="_blank" rel="noopener noreferrer" style="color:#2F3134; text-decoration:none;">Bad</a></td>
+                  <td style="padding:4px 8px 0; text-align:center; font-family:Manrope, Arial, sans-serif; font-size:12px; color:#2F3134;"><a href="{{feedback_url_ok}}" target="_blank" rel="noopener noreferrer" style="color:#2F3134; text-decoration:none;">OK</a></td>
+                  <td style="padding:4px 8px 0; text-align:center; font-family:Manrope, Arial, sans-serif; font-size:12px; color:#2F3134;"><a href="{{feedback_url_good}}" target="_blank" rel="noopener noreferrer" style="color:#2F3134; text-decoration:none;">Good</a></td>
                 </tr>
               </table>
 
-              <p style="font-family:Inter, Arial, sans-serif; font-size:14px; line-height:1.5; color:#1F4C25; text-align:center; opacity:0.7; margin:0;">
+              <p style="font-family:Manrope, Arial, sans-serif; font-size:14px; line-height:1.5; color:#2F3134; text-align:center; opacity:0.7; margin:0;">
                 Tap an emoji above or click below to leave more detailed feedback
               </p>
 
               <!-- CTA BUTTON -->
               <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:16px auto 0;">
                 <tr>
-                  <td bgcolor="#EC622D" style="border-radius:12px;">
-                    <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="{{feedback_url}}" style="height:46px;v-text-anchor:middle;width:200px;" arcsize="26%" fillcolor="#EC622D" stroke="f"><v:textbox><center><![endif]-->
+                  <td bgcolor="#B5772A" style="border-radius:12px;">
+                    <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="{{feedback_url}}" style="height:46px;v-text-anchor:middle;width:200px;" arcsize="26%" fillcolor="#B5772A" stroke="f"><v:textbox><center><![endif]-->
                     <a href="{{feedback_url}}" target="_blank" rel="noopener noreferrer"
-                       style="display:block; padding:14px 24px; font-family:Anton, Impact, Arial Black, sans-serif; font-size:18px; letter-spacing:0.3px; color:#FFFFFF; text-decoration:none; text-align:center;">
+                       style="display:block; padding:14px 24px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:18px; letter-spacing:0.3px; color:#FFFFFF; text-decoration:none; text-align:center;">
                       GIVE FEEDBACK
                     </a>
                     <!--[if mso]></center></v:textbox></v:roundrect><![endif]-->
@@ -125,7 +125,7 @@ const buildFeedbackEmail = (tenant: TenantConfig, _firstName: string, _feedbackU
           </tr>
           <!-- FOOTER -->
           <tr>
-            <td style="background-color:#1F4C25; padding:22px; border-radius:0 0 16px 16px;">
+            <td style="background-color:#2F3134; padding:22px; border-radius:0 0 16px 16px;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td align="center" style="padding-bottom:14px;">
@@ -138,7 +138,7 @@ const buildFeedbackEmail = (tenant: TenantConfig, _firstName: string, _feedbackU
                   </td>
                 </tr>
                 <tr>
-                  <td align="center" style="font-family:Inter, Arial, sans-serif; font-size:14px; line-height:1.7; color:#FFFFFF;">
+                  <td align="center" style="font-family:Manrope, Arial, sans-serif; font-size:14px; line-height:1.7; color:#FFFFFF;">
                     <div><a href="https://www.google.com/maps/search/?api=1&query=${mapsQuery}" style="color:#FFFFFF; text-decoration:underline;">${tenantAddress(tenant)}</a></div>
                     <div><a href="tel:${phoneDigits}" style="color:#FFFFFF; text-decoration:underline;">${tenant.support_phone}</a></div>
                     <div><a href="${tenantBookingUrl(tenant, "/")}" style="color:#FFFFFF; text-decoration:underline;">${tenant.booking_domain}</a></div>

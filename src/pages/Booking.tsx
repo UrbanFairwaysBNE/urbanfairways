@@ -693,7 +693,10 @@ export default function Booking() {
                 checkAvailability={checkBayAvailability}
                 onSelectBay={setSelectedBayId}
                 hourlyRate={hourlyRate}
+                totalPrice={sessionTotal}
+                specialName={appliedSpecial?.name ?? null}
                 isPeak={rateInfo?.isPeak}
+
               />
             )}
           </CardContent>

@@ -843,7 +843,11 @@ export default function AdminSettings() {
           </div>
         </div>
 
-        <Tabs defaultValue="general" className="space-y-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => setSearchParams({ tab: value }, { replace: true })}
+          className="space-y-6"
+        >
           <TabsList className="grid w-full max-w-2xl grid-cols-5">
             <TabsTrigger value="general" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />

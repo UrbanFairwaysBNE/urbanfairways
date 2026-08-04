@@ -13,6 +13,10 @@ interface BayAvailabilityGridProps {
   checkAvailability: (bayId: string, startTime: string, duration: number) => boolean;
   onSelectBay: (bayId: string) => void;
   hourlyRate: number;
+  /** Session total; falls back to rate × duration when not supplied. */
+  totalPrice?: number;
+  /** Name of the applied special deal, if one beat the hourly rate. */
+  specialName?: string | null;
   isPeak?: boolean;
 }
 
@@ -24,6 +28,8 @@ export function BayAvailabilityGrid({
   checkAvailability,
   onSelectBay,
   hourlyRate,
+  totalPrice: totalPriceProp,
+  specialName,
   isPeak,
 }: BayAvailabilityGridProps) {
   if (!selectedTime) {
@@ -34,7 +40,8 @@ export function BayAvailabilityGrid({
     );
   }
 
-  const totalPrice = hourlyRate * selectedDuration;
+  const totalPrice = totalPriceProp ?? hourlyRate * selectedDuration;
+
 
   return (
     <div className="space-y-4">

@@ -4,8 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2, Loader2, XCircle, MailX } from "lucide-react";
+import { useTenant, hubUrl } from "@/config/tenant";
 
 export default function Unsubscribe() {
+  const { tenant } = useTenant();
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState<"loading" | "success" | "error" | "already">("loading");
   const [errorMessage, setErrorMessage] = useState("");
@@ -71,7 +73,7 @@ export default function Unsubscribe() {
             {status === "loading" && "Please wait while we process your request."}
             {status === "success" && (
               <>
-                You've been unsubscribed from Birdies Bayside marketing emails.
+                You've been unsubscribed from {tenant.venue_name} marketing emails.
                 <br />
                 <span className="text-xs text-muted-foreground mt-2 block">
                   You'll still receive booking confirmations and important account updates.
@@ -85,7 +87,7 @@ export default function Unsubscribe() {
         <CardContent className="text-center">
           <Button
             variant="outline"
-            onClick={() => window.location.href = "https://hub.birdiesbayside.com.au"}
+            onClick={() => window.location.href = hubUrl(tenant, "/")}
           >
             Go to Hub
           </Button>

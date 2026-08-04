@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useTenant } from "@/config/tenant";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -75,6 +76,7 @@ interface LinkedProfile {
 }
 
 export function SGTMembers() {
+  const { tenant } = useTenant();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
@@ -331,7 +333,7 @@ export function SGTMembers() {
       case "unlink":
         return {
           title: "Unlink Profile",
-          description: `Unlink the Birdies account from "${member.user_name}"'s SGT account? They will need to re-register to link again.`,
+          description: `Unlink the ${tenant.venue_name} account from "${member.user_name}"'s SGT account? They will need to re-register to link again.`,
         };
       default:
         return { title: "", description: "" };

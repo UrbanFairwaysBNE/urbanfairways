@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { TermsContent } from "./TermsContent";
 import { CURRENT_TERMS_VERSION } from "@/lib/terms-version";
+import { useTenant } from "@/config/tenant";
 
 // Routes that must never be blocked (kiosks, embeds, admin tooling, public pages)
 const EXEMPT_PREFIXES = [
@@ -27,6 +28,7 @@ const EXEMPT_PREFIXES = [
 ];
 
 export function TermsGate() {
+  const { tenant } = useTenant();
   const { user, isLoading } = useAuth();
   const location = useLocation();
   const { toast } = useToast();
@@ -68,7 +70,7 @@ export function TermsGate() {
     if (error || data !== true) {
       toast({
         title: "Could not save",
-        description: "Please try again, or contact Birdies if this keeps happening.",
+        description: `Please try again, or contact ${tenant.venue_name} if this keeps happening.`,
         variant: "destructive",
       });
       return;
@@ -95,7 +97,7 @@ export function TermsGate() {
 
         <p className="text-sm text-muted-foreground">
           Our bays now have cameras and we record gameplay for league rounds, competitions
-          and highlights. Please review and accept the updated terms to keep using Birdies.
+          and highlights. Please review and accept the updated terms to keep using {tenant.venue_name}.
         </p>
 
         <ScrollArea className="h-[45vh] pr-4 border rounded-md p-4">

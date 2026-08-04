@@ -1,4 +1,4 @@
-// Birdies Custom HCP recalculator
+// Custom HCP recalculator
 // Runs weekly. A player's "true handicap" kicks in as soon as they have
 // 3 completed 18-hole rounds: the average to-par-gross of their best 3
 // rounds from their last 6, written to sgt_tour_members.custom_hcp.
@@ -18,7 +18,7 @@ const HCP_MIN = -36;
 const HCP_MAX = 36;
 
 /**
- * Only FULL 18-hole rounds count towards the Birdies custom handicap.
+ * Only FULL 18-hole rounds count towards the custom handicap.
  * Partial / abandoned rounds score artificially low against par and would
  * unfairly drag a handicap down.
  */

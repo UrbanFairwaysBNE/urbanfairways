@@ -13,8 +13,10 @@ import {
 import { format } from "date-fns";
 import birdiesB from "@/assets/birdies-b-icon.png";
 import { useIframeAutoResize } from "@/hooks/useIframeAutoResize";
+import { useTenant } from "@/config/tenant";
 
 export default function EmbedLocalCompLeaderboard() {
+  const { tenant } = useTenant();
   useIframeAutoResize();
   const [selectedCompId, setSelectedCompId] = useState<string>("");
 
@@ -110,7 +112,7 @@ export default function EmbedLocalCompLeaderboard() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <img src={birdiesB} alt="Birdies" className="h-10" />
+          <img src={birdiesB} alt={tenant.venue_name} className="h-10" />
           <div>
             <h1 className="font-bold text-xl text-[hsl(128,42%,21%)]">AMBROSE COMP</h1>
             <p className="text-sm text-[hsl(128,20%,40%)]">2-Man Ambrose Results</p>
@@ -255,7 +257,7 @@ export default function EmbedLocalCompLeaderboard() {
 
       {/* Footer */}
       <div className="mt-6 text-center text-xs text-[hsl(128,20%,40%)]">
-        Powered by Birdies League Hub • Live updates every 30 seconds
+        Powered by {tenant.venue_name} League Hub • Live updates every 30 seconds
       </div>
     </div>
   );

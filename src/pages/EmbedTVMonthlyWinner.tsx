@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import birdiesLogo from "@/assets/birdies-b-orange.png";
 import { getCurrentBlockLabel } from "@/lib/league-block";
+import { useTenant } from "@/config/tenant";
 
 interface MonthlyStanding {
   player_id: number;
@@ -18,9 +19,10 @@ interface MonthlyStanding {
 }
 
 export default function EmbedTVStandings() {
+  const { tenant } = useTenant();
   const [standings, setStandings] = useState<MonthlyStanding[]>([]);
   const [currentMonth, setCurrentMonth] = useState<string>("");
-  const [tourName, setTourName] = useState<string>("Birdies Tour");
+  const [tourName, setTourName] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
@@ -104,13 +106,13 @@ export default function EmbedTVStandings() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-6">
-          <img src={birdiesLogo} alt="Birdies" className="h-16" />
+          <img src={birdiesLogo} alt={tenant.venue_name} className="h-16" />
           <div>
             <h1 className="font-bold text-4xl text-[hsl(128,42%,21%)] tracking-tight">
               MONTHLY WINNER
             </h1>
             <p className="text-xl text-[hsl(128,20%,40%)]">
-              {currentMonth} • {tourName} • NET Scores
+              {currentMonth} • {tourName || `${tenant.venue_name} Tour`} • NET Scores
             </p>
           </div>
         </div>
@@ -205,7 +207,7 @@ export default function EmbedTVStandings() {
 
       {/* Footer */}
       <div className="mt-4 text-center text-lg text-[hsl(128,20%,40%)]">
-        Monthly Winner rankings • Updates every 60 seconds • Powered by Birdies League Hub
+        Monthly Winner rankings • Updates every 60 seconds • Powered by {tenant.venue_name} League Hub
       </div>
     </div>
   );

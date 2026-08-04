@@ -1,4 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getTenant } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,6 +11,7 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const tenant = await getTenant();
     const { name, email, comment } = await req.json();
 
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
@@ -42,8 +43,8 @@ Deno.serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Birdies Feedback <noreply@birdiesbayside.com.au>",
-        to: ["admin@birdiesbayside.com.au"],
+        from: `${tenant.venue_name} Feedback <${tenant.sender_email}>`,
+        to: [tenant.admin_alert_email],
         subject: `⚠️ Bad feedback from ${customerName}`,
         html,
       }),

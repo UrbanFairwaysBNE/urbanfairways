@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "npm:stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { getTenant, tenantBookingUrl } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -40,6 +41,8 @@ serve(async (req) => {
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     const { bookingId, amount, description, paymentMethodId, mode } = await req.json();
+    const tenant = await getTenant();
+
     if (!bookingId || !amount) throw new Error("Missing bookingId or amount");
     logStep("Request parsed", { bookingId, amount, description, paymentMethodId, mode });
 
@@ -182,7 +185,7 @@ serve(async (req) => {
       customerId = newCustomer.id;
       logStep("Created new Stripe customer for first-time checkout", { customerId });
 
-      const origin = req.headers.get("origin") || "https://hub.birdiesbayside.com.au";
+      const origin = req.headers.get("origin") || tenantBookingUrl(tenant, "/");
 
       // Always use HTTPS URLs - for native apps, the WebView handles the redirect naturally
       const successUrl = `${origin}/booking-success?booking_id=${bookingId}&session_id={CHECKOUT_SESSION_ID}`;
@@ -244,7 +247,7 @@ serve(async (req) => {
       // No saved card - redirect to checkout
       logStep("No saved payment method, creating checkout session");
       
-      const origin = req.headers.get("origin") || "https://hub.birdiesbayside.com.au";
+      const origin = req.headers.get("origin") || tenantBookingUrl(tenant, "/");
       
       // Always use HTTPS URLs - for native apps, the WebView handles the redirect naturally
       const successUrl = `${origin}/booking-success?booking_id=${bookingId}&session_id={CHECKOUT_SESSION_ID}`;

@@ -6,6 +6,9 @@ const { exec, spawn } = require('child_process');
 const { promisify } = require('util');
 const execAsync = promisify(exec);
 
+const HUB_ORIGIN = process.env.HUB_ORIGIN || "https://hub.example.com";
+const VENUE_NAME = process.env.VENUE_NAME || "Your Venue";
+
 // =====================================================
 // SINGLE INSTANCE LOCK - Prevent multiple instances
 // =====================================================
@@ -368,7 +371,7 @@ function createTray() {
     }
   ]);
 
-  tray.setToolTip('Birdies Bay Controller');
+  tray.setToolTip(`${VENUE_NAME} Bay Controller`);
   tray.setContextMenu(contextMenu);
   
   tray.on('double-click', () => {
@@ -1572,7 +1575,7 @@ async function showWelcomeWindows(firstName) {
     console.log('Could not load welcome logo:', err.message);
   }
   
-  // Create HTML content for welcome window - Birdies brand theme
+  // Create HTML content for welcome window - venue brand theme
   const htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -1704,13 +1707,13 @@ async function showWelcomeWindows(firstName) {
     </head>
     <body>
       <div class="container">
-        ${logoBase64 ? `<img src="${logoBase64}" class="logo" alt="Birdies" />` : ''}
+        ${logoBase64 ? `<img src="${logoBase64}" class="logo" alt="${VENUE_NAME}" />` : ''}
         <h1>Hi ${firstName}!</h1>
-        <h2>Welcome to Birdies</h2>
+        <h2>Welcome to ${VENUE_NAME}</h2>
         <p>Your session is starting.</p>
         <p>This window will close when you're ready to tee off!</p>
         <div class="etiquette">
-          <h3>Birdies Etiquette</h3>
+          <h3>${VENUE_NAME} Etiquette</h3>
           <ol>
             <li><span class="num">1</span><span>Use a different ball after every shot, this prevents a ball cracking on you!</span></li>
             <li><span class="num">2</span><span>If you keep skying your drives, tee it down lower</span></li>
@@ -1880,11 +1883,11 @@ async function closeApps(appNames) {
   // Processes we MUST keep alive: this Electron app, Windows shell, system services, and our own deps.
   // Matched case-insensitively against ProcessName (no .exe).
   // CRITICAL: derive our own process name from the running binary so a productName change
-  // (e.g. "Birdies Bay Controller.exe") can never accidentally suicide the controller.
-  const ownProcessName = path.basename(process.execPath, '.exe'); // e.g. "Birdies Bay Controller"
+  // (e.g. "Bay Controller.exe") can never accidentally suicide the controller.
+  const ownProcessName = path.basename(process.execPath, '.exe'); // e.g. "Bay Controller"
   const PROTECTED = [
     ownProcessName,                              // THIS RUNNING BINARY (whatever it's named)
-    'Birdies Bay Controller', 'BirdiesBayController',
+    'Bay Controller', 'BayController',
     'BayController', 'Bay Controller',
     'electron', 'Electron',                      // dev mode
     'explorer', 'dwm', 'sihost', 'fontdrvhost',  // Windows shell

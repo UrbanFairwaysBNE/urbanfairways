@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar, Loader2, Repeat } from "lucide-react";
+import { useTenant } from "@/config/tenant";
 
 const HERO = "https://cdn.shopify.com/s/files/1/0758/7030/6550/files/Birdies_Golf.jpg?v=1751956878&width=3840";
 
@@ -23,6 +24,7 @@ const formatDate = (date: string) =>
   });
 
 const MarketingWhatsOn = () => {
+  const { tenant } = useTenant();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,7 +43,7 @@ const MarketingWhatsOn = () => {
 
   return (
     <MarketingLayout>
-    <Seo title={"What's On | Events at Birdies Bayside"} description={"Upcoming events, leagues, competitions and specials at Birdies Bayside indoor golf in Redland Bay."} path="/whats-on" />
+    <Seo title={`What's On | Events at ${tenant.venue_name}`} description={`Upcoming events, leagues, competitions and specials at ${tenant.venue_name} indoor golf in Redland Bay.`} path="/whats-on" />
       <section className="relative h-[17vh] min-h-[110px] flex items-end overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${HERO})` }} />
         <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/70 to-primary/30" />
@@ -56,7 +58,7 @@ const MarketingWhatsOn = () => {
           <div className="text-center max-w-2xl mx-auto mb-12">
             <p className="text-accent font-display tracking-[0.2em] uppercase text-sm mb-3">Events & Specials</p>
             <h2 className="font-display text-4xl sm:text-5xl text-primary leading-tight">
-              Happening at Birdies
+              Happening at {tenant.venue_name}
             </h2>
             <p className="mt-4 text-foreground/80 text-lg leading-relaxed">
               From weekly comps to free pizza nights, here's what you can look forward to.

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { useTenant } from "@/config/tenant";
 import { useToast } from "@/hooks/use-toast";
 import { Users, Search, Pencil, Check, X, Loader2, Info, Lock } from "lucide-react";
 import {
@@ -39,6 +40,7 @@ const BEST_ROUNDS = 3;
 const WINDOW_ROUNDS = 6;
 
 export function SGTLeagueMembers() {
+  const { tenant } = useTenant();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
@@ -75,7 +77,7 @@ export function SGTLeagueMembers() {
       toast({
         title: enabled ? "Custom HCP enabled" : "SGT HCP enabled",
         description: enabled
-          ? "Players will use Birdies custom handicap (best 3 of last 6 rounds)."
+          ? `Players will use ${tenant.venue_name} custom handicap (best 3 of last 6 rounds).`
           : "Players will use SGT's Combo HCP. Onboarding lock is bypassed.",
       });
     },
@@ -211,7 +213,7 @@ export function SGTLeagueMembers() {
             <div className="space-y-1 flex-1 min-w-[240px]">
               <div className="flex items-center gap-2">
                 <Label htmlFor="hcp-mode-toggle" className="text-base font-semibold">
-                  {useCustomEnabled ? "Use Birdies Custom HCP" : "Use SGT Combo HCP"}
+                  {useCustomEnabled ? `Use ${tenant.venue_name} Custom HCP` : "Use SGT Combo HCP"}
                 </Label>
                 <TooltipProvider>
                   <Tooltip>
@@ -219,7 +221,7 @@ export function SGTLeagueMembers() {
                       <Info className="h-4 w-4 text-muted-foreground" />
                     </TooltipTrigger>
                     <TooltipContent className="max-w-sm">
-                      <p className="font-semibold mb-1">Birdies Custom HCP</p>
+                      <p className="font-semibold mb-1">{tenant.venue_name} Custom HCP</p>
                       <p className="text-xs">
                         Auto-calculated weekly using the <strong>best 3 of the last 6 rounds</strong>.
                         New members are <strong>locked to their onboarding handicap for their first 3 rounds</strong>,
@@ -264,7 +266,7 @@ export function SGTLeagueMembers() {
           <CardDescription>
             {useCustomEnabled
               ? "Custom HCP overrides Combo HCP. Locked members show their onboarding HCP until 3 rounds played."
-              : "Toggle 'Use Birdies Custom HCP' above to enable auto-recalc and manual overrides."}
+              : `Toggle 'Use ${tenant.venue_name} Custom HCP' above to enable auto-recalc and manual overrides.`}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

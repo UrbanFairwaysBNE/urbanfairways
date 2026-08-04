@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { LogOut, Calendar, Settings, ClipboardList, Trophy, Lock, Users, Info, Megaphone, Plus, Trash2, CalendarDays } from "lucide-react";
 import birdiesLogo from "@/assets/birdies-logo.png";
+import { useTenant } from "@/config/tenant";
 import swingLabBadge from "@/assets/swing-lab-badge.png.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 import { NotificationBell } from "@/components/NotificationBell";
@@ -19,6 +20,7 @@ import { Label } from "@/components/ui/label";
 type MembershipTier = "visitor" | "weekday" | "birdie" | "eagle";
 
 const Dashboard = () => {
+  const { tenant } = useTenant();
   const { user, isAuthenticated, isLoading, signOut } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -194,7 +196,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="bg-primary py-4 px-6 flex items-center justify-between safe-area-top">
-        <img src={birdiesLogo} alt="Birdies" className="h-10 w-auto" />
+        <img src={birdiesLogo} alt={tenant.venue_name} className="h-10 w-auto" />
         <div className="flex items-center gap-2 sm:gap-4">
           <NotificationBell />
           {isAdmin && (
@@ -289,7 +291,7 @@ const Dashboard = () => {
               </div>
             </button>
 
-            {/* Birdies League */}
+            {/* League */}
             <button
               onClick={() => hasLeagueAccess ? navigate(hasSgtAccount ? "/league" : "/league/register") : navigate("/membership")}
               className={`bg-card rounded-xl p-4 shadow-sm border text-left active:scale-[0.98] transition-all relative ${
@@ -307,7 +309,7 @@ const Dashboard = () => {
                 onClick={(e) => { e.stopPropagation(); setLeagueGuideOpen(true); }}
                 className="absolute top-3 right-3 h-6 w-6 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors"
                 style={!hasLeagueAccess ? { right: "5.5rem" } : {}}
-                title="How to play your Birdies League rounds"
+                title={`How to play your ${tenant.venue_name} League rounds`}
               >
                 <Info className="h-4 w-4 text-muted-foreground" />
               </button>
@@ -315,7 +317,7 @@ const Dashboard = () => {
                 <div className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${hasLeagueAccess ? "bg-league-primary/15" : "bg-muted"}`}>
                   <Trophy className={`h-5 w-5 ${hasLeagueAccess ? "text-league-primary-dark" : "text-muted-foreground"}`} />
                 </div>
-                <h2 className="font-semibold text-base">Birdies League</h2>
+                <h2 className="font-semibold text-base">{tenant.venue_name} League</h2>
               </div>
             </button>
 
@@ -465,15 +467,15 @@ const Dashboard = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Trophy className="h-5 w-5 text-league-primary-dark" />
-              How to play your Birdies League rounds
+              {`How to play your ${tenant.venue_name} League rounds`}
             </DialogTitle>
           </DialogHeader>
           <ol className="space-y-3 text-sm text-foreground list-decimal pl-5">
-            <li>Open the <span className="font-semibold">My Account</span> section of the Birdies Hub.</li>
+            <li>Open the <span className="font-semibold">My Account</span> section of the {tenant.venue_name} Hub.</li>
             <li>In <span className="font-semibold">GSPRO</span>, go to <span className="font-semibold">Players</span> and click <span className="font-semibold">Guest 1</span>. Change the information to your <span className="font-semibold">User</span> and <span className="font-semibold">UID</span> — make sure the upper and lower case of your username matches exactly.</li>
             <li>Press <span className="font-semibold">Save &amp; Exit</span>.</li>
             <li>Click <span className="font-semibold">Tournaments</span>. Your league rounds will show up.</li>
-            <li>Next time you book a session at Birdies, you'll be automatically logged in with your SGT details.</li>
+            <li>Next time you book a session at {tenant.venue_name}, you'll be automatically logged in with your SGT details.</li>
           </ol>
           <div className="mt-4 rounded-lg border border-birdies-orange/30 bg-birdies-orange/10 p-3">
             <p className="text-xs font-semibold text-birdies-orange mb-1">TOP TIP</p>
@@ -486,7 +488,7 @@ const Dashboard = () => {
 
       <footer className="bg-primary py-4 px-6 text-center">
         <p className="text-primary-foreground/60 text-sm">
-          © {new Date().getFullYear()} Birdies. All rights reserved.
+          © {new Date().getFullYear()} {tenant.venue_name}. All rights reserved.
         </p>
       </footer>
     </div>

@@ -1,17 +1,17 @@
 {
-  "name": "birdies-bay-controller",
+  "name": "bay-controller",
   "version": "1.0.36",
-  "description": "Bay Controller for Birdies Golf Simulators",
+  "description": "Bay Controller for indoor golf simulators",
   "main": "main.js",
-  "author": "Birdies",
+  "author": "Bay Controller",
   "license": "MIT",
   "scripts": {
     "start": "electron .",
     "build": "electron-builder"
   },
   "build": {
-    "appId": "com.birdies.baycontroller",
-    "productName": "Birdies Bay Controller",
+    "appId": "com.example.baycontroller",
+    "productName": "Bay Controller",
     "directories": {
       "output": "dist-electron"
     },
@@ -35,8 +35,8 @@
     ],
     "publish": {
       "provider": "github",
-      "owner": "BirdiesBayside",
-      "repo": "birdie-bay-booker"
+      "owner": "your-org",
+      "repo": "bay-controller"
     },
     "win": {
       "target": "nsis",
@@ -48,7 +48,7 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "runAfterFinish": true,
-      "artifactName": "BirdiesBayController-Setup-${version}.${ext}"
+      "artifactName": "BayController-Setup-${version}.${ext}"
     }
   },
   "devDependencies": {

@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { Resend } from "npm:resend@2.0.0";
+import { getTenant, tenantBookingUrl, tenantAddress, TenantConfig } from "../_shared/tenant.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -41,7 +42,9 @@ const buildFeedbackLinks = (token: string) => {
   };
 };
 
-const buildFeedbackEmail = (_firstName: string, _feedbackUrl: string) => {
+const buildFeedbackEmail = (tenant: TenantConfig, _firstName: string, _feedbackUrl: string) => {
+  const mapsQuery = encodeURIComponent(tenantAddress(tenant));
+  const phoneDigits = (tenant.support_phone || "").replace(/[^\d+]/g, "");
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -59,12 +62,7 @@ const buildFeedbackEmail = (_firstName: string, _feedbackUrl: string) => {
           <!-- HEADER -->
           <tr>
             <td align="center" style="background-color:#1F4C25; padding:18px; border-radius:16px 16px 0 0;">
-              <img
-                src="https://cdn.shopify.com/s/files/1/0758/7030/6550/files/NO-BG_BIRDIES-LOGOS_WORK-DOC_AMENDED-9.7.25-01.png?v=1761536603"
-                width="140"
-                alt="Birdies Bayside"
-                style="display:block; width:140px; height:auto; border:0;"
-              />
+              <div style="font-family:Anton, Impact, Arial Black, sans-serif; font-size:26px; color:#FFFFFF; text-align:center; letter-spacing:0.5px;">${tenant.venue_name}</div>
             </td>
           </tr>
           <!-- BODY -->
@@ -77,7 +75,7 @@ const buildFeedbackEmail = (_firstName: string, _feedbackUrl: string) => {
                 Hey {{first_name}},
               </p>
               <p style="font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center; margin:0 0 24px;">
-                Thanks for your first session at Birdies — we hope you had a blast! We'd love to hear how it went. It only takes 10 seconds.
+                Thanks for your first session at ${tenant.venue_name} — we hope you had a blast! We'd love to hear how it went. It only takes 10 seconds.
               </p>
               
               <!-- FEEDBACK BUTTONS -->
@@ -131,20 +129,20 @@ const buildFeedbackEmail = (_firstName: string, _feedbackUrl: string) => {
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td align="center" style="padding-bottom:14px;">
-                    <a href="https://www.instagram.com/birdiesbayside" style="margin:0 8px; text-decoration:none;">
+                    <a href="${tenant.socials?.instagram ?? "#"}" style="margin:0 8px; text-decoration:none;">
                       <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram" width="28" height="28" style="display:inline-block; border:0;" />
                     </a>
-                    <a href="https://www.facebook.com/share/17NifCh2vH/" style="margin:0 8px; text-decoration:none;">
+                    <a href="${tenant.socials?.facebook ?? "#"}" style="margin:0 8px; text-decoration:none;">
                       <img src="https://cdn-icons-png.flaticon.com/512/174/174848.png" alt="Facebook" width="28" height="28" style="display:inline-block; border:0;" />
                     </a>
                   </td>
                 </tr>
                 <tr>
                   <td align="center" style="font-family:Inter, Arial, sans-serif; font-size:14px; line-height:1.7; color:#FFFFFF;">
-                    <div><a href="https://maps.app.goo.gl/vTXLZvd8XPZEeRn16" style="color:#FFFFFF; text-decoration:underline;">Unit 2, 86 Jardine Drive, Redland Bay QLD 4165</a></div>
-                    <div><a href="tel:+61721468442" style="color:#FFFFFF; text-decoration:underline;">(07) 2146 8442</a></div>
-                    <div><a href="https://birdiesbayside.com.au" style="color:#FFFFFF; text-decoration:underline;">birdiesbayside.com.au</a></div>
-                    <div style="margin-top:10px; font-size:12px; opacity:0.75;">© Birdies Bayside</div>
+                    <div><a href="https://www.google.com/maps/search/?api=1&query=${mapsQuery}" style="color:#FFFFFF; text-decoration:underline;">${tenantAddress(tenant)}</a></div>
+                    <div><a href="tel:${phoneDigits}" style="color:#FFFFFF; text-decoration:underline;">${tenant.support_phone}</a></div>
+                    <div><a href="${tenantBookingUrl(tenant, "/")}" style="color:#FFFFFF; text-decoration:underline;">${tenant.booking_domain}</a></div>
+                    <div style="margin-top:10px; font-size:12px; opacity:0.75;">© ${tenant.venue_name}</div>
                   </td>
                 </tr>
               </table>
@@ -173,6 +171,8 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const tenant = await getTenant();
+
     // Parse request body for test mode
     let testEmail: string | null = null;
     let testName: string | null = null;
@@ -190,7 +190,7 @@ Deno.serve(async (req) => {
       const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
       const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-      let emailTemplate = buildFeedbackEmail("", "");
+      let emailTemplate = buildFeedbackEmail(tenant, "", "");
       const { data: templateRow } = await supabase
         .from("email_templates")
         .select("html_content")
@@ -201,7 +201,7 @@ Deno.serve(async (req) => {
       if (templateRow?.html_content) {
         emailTemplate = templateRow.html_content;
       } else {
-        emailTemplate = buildFeedbackEmail("{{first_name}}", "{{feedback_url}}");
+        emailTemplate = buildFeedbackEmail(tenant, "{{first_name}}", "{{feedback_url}}");
       }
 
       const testLinks = buildFeedbackLinks("test-preview");
@@ -214,9 +214,9 @@ Deno.serve(async (req) => {
       });
 
       await resend.emails.send({
-        from: "Birdies Bayside <info@birdiesbayside.com.au>",
+        from: `${tenant.venue_name} <${tenant.sender_email}>`,
         to: [testEmail],
-        subject: "Thanks for playing at Birdies! How was it? 🏌️",
+        subject: `Thanks for playing at ${tenant.venue_name}! How was it? 🏌️`,
         html: renderedHtml,
       });
 
@@ -234,7 +234,7 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     // Try to load template from email_templates table
-    let emailTemplate = buildFeedbackEmail("", "");
+    let emailTemplate = buildFeedbackEmail(tenant, "", "");
     const { data: templateRow } = await supabase
       .from("email_templates")
       .select("html_content")
@@ -246,7 +246,7 @@ Deno.serve(async (req) => {
       emailTemplate = templateRow.html_content;
       logStep("Using template from email_templates table");
     } else {
-      emailTemplate = buildFeedbackEmail("{{first_name}}", "{{feedback_url}}");
+      emailTemplate = buildFeedbackEmail(tenant, "{{first_name}}", "{{feedback_url}}");
       logStep("Using default hardcoded template");
     }
 
@@ -356,9 +356,9 @@ Deno.serve(async (req) => {
         });
 
         await resend.emails.send({
-          from: "Birdies Bayside <info@birdiesbayside.com.au>",
+          from: `${tenant.venue_name} <${tenant.sender_email}>`,
           to: [user.email],
-          subject: "Thanks for playing at Birdies! How was it? 🏌️",
+          subject: `Thanks for playing at ${tenant.venue_name}! How was it? 🏌️`,
           html: renderedHtml,
         });
 

@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { getTenant, tenantBookingUrl } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -47,6 +48,8 @@ serve(async (req) => {
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     const { priceId, tierKey } = await req.json();
+    const tenant = await getTenant();
+
     if (!priceId || !tierKey) throw new Error("Missing priceId or tierKey");
     logStep("Request body parsed", { priceId, tierKey });
 
@@ -246,7 +249,7 @@ serve(async (req) => {
     logStep("No saved payment method, redirecting to checkout");
 
 
-    const origin = req.headers.get("origin") || "https://hub.birdiesbayside.com.au";
+    const origin = req.headers.get("origin") || tenantBookingUrl(tenant, "/");
 
     const checkoutParams: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,

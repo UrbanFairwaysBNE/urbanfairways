@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
+import { getTenant } from "../_shared/tenant.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -39,6 +40,8 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
+    const tenant = await getTenant();
+
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
@@ -73,7 +76,7 @@ serve(async (req) => {
     };
 
     // Use custom subject if available
-    let subject = emailTemplate?.subject || "Your Birdies Membership is On Hold";
+    let subject = emailTemplate?.subject || `Your ${tenant.venue_name} Membership is On Hold`;
     let bodyContent: string;
 
     if (emailTemplate?.html_content) {
@@ -82,7 +85,7 @@ serve(async (req) => {
       logStep("Using custom email template body with shared wrapper");
     } else {
       bodyContent = `
-        <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">Hi ${first_name}, your membership at Birdies has been placed on hold.</p>
+        <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">Hi ${first_name}, your membership at ${tenant.venue_name} has been placed on hold.</p>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FEF3C7; border-radius:12px; margin:18px 0; border-left:4px solid #D97706;">
           <tr><td style="padding:20px; font-family:Inter, Arial, sans-serif; font-size:15px; color:#92400E;">
             <h3 style="margin:0 0 10px 0; font-family:Anton, Impact, Arial Black, sans-serif; color:#92400E;">What This Means</h3>
@@ -102,7 +105,7 @@ serve(async (req) => {
 
     // Send email
     const emailResponse = await resend.emails.send({
-      from: "Birdies Bayside <info@birdiesbayside.com.au>",
+      from: `${tenant.venue_name} <${tenant.sender_email}>`,
       to: [email],
       subject: subject,
       html: htmlContent,

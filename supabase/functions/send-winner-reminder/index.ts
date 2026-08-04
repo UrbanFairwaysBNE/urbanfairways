@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { getTenant, tenantHubUrl, TenantConfig } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,14 +8,13 @@ const corsHeaders = {
 };
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-const ADMIN_EMAIL = "admin@birdiesbayside.com.au";
 
-const buildEmailHtml = (heading: string, bodyContent: string, ctaText: string) => `<!doctype html>
+const buildEmailHtml = (tenant: TenantConfig, heading: string, bodyContent: string, ctaText: string) => `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Birdies Email</title>
+  <title>${tenant.venue_name} Email</title>
   <style>
     @import url("https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600&display=swap");
   </style>
@@ -25,7 +25,7 @@ const buildEmailHtml = (heading: string, bodyContent: string, ctaText: string) =
 <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px; width:100%;">
   <tr>
     <td align="center" style="background-color:#1F4C25; padding:18px; border-radius:16px 16px 0 0;">
-      <img src="https://cdn.shopify.com/s/files/1/0758/7030/6550/files/NO-BG_BIRDIES-LOGOS_WORK-DOC_AMENDED-9.7.25-01.png?v=1761536603" width="140" alt="Birdies Bayside" style="display:block; width:140px; height:auto; border:0;" />
+      <div style="font-family:Anton, Impact, Arial Black, sans-serif; font-size:26px; color:#FFFFFF; text-align:center; letter-spacing:0.5px;">${tenant.venue_name}</div>
     </td>
   </tr>
   <tr>
@@ -37,7 +37,7 @@ const buildEmailHtml = (heading: string, bodyContent: string, ctaText: string) =
       <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:22px auto 0;">
         <tr>
           <td bgcolor="#EC622D" style="border-radius:12px;">
-            <a href="https://hub.birdiesbayside.com.au/admin/sgt-manager"
+            <a href="${tenantHubUrl(tenant, "/admin/sgt-manager")}"
                style="display:inline-block; padding:14px 24px; font-family:Anton, Impact, Arial Black, sans-serif; font-size:18px; letter-spacing:0.3px; color:#FFFFFF; text-decoration:none;">
               ${ctaText}
             </a>
@@ -50,7 +50,7 @@ const buildEmailHtml = (heading: string, bodyContent: string, ctaText: string) =
     <td style="background-color:#1F4C25; padding:22px; border-radius:0 0 16px 16px;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr><td align="center" style="font-family:Inter, Arial, sans-serif; font-size:12px; color:#FFF5E4; opacity:0.8;">
-          <p style="margin:0;">© Birdies Bayside</p>
+          <p style="margin:0;">© ${tenant.venue_name}</p>
         </td></tr>
       </table>
     </td>
@@ -67,6 +67,7 @@ serve(async (req) => {
   }
 
   try {
+    const tenant = await getTenant();
     const { type } = await req.json();
     console.log(`[WINNER-REMINDER] Type: ${type}`);
 
@@ -100,9 +101,10 @@ serve(async (req) => {
 
       subject = "⏰ Reminder: Confirm This Week's League Winner";
       htmlContent = buildEmailHtml(
+        tenant,
         "Weekly Winner Reminder",
         `<p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
-          It's Monday morning! Time to review and confirm this week's Birdies League winner.
+          It's Monday morning! Time to review and confirm this week's ${tenant.venue_name} League winner.
         </p>
         ${tournamentInfo}
         <p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
@@ -118,6 +120,7 @@ serve(async (req) => {
 
       subject = `⏰ Reminder: Confirm ${monthName} Monthly League Winner`;
       htmlContent = buildEmailHtml(
+        tenant,
         "Monthly Winner Reminder",
         `<p style="margin:0 0 18px; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
           It's the start of a new month! Time to confirm the monthly league winner for <strong>${monthName}</strong>.
@@ -142,8 +145,8 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "Birdies <noreply@birdiesbayside.com.au>",
-        to: [ADMIN_EMAIL],
+        from: `${tenant.venue_name} <${tenant.sender_email}>`,
+        to: [tenant.admin_alert_email],
         subject,
         html: htmlContent,
       }),

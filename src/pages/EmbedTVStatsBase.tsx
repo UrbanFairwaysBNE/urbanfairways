@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useActiveTourData } from "@/hooks/useActiveTourData";
 import type { StatsResponse } from "@/components/sgt/TournamentStatsView";
 import birdiesLogo from "@/assets/birdies-b-orange.png";
+import { useTenant } from "@/config/tenant";
 
 type PlayerRow = Record<string, unknown> & { user_name?: string; numrounds?: number };
 
@@ -108,6 +109,7 @@ function MiniTable({
 
 
 export default function EmbedTVStats({ variant }: { variant: "current" | "previous" }) {
+  const { tenant } = useTenant();
   const { currentTournament, previousTournament, isLoading: tourLoading } = useActiveTourData();
   const tournament = variant === "current" ? currentTournament : previousTournament;
   const tournamentId = tournament?.tournament_id ?? null;
@@ -161,13 +163,13 @@ export default function EmbedTVStats({ variant }: { variant: "current" | "previo
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <img src={birdiesLogo} alt="Birdies" className="h-16" />
+          <img src={birdiesLogo} alt={tenant.venue_name} className="h-16" />
           <div>
             <h1 className="font-bold text-4xl text-[hsl(128,42%,21%)] tracking-tight">
               {tournament?.name || (isCurrent ? "This Week" : "Previous Week")}
             </h1>
             <p className="text-xl text-[hsl(128,20%,40%)]">
-              {tournament?.course_name || "Birdies Tour"} • Tournament Stats
+              {tournament?.course_name || `${tenant.venue_name} Tour`} • Tournament Stats
             </p>
           </div>
         </div>
@@ -288,7 +290,7 @@ export default function EmbedTVStats({ variant }: { variant: "current" | "previo
       {/* Footer */}
       <div className="text-center text-lg text-[hsl(128,20%,40%)] flex items-center justify-center gap-2">
         <Ruler className="h-4 w-4" />
-        Live updates every 30 seconds • Powered by Birdies League Hub
+        Live updates every 30 seconds • Powered by {tenant.venue_name} League Hub
       </div>
     </div>
   );

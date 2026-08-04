@@ -1,6 +1,5 @@
 import { Helmet } from "react-helmet-async";
-
-const SITE_URL = "https://birdiesbayside.com.au";
+import { useTenant, bookingUrl } from "@/config/tenant";
 
 interface SeoProps {
   title: string;
@@ -13,7 +12,8 @@ interface SeoProps {
  * Per-route head tags: unique title, description and self-referencing canonical.
  */
 const Seo = ({ title, description, path, noindex }: SeoProps) => {
-  const url = `${SITE_URL}${path}`;
+  const { tenant } = useTenant();
+  const url = bookingUrl(tenant, path);
 
   return (
     <Helmet>

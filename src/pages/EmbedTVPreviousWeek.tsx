@@ -3,8 +3,10 @@ import { cn } from "@/lib/utils";
 import { useSGTTournamentStandings } from "@/hooks/useSGTEmbedData";
 import { useActiveTourData } from "@/hooks/useActiveTourData";
 import birdiesLogo from "@/assets/birdies-b-orange.png";
+import { useTenant } from "@/config/tenant";
 
 export default function EmbedTVLastWeek() {
+  const { tenant } = useTenant();
   const { previousTournament, isLoading: tourLoading } = useActiveTourData();
 
   const { standings, isLoading: standingsLoading, lastUpdated } = useSGTTournamentStandings({
@@ -45,13 +47,13 @@ export default function EmbedTVLastWeek() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-6">
-          <img src={birdiesLogo} alt="Birdies" className="h-16" />
+          <img src={birdiesLogo} alt={tenant.venue_name} className="h-16" />
           <div>
             <h1 className="font-bold text-4xl text-[hsl(128,42%,21%)] tracking-tight">
               {previousTournament?.name || "Previous Week"}
             </h1>
             <p className="text-xl text-[hsl(128,20%,40%)]">
-              {previousTournament?.course_name || "Birdies Tour"} • NET Scores
+              {previousTournament?.course_name || `${tenant.venue_name} Tour`} • NET Scores
             </p>
           </div>
         </div>
@@ -151,7 +153,7 @@ export default function EmbedTVLastWeek() {
 
       {/* Footer */}
       <div className="mt-4 text-center text-lg text-[hsl(128,20%,40%)]">
-        Live Results • Updates every 30 seconds • Powered by Birdies League Hub
+        Live Results • Updates every 30 seconds • Powered by {tenant.venue_name} League Hub
       </div>
     </div>
   );

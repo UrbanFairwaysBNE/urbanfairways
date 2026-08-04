@@ -6,6 +6,7 @@ import { CheckCircle, Calendar, Clock, MapPin, CreditCard, Loader2, XCircle, Ale
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import birdieLogo from "@/assets/birdies-b-logo.png";
+import { useTenant } from "@/config/tenant";
 
 interface BookingDetails {
   id: string;
@@ -24,6 +25,7 @@ interface BookingDetails {
 type PaymentStatus = "loading" | "confirmed" | "failed" | "pending" | "error";
 
 const BookingSuccess = () => {
+  const { tenant } = useTenant();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [booking, setBooking] = useState<BookingDetails | null>(null);
@@ -128,7 +130,7 @@ const BookingSuccess = () => {
       <div className="min-h-screen bg-background flex flex-col">
         <header className="bg-primary text-primary-foreground py-4 px-4 safe-area-top">
           <div className="container mx-auto flex items-center justify-center">
-            <img src={birdieLogo} alt="Birdies Logo" className="h-10 w-auto" />
+            <img src={birdieLogo} alt={`${tenant.venue_name} Logo`} className="h-10 w-auto" />
           </div>
         </header>
 
@@ -190,7 +192,7 @@ const BookingSuccess = () => {
       <div className="min-h-screen bg-background flex flex-col">
         <header className="bg-primary text-primary-foreground py-4 px-4 safe-area-top">
           <div className="container mx-auto flex items-center justify-center">
-            <img src={birdieLogo} alt="Birdies Logo" className="h-10 w-auto" />
+            <img src={birdieLogo} alt={`${tenant.venue_name} Logo`} className="h-10 w-auto" />
           </div>
         </header>
 
@@ -239,7 +241,7 @@ const BookingSuccess = () => {
       {/* Header */}
       <header className="bg-primary text-primary-foreground py-4 px-4 safe-area-top">
         <div className="container mx-auto flex items-center justify-center">
-          <img src={birdieLogo} alt="Birdies Logo" className="h-10 w-auto" />
+          <img src={birdieLogo} alt={`${tenant.venue_name} Logo`} className="h-10 w-auto" />
         </div>
       </header>
 
@@ -314,7 +316,7 @@ const BookingSuccess = () => {
 
             {/* How to Use Guide */}
             <div className="mt-6 p-4 bg-muted/50 rounded-lg border text-center">
-              <p className="font-display text-lg text-foreground mb-2">First Time at Birdies?</p>
+              <p className="font-display text-lg text-foreground mb-2">First Time at {tenant.venue_name}?</p>
               <p className="text-sm text-muted-foreground mb-3">
                 Check out our guide for everything you need to know about accessing the facility and using the simulators.
               </p>

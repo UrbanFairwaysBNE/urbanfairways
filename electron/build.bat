@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo Birdies Bay Controller - Build Script
+echo Bay Controller - Build Script
 echo ========================================
 echo.
 
@@ -58,6 +58,6 @@ echo.
 echo Your installer is ready at:
 echo %cd%\dist-electron\
 echo.
-echo Look for "Birdies Bay Controller Setup 1.0.0.exe"
+echo Look for "Bay Controller Setup 1.0.0.exe"
 echo.
 pause

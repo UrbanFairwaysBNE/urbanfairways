@@ -201,7 +201,7 @@ Deno.serve(async (req) => {
     // Fetch the SGT embed page
     const response = await fetch(embedUrl, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; BirdiesApp/1.0)",
+        "User-Agent": "Mozilla/5.0 (compatible; VenueApp/1.0)",
         "Accept": "text/html",
       },
     });

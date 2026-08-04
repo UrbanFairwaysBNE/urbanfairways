@@ -14,38 +14,39 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useTenant, formatTenantAddress, type TenantSettings } from "@/config/tenant";
 
 // Kept in sync with supabase/functions/_shared/email-wrapper.ts DEFAULTS.
-const DEFAULT_HEADER_HTML = `<tr>
+const buildDefaultHeaderHtml = (t: TenantSettings) => `<tr>
   <td align="center" style="background-color:#1F4C25; padding:18px; border-radius:16px 16px 0 0;">
     <img
       src="https://cdn.shopify.com/s/files/1/0758/7030/6550/files/NO-BG_BIRDIES-LOGOS_WORK-DOC_AMENDED-9.7.25-01.png?v=1761536603"
       width="140"
-      alt="Birdies Bayside"
+      alt="${t.venue_name}"
       style="display:block; width:140px; height:auto; border:0;"
     />
   </td>
 </tr>`;
 
-const DEFAULT_FOOTER_HTML = `<tr>
+const buildDefaultFooterHtml = (t: TenantSettings) => `<tr>
   <td style="background-color:#1F4C25; padding:22px; border-radius:0 0 16px 16px;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr>
         <td align="center" style="padding-bottom:14px;">
-          <a href="https://www.instagram.com/birdiesbayside" style="margin:0 8px; text-decoration:none;">
+          <a href="${t.socials?.instagram || "#"}" style="margin:0 8px; text-decoration:none;">
             <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram" width="28" height="28" style="display:inline-block; border:0;" />
           </a>
-          <a href="https://www.facebook.com/share/17NifCh2vH/" style="margin:0 8px; text-decoration:none;">
+          <a href="${t.socials?.facebook || "#"}" style="margin:0 8px; text-decoration:none;">
             <img src="https://cdn-icons-png.flaticon.com/512/174/174848.png" alt="Facebook" width="28" height="28" style="display:inline-block; border:0;" />
           </a>
         </td>
       </tr>
       <tr>
         <td align="center" style="font-family:Inter, Arial, sans-serif; font-size:14px; line-height:1.7; color:#FFFFFF;">
-          <div><a href="https://maps.app.goo.gl/vTXLZvd8XPZEeRn16" style="color:#FFFFFF; text-decoration:underline;">Unit 2, 86 Jardine Drive, Redland Bay QLD 4165</a></div>
-          <div><a href="tel:+61721468442" style="color:#FFFFFF; text-decoration:underline;">(07) 2146 8442</a></div>
-          <div><a href="https://birdiesbayside.com.au" style="color:#FFFFFF; text-decoration:underline;">birdiesbayside.com.au</a></div>
-          <div style="margin-top:10px; font-size:12px; opacity:0.75;">© Birdies Bayside</div>
+          <div><a href="https://maps.google.com/?q=${encodeURIComponent(formatTenantAddress(t))}" style="color:#FFFFFF; text-decoration:underline;">${formatTenantAddress(t)}</a></div>
+          <div><a href="tel:${t.support_phone}" style="color:#FFFFFF; text-decoration:underline;">${t.support_phone}</a></div>
+          <div><a href="https://${t.booking_domain}" style="color:#FFFFFF; text-decoration:underline;">${t.booking_domain}</a></div>
+          <div style="margin-top:10px; font-size:12px; opacity:0.75;">© ${t.venue_name}</div>
         </td>
       </tr>
     </table>
@@ -73,6 +74,7 @@ const buildPreview = (header: string, footer: string) => `<!doctype html>
 </body></html>`;
 
 export const EmailLayoutEditor = () => {
+  const { tenant } = useTenant();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -93,8 +95,8 @@ export const EmailLayoutEditor = () => {
       toast({ title: "Failed to load layout", description: error.message, variant: "destructive" });
     }
 
-    const h = data?.header_html || DEFAULT_HEADER_HTML;
-    const f = data?.footer_html || DEFAULT_FOOTER_HTML;
+    const h = data?.header_html || buildDefaultHeaderHtml(tenant);
+    const f = data?.footer_html || buildDefaultFooterHtml(tenant);
     setHeader(h);
     setFooter(f);
     setInitial({ header: h, footer: f });
@@ -127,8 +129,8 @@ export const EmailLayoutEditor = () => {
   };
 
   const resetToDefault = (which: "header" | "footer") => {
-    if (which === "header") setHeader(DEFAULT_HEADER_HTML);
-    else setFooter(DEFAULT_FOOTER_HTML);
+    if (which === "header") setHeader(buildDefaultHeaderHtml(tenant));
+    else setFooter(buildDefaultFooterHtml(tenant));
   };
 
   const previewSrc = useMemo(() => buildPreview(header, footer), [header, footer]);

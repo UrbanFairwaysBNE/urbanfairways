@@ -1,11 +1,14 @@
 import Seo from "@/components/Seo";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useTenant } from "@/config/tenant";
 
 export default function PrivacyPolicy() {
+  const { tenant } = useTenant();
+  const legalName = tenant.legal_entity || tenant.venue_name;
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
-      <Seo title={"Privacy Policy | Birdies Bayside"} description={"How Birdies Bayside collects, uses and protects your personal information, including booking data, recordings and marketing preferences."} path="/privacy" />
+      <Seo title={`Privacy Policy | ${tenant.venue_name}`} description={`How ${tenant.venue_name} collects, uses and protects your personal information, including booking data, recordings and marketing preferences.`} path="/privacy" />
       <div className="mx-auto max-w-3xl">
         <Card>
           <CardHeader>
@@ -15,7 +18,7 @@ export default function PrivacyPolicy() {
             <ScrollArea className="h-[70vh] pr-4">
               <div className="space-y-4 text-sm text-muted-foreground">
                 <p>
-                  Birdies Indoor Golf Centre ("Birdies", "we", "us", or "our") is committed to protecting your personal information. This Privacy Policy explains how we collect, use, store, and disclose your personal data when you use our website, mobile applications, booking platform, and venue services.
+                  {legalName} ("{tenant.venue_name}", "we", "us", or "our") is committed to protecting your personal information. This Privacy Policy explains how we collect, use, store, and disclose your personal data when you use our website, mobile applications, booking platform, and venue services.
                 </p>
 
                 <h3 className="font-semibold text-foreground">1. Information We Collect</h3>
@@ -35,7 +38,7 @@ export default function PrivacyPolicy() {
 
                 <h3 className="font-semibold text-foreground">4. Recording, Filming and Media</h3>
                 <p>
-                  Our bays are monitored by security cameras, and gameplay may be video and/or audio recorded — including automatically during league rounds, competitions and events. By using our facility you consent to being recorded, and to Birdies using that footage, imagery and associated gameplay data (such as your name, username, scores and handicap) for promotional, marketing, social media, leaderboard and broadcast purposes. You can opt out of publicly shared content at any time by contacting us.
+                  Our bays are monitored by security cameras, and gameplay may be video and/or audio recorded — including automatically during league rounds, competitions and events. By using our facility you consent to being recorded, and to {tenant.venue_name} using that footage, imagery and associated gameplay data (such as your name, username, scores and handicap) for promotional, marketing, social media, leaderboard and broadcast purposes. You can opt out of publicly shared content at any time by contacting us.
                 </p>
 
                 <h3 className="font-semibold text-foreground">5. Data Sharing</h3>
@@ -61,7 +64,7 @@ export default function PrivacyPolicy() {
 
                 <h3 className="font-semibold text-foreground">9. Contact Us</h3>
                 <p>
-                  If you have any questions about this Privacy Policy or how we handle your data, please contact Birdies Indoor Golf Centre.
+                  If you have any questions about this Privacy Policy or how we handle your data, please contact {legalName}.
                 </p>
 
                 <p className="pt-4 text-xs">

@@ -9,6 +9,7 @@ import { format } from "date-fns";
 import birdiesB from "@/assets/birdies-b-orange.png";
 import { useIframeAutoResize } from "@/hooks/useIframeAutoResize";
 import { TournamentStatsView } from "@/components/sgt/TournamentStatsView";
+import { useTenant, hubUrl } from "@/config/tenant";
 
 
 // Brand tokens (locked to iframe so it renders consistently inside Shopify)
@@ -52,6 +53,7 @@ const getScoreTextColor = (s: string) => {
 };
 
 export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean } = {}) {
+  const { tenant } = useTenant();
   useIframeAutoResize();
   const { activeTour, currentTournament, previousTournament, isLoading: tourLoading } = useActiveTourData();
   const [scoreType, setScoreType] = useState<"gross" | "net">("net");
@@ -173,7 +175,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
             <div className="flex items-center gap-3 mb-4">
               <img src={birdiesB} alt="" className="h-8 sm:h-10" />
               <span className="text-white/70 font-semibold tracking-[0.2em] text-xs sm:text-sm uppercase">
-                Birdies Bayside
+                {tenant.venue_name}
               </span>
             </div>
 
@@ -202,7 +204,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
           <HowCard
             icon={<Calendar className="h-6 w-6" />}
             tag="Weekly · Members"
-            title="The Birdies League"
+            title={`The ${tenant.venue_name} League`}
             desc="Play your two competition rounds anytime during the week. Live net + gross leaderboards."
             prize="$40 prize per week"
           />
@@ -210,7 +212,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
             icon={<Trophy className="h-6 w-6" />}
             tag="Monthly · Members"
             title="Monthly Winner"
-            desc="Earn points from every weekly Birdies League tournament that follows the PGA tour. Top of the table at month's end takes the title."
+            desc={`Earn points from every weekly ${tenant.venue_name} League tournament that follows the PGA tour. Top of the table at month's end takes the title.`}
             prize="Varied monthly prizes"
           />
           <HowCard
@@ -262,10 +264,10 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
                   Weekly
                 </span>
                 <h3 className="font-black text-lg leading-tight" style={{ color: GREEN, fontFamily: "'Anton', sans-serif" }}>
-                  The Birdies League
+                  {tenant.venue_name} League
                 </h3>
                 <p className="text-xs mt-0.5 truncate" style={{ color: MUTED }}>
-                  {currentTournament?.name ?? previousTournament?.name ?? "Birdies Tour"}
+                  {currentTournament?.name ?? previousTournament?.name ?? `${tenant.venue_name} Tour`}
                 </p>
               </div>
             </div>
@@ -572,12 +574,12 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
             Book a bay, play your weekly rounds, climb the leaderboard.
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
-            <a href="https://birdiesbayside.com.au/pages/membership"
+            <a href={hubUrl(tenant, "/pages/membership")}
               className="px-6 py-3 rounded-full font-black uppercase tracking-wider text-sm transition-transform hover:scale-[1.03]"
               style={{ backgroundColor: ORANGE, color: "white" }}>
               Join the League
             </a>
-            <a href="https://hub.birdiesbayside.com.au/booking"
+            <a href={hubUrl(tenant, "/booking")}
               className="px-6 py-3 rounded-full font-black uppercase tracking-wider text-sm border-2 border-white/30 text-white hover:bg-white/10 transition-colors">
               Book a Bay
             </a>
@@ -586,7 +588,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
       </section>
 
       <div className="text-center pb-6 text-xs" style={{ color: MUTED }}>
-        Powered by Birdies League Hub · Live updates every minute
+        Powered by {tenant.venue_name} League Hub · Live updates every minute
       </div>
     </div>
   );

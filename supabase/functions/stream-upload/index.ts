@@ -2,6 +2,7 @@
 // Uses Cloudflare's copy-from-URL endpoint so the file is pulled directly,
 // avoiding Edge Function memory/timeout limits for large MKVs.
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { getTenant } from "../_shared/tenant.ts";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
 interface SessionRow {
@@ -68,6 +69,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  const tenant = await getTenant();
 
   // Internal callers (e.g. bay-controller-api recording_stop) may bypass user
   // auth by presenting the shared SYNC_SECRET. Everything else must be an admin.
@@ -177,7 +179,7 @@ Deno.serve(async (req) => {
       url: signed.signedUrl,
       meta: { name: title },
       requireSignedURLs: false,
-      allowedOrigins: ["birdiesbayside.com.au", "*.birdiesbayside.com.au", "*.lovable.app"],
+      allowedOrigins: [tenant.booking_domain, `*.${tenant.booking_domain}`, "*.lovable.app"],
     }),
   });
 

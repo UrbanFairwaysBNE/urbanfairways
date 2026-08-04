@@ -127,7 +127,7 @@ const TEMPLATE_TAGS: Record<string, { tag: string; description: string }[]> = {
   league_welcome: [
     { tag: "{first_name}", description: "Player's first name" },
     { tag: "{handicap}", description: "Starting handicap that was applied (e.g. 12.5 or 'Combo (auto)')" },
-    { tag: "{guide_url}", description: "Link to the Birdies League player guide" },
+    { tag: "{guide_url}", description: "Link to the league player guide" },
   ],
 };
 
@@ -1425,7 +1425,7 @@ export default function AdminSettings() {
                   <Input
                     value={templateSubject}
                     onChange={(e) => setTemplateSubject(e.target.value)}
-                    placeholder="e.g. Your Birdies Booking Confirmation"
+                    placeholder="e.g. Your Booking Confirmation"
                   />
                 </div>
 

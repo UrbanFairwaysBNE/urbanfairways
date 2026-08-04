@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertTriangle, ChevronDown } from "lucide-react";
+import { useTenant } from "@/config/tenant";
 
 /** Flag any player whose Ambrose handicap differs from their league handicap by this much or more. */
 const GAP_THRESHOLD = 4;
@@ -26,6 +27,7 @@ interface MismatchRow {
  * weekly adjustments both move them), so this is a read-only watch list.
  */
 export function HandicapMismatches() {
+  const { tenant } = useTenant();
   const [open, setOpen] = useState(false);
 
   const { data: rows = [], isLoading } = useQuery({
@@ -100,7 +102,7 @@ export function HandicapMismatches() {
         <CollapsibleContent>
           <CardContent className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              Players whose Ambrose handicap differs from their Birdies League handicap by{" "}
+              Players whose Ambrose handicap differs from their {tenant.venue_name} League handicap by{" "}
               {GAP_THRESHOLD} shots or more. The two are intentionally kept separate — this is a
               watch list only, nothing syncs automatically.
             </p>

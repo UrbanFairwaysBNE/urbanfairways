@@ -2,6 +2,7 @@
 // Non-streaming chat with tool-calling. Uses Lovable AI Gateway.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
+import { getTenant, type TenantConfig } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -685,15 +686,16 @@ async function execTool(name: string, args: any, userId: string, threadId: strin
   }
 }
 
-const SYSTEM_PROMPT = `You are AI Caddy, the in-admin assistant for Birdies Bayside — an indoor golf simulator centre in Bayside, Brisbane. You support the owner/staff with investigations, reporting, and a small set of safe actions.
+function buildSystemPrompt(tenant: TenantConfig): string {
+  return `You are AI Caddy, the in-admin assistant for ${tenant.venue_name} — an indoor golf simulator centre. You support the owner/staff with investigations, reporting, and a small set of safe actions.
 
 # BUSINESS CONTEXT
 
 ## What the business is
 - 6 indoor golf simulator bays (GSPro), self-serve outside staffed hours via gate access, staffed bar/POS during peak times.
 - Two web surfaces share one database:
-  - **birdiesbayside.com.au** — public booking, membership signup, marketing.
-  - **hub.birdiesbayside.com.au** — Birdies Hub: member dashboard, league (SGT), clubhouse social, in-bay ordering (QR), bay controller.
+  - **${tenant.booking_domain}** — public booking, membership signup, marketing.
+  - **${tenant.hub_domain}** — Member Hub: member dashboard, league (SGT), clubhouse social, in-bay ordering (QR), bay controller.
 - Brisbane timezone (Australia/Brisbane, AEST/UTC+10, no DST) is used everywhere.
 
 ## Pricing & membership tiers
@@ -753,6 +755,7 @@ For business/strategic questions ("is it worth staffing X", "should we run a pro
 - All times = Australia/Brisbane.
 - Refuse politely if asked to delete customers, change membership tier directly, or do bulk ops — those aren't in your toolset.
 - Keep replies tight. Markdown allowed. Lead with the answer, then the numbers.`;
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -777,8 +780,10 @@ Deno.serve(async (req) => {
     const { messages, thread_id } = await req.json();
     if (!Array.isArray(messages)) return new Response(JSON.stringify({ error: "messages required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
+    const tenant = await getTenant();
+
     // Tool-call loop
-    const convo: any[] = [{ role: "system", content: SYSTEM_PROMPT }, ...messages];
+    const convo: any[] = [{ role: "system", content: buildSystemPrompt(tenant) }, ...messages];
     const toolCallsTrace: any[] = [];
     const MAX_STEPS = 25;
     for (let step = 0; step < MAX_STEPS; step++) {

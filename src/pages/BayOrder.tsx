@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { ShoppingCart, Plus, Minus, Check, Loader2 } from "lucide-react";
 import birdieLogo from "@/assets/birdies-logo.png";
+import { useTenant } from "@/config/tenant";
 
 interface POSProduct {
   id: string;
@@ -23,6 +24,7 @@ interface ServiceHours {
 }
 
 export default function BayOrder() {
+  const { tenant } = useTenant();
   const { bayNumber } = useParams<{ bayNumber: string }>();
   const [products, setProducts] = useState<POSProduct[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -232,7 +234,7 @@ export default function BayOrder() {
       {/* Header */}
       <header className="bg-primary text-primary-foreground p-4 sticky top-0 z-10 safe-area-top">
         <div className="flex items-center justify-between max-w-lg mx-auto">
-          <img src={birdieLogo} alt="Birdies" className="h-8" />
+          <img src={birdieLogo} alt={tenant.venue_name} className="h-8" />
           <span className="font-display text-lg">Bay {bay}</span>
         </div>
       </header>

@@ -7,12 +7,14 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { format } from "date-fns";
 import { Switch } from "@/components/ui/switch";
+import { useTenant } from "@/config/tenant";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { TourFormDialog } from "./TourFormDialog";
 import { TournamentFormDialog } from "./TournamentFormDialog";
 
 export function SGTDashboard() {
+  const { tenant } = useTenant();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [syncing, setSyncing] = useState(false);
@@ -521,7 +523,7 @@ export function SGTDashboard() {
                   New Member Email
                 </Label>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Receive an email when a new member joins the Birdies League
+                  Receive an email when a new member joins the {tenant.venue_name} League
                 </p>
               </div>
             </div>
@@ -533,7 +535,7 @@ export function SGTDashboard() {
             />
           </div>
           <p className="text-xs text-muted-foreground px-1">
-            Notifications are sent to <strong className="text-primary">info@birdiesbayside.com.au</strong> when members register via the app. 
+            Notifications are sent to <strong className="text-primary">{tenant.admin_alert_email}</strong> when members register via the app. 
             The sync also sends notifications when externally-registered members are auto-linked by email match.
           </p>
         </CardContent>

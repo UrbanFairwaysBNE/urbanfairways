@@ -1,6 +1,8 @@
 import { useSearchParams } from "react-router-dom";
+import { useTenant } from "@/config/tenant";
 
 const WelcomePreview = () => {
+  const { tenant } = useTenant();
   const [searchParams] = useSearchParams();
   const firstName = searchParams.get("name") || "Guest";
 
@@ -34,7 +36,7 @@ const WelcomePreview = () => {
       <div className="welcome-container text-center">
         <img 
           src="/birdies-welcome-logo.png" 
-          alt="Birdies" 
+          alt={tenant.venue_name} 
           className="w-[210px] mx-auto mb-12"
           style={{ filter: 'drop-shadow(0 10px 30px rgba(31, 76, 37, 0.15))' }}
         />
@@ -60,7 +62,7 @@ const WelcomePreview = () => {
             letterSpacing: '1px'
           }}
         >
-          Welcome to Birdies
+          Welcome to {tenant.venue_name}
         </h2>
         
         <p 
@@ -105,7 +107,7 @@ const WelcomePreview = () => {
               letterSpacing: '2px'
             }}
           >
-            Birdies Etiquette
+            {tenant.venue_name} Etiquette
           </h3>
           <ol className="space-y-3" style={{ fontFamily: 'Inter, sans-serif', color: '#1f4c25' }}>
             {[

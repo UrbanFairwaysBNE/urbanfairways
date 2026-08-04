@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "npm:stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { getTenant, tenantBookingUrl } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -18,7 +19,7 @@ function generateCode(): string {
     }
     groups.push(s);
   }
-  return `BIRDIE-${groups.join("-")}`;
+  return `GIFT-${groups.join("-")}`;
 }
 
 interface Body {
@@ -37,6 +38,8 @@ serve(async (req: Request): Promise<Response> => {
 
   try {
     const body = (await req.json()) as Body;
+    const tenant = await getTenant();
+
 
     // Validation
     const amount = Number(body.amount);
@@ -111,7 +114,7 @@ serve(async (req: Request): Promise<Response> => {
       throw new Error("Failed to create gift card record");
     }
 
-    const origin = req.headers.get("origin") || "https://hub.birdiesbayside.com.au";
+    const origin = req.headers.get("origin") || tenantBookingUrl(tenant, "/");
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -121,7 +124,7 @@ serve(async (req: Request): Promise<Response> => {
           price_data: {
             currency: "aud",
             product_data: {
-              name: `Birdies Bayside Gift Card — $${amount.toFixed(2)}`,
+              name: `${tenant.venue_name} Gift Card — $${amount.toFixed(2)}`,
               description: `For ${body.recipient_name}`,
             },
             unit_amount: Math.round(amount * 100),

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useTenant } from "@/config/tenant";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +39,7 @@ interface PendingMember {
 }
 
 export function SGTPendingOnboarding() {
+  const { tenant } = useTenant();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [onboardingMemberId, setOnboardingMemberId] = useState<number | null>(null);
@@ -66,7 +68,7 @@ export function SGTPendingOnboarding() {
 
       // Get all unique player_ids that have played at least one scorecard.
       // Returning members (whose old tour_members row was removed when a tour
-      // ended) shouldn't appear as "new", they already have a Birdies HCP
+      // ended) shouldn't appear as "new", they already have a custom HCP
       // calculated from their history.
       const { data: scoredPlayers, error: scoredError } = await supabase
         .from("sgt_scorecards")
@@ -193,7 +195,7 @@ export function SGTPendingOnboarding() {
           New league members appear here until you set their initial handicap. Once set,
           they're automatically added to all active tours and registered for open tournaments.
           Their onboarding handicap is locked for the first 6 rounds (~3 weeks), after which
-          the Birdies Custom HCP auto-recalculates weekly using the best 3 of their last 6 rounds.
+          {`the ${tenant.venue_name} Custom HCP auto-recalculates weekly using the best 3 of their last 6 rounds.`}
         </AlertDescription>
       </Alert>
 

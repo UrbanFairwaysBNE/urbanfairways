@@ -3,6 +3,7 @@ import Stripe from "npm:stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { Resend } from "npm:resend@2.0.0";
 import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
+import { getTenant, tenantHubUrl } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -189,6 +190,8 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
+    const tenant = await getTenant();
+
     // ─── IDEMPOTENCY GUARD ───
     // Stripe may redeliver the same event (webhook timeout, non-2xx, etc.).
     // Insert event.id into stripe_processed_events; on conflict, short-circuit
@@ -347,7 +350,7 @@ serve(async (req) => {
               subject = replaceTemplateTags(subject, templateTags);
               htmlContent = await renderBrandedEmail(supabaseAdmin, heading, bodyContent, {
                 text: "Book Now",
-                url: "https://hub.birdiesbayside.com.au/booking"
+                url: tenantHubUrl(tenant, "/booking")
               });
             } else if (isTierChange) {
               const changeCopy = isUpgrade
@@ -372,7 +375,7 @@ serve(async (req) => {
               `;
               htmlContent = await renderBrandedEmail(supabaseAdmin, heading, bodyContent, {
                 text: "Book Now",
-                url: "https://hub.birdiesbayside.com.au/booking"
+                url: tenantHubUrl(tenant, "/booking")
               });
             } else {
               const bodyContent = `
@@ -388,18 +391,18 @@ serve(async (req) => {
                   </tr>
                 </table>
                 <p style="margin:18px 0 0; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
-                  You now have access to discounted bay rates and exclusive member benefits including the Birdies League!
+                  You now have access to discounted bay rates and exclusive member benefits including the ${tenant.venue_name} League!
                 </p>
               `;
               htmlContent = await renderBrandedEmail(supabaseAdmin, heading, bodyContent, {
                 text: "Book Now",
-                url: "https://hub.birdiesbayside.com.au/booking"
+                url: tenantHubUrl(tenant, "/booking")
               });
             }
 
             try {
               await resend.emails.send({
-                from: "Birdies Bayside <info@birdiesbayside.com.au>",
+                from: `${tenant.venue_name} <${tenant.sender_email}>`,
                 to: [email],
                 subject: subject,
                 html: htmlContent,
@@ -537,11 +540,11 @@ serve(async (req) => {
           let htmlContent: string;
 
           if (finalTemplate?.html_content) {
-            subject = replaceTemplateTags(finalTemplate.subject || "Your Birdies Membership", templateTags);
+            subject = replaceTemplateTags(finalTemplate.subject || `Your ${tenant.venue_name} Membership`, templateTags);
             const bodyContent = replaceTemplateTags(finalTemplate.html_content, templateTags);
             htmlContent = await renderBrandedEmail(supabaseAdmin, "Membership Update", bodyContent, {
               text: "View My Account",
-              url: "https://hub.birdiesbayside.com.au/my-account"
+              url: tenantHubUrl(tenant, "/my-account")
             });
           } else if (isPaymentFailure) {
             // Payment failure specific default email
@@ -571,11 +574,11 @@ serve(async (req) => {
                 If you believe this was an error, please contact us and we'll help sort it out.
               </p>
               `,
-              { text: "Re-Register Membership", url: "https://hub.birdiesbayside.com.au/membership" }
+              { text: "Re-Register Membership", url: tenantHubUrl(tenant, "/membership") }
             );
           } else {
             // Voluntary cancellation default email
-            subject = "Your Birdies Membership Has Been Cancelled";
+            subject = `Your ${tenant.venue_name} Membership Has Been Cancelled`;
             htmlContent = await renderBrandedEmail(supabaseAdmin, 
               "Membership Cancelled",
               `
@@ -590,16 +593,16 @@ serve(async (req) => {
               </p>
               <p style="margin:18px 0 0; font-family:Inter, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1F4C25; text-align:center;">
                 We hope to see you back soon!<br/>
-                <strong>The Birdies Team</strong>
+                <strong>The ${tenant.venue_name} Team</strong>
               </p>
               `,
-              { text: "Rejoin Membership", url: "https://hub.birdiesbayside.com.au/membership" }
+              { text: "Rejoin Membership", url: tenantHubUrl(tenant, "/membership") }
             );
           }
 
           try {
             await resend.emails.send({
-              from: "Birdies Bayside <info@birdiesbayside.com.au>",
+              from: `${tenant.venue_name} <${tenant.sender_email}>`,
               to: [email],
               subject: subject,
               html: htmlContent,

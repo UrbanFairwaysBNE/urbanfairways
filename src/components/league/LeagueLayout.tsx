@@ -1,6 +1,7 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useTenant } from "@/config/tenant";
 import birdiesBLogo from "@/assets/birdies-b-logo.png";
 import {
   LayoutDashboard,
@@ -28,6 +29,7 @@ const navItems = [
 ];
 
 export function LeagueLayout({ children }: LeagueLayoutProps) {
+  const { tenant } = useTenant();
   const { signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -51,7 +53,7 @@ export function LeagueLayout({ children }: LeagueLayoutProps) {
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <Link to="/league" className="flex items-center">
-              <img src={birdiesBLogo} alt="Birdies" className="h-10 w-auto" />
+              <img src={birdiesBLogo} alt={tenant.venue_name} className="h-10 w-auto" />
             </Link>
           </div>
 

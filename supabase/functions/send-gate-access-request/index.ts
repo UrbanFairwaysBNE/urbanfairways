@@ -1,3 +1,5 @@
+import { getTenant } from "../_shared/tenant.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -7,6 +9,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const tenant = await getTenant();
     const { fullName, email, phone } = await req.json();
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     if (!RESEND_API_KEY) throw new Error("Missing RESEND_API_KEY");
@@ -46,8 +49,8 @@ Deno.serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Birdies Gate Access <noreply@birdiesbayside.com.au>",
-        to: ["info@birdiesbayside.com.au"],
+        from: `${tenant.venue_name} Gate Access <${tenant.sender_email}>`,
+        to: [tenant.support_email],
         reply_to: email,
         subject: `Gate Access Request — ${fullName}`,
         html,

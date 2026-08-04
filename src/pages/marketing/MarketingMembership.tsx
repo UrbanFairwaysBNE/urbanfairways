@@ -1,6 +1,7 @@
 import Seo from "@/components/Seo";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { ArrowRight, Check, Clock } from "lucide-react";
+import { useTenant, hubUrl } from "@/config/tenant";
 
 const HERO = "https://cdn.shopify.com/s/files/1/0758/7030/6550/files/Birdies_Golf.jpg?v=1751956878&width=3840";
 
@@ -18,20 +19,22 @@ const tiers = [
     rate: "$10/hr",
     tag: "Most popular",
     highlight: true,
-    perks: ["Play anytime", "Birdies League access", "Swing Lab access", "Cancel any time"],
+    perks: ["Play anytime", "League access", "Swing Lab access", "Cancel any time"],
   },
   {
     name: "Eagle",
     price: "$35",
     rate: "$8/hr",
     tag: "Best value per round",
-    perks: ["Play anytime", "Birdies League access", "Swing Lab access", "Priority booking", "Cancel any time"],
+    perks: ["Play anytime", "League access", "Swing Lab access", "Priority booking", "Cancel any time"],
   },
 ];
 
-const MarketingMembership = () => (
+const MarketingMembership = () => {
+  const { tenant } = useTenant();
+  return (
   <MarketingLayout>
-    <Seo title={"Golf Memberships | Birdies Bayside"} description={"Compare Birdies Bayside membership tiers, included simulator hours, member pricing and 24/7 automated bay access in Redland Bay."} path="/membership-info" />
+    <Seo title={`Golf Memberships | ${tenant.venue_name}`} description={`Compare ${tenant.venue_name} membership tiers, included simulator hours, member pricing and 24/7 automated bay access in Redland Bay.`} path="/membership-info" />
     <section className="relative h-[28vh] min-h-[220px] flex items-end overflow-hidden">
       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${HERO})` }} />
       <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/70 to-primary/30" />
@@ -86,7 +89,7 @@ const MarketingMembership = () => (
               ))}
             </ul>
             <a
-              href="https://hub.birdiesbayside.com.au/"
+              href={hubUrl(tenant, "/")}
               className="block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               Join
@@ -104,7 +107,7 @@ const MarketingMembership = () => (
             Not ready to commit? Just pay to play.
           </h2>
           <p className="text-foreground/80 text-lg max-w-2xl mx-auto">
-            We welcome Pay As You Go sessions at Birdies, same premium golf, no commitment, same easy booking and access platform as members. Bay pricing covers up to 4 players.
+            We welcome Pay As You Go sessions at {tenant.venue_name}, same premium golf, no commitment, same easy booking and access platform as members. Bay pricing covers up to 4 players.
           </p>
         </div>
         <div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
@@ -119,7 +122,7 @@ const MarketingMembership = () => (
             </div>
             <p className="text-sm text-foreground/60 mb-2">Mon-Thu before 4pm</p>
             <p className="text-sm text-foreground/60 mb-6">Per bay, up to 4 players</p>
-            <a href="https://hub.birdiesbayside.com.au/" className="block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors bg-accent hover:bg-accent/90 text-accent-foreground">
+            <a href={hubUrl(tenant, "/")} className="block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors bg-accent hover:bg-accent/90 text-accent-foreground">
               Book Now
             </a>
           </div>
@@ -134,14 +137,14 @@ const MarketingMembership = () => (
             </div>
             <p className="text-sm text-foreground/60 mb-2">Fri-Sun & Mon-Thu 4pm+</p>
             <p className="text-sm text-foreground/60 mb-6">Per bay, up to 4 players</p>
-            <a href="https://hub.birdiesbayside.com.au/" className="block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors bg-accent hover:bg-accent/90 text-accent-foreground">
+            <a href={hubUrl(tenant, "/")} className="block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors bg-accent hover:bg-accent/90 text-accent-foreground">
               Book Now
             </a>
           </div>
         </div>
         <div className="text-center mt-10">
           <a
-            href="https://hub.birdiesbayside.com.au/"
+            href={hubUrl(tenant, "/")}
             className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-display tracking-wide uppercase px-8 py-4 rounded-md"
           >
             Join Now <ArrowRight className="h-4 w-4" />
@@ -150,6 +153,7 @@ const MarketingMembership = () => (
       </div>
     </section>
   </MarketingLayout>
-);
+  );
+};
 
 export default MarketingMembership;

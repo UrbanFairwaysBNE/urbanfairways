@@ -7,7 +7,9 @@
  };
  
  const SGT_BASE_URL = "https://simulatorgolftour.com/sgt-api/club-admin";
- const CLUB_URL = "birdiesbayside";
+import { getClubUrl } from "../_shared/sgt-config.ts";
+
+let CLUB_URL = "";
  
  let supabaseClient: ReturnType<typeof createClient>;
  
@@ -100,6 +102,7 @@
    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
    supabaseClient = createClient(supabaseUrl, supabaseKey);
+   CLUB_URL = await getClubUrl();
  
    try {
      // Get today's date in Brisbane timezone (AEST/AEDT)

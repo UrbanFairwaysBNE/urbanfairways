@@ -262,7 +262,7 @@ export default function AdminCustomerImport() {
           <CardContent className="space-y-4">
             <ol className="list-decimal list-inside space-y-2 text-sm">
               <li>Go to <strong>Marketing</strong> section</li>
-              <li>Create the <strong>"Birdies Hub Launch"</strong> campaign</li>
+              <li>Create the <strong>"Hub Launch"</strong> campaign</li>
               <li>Select <strong>All Customers</strong> as recipients</li>
               <li>Use the launch email template with:
                 <ul className="list-disc list-inside ml-6 mt-1 text-muted-foreground">

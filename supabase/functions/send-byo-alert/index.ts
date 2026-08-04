@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { getTenant } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,8 +7,6 @@ const corsHeaders = {
 };
 
 const CAMPAIGN_KEY = "byo_2026_05_30";
-const MESSAGE =
-  "Birdies Bayside: Heads up — staff are off sick tonight with no cover. BYO drinks/food welcome tonight only. Remote assistance available on 0481 600 981. Apologies for the inconvenience!";
 
 const log = (s: string, d?: unknown) =>
   console.log(`[BYO-ALERT] ${s}${d ? " " + JSON.stringify(d) : ""}`);
@@ -22,14 +21,14 @@ const formatPhoneForSMS = (phone: string | null): string | null => {
   return c;
 };
 
-const sendSMS = async (phone: string, message: string) => {
+const sendSMS = async (phone: string, message: string, senderName: string) => {
   const username = Deno.env.get("SMS_BROADCAST_USERNAME");
   const password = Deno.env.get("SMS_BROADCAST_PASSWORD");
   if (!username || !password) return { success: false, error: "no creds" };
   const formatted = formatPhoneForSMS(phone);
   if (!formatted) return { success: false, error: "bad phone" };
   const params = new URLSearchParams({
-    username, password, to: formatted, from: "Birdies", message,
+    username, password, to: formatted, from: senderName, message,
   });
   try {
     const r = await fetch(`https://api.smsbroadcast.com.au/api-adv.php?${params.toString()}`);
@@ -44,6 +43,10 @@ const sendSMS = async (phone: string, message: string) => {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  const tenant = await getTenant();
+  const MESSAGE =
+    `${tenant.venue_name}: Heads up — staff are off sick tonight with no cover. BYO drinks/food welcome tonight only. Remote assistance available on 0481 600 981. Apologies for the inconvenience!`;
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
@@ -109,7 +112,7 @@ Deno.serve(async (req) => {
       failed++;
       continue;
     }
-    const result = await sendSMS(prof.phone, MESSAGE);
+    const result = await sendSMS(prof.phone, MESSAGE, tenant.venue_name);
     await supabase.from("adhoc_sms_log").insert({
       booking_id: b.id,
       campaign_key: CAMPAIGN_KEY,

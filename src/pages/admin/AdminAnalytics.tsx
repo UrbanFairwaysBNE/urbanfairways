@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTenant } from "@/config/tenant";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const TIMEFRAME_OPTIONS: { value: AnalyticsTimeframe; label: string }[] = [
@@ -26,6 +27,7 @@ const TIMEFRAME_OPTIONS: { value: AnalyticsTimeframe; label: string }[] = [
 export default function AdminAnalytics() {
   const { isAdmin, isLoading: authLoading } = useAdminAuth();
   const [timeframe, setTimeframe] = useState<AnalyticsTimeframe>("30d");
+  const { tenant } = useTenant();
   const { data, isLoading, refetch, isFetching } = useAnalyticsData(timeframe);
 
   if (authLoading) {
@@ -65,7 +67,7 @@ export default function AdminAnalytics() {
               Analytics
             </h1>
             <p className="text-sm text-muted-foreground">
-              Key performance metrics for Birdies Bay Side
+              Key performance metrics for {tenant.venue_name}
             </p>
           </div>
           <div className="flex items-center gap-2">

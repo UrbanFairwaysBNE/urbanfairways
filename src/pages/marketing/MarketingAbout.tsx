@@ -2,10 +2,11 @@ import Seo from "@/components/Seo";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { ArrowRight, LayoutGrid, Monitor, BadgePercent, Trophy, Smartphone } from "lucide-react";
 import birdiesNeonSign from "@/assets/birdies-neon-sign.png.asset.json";
+import { useTenant, hubUrl } from "@/config/tenant";
 
 const HERO = "https://cdn.shopify.com/s/files/1/0758/7030/6550/files/Birdies_Golf.jpg?v=1751956878&width=3840";
 
-const highlights = [
+const getHighlights = (venueName: string) => [
   {
     icon: LayoutGrid,
     title: "6 Bay Centre",
@@ -24,28 +25,31 @@ const highlights = [
   {
     icon: Trophy,
     title: "Leagues & Comps",
-    body: "The Birdies League every week, plus our Wednesday 2-Man Ambrose competition.",
+    body: `The ${venueName} League every week, plus our Wednesday 2-Man Ambrose competition.`,
   },
   {
     icon: Smartphone,
-    title: "Official Birdies Hub App",
+    title: `Official ${venueName} Hub App`,
     body: "Track league rounds, view stats and progress, manage bookings, all in one place.",
   },
 ];
 
-const MarketingAbout = () => (
+const MarketingAbout = () => {
+  const { tenant } = useTenant();
+  const highlights = getHighlights(tenant.venue_name);
+  return (
   <MarketingLayout>
-    <Seo title={"About Birdies Bayside | Our Indoor Golf Centre"} description={"Meet Birdies Bayside: six fully automated simulator bays, tour-accurate launch data, 4K visuals and weekly competitions in Redland Bay."} path="/about" />
+    <Seo title={`About ${tenant.venue_name} | Our Indoor Golf Centre`} description={`Meet ${tenant.venue_name}: six fully automated simulator bays, tour-accurate launch data, 4K visuals and weekly competitions in Redland Bay.`} path="/about" />
     <section className="relative h-[17vh] min-h-[110px] flex items-end overflow-hidden">
       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${HERO})` }} />
       <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/70 to-primary/30" />
       <div className="relative container mx-auto px-4 pb-8">
         <p className="text-accent font-display tracking-[0.25em] uppercase text-xs mb-1.5">Welcome</p>
-        <h1 className="font-display text-3xl sm:text-5xl text-primary-foreground leading-none">About Birdies</h1>
+        <h1 className="font-display text-3xl sm:text-5xl text-primary-foreground leading-none">About {tenant.venue_name}</h1>
       </div>
     </section>
 
-    {/* WHAT IS BIRDIES */}
+    {/* WHAT WE ARE */}
     <section className="py-10 sm:py-20">
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="text-center max-w-2xl mx-auto mb-12">
@@ -89,11 +93,11 @@ const MarketingAbout = () => (
               The game has changed, and we are going all in.
             </p>
             <p>
-              We created Birdies to bring this revolution to life. Our space is all about giving our community the
+              We created {tenant.venue_name} to bring this revolution to life. Our space is all about giving our community the
               opportunity to practice, compete, and refine their game with ease.
             </p>
             <p>
-              Whether you're working on your swing or playing with friends, Birdies makes golf more accessible, more
+              Whether you're working on your swing or playing with friends, {tenant.venue_name} makes golf more accessible, more
               flexible, and far more convenient. No more 5-hour rounds, no more getting rained off, just great golf,
               when it suits you.
             </p>
@@ -101,7 +105,7 @@ const MarketingAbout = () => (
           </div>
         </div>
         <div className="rounded-2xl overflow-hidden shadow-xl aspect-[4/3]">
-          <img src={birdiesNeonSign.url} alt="Birdies neon sign" className="w-full h-full object-cover" />
+          <img src={birdiesNeonSign.url} alt={`${tenant.venue_name} neon sign`} className="w-full h-full object-cover" />
         </div>
       </div>
     </section>
@@ -113,10 +117,10 @@ const MarketingAbout = () => (
           Ready to Play?
         </h2>
         <p className="text-foreground/80 text-lg mb-8">
-          Join Birdies today and experience the future of golf in Redland Bay.
+          Join {tenant.venue_name} today and experience the future of golf in Redland Bay.
         </p>
         <a
-          href="https://hub.birdiesbayside.com.au/"
+          href={hubUrl(tenant, "/")}
           className="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-accent-foreground font-display tracking-wide uppercase px-7 py-3.5 rounded-md"
         >
           Book Now <ArrowRight className="h-4 w-4" />
@@ -124,6 +128,7 @@ const MarketingAbout = () => (
       </div>
     </section>
   </MarketingLayout>
-);
+  );
+};
 
 export default MarketingAbout;

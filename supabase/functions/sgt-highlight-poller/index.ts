@@ -37,7 +37,7 @@ const corsHeaders = {
 import { getClubUrl } from "../_shared/sgt-config.ts";
 
 const SGT_BASE_URL = "https://simulatorgolftour.com/sgt-api/club-admin";
-let SGT_CLUB = "birdiesbayside";
+let SGT_CLUB = "";
 
 // ---------- SGT embed helpers ----------
 async function fetchEmbedHtml(tournamentId: string): Promise<string | null> {

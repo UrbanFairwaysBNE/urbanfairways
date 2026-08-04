@@ -285,6 +285,7 @@ export default function AdminSettings() {
   // Email Templates
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
   const [emailTemplates, setEmailTemplates] = useState<EmailTemplateDB[]>([]);
+  const [templateToDelete, setTemplateToDelete] = useState<EmailTemplateDB | null>(null);
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(true);
   const [templateHtml, setTemplateHtml] = useState("");
   const [templateSubject, setTemplateSubject] = useState("");
@@ -382,6 +383,35 @@ export default function AdminSettings() {
     }
     setIsSavingTemplate(false);
   };
+
+  const deleteTemplate = async (template: EmailTemplateDB) => {
+    try {
+      const { error } = await supabase
+        .from("email_templates")
+        .delete()
+        .eq("id", template.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Template deleted",
+        description: `${template.name} has been removed.`,
+        duration: 3000,
+      });
+
+      setTemplateToDelete(null);
+      setSelectedTemplate((prev) => (prev?.id === template.id ? null : prev));
+      fetchEmailTemplates();
+    } catch (error: any) {
+      toast({
+        title: "Error deleting template",
+        description: error.message || "Failed to delete template.",
+        variant: "destructive",
+        duration: 4000,
+      });
+    }
+  };
+
 
   // Fetch bays, their devices, and upcoming bookings
   const fetchBays = async () => {

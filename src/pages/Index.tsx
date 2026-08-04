@@ -49,15 +49,13 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="bg-primary py-6 px-6 safe-area-top flex justify-center">
+      <main className="flex-1 flex flex-col items-center justify-center gap-8 p-6 safe-area-top">
         <img src={venueLogo} alt={tenant.venue_name} className="h-8" />
-      </header>
-
-      <main className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-md animate-fade-in">
           <AuthForm />
         </div>
       </main>
+
 
       <footer className="bg-primary py-4 px-6 text-center">
         <p className="text-primary-foreground/60 text-sm">

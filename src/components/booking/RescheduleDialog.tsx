@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { addDurationToTime } from "@/lib/pricing-utils";
 import { format, addDays, isToday, isBefore, startOfDay } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";

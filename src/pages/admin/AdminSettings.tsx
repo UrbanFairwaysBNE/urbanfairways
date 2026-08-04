@@ -869,10 +869,17 @@ export default function AdminSettings() {
 
           {/* General Settings */}
           <TabsContent value="general" className="space-y-4">
+            {/* Venue Details */}
+            <CollapsibleSection title="Venue Details" description="Venue name, contact details, domains and address used across the site, emails and legal pages">
+              <VenueDetailsSection />
+            </CollapsibleSection>
+
             {/* Activity Log */}
             <CollapsibleSection title="Activity Log" description="Recent authentication events and user activity">
               <ActivityLog />
             </CollapsibleSection>
+
+
 
 
             {/* Bay Management */}

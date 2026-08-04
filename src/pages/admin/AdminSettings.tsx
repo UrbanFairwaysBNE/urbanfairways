@@ -206,9 +206,8 @@ export default function AdminSettings() {
   const activeTab = (SETTINGS_TABS as readonly string[]).includes(tabParam) ? tabParam : "general";
   const { toast } = useToast();
 
-  // General settings - load from database
-  const [timezone, setTimezone] = useState("Australia/Sydney");
-  const [isLoadingTimezone, setIsLoadingTimezone] = useState(true);
+  // Timezone is hardcoded to Australia/Brisbane project-wide (no admin control)
+
 
   // League Highlights settings
   const [highlightRecordingEnabled, setHighlightRecordingEnabled] = useState(false);

@@ -28,8 +28,8 @@ const FIELDS: { key: keyof TenantSettings; label: string; placeholder?: string }
   { key: "suburb", label: "Suburb", placeholder: "Suburb" },
   { key: "state", label: "State", placeholder: "QLD" },
   { key: "postcode", label: "Postcode", placeholder: "4000" },
-  { key: "timezone", label: "Timezone", placeholder: "Australia/Brisbane" },
 ];
+
 
 const SOCIAL_KEYS = ["instagram", "facebook", "tiktok", "youtube"] as const;
 

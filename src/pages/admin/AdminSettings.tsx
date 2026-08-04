@@ -1336,6 +1336,14 @@ export default function AdminSettings() {
                             >
                               {template.is_active ? "On" : "Off"}
                             </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setTemplateToDelete(template)}
+                              className="h-8 w-8"
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
                           </div>
                         </div>
                       </div>
@@ -1433,18 +1441,53 @@ export default function AdminSettings() {
                   </p>
                 </div>
 
-                <div className="flex gap-2 justify-end">
-                  <Button variant="outline" onClick={() => setSelectedTemplate(null)}>
-                    Cancel
+                <div className="flex flex-wrap gap-2 justify-between">
+                  <Button
+                    variant="outline"
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => {
+                      const match = emailTemplates.find((t) => t.id === selectedTemplate.id);
+                      if (match) setTemplateToDelete(match);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
                   </Button>
-                  <Button onClick={saveTemplate} disabled={isSavingTemplate}>
-                    {isSavingTemplate ? "Saving..." : "Save Template"}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => setSelectedTemplate(null)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={saveTemplate} disabled={isSavingTemplate}>
+                      {isSavingTemplate ? "Saving..." : "Save Template"}
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Delete Email Template Confirmation */}
+        <AlertDialog open={!!templateToDelete} onOpenChange={(open) => !open && setTemplateToDelete(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete "{templateToDelete?.name}"?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This permanently removes the template. Any notification using it will fall back to the default content.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => templateToDelete && deleteTemplate(templateToDelete)}
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
 
         {/* Email Template Preview Dialog */}
         <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>

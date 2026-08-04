@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { Check, Clock, DollarSign, Trophy, Target, ArrowRight, BarChart3, Crosshair, TrendingUp, Activity, Gauge } from "lucide-react";
 import venueInterior from "@/assets/venue-interior.jpg";
+import simBayImage from "@/assets/sim-bay.webp.asset.json";
 import heroVideo from "@/assets/hero-video.mp4.asset.json";
 
 import swingLabBadge from "@/assets/swing-lab-badge.png.asset.json";

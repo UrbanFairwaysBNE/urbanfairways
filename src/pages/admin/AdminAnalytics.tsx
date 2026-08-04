@@ -65,7 +65,7 @@ export default function AdminAnalytics() {
               Analytics
             </h1>
             <p className="text-sm text-muted-foreground">
-              Key performance metrics for Birdies Bay Side
+              Key performance metrics for {tenant.venue_name}
             </p>
           </div>
           <div className="flex items-center gap-2">

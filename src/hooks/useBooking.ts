@@ -407,13 +407,29 @@ export function useBooking() {
     }
     
     const holidaySurchargePercent = getHolidaySurchargeForDate(date);
-    
+
     // Calculate rate based on tier, date, and time
     return calculateHourlyRate(tier, date, startTime, tierPricing, { 
       segment: customSegment, 
       holidaySurchargePercent,
+      isPublicHoliday: isPublicHolidayDate(date),
     });
   };
+
+  /**
+   * Total price for a session, applying any casual special (e.g. 90min for $60)
+   * when it beats the standard hourly rate for that exact session length.
+   */
+  const getBookingTotal = useCallback((
+    hourlyRateForSlot: number,
+    durationHours: number,
+    date?: Date,
+    startTime?: string
+  ): { total: number; special: PricingSpecial | null } => {
+    const peak = date && startTime ? isPeakTime(date, startTime, isPublicHolidayDate(date)) : false;
+    return calculateBookingTotal(hourlyRateForSlot, durationHours, pricingSpecials, peak);
+  }, [pricingSpecials, isPublicHolidayDate]);
+
 
   /**
    * Check if an off-peak-only tier can book at member rate for a given time

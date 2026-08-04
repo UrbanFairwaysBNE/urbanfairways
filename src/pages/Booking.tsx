@@ -662,6 +662,8 @@ export default function Booking() {
               selectedDate={selectedDate}
               selectedTime={selectedTime}
               selectedDuration={selectedDuration}
+              durations={availableDurations}
+
               selectedPlayers={selectedPlayers}
               onDateChange={handleDateChange}
               onTimeChange={handleTimeChange}

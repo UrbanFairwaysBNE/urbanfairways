@@ -4,7 +4,7 @@ import { AuthForm } from "@/components/auth/AuthForm";
 import { useAuth } from "@/hooks/useAuth";
 import { isHubHost } from "@/lib/hub-host";
 import venueLogo from "@/assets/venue-logo-dark.png";
-import venueAppIcon from "@/assets/venue-app-icon.png";
+import { BrandLoader } from "@/components/brand/BrandLoader";
 import MarketingHome from "./marketing/MarketingHome";
 import { useTenant } from "@/config/tenant";
 
@@ -41,8 +41,7 @@ const Index = () => {
   if (authLoading || isAuthenticated) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background safe-area-top safe-area-bottom">
-        <img src={venueAppIcon} alt={tenant.venue_name} className="h-20 mb-6" />
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+        <BrandLoader />
       </div>
     );
   }

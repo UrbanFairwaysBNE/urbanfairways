@@ -53,35 +53,33 @@ const MarketingTPI = () => {
             </figcaption>
           </figure>
 
-          <div>
-            <div className="space-y-4 text-foreground/80 leading-relaxed">
-
-                <p>
-                  I'm a dedicated golf coach specializing in a results-driven blend of TPI (Titleist Performance
-                  Institute) methods, traditional coaching principles, and advanced swing analysis.
-                </p>
-                <p>
-                  My approach goes beyond simply fixing your swing — I focus on how your body moves, identifying
-                  physical limitations and movement patterns that directly impact performance.
-                </p>
-                <p>
-                  Using TPI screening, I assess mobility, stability, and biomechanics to build a swing that works with
-                  your body, not against it. Combined with proven traditional coaching techniques and detailed video
-                  analysis, I help golfers of all levels develop more efficient, consistent, and powerful swings.
-                </p>
-                <p>
-                  Whether you're looking to improve accuracy, increase distance all whilst playing pain free golf, my
-                  coaching is tailored to your individual needs, goals, and physical capabilities.
-                </p>
-                <p>The result is a smarter, more sustainable path to better golf.</p>
-                <p className="font-display text-primary text-xl tracking-wide uppercase">
-                  Train with purpose. Move better. Play better.
-                </p>
-              </div>
-            </div>
+          <div className="space-y-4 text-foreground/80 leading-relaxed">
+            <p>
+              I'm a dedicated golf coach specializing in a results-driven blend of TPI (Titleist Performance
+              Institute) methods, traditional coaching principles, and advanced swing analysis.
+            </p>
+            <p>
+              My approach goes beyond simply fixing your swing — I focus on how your body moves, identifying
+              physical limitations and movement patterns that directly impact performance.
+            </p>
+            <p>
+              Using TPI screening, I assess mobility, stability, and biomechanics to build a swing that works with
+              your body, not against it. Combined with proven traditional coaching techniques and detailed video
+              analysis, I help golfers of all levels develop more efficient, consistent, and powerful swings.
+            </p>
+            <p>
+              Whether you're looking to improve accuracy, increase distance all whilst playing pain free golf, my
+              coaching is tailored to your individual needs, goals, and physical capabilities.
+            </p>
+            <p>The result is a smarter, more sustainable path to better golf.</p>
+            <p className="font-display text-primary text-xl tracking-wide uppercase">
+              Train with purpose. Move better. Play better.
+            </p>
           </div>
+          <div className="clear-both" />
         </div>
       </section>
+
 
 
       <section className="py-12 sm:py-20 bg-secondary/40">

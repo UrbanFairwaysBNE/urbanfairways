@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Trophy } from "lucide-react";
 import { format } from "date-fns";
-import venueLogo from "@/assets/venue-logo-mark.png";
+import venueLogo from "@/assets/venue-logo-mark-dark.png";
 import { useTenant } from "@/config/tenant";
 
 export default function EmbedTVLocalComp() {

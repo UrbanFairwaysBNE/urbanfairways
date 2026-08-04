@@ -6,7 +6,7 @@ import { useActiveTourData } from "@/hooks/useActiveTourData";
 import { useSGTTournamentStandings } from "@/hooks/useSGTEmbedData";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import venueMark from "@/assets/venue-logo-mark.png";
+import venueMark from "@/assets/venue-logo-mark-dark.png";
 import { useIframeAutoResize } from "@/hooks/useIframeAutoResize";
 import { TournamentStatsView } from "@/components/sgt/TournamentStatsView";
 import { useTenant, hubUrl } from "@/config/tenant";

@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSGTTournamentStandings } from "@/hooks/useSGTEmbedData";
 import { useActiveTourData } from "@/hooks/useActiveTourData";
 import { supabase } from "@/integrations/supabase/client";
-import venueMark from "@/assets/venue-logo-mark.png";
+import venueMark from "@/assets/venue-logo-mark-dark.png";
 import { useIframeAutoResize } from "@/hooks/useIframeAutoResize";
 import { useTenant } from "@/config/tenant";
 

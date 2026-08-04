@@ -1,4 +1,5 @@
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { usePricing } from "@/hooks/usePricing";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, DollarSign, TrendingUp, Users, UserCheck, Repeat, ChevronDown } from "lucide-react";
@@ -51,6 +52,12 @@ const tierDisplayNames: Record<string, string> = {
 
 export default function AdminDashboard() {
   const { isAdmin, isLoading } = useAdminAuth();
+  const { pricing, defaultTier, memberTiers } = usePricing();
+  const walkInTier = defaultTier?.tier ?? "visitor";
+  const memberTierLabels: Record<string, string> = {
+    all: "All Members",
+    ...Object.fromEntries(pricing.map((t) => [t.tier, t.display_name])),
+  };
   const [stats, setStats] = useState<DashboardStats>({
     bookings: 0,
     revenue: 0,

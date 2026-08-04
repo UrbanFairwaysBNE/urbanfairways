@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { usePricing } from "@/hooks/usePricing";
 import { format } from "date-fns";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -94,6 +95,7 @@ const SEGMENT_OPTIONS = [
 
 export default function AdminMarketing() {
   const { isLoading: authLoading, isAdmin } = useAdminAuth();
+  const { pricing } = usePricing();
   const { toast } = useToast();
   
   const [activeTab, setActiveTab] = useState("campaigns");

@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import { usePricing } from "@/hooks/usePricing";
+import { tierBadgeClass } from "@/lib/tier-config";
 import { useOperatingHours } from "@/hooks/useOperatingHours";
 import { format, addDays, isSameDay } from "date-fns";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -113,6 +115,7 @@ const FALLBACK_END_HOUR = 23;
 
 export default function AdminTimetable() {
   const { isAdmin, isLoading: authLoading } = useAdminAuth();
+  const { pricing } = usePricing();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { globalWindow } = useOperatingHours();

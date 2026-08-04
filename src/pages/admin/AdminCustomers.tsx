@@ -1,4 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
+import { usePricing } from "@/hooks/usePricing";
+import { tierBadgeClass } from "@/lib/tier-config";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -114,6 +116,7 @@ const DEFAULT_COLUMNS: ColumnConfig[] = [
 
 export default function AdminCustomers() {
   const { isAdmin, isLoading: authLoading } = useAdminAuth();
+  const { pricing } = usePricing();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();

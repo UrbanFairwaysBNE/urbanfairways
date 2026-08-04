@@ -1,15 +1,12 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
+import { loadTiers, calculateTierHourlyRate, TierRow } from "../_shared/tiers.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
-
-// Pricing constants (must match frontend)
-const VISITOR_PEAK_RATE = 35;
-const VISITOR_OFF_PEAK_RATE = 30;
 
 /**
  * Determines if a given date and time is during peak hours.
@@ -134,19 +131,9 @@ serve(async (req) => {
       balance: profile.deposit_balance 
     });
 
-    // Fetch pricing config
-    const { data: pricingRows, error: pricingError } = await supabaseAdmin
-      .from("pricing_config")
-      .select("tier, hourly_rate");
-
-    const pricingConfig: Record<string, number> = {};
-    if (pricingRows) {
-      pricingRows.forEach((row: { tier: string; hourly_rate: number }) => {
-        pricingConfig[row.tier.toLowerCase()] = row.hourly_rate;
-      });
-    }
-
-    console.log("[RESCHEDULE] Pricing config:", pricingConfig);
+    // Tier metadata is fully data-driven
+    const tiers = await loadTiers(supabaseAdmin);
+    console.log("[RESCHEDULE] Tiers configured:", tiers.length);
 
     // Calculate new end time based on duration
     const [startHours, startMinutes] = new_start_time.split(":").map(Number);
@@ -158,7 +145,7 @@ serve(async (req) => {
       profile.membership_tier,
       new_date,
       new_start_time,
-      pricingConfig,
+      tiers,
       profile.custom_hourly_rate
     );
 

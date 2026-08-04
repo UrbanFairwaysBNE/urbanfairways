@@ -35,7 +35,7 @@ const WelcomePreview = () => {
       
       <div className="welcome-container text-center">
         <img 
-          src="/birdies-welcome-logo.png" 
+          src="/venue-welcome-logo.png" 
           alt={tenant.venue_name} 
           className="w-[210px] mx-auto mb-12"
           style={{ filter: 'drop-shadow(0 10px 30px rgba(31, 76, 37, 0.15))' }}

@@ -39,7 +39,7 @@ const EmbedTVStatsCurrentWeek = lazy(() => import("./pages/EmbedTVStatsCurrentWe
 const EmbedTVStatsPreviousWeek = lazy(() => import("./pages/EmbedTVStatsPreviousWeek"));
 const CardAdded = lazy(() => import("./pages/CardAdded"));
 const WelcomePreview = lazy(() => import("./pages/WelcomePreview"));
-const BirdiesGuide = lazy(() => import("./pages/BirdiesGuide"));
+const QuickStartGuide = lazy(() => import("./pages/QuickStartGuide"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const BayOrder = lazy(() => import("./pages/BayOrder"));
@@ -249,7 +249,7 @@ const App = () => {
             <Route path="/bay-controller" element={<BayController />} />
             <Route path="/card-added" element={<CardAdded />} />
             <Route path="/welcome-preview" element={<WelcomePreview />} />
-            <Route path="/birdies-guide" element={<BirdiesGuide />} />
+            <Route path="/quick-start-guide" element={<QuickStartGuide />} />
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/order/:bayNumber" element={<BayOrder />} />

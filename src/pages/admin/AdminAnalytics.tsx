@@ -27,6 +27,7 @@ const TIMEFRAME_OPTIONS: { value: AnalyticsTimeframe; label: string }[] = [
 export default function AdminAnalytics() {
   const { isAdmin, isLoading: authLoading } = useAdminAuth();
   const [timeframe, setTimeframe] = useState<AnalyticsTimeframe>("30d");
+  const { tenant } = useTenant();
   const { data, isLoading, refetch, isFetching } = useAnalyticsData(timeframe);
 
   if (authLoading) {

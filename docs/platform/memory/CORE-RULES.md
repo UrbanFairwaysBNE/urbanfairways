@@ -1,17 +1,20 @@
 # Core Rules — paste into the new project's Knowledge settings
 
-This is an export of the Birdies Hub project memory. Paste the whole file into
+This is the portable rule set for the platform. Paste the whole file into
 Project Settings → Knowledge in any remixed project so the agent loads it on every
-message. Delete any Birdies-specific line that no longer applies once the project is
-de-branded.
+message. The brand block is the only section a client project should need to edit.
 
 ---
 
 ## Non-negotiable rules
 
-- **Timezone**: use explicit `Australia/Brisbane` (AEST/UTC+10, no DST) for ALL date logic
-  and ALL displayed/reported times, including chat answers and audits. Never use a bare
-  `toLocaleString()` — use the helpers in `src/lib/brisbane-time.ts`.
+- **Timezone**: use one explicit venue timezone (Baseline default `Australia/Brisbane`,
+  AEST/UTC+10, no DST) for ALL date logic and ALL displayed/reported times, including chat
+  answers and audits. Never use a bare `toLocaleString()` — use the helpers in
+  `src/lib/brisbane-time.ts`.
+- **Tenant values**: venue name, domains, emails, phone and address always come from
+  `tenant_settings` via `src/config/tenant.ts` (frontend) or
+  `supabase/functions/_shared/tenant.ts` (edge functions). Never hardcode a venue literal.
 - **Edge functions**: `npm:` imports, native `Deno.serve`, full CORS headers on every
   response including OPTIONS. `SUPABASE_SERVICE_ROLE_KEY` bypasses RLS — use it only for
   automated/admin paths.
@@ -24,19 +27,27 @@ de-branded.
 - **TypeScript**: `ReturnType<typeof setTimeout>`, not `NodeJS.Timeout`.
 - **Design**: semantic tokens only, never hardcoded colour utilities.
 - **Emails**: always wrap bodies with `_shared/email-wrapper.ts`; absolute URLs only.
-- **Stripe**: API version `2025-07-30.basil`; webhooks run with `verify_jwt = false`.
+- **Stripe**: API version `2025-08-27.basil`; webhooks run with `verify_jwt = false`.
+  A user may have at most ONE active subscription — switch tiers in place with proration
+  and `billing_cycle_anchor: "unchanged"`, never cancel-then-create. Grant tiers only on
+  the `active` subscription webhook; dedupe every event via `stripe_processed_events`.
+- **Pricing**: rates and tier behaviour are server-authoritative and admin-editable in
+  `pricing_config`. Never trust a price from the browser, never use ad-hoc `price_data`,
+  and never branch on a hardcoded tier name — read the flags on the tier row.
 - **Product philosophy**: prioritise customer UX simplicity and low-friction payments over
   complex automated security or cleanup measures.
 
-## Brand (Birdies — replace per client)
+## Brand (replace per client)
 
-Dark theme, minimal. Base green `#1F4C25`, brand orange `#EC622D`, cream `#FFF5E4`.
-Anton headings, Inter body. Over-par scores render blue.
+Baseline ships a neutral theme: graphite primary `#2F3134`, muted amber accent `#B5772A`,
+warm neutral surface `#F5F3EF`, neutral display/body font pairing. Over-par scores render
+blue.
 
 ## Architecture
 
 - One shared database serves the public booking site and the Hub (admin/league) on a
-  separate subdomain; navigation is restricted by domain.
+  separate subdomain; navigation is restricted by domain. In Baseline the Hub is also
+  reachable at `/hub` or `?hub=1` (see `src/lib/hub-host.ts`).
 - Bay Controller is a single-instance Electron app whose WebViews load the Hub domain.
   The Welcome Window is the one hardcoded inline HTML exception.
 - Bay Controller automation is an explicit state machine: IDLE → PRE_START → …
@@ -56,14 +67,16 @@ Hard stop for recordings is T−120s. Watchdog restarts the app every 30s if clo
   `billing_cycle_anchor: "unchanged"` — never create a second subscription.
 - Payment failure ladder: 1st failure → cancel + refund future bookings, flag
   `profiles.payment_failed_at`, force visitor pricing (still bookable), send a heads-up
-  email. 2nd failure → downgrade to visitor and void the invoice. Self-serve retry via
-  `MembershipPaymentIssueDialog`. `payment_succeeded` clears the flag.
+  email. 2nd failure → downgrade to the default visitor tier and void the invoice.
+  Self-serve retry via `MembershipPaymentIssueDialog`. `payment_succeeded` clears the flag.
 - All webhooks are guarded by `stripe_processed_events` idempotency.
+- League eligibility comes from `pricing_config.grants_league_access`, never a tier name.
 
 ## League
 
 - SGT registration order is club → tour → tournament, always.
-- Tournaments start Sunday, end Monday (Brisbane). 6:00am auto-register, 6:00am auto-close.
+- Tournaments start Sunday, end Monday (venue timezone). 6:00am auto-register, 6:00am
+  auto-close.
 - Players are provisional until 3 full 18-hole rounds; shown as `(E)`; true handicap set
   from the best 3 of the last 6; monthly points accrue from the 4th round.
 - Only complete 18-hole rounds (18 distinct hole entries) count toward handicaps and stats.

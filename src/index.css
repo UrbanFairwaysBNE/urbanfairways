@@ -2,11 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Baseline Design System — neutral placeholder brand.
-   Replace these values per client; keep the token structure intact.
-   - Graphite (#1c1f24): HSL 220 4% 20%  - Header/Primary
-   - Muted amber (#5f6f52): HSL 32 62% 44% - Accents/CTAs
-   - Warm neutral (#f4f1eb): HSL 40 20% 95% - Background
+/* Urban Fairways Design System
+   - Charcoal (#1C1F24): HSL 218 13% 13%  - Header/Primary
+   - Fairway green (#5F6F52): HSL 93 15% 38% - Accents/CTAs
+   - Warm linen (#F4F1EB): HSL 40 29% 94% - Background
 */
 
 @layer base {

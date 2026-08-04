@@ -103,8 +103,8 @@ const MarketingCoaching = () => {
           </Tile>
 
           {/* Ladies beginner group classes */}
-          <Tile>
-            <Eyebrow>Coming Soon</Eyebrow>
+          <Tile id="ladies">
+            <Eyebrow>Ladies</Eyebrow>
             <h2 className="font-display text-3xl sm:text-4xl text-primary leading-tight mb-6">
               Ladies Beginner Group Classes
             </h2>

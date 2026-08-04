@@ -13,9 +13,9 @@ import { useTenant, hubUrl } from "@/config/tenant";
 
 
 // Brand tokens (locked to iframe so it renders consistently inside Shopify)
-const GREEN = "hsl(220,4%,20%)";
-const ORANGE = "hsl(32,62%,44%)";
-const CREAM = "hsl(40,20%,95%)";
+const GREEN = "hsl(218,13%,13%)";
+const ORANGE = "hsl(93,15%,38%)";
+const CREAM = "hsl(40,29%,94%)";
 const CREAM_DEEP = "hsl(37,40%,90%)";
 const MUTED = "hsl(128,20%,40%)";
 const BORDER = "hsl(128,20%,85%)";
@@ -253,7 +253,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
         <div className="bg-white rounded-2xl border shadow-sm overflow-hidden" style={{ borderColor: BORDER }}>
           <button
             onClick={() => setWeeklyOpen(!weeklyOpen)}
-            className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-[hsl(40,20%,97%)] transition-colors"
+            className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-[hsl(40,29%,97%)] transition-colors"
           >
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: CREAM_DEEP, color: GREEN }}>
@@ -383,7 +383,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
         <div className="bg-white rounded-2xl border shadow-sm overflow-hidden" style={{ borderColor: BORDER }}>
           <button
             onClick={() => setMonthlyOpen(!monthlyOpen)}
-            className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-[hsl(40,20%,97%)] transition-colors"
+            className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-[hsl(40,29%,97%)] transition-colors"
           >
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: CREAM_DEEP, color: GREEN }}>
@@ -448,7 +448,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
         <div className="bg-white rounded-2xl border shadow-sm overflow-hidden" style={{ borderColor: BORDER }}>
           <button
             onClick={() => setAmbroseOpen(!ambroseOpen)}
-            className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-[hsl(40,20%,97%)] transition-colors"
+            className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-[hsl(40,29%,97%)] transition-colors"
           >
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: CREAM_DEEP, color: GREEN }}>
@@ -598,7 +598,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
 
 function FooterCTA({ href, label }: { href: string; label: string }) {
   return (
-    <a href={href} className="block px-5 py-3 border-t text-xs font-bold uppercase tracking-widest text-center transition-colors hover:bg-[hsl(40,20%,97%)]"
+    <a href={href} className="block px-5 py-3 border-t text-xs font-bold uppercase tracking-widest text-center transition-colors hover:bg-[hsl(40,29%,97%)]"
       style={{ borderColor: BORDER, color: ORANGE }}>
       {label} →
     </a>

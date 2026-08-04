@@ -1,18 +1,16 @@
 import Seo from "@/components/Seo";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { Phone, Mail, MapPin } from "lucide-react";
+import venueInterior from "@/assets/venue-interior.jpg";
 import { useTenant, formatTenantAddress } from "@/config/tenant";
-
-const HERO = "https://cdn.shopify.com/s/files/1/0758/7030/6550/files/Birdies_Golf.jpg?v=1751956878&width=3840";
-const MAP_IMG = "https://cdn.shopify.com/s/files/1/0758/7030/6550/files/WE_ARE_HERE.png?v=1755590019&width=3840";
 
 const MarketingContact = () => {
   const { tenant } = useTenant();
   return (
   <MarketingLayout>
-    <Seo title={`Contact ${tenant.venue_name} | Redland Bay Indoor Golf`} description={`Get in touch with ${tenant.venue_name}. Find our Redland Bay address, phone number, staffed hours and directions to the centre.`} path="/contact" />
+    <Seo title={`Contact ${tenant.venue_name} | Indoor Golf`} description={`Get in touch with ${tenant.venue_name}. Find our address, phone number, staffed hours and directions to the centre.`} path="/contact" />
     <section className="relative h-[22vh] min-h-[160px] flex items-end overflow-hidden">
-      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${HERO})` }} />
+      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${venueInterior})` }} />
       <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/70 to-primary/30" />
       <div className="relative container mx-auto px-4 pb-6">
         <p className="text-accent font-display tracking-[0.25em] uppercase text-xs mb-1.5">Get in Touch</p>
@@ -34,9 +32,7 @@ const MarketingContact = () => {
             <ContactRow icon={MapPin} label="Address" value={formatTenantAddress(tenant)} />
           </div>
 
-          <div className="mt-10 rounded-xl overflow-hidden border border-border">
-            <img src={MAP_IMG} alt={`${tenant.venue_name} location map`} className="w-full h-auto" />
-          </div>
+
         </div>
 
         {/* Contact form */}

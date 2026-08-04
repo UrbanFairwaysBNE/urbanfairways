@@ -1,31 +1,29 @@
 import Seo from "@/components/Seo";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { ArrowRight, LayoutGrid, Monitor, BadgePercent, Trophy, Smartphone } from "lucide-react";
-import birdiesNeonSign from "@/assets/venue-interior.jpg";
+import venueInterior from "@/assets/venue-interior.jpg";
 import { useTenant, hubUrl } from "@/config/tenant";
-
-const HERO = "https://cdn.shopify.com/s/files/1/0758/7030/6550/files/Birdies_Golf.jpg?v=1751956878&width=3840";
 
 const getHighlights = (venueName: string) => [
   {
     icon: LayoutGrid,
-    title: "6 Bay Centre",
-    body: "Six fully automated simulator bays, book any time that suits you.",
+    title: "Multi-Bay Centre",
+    body: "Fully automated simulator bays, book any time that suits you.",
   },
   {
     icon: Monitor,
     title: "Top of the Range Tech",
-    body: "Tour-accurate launch data, 4K visuals, and 2,300+ world-famous courses.",
+    body: "Tour-accurate launch data, 4K visuals, and a huge library of world-famous courses.",
   },
   {
     icon: BadgePercent,
     title: "Competitive Visitor Rates",
-    body: "Off-peak from $30/hr, peak from $35/hr per bay, up to 4 players.",
+    body: "Simple off-peak and peak pricing per bay, for groups of players.",
   },
   {
     icon: Trophy,
     title: "Leagues & Comps",
-    body: `The ${venueName} League every week, plus our Wednesday 2-Man Ambrose competition.`,
+    body: `The ${venueName} League every week, plus regular local competitions.`,
   },
   {
     icon: Smartphone,
@@ -39,9 +37,9 @@ const MarketingAbout = () => {
   const highlights = getHighlights(tenant.venue_name);
   return (
   <MarketingLayout>
-    <Seo title={`About ${tenant.venue_name} | Our Indoor Golf Centre`} description={`Meet ${tenant.venue_name}: six fully automated simulator bays, tour-accurate launch data, 4K visuals and weekly competitions in Redland Bay.`} path="/about" />
+    <Seo title={`About ${tenant.venue_name} | Indoor Golf Centre`} description={`Meet ${tenant.venue_name}: automated simulator bays, tour-accurate launch data, 4K visuals and weekly competitions.`} path="/about" />
     <section className="relative h-[17vh] min-h-[110px] flex items-end overflow-hidden">
-      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${HERO})` }} />
+      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${venueInterior})` }} />
       <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/70 to-primary/30" />
       <div className="relative container mx-auto px-4 pb-8">
         <p className="text-accent font-display tracking-[0.25em] uppercase text-xs mb-1.5">Welcome</p>
@@ -55,7 +53,7 @@ const MarketingAbout = () => {
         <div className="text-center max-w-2xl mx-auto mb-12">
           <p className="text-accent font-display tracking-[0.2em] uppercase text-sm mb-3">What We Are</p>
           <h2 className="font-display text-4xl sm:text-5xl text-primary leading-tight">
-            Redland Bay's Premier Indoor Golf Centre
+            A Premier Indoor Golf Centre
           </h2>
           <p className="mt-4 text-foreground/80 text-lg leading-relaxed">
             World-class golf simulators, a welcoming local community, and flexible access so you can play, practice, and compete on your schedule.
@@ -117,7 +115,7 @@ const MarketingAbout = () => {
           Ready to Play?
         </h2>
         <p className="text-foreground/80 text-lg mb-8">
-          Join {tenant.venue_name} today and experience the future of golf in Redland Bay.
+          Join {tenant.venue_name} today and experience the future of golf.
         </p>
         <a
           href={hubUrl(tenant, "/")}

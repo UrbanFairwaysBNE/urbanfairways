@@ -6,6 +6,7 @@ import { useTenant, hubUrl } from "@/config/tenant";
 
 const playLinks = [
   { to: "/about", label: "About" },
+  { to: "/coaching", label: "Coaching" },
   { to: "/staffed-hours", label: "Staffed Hours" },
   { to: "/faqs", label: "FAQs" },
 ];

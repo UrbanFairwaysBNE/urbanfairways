@@ -2,114 +2,114 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Birdies Design System
-   Brand Colors:
-   - Green (#1f4c25): HSL 128 42% 21% - Header/Primary
-   - Burnt Orange (#ec622d): HSL 18 84% 55% - Accents/CTAs
-   - Cream (#fff5e4): HSL 37 100% 95% - Background
+/* Baseline Design System — neutral placeholder brand.
+   Replace these values per client; keep the token structure intact.
+   - Graphite (#2f3134): HSL 220 4% 20%  - Header/Primary
+   - Muted amber (#b5772a): HSL 32 62% 44% - Accents/CTAs
+   - Warm neutral (#f5f3ef): HSL 40 20% 95% - Background
 */
 
 @layer base {
   :root {
-    /* Birdies Cream Background */
-    --background: 37 100% 95%;
-    --foreground: 128 42% 15%;
+    /* Warm neutral background */
+    --background: 40 20% 95%;
+    --foreground: 220 6% 14%;
 
     /* Cards slightly lighter than background */
-    --card: 37 100% 98%;
-    --card-foreground: 128 42% 15%;
+    --card: 40 20% 98%;
+    --card-foreground: 220 6% 14%;
 
-    --popover: 37 100% 98%;
-    --popover-foreground: 128 42% 15%;
+    --popover: 40 20% 98%;
+    --popover-foreground: 220 6% 14%;
 
-    /* Primary: Birdies Green */
-    --primary: 128 42% 21%;
-    --primary-foreground: 37 100% 95%;
+    /* Primary: graphite */
+    --primary: 220 4% 20%;
+    --primary-foreground: 40 20% 97%;
 
-    /* Secondary: Lighter green */
-    --secondary: 128 30% 90%;
-    --secondary-foreground: 128 42% 21%;
+    /* Secondary: light neutral */
+    --secondary: 220 6% 90%;
+    --secondary-foreground: 220 4% 20%;
 
     /* Muted tones */
-    --muted: 37 40% 90%;
-    --muted-foreground: 128 20% 40%;
+    --muted: 40 12% 90%;
+    --muted-foreground: 220 5% 42%;
 
-    /* Accent: Burnt Orange */
-    --accent: 18 84% 55%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent: muted amber */
+    --accent: 32 62% 44%;
+    --accent-foreground: 40 20% 97%;
 
     /* Destructive */
-    --destructive: 0 84% 60%;
+    --destructive: 0 72% 45%;
     --destructive-foreground: 0 0% 100%;
 
     /* Borders */
-    --border: 128 20% 85%;
-    --input: 128 20% 85%;
-    --ring: 18 84% 55%;
+    --border: 220 8% 85%;
+    --input: 220 8% 85%;
+    --ring: 32 62% 44%;
 
     --radius: 0.5rem;
 
-    /* Sidebar - Green theme */
-    --sidebar-background: 128 42% 21%;
-    --sidebar-foreground: 37 100% 95%;
-    --sidebar-primary: 18 84% 55%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 128 42% 28%;
-    --sidebar-accent-foreground: 37 100% 95%;
-    --sidebar-border: 128 42% 28%;
-    --sidebar-ring: 18 84% 55%;
+    /* Sidebar - graphite theme */
+    --sidebar-background: 220 4% 20%;
+    --sidebar-foreground: 40 20% 97%;
+    --sidebar-primary: 32 62% 44%;
+    --sidebar-primary-foreground: 40 20% 97%;
+    --sidebar-accent: 220 4% 27%;
+    --sidebar-accent-foreground: 40 20% 97%;
+    --sidebar-border: 220 4% 27%;
+    --sidebar-ring: 32 62% 44%;
 
-    /* Custom Birdies tokens */
-    --brand-primary: 128 42% 21%;
-    --brand-accent: 18 84% 55%;
-    --brand-surface: 37 100% 95%;
-    --brand-primary-light: 128 30% 35%;
-    --brand-accent-light: 18 84% 65%;
-    
-    /* League Hub - Premium Gold/Amber theme */
-    --league-primary: 45 93% 47%;
-    --league-primary-dark: 38 92% 40%;
-    --league-foreground: 30 30% 15%;
+    /* Custom brand tokens */
+    --brand-primary: 220 4% 20%;
+    --brand-accent: 32 62% 44%;
+    --brand-surface: 40 20% 95%;
+    --brand-primary-light: 220 5% 34%;
+    --brand-accent-light: 32 62% 56%;
+
+    /* League Hub - neutral bronze theme */
+    --league-primary: 36 45% 45%;
+    --league-primary-dark: 33 44% 36%;
+    --league-foreground: 30 10% 15%;
   }
 
   .dark {
-    /* Dark mode - inverted Birdies palette */
-    --background: 128 42% 10%;
-    --foreground: 37 100% 95%;
+    /* Dark mode - inverted neutral palette */
+    --background: 220 6% 10%;
+    --foreground: 40 20% 95%;
 
-    --card: 128 42% 15%;
-    --card-foreground: 37 100% 95%;
+    --card: 220 6% 14%;
+    --card-foreground: 40 20% 95%;
 
-    --popover: 128 42% 15%;
-    --popover-foreground: 37 100% 95%;
+    --popover: 220 6% 14%;
+    --popover-foreground: 40 20% 95%;
 
-    --primary: 18 84% 55%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 32 62% 48%;
+    --primary-foreground: 220 6% 10%;
 
-    --secondary: 128 42% 21%;
-    --secondary-foreground: 37 100% 95%;
+    --secondary: 220 5% 20%;
+    --secondary-foreground: 40 20% 95%;
 
-    --muted: 128 30% 20%;
-    --muted-foreground: 37 40% 70%;
+    --muted: 220 5% 20%;
+    --muted-foreground: 40 12% 70%;
 
-    --accent: 18 84% 55%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 32 62% 48%;
+    --accent-foreground: 220 6% 10%;
 
     --destructive: 0 62% 40%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 128 30% 25%;
-    --input: 128 30% 25%;
-    --ring: 18 84% 55%;
+    --border: 220 5% 24%;
+    --input: 220 5% 24%;
+    --ring: 32 62% 48%;
 
-    --sidebar-background: 128 42% 8%;
-    --sidebar-foreground: 37 100% 95%;
-    --sidebar-primary: 18 84% 55%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 128 42% 15%;
-    --sidebar-accent-foreground: 37 100% 95%;
-    --sidebar-border: 128 42% 15%;
-    --sidebar-ring: 18 84% 55%;
+    --sidebar-background: 220 6% 8%;
+    --sidebar-foreground: 40 20% 95%;
+    --sidebar-primary: 32 62% 48%;
+    --sidebar-primary-foreground: 220 6% 10%;
+    --sidebar-accent: 220 6% 14%;
+    --sidebar-accent-foreground: 40 20% 95%;
+    --sidebar-border: 220 6% 14%;
+    --sidebar-ring: 32 62% 48%;
   }
 }
 
@@ -155,7 +155,7 @@
 
   /* Stat Card Styling */
   .stat-card {
-    @apply bg-white rounded-2xl p-5 shadow-sm border border-border/50;
+    @apply bg-card rounded-2xl p-5 shadow-sm border border-border/50;
   }
 
   /* Hero section for profile */

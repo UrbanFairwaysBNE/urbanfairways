@@ -3,6 +3,7 @@ import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { ArrowRight, Check, Clock } from "lucide-react";
 import venueInterior from "@/assets/venue-interior.jpg";
 import { useTenant, hubUrl } from "@/config/tenant";
+import { useCasualRates } from "@/hooks/useCasualRates";
 
 const tiers = [
   {

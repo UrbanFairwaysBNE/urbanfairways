@@ -6,6 +6,7 @@ import venueInterior from "@/assets/venue-interior.jpg";
 import swingLabBadge from "@/assets/swing-lab-badge.png.asset.json";
 import googlePlayBadge from "@/assets/google-play-badge.svg";
 import { useTenant, hubUrl } from "@/config/tenant";
+import { useCasualRates } from "@/hooks/useCasualRates";
 
 const getFeatures = (venueName: string) => [
   { icon: Target, title: "High-Tech Simulators", body: "Tour-accurate launch data, 4K graphics and a huge library of world-famous courses." },

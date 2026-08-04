@@ -22,7 +22,7 @@ const tiers = [
     name: "Birdie",
     price: "$29",
     rate: "$10/hr",
-    tag: "Most popular",
+    tag: "Suits Most",
     highlight: true,
     perks: [
       "Play anytime",
@@ -97,11 +97,11 @@ const MarketingMembership = () => {
           <div
             key={t.name}
             className={`relative rounded-2xl p-6 border transition-all bg-card text-card-foreground hover:shadow-lg ${
-              t.highlight ? "border-accent ring-2 ring-accent/20" : "border-border"
+              t.highlight ? "border-accent ring-2 ring-accent/20 mt-6 md:mt-0" : "border-border"
             }`}
           >
             {t.highlight && (
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-accent-foreground text-xs font-display uppercase tracking-wider px-3 py-1 rounded-full">
+              <span className="absolute -top-4 left-1/2 -translate-x-1/2 whitespace-nowrap bg-accent text-accent-foreground text-xs font-display uppercase tracking-wider px-4 py-1.5 rounded-full shadow-sm">
                 Most Popular
               </span>
             )}

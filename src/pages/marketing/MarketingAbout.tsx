@@ -103,7 +103,7 @@ const MarketingAbout = () => {
           </div>
         </div>
         <div className="rounded-2xl overflow-hidden shadow-xl aspect-[4/3]">
-          <img src={birdiesNeonSign} alt={`${tenant.venue_name} neon sign`} className="w-full h-full object-cover" />
+          <img src={venueInterior} alt="Venue interior" className="w-full h-full object-cover" />
         </div>
       </div>
     </section>

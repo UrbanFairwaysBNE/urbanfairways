@@ -65,7 +65,7 @@ Hi ${playerName},
 </p>
 
 <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
-Amazing work! You've won this week's Birdies League tournament!
+Amazing work! You've won this week's ${tenant.venue_name} League tournament!
 </p>
 
 <!-- Prize Box -->
@@ -94,12 +94,12 @@ ${prizeAmount}
 </table>
 
 <p style="margin:18px 0; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
-Your credit has been added to your Birdies account and can be used for:
+Your credit has been added to your ${tenant.venue_name} account and can be used for:
 </p>
 
 <ul style="margin:0 0 20px; padding-left:20px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.8; color:#2F3134;">
 <li>Future bay bookings</li>
-<li>In-store purchases at Birdies</li>
+<li>In-store purchases at ${tenant.venue_name}</li>
 </ul>
 
 <p style="margin:18px 0; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
@@ -145,7 +145,7 @@ View My Account
 
 <tr>
 <td align="center" style="font-family:Manrope, Arial, sans-serif; font-size:12px; color:#F5F3EF; opacity:0.8;">
-<p style="margin:0; padding:0 8px;">© 2025 Birdies Bayside. All rights reserved.</p>
+<p style="margin:0; padding:0 8px;">© 2025 ${tenant.venue_name}. All rights reserved.</p>
 </td>
 </tr>
 
@@ -179,7 +179,7 @@ View My Account
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "Birdies <noreply@birdiesbayside.com.au>",
+        from: `${tenant.venue_name} <${tenant.sender_email}>`,
         to: [testEmail],
         subject: `Congratulations! You Won ${tournamentName}`,
         html: htmlContent,

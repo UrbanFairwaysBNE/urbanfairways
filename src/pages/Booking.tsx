@@ -35,6 +35,8 @@ export default function Booking() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { tenant } = useTenant();
+  const { pricing, defaultTier, getTierLabel, peakRate: walkInPeakRate } = usePricing();
+  const walkInLabel = defaultTier?.display_name || "Walk-in";
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
   const {
     bays,

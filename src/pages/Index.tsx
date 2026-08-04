@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { useAuth } from "@/hooks/useAuth";
 import { isHubHost } from "@/lib/hub-host";
-import venueLogo from "@/assets/venue-logo.png";
+import venueLogo from "@/assets/venue-logo-dark.png";
 import venueAppIcon from "@/assets/venue-app-icon.png";
 import MarketingHome from "./marketing/MarketingHome";
 import { useTenant } from "@/config/tenant";

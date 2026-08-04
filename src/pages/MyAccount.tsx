@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import birdiesLogo from "@/assets/birdies-logo.png";
+import { useTenant } from "@/config/tenant";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,6 +57,7 @@ interface PaymentMethod {
 }
 
 const MyAccount = () => {
+  const { tenant } = useTenant();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -404,7 +406,7 @@ const MyAccount = () => {
         </div>
         <img 
           src={birdiesLogo} 
-          alt="Birdies" 
+          alt={tenant.venue_name} 
           className="h-10 w-auto"
         />
       </header>
@@ -542,7 +544,7 @@ const MyAccount = () => {
                     <Gamepad2 className="h-5 w-5 text-accent" />
                   </div>
                   <div>
-                    <CardTitle>Birdies League Account</CardTitle>
+                    <CardTitle>{tenant.venue_name} League Account</CardTitle>
                     <CardDescription>Your simulator golf tour credentials</CardDescription>
                   </div>
                 </div>
@@ -931,7 +933,7 @@ const MyAccount = () => {
       {/* Footer */}
       <footer className="bg-primary py-4 px-6 text-center">
         <p className="text-primary-foreground/60 text-sm">
-          © {new Date().getFullYear()} Birdies. All rights reserved.
+          © {new Date().getFullYear()} {tenant.venue_name}. All rights reserved.
         </p>
       </footer>
     </div>

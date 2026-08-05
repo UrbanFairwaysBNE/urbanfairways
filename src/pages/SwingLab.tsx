@@ -242,7 +242,7 @@ export default function SwingLab() {
             <Button variant="ghost" size="sm" className="-ml-2" onClick={() => navigate("/dashboard")}>
               <ArrowLeft className="h-4 w-4 mr-1" /> Back
             </Button>
-            <img src={swingLabBadge} alt="UF Lab" className="h-9 md:h-10 w-auto object-contain" />
+            <img src={swingLabBadge} alt="UF Lab" className="h-12 md:h-14 w-auto object-contain rounded-full" />
 
             <Button variant="ghost" size="sm" className="-mr-2 border border-accent" onClick={() => setHowToOpen(true)}>
               <HelpCircle className="h-4 w-4 mr-1" /> How To

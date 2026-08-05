@@ -291,7 +291,7 @@ export default function SwingLabProgress() {
           <Button variant="ghost" size="sm" onClick={() => navigate("/swing-lab")} className="gap-1">
             <ArrowLeft className="h-4 w-4" /> Back
           </Button>
-          <img src={swingLabBadge} alt="UF Lab" className="h-9 md:h-10 object-contain" />
+          <img src={swingLabBadge} alt="UF Lab" className="h-12 md:h-14 object-contain rounded-full" />
           <div className="w-16" />
         </div>
       </header>

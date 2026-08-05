@@ -553,7 +553,17 @@ export default function Booking() {
   const sessionTotal = rateInfo?.total ?? hourlyRate * selectedDuration;
   const appliedSpecial = rateInfo?.special ?? null;
 
+  // Prepaid pack hours cover session time at the session's effective hourly rate
+  const packHoursAvailable = Math.min(packHoursBalance, selectedDuration);
+  const packHoursToApply = applyPackHours ? packHoursAvailable : 0;
+  const packDiscount =
+    selectedDuration > 0
+      ? Math.round(packHoursToApply * (sessionTotal / selectedDuration) * 100) / 100
+      : 0;
+  const amountAfterHours = Math.max(0, Math.round((sessionTotal - packDiscount) * 100) / 100);
+
   const canConfirm = selectedDate && selectedTime && selectedBayId;
+
 
 
   return (

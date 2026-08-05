@@ -46,6 +46,8 @@ export default function Booking() {
     actualMembershipTier,
     isPaymentLimbo,
     depositBalance,
+    packHoursBalance,
+
     savedCard,
     getHourlyRate,
     getRateInfo,

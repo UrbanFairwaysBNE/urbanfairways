@@ -294,6 +294,8 @@ const PriceCard = ({
   tag,
   perks,
   highlight,
+  subtle,
+  info,
   joinHref,
 }: {
   tier: string;
@@ -302,11 +304,17 @@ const PriceCard = ({
   tag: string;
   perks: string[];
   highlight?: boolean;
+  subtle?: boolean;
+  info?: string;
   joinHref: string;
 }) => (
   <div
-    className={`relative rounded-2xl p-7 border transition-all bg-card text-card-foreground hover:shadow-lg ${
-      highlight ? "border-accent ring-2 ring-accent/20" : "border-border"
+    className={`relative rounded-2xl p-7 border transition-all hover:shadow-lg ${
+      highlight
+        ? "border-accent ring-2 ring-accent/20 bg-card text-card-foreground"
+        : subtle
+          ? "border-dashed border-border bg-muted/40 text-foreground"
+          : "border-border bg-card text-card-foreground"
     }`}
   >
     {highlight && (
@@ -314,8 +322,24 @@ const PriceCard = ({
         Most Popular
       </span>
     )}
+    {info && (
+      <TooltipProvider delayDuration={100}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              aria-label={info}
+              className="absolute top-4 right-4 text-foreground/40 hover:text-accent transition-colors"
+            >
+              <Info className="h-4 w-4" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent className="max-w-[220px] text-xs">{info}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    )}
     <p className="text-xs font-bold uppercase tracking-wider mb-2 text-foreground/60">{tag}</p>
-    <h3 className="font-display text-3xl uppercase tracking-wide mb-1">{tier}</h3>
+    <h3 className={`font-display text-3xl uppercase tracking-wide mb-1 ${subtle ? "text-foreground/80" : ""}`}>{tier}</h3>
     <div className="mb-5">
       <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold bg-accent/10 text-accent border border-accent/20">
         <Clock className="h-3.5 w-3.5" />
@@ -336,11 +360,16 @@ const PriceCard = ({
     </ul>
     <a
       href={joinHref}
-      className="block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors bg-primary hover:bg-primary/90 text-primary-foreground"
+      className={`block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors ${
+        subtle
+          ? "border border-primary/40 text-primary hover:bg-primary/5"
+          : "bg-primary hover:bg-primary/90 text-primary-foreground"
+      }`}
     >
       Join
     </a>
   </div>
 );
+
 
 export default MarketingHome;

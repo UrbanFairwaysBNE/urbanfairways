@@ -508,7 +508,11 @@ const MyAccount = () => {
             </Card>
           )}
 
+          {/* Prepaid Hour Packs */}
+          <PrepaidPacksCard />
+
           {/* Redeem Gift Card */}
+
           <Card>
             <CardHeader>
               <div className="flex items-center gap-3">

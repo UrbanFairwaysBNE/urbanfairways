@@ -97,7 +97,7 @@ const SiteFooter = () => {
       <div className="border-t border-primary-foreground/10">
         <div className="container mx-auto px-4 py-5 flex flex-col sm:flex-row items-center justify-between text-xs text-primary-foreground/60 gap-2">
           <p>© {new Date().getFullYear()} {tenant.venue_name}. All rights reserved.</p>
-          <p>Indoor Golf, Redefined.</p>
+          
         </div>
       </div>
     </footer>

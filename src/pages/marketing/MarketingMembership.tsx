@@ -1,11 +1,23 @@
 import Seo from "@/components/Seo";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
-import { ArrowRight, Check, Clock } from "lucide-react";
+import { ArrowRight, Check, Clock, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import venueInterior from "@/assets/venue-interior.jpg";
 import { useTenant, hubUrl } from "@/config/tenant";
 import { useCasualRates } from "@/hooks/useCasualRates";
 
-const tiers = [
+interface Tier {
+  name: string;
+  price: string;
+  rate: string;
+  tag: string;
+  perks: string[];
+  highlight?: boolean;
+  subtle?: boolean;
+  info?: string;
+}
+
+const tiers: Tier[] = [
   {
     name: "Practice Club",
     price: "$15",
@@ -34,22 +46,6 @@ const tiers = [
     ],
   },
   {
-    name: "Frontline",
-    price: "$30",
-    rate: "$8/hr",
-    tag: "Frontline & essential workers",
-    perks: [
-      "Play anytime",
-      "2 guests",
-      "Swing Lab access",
-      "Member events",
-      "Member competitions",
-      "Priority bookings",
-      "TPI Assessment on joining",
-      "Monthly 30min coaching session (does not carry over)",
-    ],
-  },
-  {
     name: "Eagle",
     price: "$39",
     rate: "$8/hr",
@@ -65,6 +61,26 @@ const tiers = [
     ],
   },
 ];
+
+const frontlineTier: Tier = {
+  name: "Frontline",
+  price: "$30",
+  rate: "$8/hr",
+  tag: "Frontline & essential workers",
+  subtle: true,
+  info: "This membership is available to Emergency Services, Defence & Nurses",
+  perks: [
+    "Play anytime",
+    "2 guests",
+    "Swing Lab access",
+    "Member events",
+    "Member competitions",
+    "Priority bookings",
+    "TPI Assessment on joining",
+    "Monthly 30min coaching session (does not carry over)",
+  ],
+};
+
 
 const MarketingMembership = () => {
   const { tenant } = useTenant();
@@ -92,49 +108,18 @@ const MarketingMembership = () => {
     </section>
 
     <section className="pb-20">
-      <div className="container mx-auto px-4 grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl">
+      <div className="container mx-auto px-4 grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl">
         {tiers.map((t) => (
-          <div
-            key={t.name}
-            className={`relative rounded-2xl p-6 border transition-all bg-card text-card-foreground hover:shadow-lg ${
-              t.highlight ? "border-accent ring-2 ring-accent/20 mt-6 md:mt-0" : "border-border"
-            }`}
-          >
-            {t.highlight && (
-              <span className="absolute -top-4 left-1/2 -translate-x-1/2 whitespace-nowrap bg-accent text-accent-foreground text-xs font-display uppercase tracking-wider px-4 py-1.5 rounded-full shadow-sm">
-                Most Popular
-              </span>
-            )}
-            <p className="text-xs font-bold uppercase tracking-wider mb-2 text-foreground/60">{t.tag}</p>
-            <h3 className="font-display text-2xl uppercase tracking-wide mb-1">{t.name}</h3>
-            <div className="mb-5">
-              <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold bg-accent/10 text-accent border border-accent/20">
-                <Clock className="h-3.5 w-3.5" />
-                {t.rate}
-              </span>
-            </div>
-            <div className="mb-6">
-              <span className="font-display text-5xl">{t.price}</span>
-              <span className="text-sm text-foreground/60"> /week</span>
-            </div>
-            <ul className="space-y-3 text-sm mb-7">
-              {t.perks.map((p) => (
-                <li key={p} className="flex gap-2">
-                  <Check className="h-4 w-4 mt-0.5 text-accent shrink-0" />
-                  <span>{p}</span>
-                </li>
-              ))}
-            </ul>
-            <a
-              href={hubUrl(tenant, "/")}
-              className="block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors bg-primary hover:bg-primary/90 text-primary-foreground"
-            >
-              Join
-            </a>
-          </div>
+          <TierCard key={t.name} tier={t} joinHref={hubUrl(tenant, "/")} />
         ))}
       </div>
+      <div className="container mx-auto px-4 mt-6 max-w-5xl">
+        <div className="md:max-w-sm">
+          <TierCard tier={frontlineTier} joinHref={hubUrl(tenant, "/")} />
+        </div>
+      </div>
     </section>
+
 
     <section className="py-12 sm:py-20">
       <div className="container mx-auto px-4 max-w-5xl">
@@ -209,5 +194,70 @@ const MarketingMembership = () => {
   </MarketingLayout>
   );
 };
+
+const TierCard = ({ tier: t, joinHref }: { tier: Tier; joinHref: string }) => (
+  <div
+    className={`relative rounded-2xl p-6 border transition-all hover:shadow-lg ${
+      t.highlight
+        ? "border-accent ring-2 ring-accent/20 mt-6 md:mt-0 bg-card text-card-foreground"
+        : t.subtle
+          ? "border-dashed border-border bg-muted/40 text-foreground"
+          : "border-border bg-card text-card-foreground"
+    }`}
+  >
+    {t.highlight && (
+      <span className="absolute -top-4 left-1/2 -translate-x-1/2 whitespace-nowrap bg-accent text-accent-foreground text-xs font-display uppercase tracking-wider px-4 py-1.5 rounded-full shadow-sm">
+        Most Popular
+      </span>
+    )}
+    {t.info && (
+      <TooltipProvider delayDuration={100}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              aria-label={t.info}
+              className="absolute top-4 right-4 text-foreground/40 hover:text-accent transition-colors"
+            >
+              <Info className="h-4 w-4" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent className="max-w-[220px] text-xs">{t.info}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    )}
+    <p className="text-xs font-bold uppercase tracking-wider mb-2 text-foreground/60">{t.tag}</p>
+    <h3 className={`font-display text-2xl uppercase tracking-wide mb-1 ${t.subtle ? "text-foreground/80" : ""}`}>{t.name}</h3>
+    <div className="mb-5">
+      <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold bg-accent/10 text-accent border border-accent/20">
+        <Clock className="h-3.5 w-3.5" />
+        {t.rate}
+      </span>
+    </div>
+    <div className="mb-6">
+      <span className="font-display text-5xl">{t.price}</span>
+      <span className="text-sm text-foreground/60"> /week</span>
+    </div>
+    <ul className="space-y-3 text-sm mb-7">
+      {t.perks.map((p) => (
+        <li key={p} className="flex gap-2">
+          <Check className="h-4 w-4 mt-0.5 text-accent shrink-0" />
+          <span>{p}</span>
+        </li>
+      ))}
+    </ul>
+    <a
+      href={joinHref}
+      className={`block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors ${
+        t.subtle
+          ? "border border-primary/40 text-primary hover:bg-primary/5"
+          : "bg-primary hover:bg-primary/90 text-primary-foreground"
+      }`}
+    >
+      Join
+    </a>
+  </div>
+);
+
 
 export default MarketingMembership;

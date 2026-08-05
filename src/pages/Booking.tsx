@@ -778,7 +778,8 @@ export default function Booking() {
             </CardHeader>
             <CardContent className="space-y-4">
               {(() => {
-                const totalPrice = sessionTotal;
+                const totalPrice = amountAfterHours;
+
                 const hasEnoughBalance = depositBalance >= totalPrice;
                 const remainingAfterBalance = totalPrice - depositBalance;
 

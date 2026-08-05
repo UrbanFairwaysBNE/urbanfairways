@@ -279,7 +279,7 @@ export default function SwingLab() {
               <div className="border-t border-border pt-4 space-y-2">
                 <h4 className="font-semibold text-foreground">Tip</h4>
                 <p className="text-muted-foreground">
-                  You can remove any outlier or bad shots by clicking the clipboard and deleting the individual shots. The Hub has a <strong>Hide Outliers</strong> filter too.
+                  You can remove any outlier or bad shots by clicking the clipboard and deleting the individual shots. UF Lab has a <strong>Hide Outliers</strong> filter too.
                 </p>
               </div>
             </div>

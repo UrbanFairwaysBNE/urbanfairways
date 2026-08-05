@@ -315,8 +315,8 @@ export default function SwingLab() {
               <Target className="h-10 w-10 mx-auto text-muted-foreground" />
               <h2 className="text-lg font-semibold">No UF Lab sessions yet</h2>
               <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                UF Lab data is captured when you hit <strong>Export</strong> in the GSPro driving range and finish your session.
-                Your shots will appear here automatically after your booking ends.
+                UF Lab data comes from your GSPro range sessions — select your club as you go, then hit <strong>Export to CSV</strong> on the clipboard when you finish.
+                That's all you need to do; we take care of the rest and your shots appear here shortly after.
               </p>
             </CardContent>
           </Card>

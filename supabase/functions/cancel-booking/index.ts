@@ -82,6 +82,38 @@ serve(async (req) => {
 
     let refundResult = null;
 
+    // ── Prepaid hours ──
+    // Hours always go straight back to the customer's wallet (new expiry lots handled
+    // by restore_pack_hours). The dollar value they covered must not also be refunded.
+    const packHoursUsed = Number(booking.pack_hours_used) || 0;
+    let packHoursRestored = 0;
+    let packValue = 0;
+
+    if (packHoursUsed > 0) {
+      const duration = Number(booking.duration_hours) || 0;
+      const effectiveRate = duration > 0 ? Number(booking.total_price) / duration : 0;
+      packValue = Math.round(packHoursUsed * effectiveRate * 100) / 100;
+
+      const { data: restored, error: restoreError } = await supabaseAdmin.rpc("restore_pack_hours", {
+        _user_id: user.id,
+        _hours: packHoursUsed,
+        _booking_id: booking.id,
+        _transaction_type: "refund",
+        _description: "Booking cancelled - prepaid hours returned",
+      });
+
+      if (restoreError) {
+        throw new Error(`Failed to return prepaid hours: ${restoreError.message}`);
+      }
+
+      packHoursRestored = Number(restored) || packHoursUsed;
+      console.log("[CANCEL-BOOKING] Prepaid hours restored:", packHoursRestored);
+    }
+
+    // Dollar amount actually paid with money (credit or card)
+    const cashPaid = Math.max(0, Math.round((Number(booking.total_price) - packValue) * 100) / 100);
+
+
     // Process Stripe refund if payment intent exists (check for both "stripe" and "card" payment methods)
     if (booking.stripe_payment_intent_id && (booking.payment_method === "stripe" || booking.payment_method === "card")) {
       const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");

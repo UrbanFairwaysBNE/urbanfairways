@@ -890,20 +890,26 @@ export default function Booking() {
             ) : (
               (() => {
                 if (!canConfirm) return "Confirm Booking";
-                const totalPrice = sessionTotal;
                 // Free bookings get special treatment
-                if (totalPrice <= 0) {
+                if (sessionTotal <= 0) {
                   return "Confirm Free Booking";
                 }
+                const totalPrice = amountAfterHours;
+                if (totalPrice <= 0) {
+                  return `Confirm Booking - ${packHoursToApply} Prepaid ${packHoursToApply === 1 ? "Hour" : "Hours"}`;
+                }
+                const hoursSuffix =
+                  packHoursToApply > 0 ? ` + ${packHoursToApply}h Prepaid` : "";
                 if (selectedPaymentMethod === "balance" && depositBalance >= totalPrice) {
-                  return `Confirm Booking - $${totalPrice.toFixed(2)} from Balance`;
+                  return `Confirm Booking - $${totalPrice.toFixed(2)} from Balance${hoursSuffix}`;
                 }
                 if (usePartialBalance && depositBalance > 0) {
-                  const cardAmount = totalPrice - depositBalance;
-                  return `Confirm Booking - $${cardAmount.toFixed(2)} Card + $${depositBalance.toFixed(2)} Balance`;
+                  const cardAmount = Math.max(0, totalPrice - depositBalance);
+                  return `Confirm Booking - $${cardAmount.toFixed(2)} Card + $${Math.min(depositBalance, totalPrice).toFixed(2)} Balance${hoursSuffix}`;
                 }
-                return `Confirm Booking - $${totalPrice.toFixed(2)}`;
+                return `Confirm Booking - $${totalPrice.toFixed(2)}${hoursSuffix}`;
               })()
+
             )}
           </Button>
           {canConfirm && depositBalance === 0 && sessionTotal > 0 && (

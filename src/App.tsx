@@ -58,7 +58,9 @@ const SwingLabProgress = lazy(() => import("./pages/SwingLabProgress"));
 const MarketingAbout = lazy(() => import("./pages/marketing/MarketingAbout"));
 const MarketingMembership = lazy(() => import("./pages/marketing/MarketingMembership"));
 const MarketingLeague = lazy(() => import("./pages/marketing/MarketingLeague"));
-const MarketingCompete = lazy(() => import("./pages/marketing/MarketingCompete"));
+const MarketingMonthlyWinner = lazy(() => import("./pages/marketing/MarketingMonthlyWinner"));
+const MarketingAmbrose = lazy(() => import("./pages/marketing/MarketingAmbrose"));
+
 const MarketingContact = lazy(() => import("./pages/marketing/MarketingContact"));
 const MarketingFAQs = lazy(() => import("./pages/marketing/MarketingFAQs"));
 const MarketingStaffedHours = lazy(() => import("./pages/marketing/MarketingStaffedHours"));

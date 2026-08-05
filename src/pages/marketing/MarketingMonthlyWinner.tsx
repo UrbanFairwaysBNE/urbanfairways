@@ -1,7 +1,6 @@
 import Seo from "@/components/Seo";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { Trophy, CalendarRange, Medal, Gift } from "lucide-react";
-import venueInterior from "@/assets/venue-interior.jpg";
 import pageHeader from "@/assets/page-header-city.jpg";
 import { useTenant, hubUrl } from "@/config/tenant";
 import { MonthlyBoard } from "@/components/compete/CompeteBoards";

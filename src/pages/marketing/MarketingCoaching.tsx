@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import Seo from "@/components/Seo";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { useTenant } from "@/config/tenant";
-import venueInterior from "@/assets/venue-interior.jpg";
 import pageHeader from "@/assets/page-header-city.jpg";
 import { Check, Clock, DollarSign, MapPin, Users } from "lucide-react";
 

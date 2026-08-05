@@ -2,7 +2,6 @@ import Seo from "@/components/Seo";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { ArrowRight, Check, Clock, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import venueInterior from "@/assets/venue-interior.jpg";
 import pageHeader from "@/assets/page-header-city.jpg";
 import { useTenant, hubUrl } from "@/config/tenant";
 import { useCasualRates } from "@/hooks/useCasualRates";

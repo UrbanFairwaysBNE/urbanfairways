@@ -2,7 +2,6 @@ import Seo from "@/components/Seo";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Globe, CalendarDays, Zap, Trophy } from "lucide-react";
-import venueInterior from "@/assets/venue-interior.jpg";
 import pageHeader from "@/assets/page-header-city.jpg";
 import { useTenant } from "@/config/tenant";
 import { WeeklyLeagueBoard } from "@/components/compete/CompeteBoards";

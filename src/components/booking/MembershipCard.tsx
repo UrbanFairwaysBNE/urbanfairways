@@ -11,7 +11,7 @@ interface MembershipCardProps {
 }
 
 export function MembershipCard({ membership, isPopular, onSelect }: MembershipCardProps) {
-  const isVisitor = membership.tier === 'visitor';
+  const isCasual = membership.tier === 'casual';
   const hasRestrictions = !!membership.restrictions;
 
   return (
@@ -33,7 +33,7 @@ export function MembershipCard({ membership, isPopular, onSelect }: MembershipCa
       <CardContent className="flex-1 space-y-6">
         {/* Pricing */}
         <div className="text-center space-y-1">
-          {!isVisitor && membership.weeklyFee > 0 && (
+          {!isCasual && membership.weeklyFee > 0 && (
             <div className="text-muted-foreground text-sm">
               <span className="text-3xl font-bold text-foreground">${membership.weeklyFee}</span>
               <span>/week</span>
@@ -41,10 +41,10 @@ export function MembershipCard({ membership, isPopular, onSelect }: MembershipCa
           )}
           <div className={cn(
             "font-semibold",
-            isVisitor ? "text-2xl" : "text-lg text-accent"
+            isCasual ? "text-2xl" : "text-lg text-accent"
           )}>
             ${membership.hourlyRate}/hr
-            {isVisitor && <span className="text-sm font-normal text-muted-foreground"> (peak)</span>}
+            {isCasual && <span className="text-sm font-normal text-muted-foreground"> (peak)</span>}
           </div>
         </div>
 
@@ -77,7 +77,7 @@ export function MembershipCard({ membership, isPopular, onSelect }: MembershipCa
               : "bg-primary text-primary-foreground hover:bg-primary/90"
           )}
         >
-          {isVisitor ? "Book as Visitor" : "Join Now"}
+          {isCasual ? "Book as Casual" : "Join Now"}
         </Button>
       </CardFooter>
     </Card>

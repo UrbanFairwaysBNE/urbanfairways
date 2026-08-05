@@ -82,11 +82,11 @@ serve(async (req: Request): Promise<Response> => {
       );
     }
 
-    // Only visitors qualify
-    if (profile.membership_tier !== "visitor") {
-      logStep("Not a visitor", { tier: profile.membership_tier });
+    // Only casual customers qualify
+    if (profile.membership_tier !== "casual") {
+      logStep("Not a casual", { tier: profile.membership_tier });
       return new Response(
-        JSON.stringify({ eligible: false, reason: "Not a visitor" }),
+        JSON.stringify({ eligible: false, reason: "Not a casual" }),
         { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
@@ -189,7 +189,7 @@ serve(async (req: Request): Promise<Response> => {
         } else {
           const bodyContent = `
               <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
-                Hi ${profile.first_name}, thanks for being a loyal visitor! You've completed <strong>${totalBookings} visits</strong> to ${tenant.venue_name} and earned a loyalty credit.
+                Hi ${profile.first_name}, thanks for being a loyal casual! You've completed <strong>${totalBookings} visits</strong> to ${tenant.venue_name} and earned a loyalty credit.
               </p>
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#2F3134; border-radius:12px; margin:18px 0;">
                 <tr>

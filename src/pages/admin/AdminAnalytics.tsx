@@ -131,7 +131,7 @@ export default function AdminAnalytics() {
                 <GrowthMetricCard
                   title="Member Conversion"
                   value={`${data.memberConversionRate.toFixed(1)}%`}
-                  subtitle="Visitors → Members"
+                  subtitle="Casual customers → Members"
                   target="10%"
                 />
                 <GrowthMetricCard

@@ -28,7 +28,7 @@ interface ImportRow {
 export default function AdminCustomerImport() {
   const { isAdmin, isLoading: authLoading } = useAdminAuth();
   const { pricing, defaultTier } = usePricing();
-  const walkInTier = defaultTier?.tier ?? 'visitor';
+  const walkInTier = defaultTier?.tier ?? 'casual';
   const validTiers = pricing.map((t) => t.tier.toLowerCase());
   const [csvData, setCsvData] = useState<ImportRow[]>([]);
   const [isImporting, setIsImporting] = useState(false);
@@ -141,7 +141,7 @@ export default function AdminCustomerImport() {
 
   const getTierBadge = (tier: string) => {
     const colors: Record<string, string> = {
-      visitor: 'bg-gray-500',
+      casual: 'bg-gray-500',
       weekday: 'bg-teal-500',
       birdie: 'bg-blue-500',
       eagle: 'bg-purple-500'
@@ -192,7 +192,7 @@ export default function AdminCustomerImport() {
             <CardDescription>
               CSV format: First Name, Last Name, Email, Contact No, Membership Tier
               <br />
-              <span className="text-xs">Valid tiers: visitor, par, birdie, eagle, albatross (defaults to visitor if invalid)</span>
+              <span className="text-xs">Valid tiers: casual, par, birdie, eagle, albatross (defaults to casual if invalid)</span>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

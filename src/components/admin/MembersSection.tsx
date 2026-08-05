@@ -66,7 +66,7 @@ type SortDirection = "asc" | "desc";
 export function MembersSection() {
   const { pricing, defaultTier, memberTiers } = usePricing();
   // Tier keys are venue-defined; the walk-in tier comes from pricing config.
-  const walkInTier = defaultTier?.tier ?? "visitor";
+  const walkInTier = defaultTier?.tier ?? "casual";
   const MEMBER_TIERS = memberTierKeys(pricing);
   const getTierColor = (tier: string) => tierBadgeClass(pricing, tier);
   const [members, setMembers] = useState<MemberProfile[]>([]);
@@ -139,17 +139,17 @@ export function MembersSection() {
       last_name: nameMap.get(c.user_id)?.last_name || "",
     }));
 
-    // Joins: visitor -> member tier
+    // Joins: casual -> member tier
     const joins = enriched.filter(
       (c) => c.previous_tier === walkInTier && MEMBER_TIERS.includes(c.new_tier)
     );
 
-    // Dropoffs: member tier -> visitor
+    // Dropoffs: member tier -> casual
     const dropoffs = enriched.filter(
       (c) => MEMBER_TIERS.includes(c.previous_tier) && c.new_tier === walkInTier
     );
 
-    // Determine net-new vs returning: check if any PRIOR member->visitor record exists (before this week)
+    // Determine net-new vs returning: check if any PRIOR member->casual record exists (before this week)
     const joinUserIds = [...new Set(joins.map((j) => j.user_id))];
     let previousMemberIds = new Set<string>();
     if (joinUserIds.length > 0) {

@@ -122,11 +122,11 @@ const fetchUserProfile = async () => {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  const actualTier = data?.membership_tier || "visitor";
+  const actualTier = data?.membership_tier || "casual";
   const paymentFailedAt = data?.payment_failed_at ?? null;
   // Strict rule: while in membership payment limbo, member loses member pricing
-  // and is treated as a visitor everywhere until they retry payment successfully.
-  const effectiveTier = paymentFailedAt ? "visitor" : actualTier;
+  // and is treated as a casual everywhere until they retry payment successfully.
+  const effectiveTier = paymentFailedAt ? "casual" : actualTier;
 
   // Prepaid hours wallet — separate to the dollar credit balance
   const { data: packHours } = await supabase.rpc("pack_hours_balance", { _user_id: user.id });
@@ -213,7 +213,7 @@ export function useBooking() {
   });
 
   // Derived values from user profile
-  const userMembershipTier = userProfile?.membershipTier || "visitor";
+  const userMembershipTier = userProfile?.membershipTier || "casual";
   const actualMembershipTier = userProfile?.actualMembershipTier || userMembershipTier;
   const isPaymentLimbo = !!userProfile?.isPaymentLimbo;
   const customHourlyRate = userProfile?.customHourlyRate ?? null;
@@ -512,7 +512,7 @@ export function useBooking() {
       ? checkMultiBayRestriction(date, startTime, durationHours, bayId)
       : false;
     
-    // If multi-bay restricted, rate becomes visitor peak rate (then surcharge applied on top)
+    // If multi-bay restricted, rate becomes casual peak rate (then surcharge applied on top)
     let rate: number;
     if (isMultiBayRestricted) {
       const baseRate = defaultPeakRate(tierPricing); // walk-in peak rate
@@ -683,7 +683,7 @@ export function useBooking() {
       const holidaySurchargePercent = getHolidaySurchargeForDate(date);
       const holidayFlag = isPublicHolidayDate(date);
       if (hasOverlappingBooking) {
-        // Multi-bay during peak: charge visitor rate instead of member rate (+ holiday surcharge if any)
+        // Multi-bay during peak: charge casual rate instead of member rate (+ holiday surcharge if any)
         console.log("[useBooking] Multi-bay peak restriction triggered - charging walk-in rate");
         const baseRate = defaultPeakRate(tierPricing); // walk-in peak rate
         actualHourlyRate = holidaySurchargePercent > 0

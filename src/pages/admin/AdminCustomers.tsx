@@ -967,14 +967,14 @@ export default function AdminCustomers() {
       setCustomers(prev =>
         prev.map(c =>
           c.id === selectedCustomer.id
-            ? { ...c, membership_tier: "visitor" }
+            ? { ...c, membership_tier: "casual" }
             : c
         )
       );
       
       setSelectedCustomer({
         ...selectedCustomer,
-        membership_tier: "visitor",
+        membership_tier: "casual",
       });
       
       setShowCancelMembershipConfirm(false);
@@ -1232,7 +1232,7 @@ export default function AdminCustomers() {
                         <TableCell key={col.key}>
                           {col.key === "membership_tier" ? (
                             <Badge className={getMembershipColor(customer.membership_tier)}>
-                              {customer.membership_tier || "Visitor"}
+                              {customer.membership_tier || "Casual"}
                             </Badge>
                           ) : col.key === "created_at" ? (
                             format(new Date(customer.created_at), "MMM d, yyyy")
@@ -1326,7 +1326,7 @@ export default function AdminCustomers() {
                       {selectedCustomer.first_name} {selectedCustomer.last_name}
                     </h3>
                     <Badge className={getMembershipColor(selectedCustomer.membership_tier)}>
-                      {selectedCustomer.membership_tier || "Visitor"}
+                      {selectedCustomer.membership_tier || "Casual"}
                     </Badge>
                   </div>
                   <TooltipProvider delayDuration={150}>
@@ -1450,8 +1450,8 @@ export default function AdminCustomers() {
                   />
                 </div>
 
-                {/* Hold Membership Toggle - only show for non-visitors */}
-                {selectedCustomer.membership_tier && selectedCustomer.membership_tier !== "visitor" && (
+                {/* Hold Membership Toggle - only show for non-casual customers */}
+                {selectedCustomer.membership_tier && selectedCustomer.membership_tier !== "casual" && (
                   <>
                     <div className="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-lg">
                       <div className="flex items-center gap-3">
@@ -1475,14 +1475,14 @@ export default function AdminCustomers() {
                 )}
 
                 <hr className="border-border" />
-                {selectedCustomer.membership_tier && selectedCustomer.membership_tier !== "visitor" && (
+                {selectedCustomer.membership_tier && selectedCustomer.membership_tier !== "casual" && (
                   <>
                     <div className="p-3 bg-destructive/5 border border-destructive/20 rounded-lg">
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="text-sm font-medium text-destructive">Cancel Membership</div>
                           <div className="text-xs text-muted-foreground">
-                            Cancel subscription and revert to visitor
+                            Cancel subscription and revert to casual
                           </div>
                         </div>
                         <Button
@@ -1638,7 +1638,7 @@ export default function AdminCustomers() {
               </div>
               
               <p className="text-xs text-muted-foreground">
-                Customer will be created with visitor tier. They will receive an email to set their password.
+                Customer will be created with casual tier. They will receive an email to set their password.
               </p>
               
               <div className="flex gap-2">
@@ -1801,7 +1801,7 @@ export default function AdminCustomers() {
             <AlertDialogHeader>
               <AlertDialogTitle>Cancel membership?</AlertDialogTitle>
               <AlertDialogDescription>
-                This will cancel {selectedCustomer?.first_name}'s Stripe subscription and revert their account to visitor status.
+                This will cancel {selectedCustomer?.first_name}'s Stripe subscription and revert their account to casual status.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <div className="py-4">

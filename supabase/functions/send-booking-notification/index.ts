@@ -636,7 +636,7 @@ serve(async (req) => {
           const alertTagsExt = {
             ...templateTags,
             '{phone}': profile.phone || 'Not provided',
-            '{membership_tier}': profile.membership_tier || 'Visitor',
+            '{membership_tier}': profile.membership_tier || 'Casual',
           };
           const alertSubject = replaceTemplateTags(
             (alertTpl as any)?.subject || `⚠️ Watched Customer Booking: {first_name} {last_name}`,

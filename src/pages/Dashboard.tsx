@@ -27,7 +27,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [membershipTier, setMembershipTier] = useState<MembershipTier>("visitor");
+  const [membershipTier, setMembershipTier] = useState<MembershipTier>("casual");
   const [membershipOnHold, setMembershipOnHold] = useState(false);
   const [hasSgtAccount, setHasSgtAccount] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -54,7 +54,7 @@ const Dashboard = () => {
 
     const fetchAccountAccess = async () => {
       if (!user) {
-        setMembershipTier("visitor");
+        setMembershipTier("casual");
         setMembershipOnHold(false);
         setHasSgtAccount(false);
         setIsStaff(false);
@@ -81,7 +81,7 @@ const Dashboard = () => {
         if (cancelled) return;
 
         const profile = profileResult.data;
-        setMembershipTier((profile?.membership_tier as MembershipTier) || "visitor");
+        setMembershipTier((profile?.membership_tier as MembershipTier) || "casual");
         setMembershipOnHold(!!profile?.membership_on_hold);
         setHasSgtAccount(!!profile?.sgt_user_id);
         setIsStaff((profile as any)?.custom_segment === "staff");
@@ -89,7 +89,7 @@ const Dashboard = () => {
       } catch (error) {
         if (!cancelled) {
           console.error("Error fetching account access:", error);
-          setMembershipTier("visitor");
+          setMembershipTier("casual");
           setMembershipOnHold(false);
           setHasSgtAccount(false);
           setIsStaff(false);
@@ -172,7 +172,7 @@ const Dashboard = () => {
   });
 
   const handleSignOut = async () => {
-    setMembershipTier("visitor");
+    setMembershipTier("casual");
     setMembershipOnHold(false);
     setHasSgtAccount(false);
     setIsAdmin(false);

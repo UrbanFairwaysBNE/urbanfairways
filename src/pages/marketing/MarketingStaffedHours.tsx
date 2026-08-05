@@ -24,7 +24,7 @@ const MarketingStaffedHours = () => {
           </h1>
           <p className="mt-4 text-primary-foreground/80 max-w-2xl mx-auto">
             Open every day during <span className="text-accent font-semibold">extended access hours</span> for
-            visitors and members.
+            casual customers and members.
           </p>
         </div>
       </section>
@@ -38,7 +38,7 @@ const MarketingStaffedHours = () => {
               <h2 className="font-display text-2xl uppercase tracking-wide">Opening Hours</h2>
             </div>
             <p className="text-4xl font-display tracking-wide text-primary">Extended Hours</p>
-            <p className="text-muted-foreground mt-2">Every day, for visitors and members*.</p>
+            <p className="text-muted-foreground mt-2">Every day, for casual customers and members*.</p>
           </div>
 
           <div className="rounded-xl border border-border bg-card p-8 shadow-sm">

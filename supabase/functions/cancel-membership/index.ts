@@ -70,16 +70,16 @@ serve(async (req) => {
       logStep("No Stripe customer found, skipping subscription cancellation");
     }
 
-    // Update profile to visitor tier
+    // Update profile to casual tier
     const { error: updateError } = await supabaseClient
       .from("profiles")
-      .update({ membership_tier: "visitor" })
+      .update({ membership_tier: "casual" })
       .eq("user_id", user_id);
 
     if (updateError) {
       throw new Error(`Failed to update profile: ${updateError.message}`);
     }
-    logStep("Updated profile to visitor tier");
+    logStep("Updated profile to casual tier");
 
     // Email notification is now handled by the Stripe webhook (stripe-webhook function)
     // when the subscription.deleted event fires, preventing duplicate emails

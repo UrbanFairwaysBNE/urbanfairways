@@ -47,7 +47,7 @@ const Clubhouse = () => {
   const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
-  const [membershipTier, setMembershipTier] = useState<MembershipTier>("visitor");
+  const [membershipTier, setMembershipTier] = useState<MembershipTier>("casual");
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);

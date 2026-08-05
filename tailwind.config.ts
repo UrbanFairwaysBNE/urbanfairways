@@ -68,6 +68,7 @@ export default {
           "primary-light": "hsl(var(--brand-primary-light))",
           accent: "hsl(var(--brand-accent))",
           "accent-light": "hsl(var(--brand-accent-light))",
+          "accent-soft": "hsl(var(--brand-accent-soft))",
           surface: "hsl(var(--brand-surface))",
         },
         // League Hub premium colors

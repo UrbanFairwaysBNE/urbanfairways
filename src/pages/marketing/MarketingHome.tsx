@@ -52,7 +52,7 @@ const MarketingHome = () => {
 
         <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/40 to-transparent" />
         <div className="relative container mx-auto px-4 max-w-5xl">
-          <p className="text-accent font-display font-bold tracking-[0.25em] uppercase text-sm mb-4">
+          <p className="text-brand-accent-soft font-display font-bold tracking-[0.25em] uppercase text-sm mb-4">
             Welcome to {tenant.venue_name}
           </p>
           <h1 className="font-display font-extrabold text-5xl sm:text-7xl lg:text-8xl text-primary-foreground leading-[0.95] tracking-tight uppercase">

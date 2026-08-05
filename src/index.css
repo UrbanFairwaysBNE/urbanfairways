@@ -64,6 +64,8 @@
     --brand-surface: 40 29% 94%;
     --brand-primary-light: 218 11% 26%;
     --brand-accent-light: 93 16% 50%;
+    /* Light sage for kickers over dark imagery */
+    --brand-accent-soft: 92 27% 77%;
 
     /* League Hub - neutral bronze theme */
     --league-primary: 93 15% 38%;

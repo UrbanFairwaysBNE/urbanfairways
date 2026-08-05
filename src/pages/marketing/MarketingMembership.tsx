@@ -92,7 +92,7 @@ const MarketingMembership = () => {
       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${pageHeader})` }} />
       <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/70 to-primary/30" />
       <div className="relative container mx-auto px-4 pb-8">
-        <p className="text-accent font-display font-bold tracking-[0.25em] uppercase text-xs mb-1.5">Membership</p>
+        <p className="text-brand-accent-soft font-display font-bold tracking-[0.25em] uppercase text-xs mb-1.5">Membership</p>
         <h1 className="font-display text-3xl sm:text-5xl text-primary-foreground leading-none">
           Play More.<br />Save More.
         </h1>

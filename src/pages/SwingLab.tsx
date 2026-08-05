@@ -274,7 +274,7 @@ export default function SwingLab() {
                   </div>
                 </li>
                 <li>Click <strong>Export to CSV</strong>.</li>
-                <li><strong>Done!</strong> The system will automatically send this to your Hub for analysis.</li>
+                <li><strong>Done!</strong> That's all you need to do — we take care of the rest and your session appears in UF Lab.</li>
               </ol>
               <div className="border-t border-border pt-4 space-y-2">
                 <h4 className="font-semibold text-foreground">Tip</h4>

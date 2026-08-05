@@ -2,6 +2,7 @@ import Seo from "@/components/Seo";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { Phone, Mail, MapPin } from "lucide-react";
 import venueInterior from "@/assets/venue-interior.jpg";
+import pageHeader from "@/assets/page-header-city.jpg";
 import { useTenant, formatTenantAddress } from "@/config/tenant";
 
 const MarketingContact = () => {

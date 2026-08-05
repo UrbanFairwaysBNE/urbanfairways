@@ -4,6 +4,7 @@ import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import venueInterior from "@/assets/venue-interior.jpg";
+import pageHeader from "@/assets/page-header-city.jpg";
 import { useTenant } from "@/config/tenant";
 
 const MarketingGateAccess = () => {

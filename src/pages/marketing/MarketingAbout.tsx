@@ -2,6 +2,7 @@ import Seo from "@/components/Seo";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { ArrowRight, LayoutGrid, Monitor, BadgePercent, Trophy, Smartphone } from "lucide-react";
 import venueInterior from "@/assets/venue-interior.jpg";
+import pageHeader from "@/assets/page-header-city.jpg";
 import { useTenant, hubUrl } from "@/config/tenant";
 
 const getHighlights = (venueName: string) => [
@@ -39,7 +40,7 @@ const MarketingAbout = () => {
   <MarketingLayout>
     <Seo title={`About ${tenant.venue_name} | Indoor Golf Centre`} description={`Meet ${tenant.venue_name}: automated simulator bays, tour-accurate launch data, 4K visuals and weekly competitions.`} path="/about" />
     <section className="relative h-[17vh] min-h-[110px] flex items-end overflow-hidden">
-      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${venueInterior})` }} />
+      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${pageHeader})` }} />
       <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/70 to-primary/30" />
       <div className="relative container mx-auto px-4 pb-8">
         <p className="text-accent font-display font-bold tracking-[0.25em] uppercase text-xs mb-1.5">Welcome</p>

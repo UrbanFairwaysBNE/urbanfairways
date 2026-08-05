@@ -3,6 +3,7 @@ import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { Users, Target, Wallet, Clock, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
 import venueInterior from "@/assets/venue-interior.jpg";
+import pageHeader from "@/assets/page-header-city.jpg";
 import { useTenant } from "@/config/tenant";
 import { AmbroseBoard, useNextAmbrose } from "@/components/compete/CompeteBoards";
 

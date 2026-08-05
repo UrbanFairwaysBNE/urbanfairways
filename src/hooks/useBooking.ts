@@ -939,6 +939,8 @@ export function useBooking() {
     actualMembershipTier,
     isPaymentLimbo,
     depositBalance,
+    packHoursBalance,
+
     savedCard: savedCard ?? null,
     isLoadingSavedCard,
     tierPricing,

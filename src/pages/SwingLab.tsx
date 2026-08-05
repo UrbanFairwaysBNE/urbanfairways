@@ -16,7 +16,7 @@ import { Trash2, Info as InfoIcon } from "lucide-react";
 import { PGA_TOUR_AVERAGES, matchTourClub, matchBenchmarkClub, METRIC_TOOLTIPS, BENCHMARK_LABELS, type TourAverage, type BenchmarkSet } from "@/lib/pga-tour-averages";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { supabase } from "@/integrations/supabase/client";
-import swingLabBadge from "@/assets/swing-lab-badge.png.asset.json";
+import swingLabBadge from "@/assets/uf-lab-circle-light.png";
 import swingLabClipboard from "@/assets/swing-lab-clipboard.png.asset.json";
 import { HelpCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -242,7 +242,7 @@ export default function SwingLab() {
             <Button variant="ghost" size="sm" className="-ml-2" onClick={() => navigate("/dashboard")}>
               <ArrowLeft className="h-4 w-4 mr-1" /> Back
             </Button>
-            <img src={swingLabBadge.url} alt="UF Lab" className="h-9 md:h-10 w-auto object-contain" />
+            <img src={swingLabBadge} alt="UF Lab" className="h-12 md:h-14 w-auto object-contain rounded-full" />
 
             <Button variant="ghost" size="sm" className="-mr-2 border border-accent" onClick={() => setHowToOpen(true)}>
               <HelpCircle className="h-4 w-4 mr-1" /> How To
@@ -255,7 +255,7 @@ export default function SwingLab() {
         <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <img src={swingLabBadge.url} alt="" className="h-6 w-6 rounded-full object-cover" />
+              <img src={swingLabBadge} alt="" className="h-6 w-6 rounded-full object-cover" />
               {howToPage === 1 ? "How to use UF Lab" : "How to customise your bag"}
             </DialogTitle>
           </DialogHeader>

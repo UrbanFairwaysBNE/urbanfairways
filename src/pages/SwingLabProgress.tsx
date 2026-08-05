@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import swingLabBadge from "@/assets/swing-lab-badge.png.asset.json";
+import swingLabBadge from "@/assets/uf-lab-circle-light.png";
 import { detectDistanceUnit, detectSpeedUnit, convertDistance, convertSpeed, type Shot, type DistanceUnit, type SpeedUnit } from "@/lib/range-stats";
 
 type Session = { id: string; session_date: string };
@@ -291,7 +291,7 @@ export default function SwingLabProgress() {
           <Button variant="ghost" size="sm" onClick={() => navigate("/swing-lab")} className="gap-1">
             <ArrowLeft className="h-4 w-4" /> Back
           </Button>
-          <img src={swingLabBadge.url} alt="UF Lab" className="h-9 md:h-10 object-contain" />
+          <img src={swingLabBadge} alt="UF Lab" className="h-12 md:h-14 object-contain rounded-full" />
           <div className="w-16" />
         </div>
       </header>

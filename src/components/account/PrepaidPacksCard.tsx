@@ -13,7 +13,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Clock, Loader2, Timer, Copy, Gift } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Clock, Loader2, Timer, Copy, Gift, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { formatBrisbaneDate } from "@/lib/brisbane-time";
 import { usePackHours, formatHours, type PackProduct } from "@/hooks/usePackHours";

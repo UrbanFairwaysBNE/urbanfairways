@@ -48,9 +48,9 @@ const features = [
 ];
 
 const steps = [
-  { n: "01", title: "Book a bay", body: "Any bay, any session. UF Lab runs quietly in the background." },
-  { n: "02", title: "Hit the range", body: "Load a GSPro range session and warm up or grind as normal." },
-  { n: "03", title: "Review your data", body: "Open UF Lab in the Urban Fairways app and see the session broken down club by club." },
+  { n: "01", title: "Start a range session", body: "Load the GSPro driving range and select the correct club in the bottom left as you work through the bag." },
+  { n: "02", title: "Hit Export", body: "When you're done, click the clipboard icon in the top left and choose Export to CSV. That's the only step on you." },
+  { n: "03", title: "We do the rest", body: "Your session is processed and sent through to UF Lab in the Urban Fairways app, broken down club by club." },
 ];
 
 const MarketingUFLab = () => {

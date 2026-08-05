@@ -735,8 +735,43 @@ export default function Booking() {
           </CardContent>
         </Card>
 
+        {/* Prepaid Hours */}
+        {canConfirm && packHoursBalance > 0 && sessionTotal > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-display text-xl">Prepaid Hours</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-secondary/50">
+                <Checkbox
+                  id="pack-hours"
+                  checked={applyPackHours}
+                  onCheckedChange={(checked) => setApplyPackHours(checked === true)}
+                />
+                <Label htmlFor="pack-hours" className="flex-1 cursor-pointer">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium">
+                      Use {packHoursAvailable} of your {packHoursBalance} prepaid{" "}
+                      {packHoursBalance === 1 ? "hour" : "hours"}
+                    </span>
+                    <span className="font-semibold text-green-600">
+                      -${packDiscount.toFixed(2)}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {amountAfterHours <= 0
+                      ? "This session is fully covered by your prepaid hours."
+                      : `$${amountAfterHours.toFixed(2)} left to pay.`}
+                  </p>
+                </Label>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Payment Method Selection - Only show if user has balance */}
-        {canConfirm && depositBalance > 0 && (
+        {canConfirm && depositBalance > 0 && amountAfterHours > 0 && (
+
           <Card>
             <CardHeader>
               <CardTitle className="font-display text-xl">Payment Method</CardTitle>

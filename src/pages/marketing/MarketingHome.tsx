@@ -21,7 +21,7 @@ const getFeatures = (venueName: string) => [
 ];
 
 const swingLabFeatures = [
-  { icon: Target, title: "Automatic shot capture from GSPro range sessions" },
+  { icon: Target, title: "One-tap export from GSPro — we do the rest" },
   { icon: BarChart3, title: "Per-club gapping and distance averages" },
   { icon: Crosshair, title: "Dispersion analysis with visual scatter plots" },
   { icon: Activity, title: "Swing dynamics: path, face angle, attack angle and spin" },

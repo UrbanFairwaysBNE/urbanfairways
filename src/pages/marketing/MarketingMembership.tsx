@@ -108,49 +108,18 @@ const MarketingMembership = () => {
     </section>
 
     <section className="pb-20">
-      <div className="container mx-auto px-4 grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl">
+      <div className="container mx-auto px-4 grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl">
         {tiers.map((t) => (
-          <div
-            key={t.name}
-            className={`relative rounded-2xl p-6 border transition-all bg-card text-card-foreground hover:shadow-lg ${
-              t.highlight ? "border-accent ring-2 ring-accent/20 mt-6 md:mt-0" : "border-border"
-            }`}
-          >
-            {t.highlight && (
-              <span className="absolute -top-4 left-1/2 -translate-x-1/2 whitespace-nowrap bg-accent text-accent-foreground text-xs font-display uppercase tracking-wider px-4 py-1.5 rounded-full shadow-sm">
-                Most Popular
-              </span>
-            )}
-            <p className="text-xs font-bold uppercase tracking-wider mb-2 text-foreground/60">{t.tag}</p>
-            <h3 className="font-display text-2xl uppercase tracking-wide mb-1">{t.name}</h3>
-            <div className="mb-5">
-              <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold bg-accent/10 text-accent border border-accent/20">
-                <Clock className="h-3.5 w-3.5" />
-                {t.rate}
-              </span>
-            </div>
-            <div className="mb-6">
-              <span className="font-display text-5xl">{t.price}</span>
-              <span className="text-sm text-foreground/60"> /week</span>
-            </div>
-            <ul className="space-y-3 text-sm mb-7">
-              {t.perks.map((p) => (
-                <li key={p} className="flex gap-2">
-                  <Check className="h-4 w-4 mt-0.5 text-accent shrink-0" />
-                  <span>{p}</span>
-                </li>
-              ))}
-            </ul>
-            <a
-              href={hubUrl(tenant, "/")}
-              className="block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors bg-primary hover:bg-primary/90 text-primary-foreground"
-            >
-              Join
-            </a>
-          </div>
+          <TierCard key={t.name} tier={t} joinHref={hubUrl(tenant, "/")} />
         ))}
       </div>
+      <div className="container mx-auto px-4 mt-6 max-w-5xl">
+        <div className="md:max-w-sm">
+          <TierCard tier={frontlineTier} joinHref={hubUrl(tenant, "/")} />
+        </div>
+      </div>
     </section>
+
 
     <section className="py-12 sm:py-20">
       <div className="container mx-auto px-4 max-w-5xl">

@@ -8,7 +8,7 @@ import venueInterior from "@/assets/venue-interior.jpg";
 import simBayImage from "@/assets/sim-bay.webp.asset.json";
 import heroVideo from "@/assets/hero-video-v3.mp4.asset.json";
 
-import swingLabBadge from "@/assets/swing-lab-badge.png.asset.json";
+import swingLabBadge from "@/assets/uf-lab-circle-dark.png";
 import googlePlayBadge from "@/assets/google-play-badge.svg";
 import { useTenant, hubUrl } from "@/config/tenant";
 import { useCasualRates } from "@/hooks/useCasualRates";
@@ -229,7 +229,7 @@ const MarketingHome = () => {
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-14">
             <img
-              src={swingLabBadge.url}
+              src={swingLabBadge}
               alt={`UF Lab at ${tenant.venue_name}`}
               className="h-28 sm:h-36 w-auto mx-auto mb-6 object-contain"
               loading="lazy"

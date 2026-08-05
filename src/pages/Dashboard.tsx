@@ -8,7 +8,7 @@ import { LogOut, Calendar, Settings, ClipboardList, Trophy, Lock, Users, Info, M
 import venueLogo from "@/assets/venue-logo.png";
 import { useTenant } from "@/config/tenant";
 import { usePricing } from "@/hooks/usePricing";
-import swingLabBadge from "@/assets/swing-lab-badge.png.asset.json";
+import swingLabBadge from "@/assets/uf-lab-circle-light.png";
 import { supabase } from "@/integrations/supabase/client";
 import { NotificationBell } from "@/components/NotificationBell";
 import { QUERY_KEYS, STALE_TIMES } from "@/lib/query-keys";
@@ -285,7 +285,7 @@ const Dashboard = () => {
               )}
               <div className="flex items-center gap-3">
                 <img
-                  src={swingLabBadge.url}
+                  src={swingLabBadge}
                   alt="UF Lab"
                   className="h-12 w-12 rounded-full object-cover shrink-0"
                 />

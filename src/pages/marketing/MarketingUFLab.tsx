@@ -17,8 +17,8 @@ import {
 const features = [
   {
     icon: Target,
-    title: "Automatic shot capture",
-    body: "Every range session in GSPro is captured automatically. No apps to open, no data to log — just hit balls and the numbers land in your account.",
+    title: "One-tap shot export",
+    body: "Set your club as you go, then hit Export to CSV in GSPro at the end of your range session. That's your only job — we take care of the rest.",
   },
   {
     icon: BarChart3,

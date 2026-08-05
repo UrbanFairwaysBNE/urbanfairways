@@ -27,7 +27,7 @@ const tiers: Tier[] = [
       "Mon–Fri 5:30am–4:00pm",
       "Sat–Sun 5:30am–10:00am",
       "2 guests",
-      "Swing Lab access",
+      "UF Lab access",
     ],
   },
   {
@@ -39,7 +39,7 @@ const tiers: Tier[] = [
     perks: [
       "Play anytime",
       "2 guests",
-      "Swing Lab access",
+      "UF Lab access",
       "Member events",
       "Member competitions",
       "Priority bookings",
@@ -53,7 +53,7 @@ const tiers: Tier[] = [
     perks: [
       "Play anytime",
       "2 guests",
-      "Swing Lab access",
+      "UF Lab access",
       "Member events",
       "Member competitions",
       "Priority bookings",
@@ -72,7 +72,7 @@ const frontlineTier: Tier = {
   perks: [
     "Play anytime",
     "2 guests",
-    "Swing Lab access",
+    "UF Lab access",
     "Member events",
     "Member competitions",
     "Priority bookings",

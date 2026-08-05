@@ -270,7 +270,7 @@ const Dashboard = () => {
               </div>
             </button>
 
-            {/* Swing Lab */}
+            {/* UF Lab */}
             <button
               onClick={() => hasRangeAccess ? navigate("/swing-lab") : navigate("/membership")}
               className={`bg-card rounded-xl p-4 shadow-sm border text-left active:scale-[0.98] transition-all relative ${
@@ -286,10 +286,10 @@ const Dashboard = () => {
               <div className="flex items-center gap-3">
                 <img
                   src={swingLabBadge.url}
-                  alt="Swing Lab"
+                  alt="UF Lab"
                   className="h-12 w-12 rounded-full object-cover shrink-0"
                 />
-                <h2 className={`font-semibold text-base ${hasRangeAccess ? "" : "text-muted-foreground"}`}>Swing Lab</h2>
+                <h2 className={`font-semibold text-base ${hasRangeAccess ? "" : "text-muted-foreground"}`}>UF Lab</h2>
               </div>
             </button>
 

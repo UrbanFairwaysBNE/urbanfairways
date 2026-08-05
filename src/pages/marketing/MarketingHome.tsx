@@ -164,12 +164,12 @@ const MarketingHome = () => {
             </h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            <PriceCard tier="Practice Club" rate="$10/hr" price="$15" tag="Off-peak access" perks={["Mon–Fri 5:30am–4:00pm", "Sat–Sun 5:30am–10:00am", "2 guests", "Swing Lab access"]} joinHref={hubUrl(tenant, "/")} />
-            <PriceCard tier="Birdie" rate="$10/hr" price="$29" tag="Suits Most" highlight perks={["Play anytime", "2 guests", "Swing Lab access", "Member events & comps", "Priority bookings"]} joinHref={hubUrl(tenant, "/")} />
-            <PriceCard tier="Eagle" rate="$8/hr" price="$39" tag="Best value per round" perks={["Play anytime", "2 guests", "Swing Lab access", "Member events & comps", "Priority bookings", "Monthly 30min coaching session"]} joinHref={hubUrl(tenant, "/")} />
+            <PriceCard tier="Practice Club" rate="$10/hr" price="$15" tag="Off-peak access" perks={["Mon–Fri 5:30am–4:00pm", "Sat–Sun 5:30am–10:00am", "2 guests", "UF Lab access"]} joinHref={hubUrl(tenant, "/")} />
+            <PriceCard tier="Birdie" rate="$10/hr" price="$29" tag="Suits Most" highlight perks={["Play anytime", "2 guests", "UF Lab access", "Member events & comps", "Priority bookings"]} joinHref={hubUrl(tenant, "/")} />
+            <PriceCard tier="Eagle" rate="$8/hr" price="$39" tag="Best value per round" perks={["Play anytime", "2 guests", "UF Lab access", "Member events & comps", "Priority bookings", "Monthly 30min coaching session"]} joinHref={hubUrl(tenant, "/")} />
           </div>
           <div className="max-w-sm mx-auto mt-6">
-            <PriceCard tier="Frontline" rate="$8/hr" price="$30" tag="Frontline & essential workers" subtle info="This membership is available to Emergency Services, Defence & Nurses" perks={["Play anytime", "2 guests", "Swing Lab access", "Member events & comps", "TPI Assessment on joining", "Monthly 30min coaching session"]} joinHref={hubUrl(tenant, "/")} />
+            <PriceCard tier="Frontline" rate="$8/hr" price="$30" tag="Frontline & essential workers" subtle info="This membership is available to Emergency Services, Defence & Nurses" perks={["Play anytime", "2 guests", "UF Lab access", "Member events & comps", "TPI Assessment on joining", "Monthly 30min coaching session"]} joinHref={hubUrl(tenant, "/")} />
           </div>
 
           <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto mt-8">
@@ -230,11 +230,11 @@ const MarketingHome = () => {
           <div className="text-center max-w-2xl mx-auto mb-14">
             <img
               src={swingLabBadge.url}
-              alt={`Swing Lab at ${tenant.venue_name}`}
+              alt={`UF Lab at ${tenant.venue_name}`}
               className="h-28 sm:h-36 w-auto mx-auto mb-6 object-contain"
               loading="lazy"
             />
-            <p className="text-accent font-display font-bold tracking-[0.2em] uppercase text-sm mb-3">Swing Lab</p>
+            <p className="text-accent font-display font-bold tracking-[0.2em] uppercase text-sm mb-3">UF Lab</p>
             <h2 className="font-display text-4xl sm:text-5xl text-primary leading-tight">
               Your Personal Driving Range Coach.
             </h2>
@@ -260,7 +260,7 @@ const MarketingHome = () => {
               to="/membership-info"
               className="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-accent-foreground font-display tracking-wide uppercase px-7 py-3.5 rounded-md"
             >
-              Unlock Swing Lab <ArrowRight className="h-4 w-4" />
+              Unlock UF Lab <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>

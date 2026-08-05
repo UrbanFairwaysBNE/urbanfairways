@@ -128,6 +128,9 @@ const fetchUserProfile = async () => {
   // and is treated as a visitor everywhere until they retry payment successfully.
   const effectiveTier = paymentFailedAt ? "visitor" : actualTier;
 
+  // Prepaid hours wallet — separate to the dollar credit balance
+  const { data: packHours } = await supabase.rpc("pack_hours_balance", { _user_id: user.id });
+
   return {
     userId: user.id,
     membershipTier: effectiveTier,
@@ -136,8 +139,10 @@ const fetchUserProfile = async () => {
     isPaymentLimbo: !!paymentFailedAt,
     customHourlyRate: data?.custom_hourly_rate ?? null,
     depositBalance: Number(data?.deposit_balance) || 0,
+    packHoursBalance: Number(packHours) || 0,
     customSegment: data?.custom_segment ?? null,
   };
+
 };
 
 const fetchSavedCard = async (): Promise<SavedCard | null> => {

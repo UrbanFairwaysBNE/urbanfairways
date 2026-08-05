@@ -22,6 +22,7 @@ const navGroups: NavGroup[] = [
     links: [
       { to: "/coaching", label: "Coaching" },
       { to: "/tpi-assessment", label: "TPI Assessment" },
+      { to: "/uf-lab", label: "UF Lab" },
     ],
   },
   {

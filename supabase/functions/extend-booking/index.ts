@@ -72,6 +72,8 @@ serve(async (req) => {
     const body = await req.json();
     const booking_id: string = body.booking_id;
     const additional_hours: number = Number(body.additional_hours);
+    const use_pack_hours: boolean = body.use_pack_hours === true;
+
 
     if (!booking_id || !additional_hours || additional_hours < 1 || additional_hours > 3) {
       throw new Error("Invalid request: additional_hours must be 1, 2 or 3");
@@ -173,12 +175,37 @@ serve(async (req) => {
     let balanceUsed = 0;
     let cardCharged = 0;
 
-    if (extensionCost > 0) {
-      if (currentBalance >= extensionCost) {
-        balanceUsed = extensionCost;
+    // ── Prepaid pack hours ──
+    // Applied first, at the extension's effective hourly rate, then credit, then card.
+    let packHoursUsed = 0;
+    let packDiscount = 0;
+    if (use_pack_hours && extensionCost > 0) {
+      const { data: packBalance } = await supabaseAdmin.rpc("pack_hours_balance", {
+        _user_id: user.id,
+      });
+      const available = Math.min(Number(packBalance) || 0, additional_hours);
+      if (available > 0) {
+        const { error: consumeErr } = await supabaseAdmin.rpc("consume_pack_hours", {
+          _user_id: user.id,
+          _hours: available,
+          _booking_id: booking_id,
+          _description: `Extend booking by ${additional_hours}hr`,
+        });
+        if (consumeErr) throw new Error(`Could not use prepaid hours: ${consumeErr.message}`);
+        packHoursUsed = available;
+        packDiscount =
+          Math.round((extensionCost / additional_hours) * packHoursUsed * 100) / 100;
+      }
+    }
+
+    const amountDue = Math.max(0, Math.round((extensionCost - packDiscount) * 100) / 100);
+
+    if (amountDue > 0) {
+      if (currentBalance >= amountDue) {
+        balanceUsed = amountDue;
         await supabaseAdmin
           .from("profiles")
-          .update({ deposit_balance: currentBalance - extensionCost })
+          .update({ deposit_balance: currentBalance - amountDue })
           .eq("user_id", user.id);
         paymentResult = { method: "balance", chargedFromBalance: balanceUsed };
       } else if (stripeKey) {
@@ -196,7 +223,7 @@ serve(async (req) => {
             .update({ deposit_balance: 0 })
             .eq("user_id", user.id);
         }
-        cardCharged = extensionCost - balanceUsed;
+        cardCharged = amountDue - balanceUsed;
         await stripe.paymentIntents.create({
           amount: Math.round(cardCharged * 100),
           currency: "aud",
@@ -227,6 +254,7 @@ serve(async (req) => {
         duration_hours: newDuration,
         total_price: newTotal,
         hourly_rate: blendedHourlyRate,
+        pack_hours_used: (Number(booking.pack_hours_used) || 0) + packHoursUsed,
         updated_at: new Date().toISOString(),
       })
       .eq("id", booking_id)
@@ -270,7 +298,8 @@ serve(async (req) => {
         booking: updated,
         extensionCost,
         newTotal,
-        payment: paymentResult,
+        packHoursUsed,
+        payment: { ...paymentResult, packHoursUsed },
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
     );

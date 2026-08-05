@@ -128,6 +128,9 @@ const fetchUserProfile = async () => {
   // and is treated as a visitor everywhere until they retry payment successfully.
   const effectiveTier = paymentFailedAt ? "visitor" : actualTier;
 
+  // Prepaid hours wallet — separate to the dollar credit balance
+  const { data: packHours } = await supabase.rpc("pack_hours_balance", { _user_id: user.id });
+
   return {
     userId: user.id,
     membershipTier: effectiveTier,
@@ -136,8 +139,10 @@ const fetchUserProfile = async () => {
     isPaymentLimbo: !!paymentFailedAt,
     customHourlyRate: data?.custom_hourly_rate ?? null,
     depositBalance: Number(data?.deposit_balance) || 0,
+    packHoursBalance: Number(packHours) || 0,
     customSegment: data?.custom_segment ?? null,
   };
+
 };
 
 const fetchSavedCard = async (): Promise<SavedCard | null> => {
@@ -213,6 +218,8 @@ export function useBooking() {
   const isPaymentLimbo = !!userProfile?.isPaymentLimbo;
   const customHourlyRate = userProfile?.customHourlyRate ?? null;
   const depositBalance = userProfile?.depositBalance || 0;
+  const packHoursBalance = userProfile?.packHoursBalance || 0;
+
   const customSegment = userProfile?.customSegment ?? null;
 
   /**
@@ -615,7 +622,10 @@ export function useBooking() {
     paymentMethod: PaymentMethod = "card",
     newPaymentMethodId?: string,
     partialBalanceAmount?: number,
-    notes?: string
+    notes?: string,
+    /** Prepaid pack hours to spend on this session (capped at balance and duration) */
+    packHoursToUse?: number
+
   ): Promise<{ booking: any; requiresCheckout?: boolean; checkoutUrl?: string }> => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
@@ -692,32 +702,72 @@ export function useBooking() {
     // Apply any casual special (e.g. 90 minutes for $60) when it beats the hourly rate
     const { total: totalPrice } = getBookingTotal(actualHourlyRate, durationHours, date, startTime);
 
-    
+    // ── Prepaid pack hours ──
+    // Hours buy simulator time, so they are worth the session's effective hourly rate.
+    // They are always applied first, then dollar credit, then card.
+    const effectiveRate = durationHours > 0 ? totalPrice / durationHours : 0;
+    const hoursRequested = Math.max(0, Math.min(packHoursToUse ?? 0, durationHours, packHoursBalance));
+    let packHoursUsed = 0;
+    let packDiscount = 0;
+
+    if (hoursRequested > 0) {
+      const { data: consumed, error: packError } = await supabase.rpc("consume_pack_hours", {
+        _user_id: user.id,
+        _hours: hoursRequested,
+        _transaction_type: "booking",
+        _description: `Booking - ${format(date, "PPP")} at ${startTime}`,
+      });
+      if (packError) throw new Error(packError.message || "Failed to apply prepaid hours");
+      packHoursUsed = Number(consumed) || 0;
+      packDiscount = Math.round(packHoursUsed * effectiveRate * 100) / 100;
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USER_PROFILE() });
+    }
+
+    /** Restores prepaid hours if a later step of this booking fails. */
+    const rollbackPackHours = async () => {
+      if (packHoursUsed <= 0) return;
+      await supabase.rpc("restore_pack_hours", {
+        _user_id: user.id,
+        _hours: packHoursUsed,
+        _transaction_type: "reversal",
+        _description: "Booking failed - prepaid hours returned",
+      });
+      packHoursUsed = 0;
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USER_PROFILE() });
+    };
+
+    // Amount still owed after prepaid hours
+    const payableTotal = Math.max(0, Math.round((totalPrice - packDiscount) * 100) / 100);
+
     // Track how much to deduct from balance and charge to card
     let balanceDeduction = 0;
-    let cardAmount = totalPrice;
+    let cardAmount = payableTotal;
     let currentDepositBalance = depositBalance;
 
     // If using balance, check if sufficient funds
-    if (paymentMethod === "balance") {
-      if (currentDepositBalance < totalPrice) {
+    if (paymentMethod === "balance" && payableTotal > 0) {
+      if (currentDepositBalance < payableTotal) {
+        await rollbackPackHours();
         throw new Error("Insufficient balance");
       }
-      balanceDeduction = totalPrice;
+      balanceDeduction = payableTotal;
       cardAmount = 0;
-      
-      const newBalance = currentDepositBalance - totalPrice;
+
+      const newBalance = currentDepositBalance - payableTotal;
       const { error: balanceError } = await supabase
         .from("profiles")
         .update({ deposit_balance: newBalance })
         .eq("user_id", user.id);
-      
-      if (balanceError) throw new Error("Failed to deduct balance");
+
+      if (balanceError) {
+        await rollbackPackHours();
+        throw new Error("Failed to deduct balance");
+      }
 
       // Log the transaction
       await supabase.from("deposit_transactions").insert({
         user_id: user.id,
-        amount: -totalPrice,
+        amount: -payableTotal,
         balance_before: currentDepositBalance,
         balance_after: newBalance,
         transaction_type: "booking",
@@ -725,18 +775,21 @@ export function useBooking() {
       });
 
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USER_PROFILE() });
-    } else if (partialBalanceAmount && partialBalanceAmount > 0) {
+    } else if (partialBalanceAmount && partialBalanceAmount > 0 && payableTotal > 0) {
       // Partial balance usage with card payment
-      balanceDeduction = Math.min(partialBalanceAmount, totalPrice);
-      cardAmount = totalPrice - balanceDeduction;
-      
+      balanceDeduction = Math.min(partialBalanceAmount, payableTotal);
+      cardAmount = Math.round((payableTotal - balanceDeduction) * 100) / 100;
+
       const newBalance = currentDepositBalance - balanceDeduction;
       const { error: balanceError } = await supabase
         .from("profiles")
         .update({ deposit_balance: newBalance })
         .eq("user_id", user.id);
-      
-      if (balanceError) throw new Error("Failed to deduct balance");
+
+      if (balanceError) {
+        await rollbackPackHours();
+        throw new Error("Failed to deduct balance");
+      }
 
       // Log the transaction
       await supabase.from("deposit_transactions").insert({
@@ -751,11 +804,21 @@ export function useBooking() {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USER_PROFILE() });
     }
 
-    // Auto-confirm if total is $0 (free booking) or paid by balance
-    // Use <= 0 to handle floating point edge cases
+    // Auto-confirm when nothing is left to charge (free, fully prepaid, or paid by credit)
     const isFreeBooking = totalPrice <= 0;
-    const shouldAutoConfirm = isFreeBooking || paymentMethod === "balance";
-    
+    const nothingLeftToPay = payableTotal <= 0;
+    const shouldAutoConfirm = isFreeBooking || nothingLeftToPay || paymentMethod === "balance";
+
+    const settledPaymentMethod = isFreeBooking
+      ? "free"
+      : nothingLeftToPay && packHoursUsed > 0
+        ? "prepaid_hours"
+        : paymentMethod === "balance"
+          ? "balance"
+          : balanceDeduction > 0 || packHoursUsed > 0
+            ? "partial"
+            : "pending";
+
     const { data: bookingData, error } = await supabase
       .from("bookings")
       .insert({
@@ -767,8 +830,9 @@ export function useBooking() {
         duration_hours: durationHours,
         hourly_rate: actualHourlyRate,
         total_price: totalPrice,
+        pack_hours_used: packHoursUsed,
         player_count: playerCount,
-        payment_method: isFreeBooking ? "free" : (paymentMethod === "balance" ? "balance" : (balanceDeduction > 0 ? "partial" : "pending")),
+        payment_method: settledPaymentMethod,
         status: shouldAutoConfirm ? "confirmed" : "pending",
         notes: notes ?? null,
       })
@@ -776,7 +840,7 @@ export function useBooking() {
       .single();
 
     if (error) {
-      // CRITICAL: Restore balance if it was already deducted before the booking insert failed
+      // CRITICAL: Restore balance and prepaid hours if they were already spent
       if (balanceDeduction > 0) {
         console.log("[useBooking] Booking insert failed, restoring balance deduction of", balanceDeduction);
         await supabase
@@ -785,8 +849,20 @@ export function useBooking() {
           .eq("user_id", user.id);
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USER_PROFILE() });
       }
+      await rollbackPackHours();
       throw error;
     }
+
+    // Link the hour spend to the booking now that it exists
+    if (packHoursUsed > 0) {
+      await supabase
+        .from("pack_transactions")
+        .update({ related_booking_id: bookingData.id })
+        .eq("user_id", user.id)
+        .is("related_booking_id", null)
+        .eq("transaction_type", "booking");
+    }
+
 
     // Only charge card if there's an amount to charge
     if (paymentMethod === "card" && cardAmount > 0) {
@@ -804,7 +880,7 @@ export function useBooking() {
       });
 
       if (chargeError) {
-        // Restore balance if card payment fails
+        // Restore balance and prepaid hours if card payment fails
         if (balanceDeduction > 0) {
           await supabase
             .from("profiles")
@@ -812,12 +888,13 @@ export function useBooking() {
             .eq("user_id", user.id);
           queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USER_PROFILE() });
         }
+        await rollbackPackHours();
         await supabase.from("bookings").delete().eq("id", bookingData.id);
         throw new Error(chargeError.message || "Payment failed");
       }
 
       if (chargeResult.error) {
-        // Restore balance if card payment fails
+        // Restore balance and prepaid hours if card payment fails
         if (balanceDeduction > 0) {
           await supabase
             .from("profiles")
@@ -825,8 +902,10 @@ export function useBooking() {
             .eq("user_id", user.id);
           queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USER_PROFILE() });
         }
+        await rollbackPackHours();
         await supabase.from("bookings").delete().eq("id", bookingData.id);
         throw new Error(chargeResult.error);
+
       }
 
       if (chargeResult.requiresCheckout) {
@@ -860,6 +939,8 @@ export function useBooking() {
     actualMembershipTier,
     isPaymentLimbo,
     depositBalance,
+    packHoursBalance,
+
     savedCard: savedCard ?? null,
     isLoadingSavedCard,
     tierPricing,

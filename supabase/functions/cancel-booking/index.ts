@@ -80,7 +80,39 @@ serve(async (req) => {
       total_price: booking.total_price
     });
 
-    let refundResult = null;
+    let refundResult: Record<string, unknown> | null = null;
+
+    // ── Prepaid hours ──
+    // Hours always go straight back to the customer's wallet (new expiry lots handled
+    // by restore_pack_hours). The dollar value they covered must not also be refunded.
+    const packHoursUsed = Number(booking.pack_hours_used) || 0;
+    let packHoursRestored = 0;
+    let packValue = 0;
+
+    if (packHoursUsed > 0) {
+      const duration = Number(booking.duration_hours) || 0;
+      const effectiveRate = duration > 0 ? Number(booking.total_price) / duration : 0;
+      packValue = Math.round(packHoursUsed * effectiveRate * 100) / 100;
+
+      const { data: restored, error: restoreError } = await supabaseAdmin.rpc("restore_pack_hours", {
+        _user_id: user.id,
+        _hours: packHoursUsed,
+        _booking_id: booking.id,
+        _transaction_type: "refund",
+        _description: "Booking cancelled - prepaid hours returned",
+      });
+
+      if (restoreError) {
+        throw new Error(`Failed to return prepaid hours: ${restoreError.message}`);
+      }
+
+      packHoursRestored = Number(restored) || packHoursUsed;
+      console.log("[CANCEL-BOOKING] Prepaid hours restored:", packHoursRestored);
+    }
+
+    // Dollar amount actually paid with money (credit or card)
+    const cashPaid = Math.max(0, Math.round((Number(booking.total_price) - packValue) * 100) / 100);
+
 
     // Process Stripe refund if payment intent exists (check for both "stripe" and "card" payment methods)
     if (booking.stripe_payment_intent_id && (booking.payment_method === "stripe" || booking.payment_method === "card")) {
@@ -105,10 +137,10 @@ serve(async (req) => {
       };
 
       console.log("[CANCEL-BOOKING] Stripe refund created:", refundResult);
-    } else if (booking.payment_method === "balance") {
-      // Refund to deposit balance
-      console.log("[CANCEL-BOOKING] Refunding to deposit balance:", booking.total_price);
-      
+    } else if (booking.payment_method === "balance" && cashPaid > 0) {
+      // Refund to deposit balance (only the part actually paid in dollars)
+      console.log("[CANCEL-BOOKING] Refunding to deposit balance:", cashPaid);
+
       const { data: profile, error: profileError } = await supabaseAdmin
         .from("profiles")
         .select("deposit_balance")
@@ -119,8 +151,8 @@ serve(async (req) => {
         throw new Error(`Failed to fetch profile: ${profileError.message}`);
       }
 
-      const newBalance = (profile.deposit_balance || 0) + booking.total_price;
-      
+      const newBalance = (profile.deposit_balance || 0) + cashPaid;
+
       const { error: updateBalanceError } = await supabaseAdmin
         .from("profiles")
         .update({ deposit_balance: newBalance })
@@ -132,14 +164,24 @@ serve(async (req) => {
 
       refundResult = {
         type: "balance",
-        amount: booking.total_price,
+        amount: cashPaid,
         new_balance: newBalance,
       };
 
       console.log("[CANCEL-BOOKING] Balance refund completed:", refundResult);
+    } else if (packHoursRestored > 0) {
+      refundResult = {
+        type: "prepaid_hours",
+        hours: packHoursRestored,
+      };
     } else {
       console.log("[CANCEL-BOOKING] No payment to refund (payment_method:", booking.payment_method, ")");
     }
+
+    if (packHoursRestored > 0 && refundResult && refundResult.type !== "prepaid_hours") {
+      refundResult.pack_hours_returned = packHoursRestored;
+    }
+
 
     // Update booking status to cancelled
     const { error: updateError } = await supabaseAdmin

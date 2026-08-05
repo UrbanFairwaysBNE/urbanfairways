@@ -641,6 +641,65 @@ serve(async (req) => {
 
       logStep("Checkout session completed", { sessionId: session.id, purpose, bookingId, giftCardId, paymentIntentId });
 
+      // ── PREPAID HOUR PACKS ──
+      const packLotId = session.metadata?.pack_lot_id;
+      if (purpose === "pack" && packLotId) {
+        const { data: lot } = await supabaseAdmin
+          .from("pack_lots")
+          .select("id, status, is_gift, validity_days, user_id")
+          .eq("id", packLotId)
+          .maybeSingle();
+
+        if (!lot) {
+          logStep("Pack lot missing", { packLotId });
+        } else if (lot.status !== "pending_payment") {
+          logStep("Pack lot already processed, skipping", { packLotId, status: lot.status });
+        } else {
+          const now = new Date();
+          const expiresAt = new Date(now.getTime() + lot.validity_days * 24 * 60 * 60 * 1000);
+
+          await supabaseAdmin
+            .from("pack_lots")
+            .update({
+              status: lot.is_gift ? "unredeemed" : "active",
+              purchased_at: now.toISOString(),
+              // Gift packs start their clock when redeemed, not when bought
+              expires_at: lot.is_gift ? null : expiresAt.toISOString(),
+              stripe_payment_intent_id: paymentIntentId,
+            })
+            .eq("id", packLotId);
+
+          if (!lot.is_gift && lot.user_id) {
+            const { data: balance } = await supabaseAdmin.rpc("pack_hours_balance", {
+              _user_id: lot.user_id,
+            });
+            await supabaseAdmin.from("pack_transactions").insert({
+              user_id: lot.user_id,
+              lot_id: packLotId,
+              hours: (await supabaseAdmin
+                .from("pack_lots")
+                .select("hours_total")
+                .eq("id", packLotId)
+                .maybeSingle()).data?.hours_total ?? 0,
+              balance_after: Number(balance) || 0,
+              transaction_type: "purchase",
+              description: "Prepaid hours pack purchased",
+            });
+          }
+
+          try {
+            await supabaseAdmin.functions.invoke("send-pack-email", {
+              body: { pack_lot_id: packLotId, kind: lot.is_gift ? "gift" : "purchase" },
+            });
+          } catch (e) {
+            logStep("send-pack-email invoke failed", { error: String(e) });
+          }
+
+          logStep("Pack activated", { packLotId, isGift: lot.is_gift });
+        }
+      }
+
+
       // ── GIFT CARD PAYMENTS ──
       if (purpose === "gift_card" && giftCardId) {
         // Brisbane today (UTC+10, no DST)

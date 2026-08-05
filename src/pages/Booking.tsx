@@ -46,6 +46,8 @@ export default function Booking() {
     actualMembershipTier,
     isPaymentLimbo,
     depositBalance,
+    packHoursBalance,
+
     savedCard,
     getHourlyRate,
     getRateInfo,
@@ -69,6 +71,8 @@ export default function Booking() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<"balance" | "card">("card");
   const [usePartialBalance, setUsePartialBalance] = useState(false);
+  const [applyPackHours, setApplyPackHours] = useState(true);
+
   const [pendingBookingId, setPendingBookingId] = useState<string | null>(null);
   const [playingComp, setPlayingComp] = useState(false);
   const [showMembershipIssueDialog, setShowMembershipIssueDialog] = useState(false);
@@ -305,6 +309,17 @@ export default function Booking() {
       return;
     }
 
+    // Prepaid hours are always spent through createBooking (it handles the wallet,
+    // then credit, then card, and rolls everything back if a step fails)
+    if (packHoursToApply > 0) {
+      if (amountAfterHours <= 0) {
+        handleConfirmBooking("balance");
+      } else {
+        handleConfirmBooking("card", usePartialBalance && depositBalance > 0);
+      }
+      return;
+    }
+
     // If paying with balance and have enough, skip pending/checkout entirely
     if (selectedPaymentMethod === "balance" && depositBalance >= totalPrice) {
       handleConfirmBookingWithBalance();
@@ -316,6 +331,7 @@ export default function Booking() {
       handleConfirmBooking("card", true);
       return;
     }
+
 
     // ALWAYS create a pending booking first to lock the slot
     setIsSubmitting(true);
@@ -438,7 +454,8 @@ export default function Booking() {
         paymentMethod,
         undefined, // No new payment method ID - we use saved card
         partialAmount,
-        playingComp ? COMP_NOTE : undefined
+        playingComp ? COMP_NOTE : undefined,
+        packHoursToApply
       );
       
       // If charge-booking returned a checkout URL (no saved card), redirect there
@@ -454,14 +471,20 @@ export default function Booking() {
 
       const totalPrice = sessionTotal;
       let message = `Your bay is booked for ${format(selectedDate, "PPP")} at ${selectedTime}.`;
-      if (paymentMethod === "balance") {
+      if (packHoursToApply > 0) {
+        message += ` ${packHoursToApply} prepaid ${packHoursToApply === 1 ? "hour" : "hours"} used.`;
+      }
+      if (amountAfterHours <= 0 && packHoursToApply > 0) {
+        // Fully covered by prepaid hours — nothing else to say
+      } else if (paymentMethod === "balance") {
         message += " Balance deducted.";
       } else if (applyPartialBalance && depositBalance > 0) {
-        const cardAmount = totalPrice - depositBalance;
-        message += ` $${depositBalance.toFixed(2)} from balance, $${cardAmount.toFixed(2)} charged to card.`;
+        const cardAmount = Math.max(0, amountAfterHours - depositBalance);
+        message += ` $${Math.min(depositBalance, amountAfterHours).toFixed(2)} from balance, $${cardAmount.toFixed(2)} charged to card.`;
       } else if (savedCard) {
         message += ` Charged to your ${savedCard.brand} •••• ${savedCard.last4}.`;
       }
+
       
       toast({
         title: "Booking confirmed!",
@@ -549,7 +572,17 @@ export default function Booking() {
   const sessionTotal = rateInfo?.total ?? hourlyRate * selectedDuration;
   const appliedSpecial = rateInfo?.special ?? null;
 
+  // Prepaid pack hours cover session time at the session's effective hourly rate
+  const packHoursAvailable = Math.min(packHoursBalance, selectedDuration);
+  const packHoursToApply = applyPackHours ? packHoursAvailable : 0;
+  const packDiscount =
+    selectedDuration > 0
+      ? Math.round(packHoursToApply * (sessionTotal / selectedDuration) * 100) / 100
+      : 0;
+  const amountAfterHours = Math.max(0, Math.round((sessionTotal - packDiscount) * 100) / 100);
+
   const canConfirm = selectedDate && selectedTime && selectedBayId;
+
 
 
   return (
@@ -702,15 +735,51 @@ export default function Booking() {
           </CardContent>
         </Card>
 
+        {/* Prepaid Hours */}
+        {canConfirm && packHoursBalance > 0 && sessionTotal > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-display text-xl">Prepaid Hours</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-secondary/50">
+                <Checkbox
+                  id="pack-hours"
+                  checked={applyPackHours}
+                  onCheckedChange={(checked) => setApplyPackHours(checked === true)}
+                />
+                <Label htmlFor="pack-hours" className="flex-1 cursor-pointer">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium">
+                      Use {packHoursAvailable} of your {packHoursBalance} prepaid{" "}
+                      {packHoursBalance === 1 ? "hour" : "hours"}
+                    </span>
+                    <span className="font-semibold text-green-600">
+                      -${packDiscount.toFixed(2)}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {amountAfterHours <= 0
+                      ? "This session is fully covered by your prepaid hours."
+                      : `$${amountAfterHours.toFixed(2)} left to pay.`}
+                  </p>
+                </Label>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Payment Method Selection - Only show if user has balance */}
-        {canConfirm && depositBalance > 0 && (
+        {canConfirm && depositBalance > 0 && amountAfterHours > 0 && (
+
           <Card>
             <CardHeader>
               <CardTitle className="font-display text-xl">Payment Method</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {(() => {
-                const totalPrice = sessionTotal;
+                const totalPrice = amountAfterHours;
+
                 const hasEnoughBalance = depositBalance >= totalPrice;
                 const remainingAfterBalance = totalPrice - depositBalance;
 
@@ -821,20 +890,26 @@ export default function Booking() {
             ) : (
               (() => {
                 if (!canConfirm) return "Confirm Booking";
-                const totalPrice = sessionTotal;
                 // Free bookings get special treatment
-                if (totalPrice <= 0) {
+                if (sessionTotal <= 0) {
                   return "Confirm Free Booking";
                 }
+                const totalPrice = amountAfterHours;
+                if (totalPrice <= 0) {
+                  return `Confirm Booking - ${packHoursToApply} Prepaid ${packHoursToApply === 1 ? "Hour" : "Hours"}`;
+                }
+                const hoursSuffix =
+                  packHoursToApply > 0 ? ` + ${packHoursToApply}h Prepaid` : "";
                 if (selectedPaymentMethod === "balance" && depositBalance >= totalPrice) {
-                  return `Confirm Booking - $${totalPrice.toFixed(2)} from Balance`;
+                  return `Confirm Booking - $${totalPrice.toFixed(2)} from Balance${hoursSuffix}`;
                 }
                 if (usePartialBalance && depositBalance > 0) {
-                  const cardAmount = totalPrice - depositBalance;
-                  return `Confirm Booking - $${cardAmount.toFixed(2)} Card + $${depositBalance.toFixed(2)} Balance`;
+                  const cardAmount = Math.max(0, totalPrice - depositBalance);
+                  return `Confirm Booking - $${cardAmount.toFixed(2)} Card + $${Math.min(depositBalance, totalPrice).toFixed(2)} Balance${hoursSuffix}`;
                 }
-                return `Confirm Booking - $${totalPrice.toFixed(2)}`;
+                return `Confirm Booking - $${totalPrice.toFixed(2)}${hoursSuffix}`;
               })()
+
             )}
           </Button>
           {canConfirm && depositBalance === 0 && sessionTotal > 0 && (

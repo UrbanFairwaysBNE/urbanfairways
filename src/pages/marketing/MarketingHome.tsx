@@ -21,7 +21,7 @@ const getFeatures = (venueName: string) => [
 ];
 
 const swingLabFeatures = [
-  { icon: Target, title: "Automatic shot capture from GSPro range sessions" },
+  { icon: Target, title: "One-tap export from GSPro — we do the rest" },
   { icon: BarChart3, title: "Per-club gapping and distance averages" },
   { icon: Crosshair, title: "Dispersion analysis with visual scatter plots" },
   { icon: Activity, title: "Swing dynamics: path, face angle, attack angle and spin" },
@@ -239,7 +239,7 @@ const MarketingHome = () => {
               Your Personal Driving Range Coach.
             </h2>
             <p className="mt-4 text-foreground/80 text-lg leading-relaxed">
-              Every range session becomes actionable data. Track your distances, dispersion, swing dynamics and progress over time — all included with your {tenant.venue_name} membership.
+              Every range session becomes actionable data. Hit Export in GSPro when you're done and we do the rest — distances, dispersion, swing dynamics and progress over time, all included with your {tenant.venue_name} membership.
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">

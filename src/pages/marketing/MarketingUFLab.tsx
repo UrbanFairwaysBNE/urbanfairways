@@ -17,8 +17,8 @@ import {
 const features = [
   {
     icon: Target,
-    title: "Automatic shot capture",
-    body: "Every range session in GSPro is captured automatically. No apps to open, no data to log — just hit balls and the numbers land in your account.",
+    title: "One-tap shot export",
+    body: "Set your club as you go, then hit Export to CSV in GSPro at the end of your range session. That's your only job — we take care of the rest.",
   },
   {
     icon: BarChart3,
@@ -48,9 +48,9 @@ const features = [
 ];
 
 const steps = [
-  { n: "01", title: "Book a bay", body: "Any bay, any session. UF Lab runs quietly in the background." },
-  { n: "02", title: "Hit the range", body: "Load a GSPro range session and warm up or grind as normal." },
-  { n: "03", title: "Review your data", body: "Open UF Lab in the Urban Fairways app and see the session broken down club by club." },
+  { n: "01", title: "Start a range session", body: "Load the GSPro driving range and select the correct club in the bottom left as you work through the bag." },
+  { n: "02", title: "Hit Export", body: "When you're done, click the clipboard icon in the top left and choose Export to CSV. That's the only step on you." },
+  { n: "03", title: "We do the rest", body: "Your session is processed and sent through to UF Lab in the Urban Fairways app, broken down club by club." },
 ];
 
 const MarketingUFLab = () => {
@@ -116,7 +116,7 @@ const MarketingUFLab = () => {
         <div className="container mx-auto px-4 max-w-4xl">
           <p className="text-accent font-display font-bold tracking-[0.2em] uppercase text-sm mb-3">How it works</p>
           <h2 className="font-display text-3xl sm:text-4xl text-primary leading-tight mb-10">
-            Nothing extra to do
+            Hit export, we do the rest
           </h2>
           <div className="grid sm:grid-cols-3 gap-6">
             {steps.map((s) => (
@@ -136,8 +136,8 @@ const MarketingUFLab = () => {
             Unlock UF Lab
           </h2>
           <p className="text-primary-foreground/75 mb-8 leading-relaxed">
-            UF Lab is included with every {tenant.venue_name} membership. Join a tier, hit the range, and let the
-            data do the rest.
+            UF Lab is included with every {tenant.venue_name} membership. Join a tier, hit the range, export your
+            session — we do the rest.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link

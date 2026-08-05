@@ -274,12 +274,12 @@ export default function SwingLab() {
                   </div>
                 </li>
                 <li>Click <strong>Export to CSV</strong>.</li>
-                <li><strong>Done!</strong> The system will automatically send this to your Hub for analysis.</li>
+                <li><strong>Done!</strong> That's all you need to do — we take care of the rest and your session appears in UF Lab.</li>
               </ol>
               <div className="border-t border-border pt-4 space-y-2">
                 <h4 className="font-semibold text-foreground">Tip</h4>
                 <p className="text-muted-foreground">
-                  You can remove any outlier or bad shots by clicking the clipboard and deleting the individual shots. The Hub has a <strong>Hide Outliers</strong> filter too.
+                  You can remove any outlier or bad shots by clicking the clipboard and deleting the individual shots. UF Lab has a <strong>Hide Outliers</strong> filter too.
                 </p>
               </div>
             </div>
@@ -315,8 +315,8 @@ export default function SwingLab() {
               <Target className="h-10 w-10 mx-auto text-muted-foreground" />
               <h2 className="text-lg font-semibold">No UF Lab sessions yet</h2>
               <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                UF Lab data is captured when you hit <strong>Export</strong> in the GSPro driving range and finish your session.
-                Your shots will appear here automatically after your booking ends.
+                UF Lab data comes from your GSPro range sessions — select your club as you go, then hit <strong>Export to CSV</strong> on the clipboard when you finish.
+                That's all you need to do; we take care of the rest and your shots appear here shortly after.
               </p>
             </CardContent>
           </Card>

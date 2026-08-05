@@ -319,6 +319,9 @@ export default function AdminPOS() {
         start_time: b.start_time,
         end_time: b.end_time,
         total_price: b.total_price,
+        duration_hours: b.duration_hours,
+        hourly_rate: b.hourly_rate,
+
         bay_name: b.bays?.name || 'Unknown',
         customer_name: b.profiles ? `${b.profiles.first_name} ${b.profiles.last_name}` : 'Unknown',
         customer_id: b.profiles?.user_id || b.user_id,

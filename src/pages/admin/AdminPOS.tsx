@@ -298,6 +298,8 @@ export default function AdminPOS() {
         start_time,
         end_time,
         total_price,
+        duration_hours,
+        hourly_rate,
         user_id,
         bay_id,
         bays(name),
@@ -565,6 +567,7 @@ export default function AdminPOS() {
     setSelectedBooking(null);
     setSelectedCustomer("");
     setCreditToApply(0);
+    setPackHoursToApply(0);
     setActiveTabId(null);
     setActiveTabCustomerName("");
   };

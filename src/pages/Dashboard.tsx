@@ -319,7 +319,7 @@ const Dashboard = () => {
                 <div className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${hasLeagueAccess ? "bg-league-primary/15" : "bg-muted"}`}>
                   <Trophy className={`h-5 w-5 ${hasLeagueAccess ? "text-league-primary-dark" : "text-muted-foreground"}`} />
                 </div>
-                <h2 className="font-semibold text-base">{tenant.venue_name} League</h2>
+                <h2 className="font-semibold text-base">UF League</h2>
               </div>
             </button>
 
@@ -473,7 +473,7 @@ const Dashboard = () => {
             </DialogTitle>
           </DialogHeader>
           <ol className="space-y-3 text-sm text-foreground list-decimal pl-5">
-            <li>Open the <span className="font-semibold">My Account</span> section of the {tenant.venue_name} Hub.</li>
+            <li>Open the <span className="font-semibold">My Account</span> section of the {tenant.venue_name} app.</li>
             <li>In <span className="font-semibold">GSPRO</span>, go to <span className="font-semibold">Players</span> and click <span className="font-semibold">Guest 1</span>. Change the information to your <span className="font-semibold">User</span> and <span className="font-semibold">UID</span> — make sure the upper and lower case of your username matches exactly.</li>
             <li>Press <span className="font-semibold">Save &amp; Exit</span>.</li>
             <li>Click <span className="font-semibold">Tournaments</span>. Your league rounds will show up.</li>

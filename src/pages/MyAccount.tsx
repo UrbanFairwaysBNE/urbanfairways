@@ -540,7 +540,7 @@ const MyAccount = () => {
             <CardContent>
               <div className="flex flex-col sm:flex-row gap-2">
                 <Input
-                  placeholder="BIRDIE-XXXX-XXXX"
+                  placeholder="UF-XXXXXX"
                   value={redeemCode}
                   onChange={(e) => setRedeemCode(e.target.value.toUpperCase())}
                   className="font-mono tracking-wider uppercase"

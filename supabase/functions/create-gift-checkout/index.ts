@@ -11,15 +11,9 @@ const corsHeaders = {
 // Unambiguous alphabet (no 0/O, 1/I)
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 function generateCode(): string {
-  const groups = [];
-  for (let g = 0; g < 3; g++) {
-    let s = "";
-    for (let i = 0; i < 4; i++) {
-      s += CODE_ALPHABET[Math.floor(Math.random() * CODE_ALPHABET.length)];
-    }
-    groups.push(s);
-  }
-  return `GIFT-${groups.join("-")}`;
+  let s = "";
+  for (let i = 0; i < 6; i++) s += CODE_ALPHABET[Math.floor(Math.random() * CODE_ALPHABET.length)];
+  return `UF-${s}`;
 }
 
 interface Body {

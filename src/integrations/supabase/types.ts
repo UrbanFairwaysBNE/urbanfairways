@@ -1802,6 +1802,182 @@ export type Database = {
         }
         Relationships: []
       }
+      pack_lots: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          hours_remaining: number
+          hours_total: number
+          id: string
+          is_gift: boolean
+          price_paid: number
+          product_id: string | null
+          product_name: string
+          purchased_at: string | null
+          purchaser_email: string | null
+          purchaser_name: string | null
+          purchaser_user_id: string | null
+          recipient_name: string | null
+          redeemed_at: string | null
+          redemption_code: string | null
+          reminder_sent_at: string | null
+          status: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
+          updated_at: string
+          user_id: string | null
+          validity_days: number
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          hours_remaining?: number
+          hours_total: number
+          id?: string
+          is_gift?: boolean
+          price_paid?: number
+          product_id?: string | null
+          product_name: string
+          purchased_at?: string | null
+          purchaser_email?: string | null
+          purchaser_name?: string | null
+          purchaser_user_id?: string | null
+          recipient_name?: string | null
+          redeemed_at?: string | null
+          redemption_code?: string | null
+          reminder_sent_at?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+          validity_days?: number
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          hours_remaining?: number
+          hours_total?: number
+          id?: string
+          is_gift?: boolean
+          price_paid?: number
+          product_id?: string | null
+          product_name?: string
+          purchased_at?: string | null
+          purchaser_email?: string | null
+          purchaser_name?: string | null
+          purchaser_user_id?: string | null
+          recipient_name?: string | null
+          redeemed_at?: string | null
+          redemption_code?: string | null
+          reminder_sent_at?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+          validity_days?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pack_lots_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "pack_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pack_products: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          hours: number
+          id: string
+          is_active: boolean
+          name: string
+          price: number
+          updated_at: string
+          validity_days: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          hours: number
+          id?: string
+          is_active?: boolean
+          name: string
+          price: number
+          updated_at?: string
+          validity_days?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          hours?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          price?: number
+          updated_at?: string
+          validity_days?: number
+        }
+        Relationships: []
+      }
+      pack_transactions: {
+        Row: {
+          balance_after: number
+          created_at: string
+          description: string | null
+          hours: number
+          id: string
+          lot_id: string | null
+          related_booking_id: string | null
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          balance_after?: number
+          created_at?: string
+          description?: string | null
+          hours: number
+          id?: string
+          lot_id?: string | null
+          related_booking_id?: string | null
+          transaction_type: string
+          user_id: string
+        }
+        Update: {
+          balance_after?: number
+          created_at?: string
+          description?: string | null
+          hours?: number
+          id?: string
+          lot_id?: string | null
+          related_booking_id?: string | null
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pack_transactions_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "pack_lots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pack_transactions_related_booking_id_fkey"
+            columns: ["related_booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pos_products: {
         Row: {
           created_at: string
@@ -3450,6 +3626,17 @@ export type Database = {
         }
         Returns: undefined
       }
+      consume_pack_hours: {
+        Args: {
+          _booking_id?: string
+          _description?: string
+          _hours: number
+          _transaction_type?: string
+          _user_id: string
+        }
+        Returns: number
+      }
+      expire_pack_lots: { Args: never; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -3458,6 +3645,18 @@ export type Database = {
         Returns: boolean
       }
       is_paying_member: { Args: { _user_id: string }; Returns: boolean }
+      pack_hours_balance: { Args: { _user_id: string }; Returns: number }
+      redeem_pack_code: { Args: { _code: string }; Returns: Json }
+      restore_pack_hours: {
+        Args: {
+          _booking_id?: string
+          _description?: string
+          _hours: number
+          _transaction_type?: string
+          _user_id: string
+        }
+        Returns: number
+      }
       sgt_is_full_18: {
         Args: { hole_data: Json; in_gross: number; out_gross: number }
         Returns: boolean

@@ -136,8 +136,8 @@ const MarketingUFLab = () => {
             Unlock UF Lab
           </h2>
           <p className="text-primary-foreground/75 mb-8 leading-relaxed">
-            UF Lab is included with every {tenant.venue_name} membership. Join a tier, hit the range, and let the
-            data do the rest.
+            UF Lab is included with every {tenant.venue_name} membership. Join a tier, hit the range, export your
+            session — we do the rest.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link

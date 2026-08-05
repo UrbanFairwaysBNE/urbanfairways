@@ -116,7 +116,7 @@ const MarketingUFLab = () => {
         <div className="container mx-auto px-4 max-w-4xl">
           <p className="text-accent font-display font-bold tracking-[0.2em] uppercase text-sm mb-3">How it works</p>
           <h2 className="font-display text-3xl sm:text-4xl text-primary leading-tight mb-10">
-            Nothing extra to do
+            Hit export, we do the rest
           </h2>
           <div className="grid sm:grid-cols-3 gap-6">
             {steps.map((s) => (

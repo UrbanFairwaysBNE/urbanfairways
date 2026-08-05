@@ -205,12 +205,15 @@ const MarketingHome = () => {
               Pay as you go, or save with a membership.
             </h2>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
             <PriceCard tier="Practice Club" rate="$10/hr" price="$15" tag="Off-peak access" perks={["Mon–Fri 5:30am–4:00pm", "Sat–Sun 5:30am–10:00am", "2 guests", "Swing Lab access"]} joinHref={hubUrl(tenant, "/")} />
             <PriceCard tier="Birdie" rate="$10/hr" price="$29" tag="Suits Most" highlight perks={["Play anytime", "2 guests", "Swing Lab access", "Member events & comps", "Priority bookings"]} joinHref={hubUrl(tenant, "/")} />
-            <PriceCard tier="Frontline" rate="$8/hr" price="$30" tag="Frontline & essential workers" perks={["Play anytime", "2 guests", "Swing Lab access", "Member events & comps", "TPI Assessment on joining", "Monthly 30min coaching session"]} joinHref={hubUrl(tenant, "/")} />
             <PriceCard tier="Eagle" rate="$8/hr" price="$39" tag="Best value per round" perks={["Play anytime", "2 guests", "Swing Lab access", "Member events & comps", "Priority bookings", "Monthly 30min coaching session"]} joinHref={hubUrl(tenant, "/")} />
           </div>
+          <div className="max-w-sm mx-auto mt-6">
+            <PriceCard tier="Frontline" rate="$8/hr" price="$30" tag="Frontline & essential workers" subtle info="This membership is available to Emergency Services, Defence & Nurses" perks={["Play anytime", "2 guests", "Swing Lab access", "Member events & comps", "TPI Assessment on joining", "Monthly 30min coaching session"]} joinHref={hubUrl(tenant, "/")} />
+          </div>
+
           <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto mt-8">
             <div className="bg-card border border-border rounded-2xl p-7 text-card-foreground hover:shadow-lg transition-all">
               <p className="text-xs font-bold uppercase tracking-wider mb-2 text-foreground/60">Off-Peak</p>

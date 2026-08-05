@@ -83,7 +83,7 @@ serve(async (req: Request): Promise<Response> => {
     }
 
     // Only visitors qualify
-    if (profile.membership_tier !== "visitor") {
+    if (profile.membership_tier !== "casual") {
       logStep("Not a visitor", { tier: profile.membership_tier });
       return new Response(
         JSON.stringify({ eligible: false, reason: "Not a visitor" }),

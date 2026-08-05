@@ -122,11 +122,11 @@ const fetchUserProfile = async () => {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  const actualTier = data?.membership_tier || "visitor";
+  const actualTier = data?.membership_tier || "casual";
   const paymentFailedAt = data?.payment_failed_at ?? null;
   // Strict rule: while in membership payment limbo, member loses member pricing
   // and is treated as a visitor everywhere until they retry payment successfully.
-  const effectiveTier = paymentFailedAt ? "visitor" : actualTier;
+  const effectiveTier = paymentFailedAt ? "casual" : actualTier;
 
   // Prepaid hours wallet — separate to the dollar credit balance
   const { data: packHours } = await supabase.rpc("pack_hours_balance", { _user_id: user.id });
@@ -213,7 +213,7 @@ export function useBooking() {
   });
 
   // Derived values from user profile
-  const userMembershipTier = userProfile?.membershipTier || "visitor";
+  const userMembershipTier = userProfile?.membershipTier || "casual";
   const actualMembershipTier = userProfile?.actualMembershipTier || userMembershipTier;
   const isPaymentLimbo = !!userProfile?.isPaymentLimbo;
   const customHourlyRate = userProfile?.customHourlyRate ?? null;

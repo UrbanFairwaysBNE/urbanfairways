@@ -28,7 +28,7 @@ interface ImportRow {
 export default function AdminCustomerImport() {
   const { isAdmin, isLoading: authLoading } = useAdminAuth();
   const { pricing, defaultTier } = usePricing();
-  const walkInTier = defaultTier?.tier ?? 'visitor';
+  const walkInTier = defaultTier?.tier ?? 'casual';
   const validTiers = pricing.map((t) => t.tier.toLowerCase());
   const [csvData, setCsvData] = useState<ImportRow[]>([]);
   const [isImporting, setIsImporting] = useState(false);

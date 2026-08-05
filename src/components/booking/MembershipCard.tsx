@@ -11,7 +11,7 @@ interface MembershipCardProps {
 }
 
 export function MembershipCard({ membership, isPopular, onSelect }: MembershipCardProps) {
-  const isVisitor = membership.tier === 'visitor';
+  const isVisitor = membership.tier === 'casual';
   const hasRestrictions = !!membership.restrictions;
 
   return (

@@ -967,14 +967,14 @@ export default function AdminCustomers() {
       setCustomers(prev =>
         prev.map(c =>
           c.id === selectedCustomer.id
-            ? { ...c, membership_tier: "visitor" }
+            ? { ...c, membership_tier: "casual" }
             : c
         )
       );
       
       setSelectedCustomer({
         ...selectedCustomer,
-        membership_tier: "visitor",
+        membership_tier: "casual",
       });
       
       setShowCancelMembershipConfirm(false);
@@ -1451,7 +1451,7 @@ export default function AdminCustomers() {
                 </div>
 
                 {/* Hold Membership Toggle - only show for non-visitors */}
-                {selectedCustomer.membership_tier && selectedCustomer.membership_tier !== "visitor" && (
+                {selectedCustomer.membership_tier && selectedCustomer.membership_tier !== "casual" && (
                   <>
                     <div className="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-lg">
                       <div className="flex items-center gap-3">
@@ -1475,7 +1475,7 @@ export default function AdminCustomers() {
                 )}
 
                 <hr className="border-border" />
-                {selectedCustomer.membership_tier && selectedCustomer.membership_tier !== "visitor" && (
+                {selectedCustomer.membership_tier && selectedCustomer.membership_tier !== "casual" && (
                   <>
                     <div className="p-3 bg-destructive/5 border border-destructive/20 rounded-lg">
                       <div className="flex items-center justify-between">

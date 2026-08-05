@@ -75,7 +75,7 @@ const buildTierMaps = (tiers: TierRow[]) => {
   tiers.filter((t) => t.is_default).forEach((t) => {
     names[t.tier] = t.display_name || t.tier;
   });
-  return { names, prices, rank, walkInTier: tiers.find((t) => t.is_default)?.tier ?? "visitor" };
+  return { names, prices, rank, walkInTier: tiers.find((t) => t.is_default)?.tier ?? "casual" };
 };
 
 // Replace template tags with actual values

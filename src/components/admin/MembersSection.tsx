@@ -66,7 +66,7 @@ type SortDirection = "asc" | "desc";
 export function MembersSection() {
   const { pricing, defaultTier, memberTiers } = usePricing();
   // Tier keys are venue-defined; the walk-in tier comes from pricing config.
-  const walkInTier = defaultTier?.tier ?? "visitor";
+  const walkInTier = defaultTier?.tier ?? "casual";
   const MEMBER_TIERS = memberTierKeys(pricing);
   const getTierColor = (tier: string) => tierBadgeClass(pricing, tier);
   const [members, setMembers] = useState<MemberProfile[]>([]);

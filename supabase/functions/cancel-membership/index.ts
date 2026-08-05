@@ -73,7 +73,7 @@ serve(async (req) => {
     // Update profile to visitor tier
     const { error: updateError } = await supabaseClient
       .from("profiles")
-      .update({ membership_tier: "visitor" })
+      .update({ membership_tier: "casual" })
       .eq("user_id", user_id);
 
     if (updateError) {

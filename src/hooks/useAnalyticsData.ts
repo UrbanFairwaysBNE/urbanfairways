@@ -185,7 +185,7 @@ export function useAnalyticsData(timeframe: AnalyticsTimeframe = "30d") {
 
       // Member conversion rate
       const totalProfiles = profiles.length;
-      const members = profiles.filter((p) => p.membership_tier !== "visitor").length;
+      const members = profiles.filter((p) => p.membership_tier !== "casual").length;
       const memberConversionRate = totalProfiles > 0 
         ? (members / totalProfiles) * 100 
         : 0;
@@ -193,7 +193,7 @@ export function useAnalyticsData(timeframe: AnalyticsTimeframe = "30d") {
       // Churn rate
       const paidMemberUserIds = new Set(membershipPayments.map((p) => p.user_id));
       const churnedMembers = profiles.filter(
-        (p) => p.membership_tier === "visitor" && paidMemberUserIds.has(p.user_id)
+        (p) => p.membership_tier === "casual" && paidMemberUserIds.has(p.user_id)
       ).length;
       const churnRate = members + churnedMembers > 0 
         ? (churnedMembers / (members + churnedMembers)) * 100 

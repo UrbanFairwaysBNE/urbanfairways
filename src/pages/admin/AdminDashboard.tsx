@@ -53,7 +53,7 @@ const tierDisplayNames: Record<string, string> = {
 export default function AdminDashboard() {
   const { isAdmin, isLoading } = useAdminAuth();
   const { pricing, defaultTier, memberTiers } = usePricing();
-  const walkInTier = defaultTier?.tier ?? "visitor";
+  const walkInTier = defaultTier?.tier ?? "casual";
   const memberTierLabels: Record<string, string> = {
     all: "All Members",
     ...Object.fromEntries(pricing.map((t) => [t.tier, t.display_name])),

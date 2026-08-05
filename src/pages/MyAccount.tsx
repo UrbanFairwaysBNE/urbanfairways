@@ -218,7 +218,7 @@ const MyAccount = () => {
 
   const handleDeletePaymentMethod = async (paymentMethodId: string) => {
     // Block deletion for members - they must contact us
-    if (profile?.membership_tier && profile.membership_tier !== "visitor") {
+    if (profile?.membership_tier && profile.membership_tier !== "casual") {
       setShowMembershipBlockDialog(true);
       return;
     }
@@ -482,10 +482,10 @@ const MyAccount = () => {
                     </p>
                   </div>
                   <Button variant="outline" onClick={() => navigate("/membership")}>
-                    {profile?.membership_tier === "visitor" ? "Become a Member" : "View Plans"}
+                    {profile?.membership_tier === "casual" ? "Become a Member" : "View Plans"}
                   </Button>
                 </div>
-                {profile?.membership_tier !== "visitor" && (
+                {profile?.membership_tier !== "casual" && (
                   <p className="text-xs text-muted-foreground">
                     To cancel your membership, please contact us.
                   </p>
@@ -799,7 +799,7 @@ const MyAccount = () => {
                   ))}
                   <div className="flex flex-wrap gap-2 mt-2">
                     {/* For members: show Update Card button to open Stripe billing portal */}
-                    {profile?.membership_tier && profile.membership_tier !== "visitor" && (
+                    {profile?.membership_tier && profile.membership_tier !== "casual" && (
                       <Button 
                         variant="default" 
                         size="sm"

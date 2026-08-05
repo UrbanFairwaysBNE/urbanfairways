@@ -21,7 +21,7 @@ const Membership = () => {
   const [searchParams] = useSearchParams();
   const { pricing, isLoading: pricingLoading, getHourlyRate } = usePricing();
   const { savedCard, isLoadingSavedCard, refetchSavedCard } = useSavedCard();
-  const [currentTier, setCurrentTier] = useState<string>("visitor");
+  const [currentTier, setCurrentTier] = useState<string>("casual");
   const [isLoading, setIsLoading] = useState(true);
   const [subscribingTier, setSubscribingTier] = useState<string | null>(null);
   const [pendingTier, setPendingTier] = useState<PricingTier | null>(null);
@@ -59,7 +59,7 @@ const Membership = () => {
         .maybeSingle();
 
       if (error) throw error;
-      setCurrentTier(data?.membership_tier || "visitor");
+      setCurrentTier(data?.membership_tier || "casual");
     } catch (error) {
       console.error("Error fetching membership:", error);
     } finally {

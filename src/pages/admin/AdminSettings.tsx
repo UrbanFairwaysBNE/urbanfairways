@@ -34,6 +34,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { SalesReporting } from "@/components/admin/SalesReporting";
 import { LoyaltyPromoSettings } from "@/components/admin/LoyaltyPromoSettings";
+import { PackProductsSettings } from "@/components/admin/PackProductsSettings";
 import { ActivityLog } from "@/components/admin/ActivityLog";
 import VenueDetailsSection from "@/components/admin/VenueDetailsSection";
 import { TableServiceSettings } from "@/components/admin/TableServiceSettings";
@@ -1215,6 +1216,14 @@ export default function AdminSettings() {
               icon={Gift}
             >
               <LoyaltyPromoSettings />
+            </CollapsibleSection>
+
+            <CollapsibleSection
+              title="Prepaid Packs"
+              description="Prepaid hour packs customers can buy or gift (separate to $ credit)"
+              icon={Gift}
+            >
+              <PackProductsSettings />
             </CollapsibleSection>
           </TabsContent>
 

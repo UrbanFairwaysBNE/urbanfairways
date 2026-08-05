@@ -18,35 +18,47 @@ const getFaqs = (venueName: string) => [
   {
     section: "General Information",
     items: [
-      { q: `What is the ${venueName} League?`, a: `The ${venueName} League is a members-only golf sim league that allows competitive play, tournament rounds, leaderboards, competitions and prizes.` },
-      { q: "How much does it cost to join?", a: `Access to the ${venueName} League is included with your membership. Higher membership tiers include full access, entry-level members can still join our local weekly comp.` },
+      { q: `What is the ${venueName} League?`, a: `The ${venueName} League (UF League) is a members-only simulator golf league run through the Simulator Golf Tour (SGT). You play handicapped tournament rounds in your own time, with live leaderboards, weekly winners, monthly standings and prizes.` },
+      { q: "How much does it cost to join?", a: `Access to the UF League is included with eligible memberships. Higher tiers include full access, and entry-level members can still join our local weekly comp.` },
+      { q: "Is it the same as the Wednesday 2-Man Ambrose?", a: "No. The Ambrose is a separate in-person team comp scored on the night. The UF League is the ongoing online tour with its own handicaps and standings." },
     ],
   },
   {
     section: "Registration & Setup",
     items: [
-      { q: "How do I join?", a: `You can join the league by scanning the QR code at ${venueName}. This will take you to the SGT Club registration where you can create your own account for future round tracking.` },
-      { q: "How do I play?", a: `Once you've created an SGT login, your name will be automatically synced to every bay at ${venueName}. Just hit ONLINE MATCH and choose your name from the dropdown to load your weekly rounds.` },
-      { q: "What if I can't make a certain day?", a: `There are no set tournament days at ${venueName}. You're free to play your 2 weekly rounds any time and your leaderboard status will update automatically.` },
+      { q: "How do I join?", a: `Sign up in the ${venueName} app — open the League tile on your dashboard and complete the short registration form. You choose an SGT username and password and tell us your typical 18-hole score.` },
+      { q: "What happens after I register?", a: "Our team reviews your registration and sets your starting handicap. Once that's approved you're automatically added to the active tours and entered into the open tournaments — no further setup needed." },
+      { q: "How do I load my rounds in the bay?", a: "In GSPRO, go to Players and click Guest 1, then enter your SGT User and UID exactly as they appear in My Account (case sensitive). Press Save & Exit, then click Tournaments and your league rounds will appear. After the first time, you'll be logged in automatically each session." },
       { q: "What if I want to cancel?", a: "Just email us and we'll cancel your membership within 24 working hours. Your most recent weekly payment will not be refunded." },
     ],
   },
   {
     section: "Gameplay & Rules",
     items: [
-      { q: "How many holes do I play each week?", a: "Each week you'll be required to play 2 full 18-hole rounds. These can be played on different days, or even resumed at different times if required." },
-      { q: "What courses will I play?", a: "We always select the best courses to play each week. Some of our tours will be themed, for example we may run an Aussie tour that's only Australian courses." },
-      { q: "Is there a handicap system?", a: "Yes. You'll be required to obtain your handicap in your first week by completing 'Q School'. Once you have your handicap you'll play the tour and get a net score for each round." },
-      { q: "What if I hit an accidental shot or get a strange misread?", a: `Although we can edit scores, to ensure fair play all scores will be final. We recommend ensuring you are very comfortable with GSPRO and sim usage before competing in the ${venueName} League.` },
+      { q: "How many rounds do I play each week?", a: "Two full 18-hole rounds per week. They can be played on different days and can be resumed later if you need to stop." },
+      { q: "When does each week run?", a: "Tournament weeks start Sunday and close Monday morning (Brisbane time). Within that window you can play whenever suits you." },
+      { q: "What courses will I play?", a: "We select the best courses each week. Some tours are themed — for example an Aussie tour featuring only Australian courses." },
+      { q: "What if I don't finish a round?", a: "If you have to stop, quit while you're on the tee box of a hole. Quitting midway through a hole can cause scoring bugs. Only complete 18-hole rounds count toward handicaps and standings." },
+      { q: "What if I hit an accidental shot or get a strange misread?", a: `Although scores can be edited, to ensure fair play all scores are final. We recommend getting comfortable with GSPRO and sim usage before competing in the UF League.` },
+    ],
+  },
+  {
+    section: "Handicaps",
+    items: [
+      { q: "How do I get a handicap?", a: "Your starting handicap is set by our team when you register, based on your typical scoring. There's no qualifying round to complete." },
+      { q: "When does my handicap become official?", a: "Your onboarding handicap is locked for your first 6 rounds (around 3 weeks). After that your UF handicap recalculates weekly from the best 3 of your last 6 rounds." },
+      { q: "Why am I shown as (E) on the leaderboard?", a: "You're provisional until you've completed 3 full 18-hole rounds. You still play and appear on the leaderboard, but you can't win a prize until you hold a true UF handicap." },
+      { q: "When do I start earning points?", a: "Monthly points accrue from your 4th completed round onwards, once your true handicap is set." },
     ],
   },
   {
     section: "Scoring & Standings",
     items: [
-      { q: "How is scoring tracked?", a: "Scores are fully automated through GSPRO and the SGT. Your round results show at the end of the round and are visible online almost immediately." },
-      { q: "Where can we see the leaderboard?", a: `The leaderboard is available in the online SGT portal, or you can see it on our ${venueName} TV located near the vending machine.` },
-      { q: "What if I miss a week?", a: "You won't gain any points for that week, but the leaderboards are cumulative, so missing one round won't be a huge disadvantage." },
-      { q: "Are there prizes?", a: "Yes, we work with local businesses and have a rotating selection of prizes, including a monthly medal prize." },
+      { q: "How is scoring tracked?", a: "Scoring is fully automated through GSPRO and SGT. Your results show at the end of the round and appear online almost immediately." },
+      { q: "Where can we see the leaderboard?", a: `Live leaderboards are on this page and in the app, and they're also on the ${venueName} TV in the venue.` },
+      { q: "How do monthly standings work?", a: "Each tournament week awards points on a descending scale to the field, grouped by calendar month. Provisional players are excluded from prize positions." },
+      { q: "What if I miss a week?", a: "You won't score points for that week, but standings are cumulative so one missed week won't ruin your month." },
+      { q: "Are there prizes?", a: "Yes. Weekly winners receive venue credit, and there's a monthly tour champion prize alongside rotating giveaways from local businesses." },
     ],
   },
 ];

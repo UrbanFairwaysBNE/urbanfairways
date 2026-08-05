@@ -177,7 +177,7 @@ export default function SwingLab() {
   );
 
   if (isLoading || sessionsLoading) {
-    return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading swing lab data…</div>;
+    return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading UF Lab data…</div>;
   }
 
 
@@ -242,7 +242,7 @@ export default function SwingLab() {
             <Button variant="ghost" size="sm" className="-ml-2" onClick={() => navigate("/dashboard")}>
               <ArrowLeft className="h-4 w-4 mr-1" /> Back
             </Button>
-            <img src={swingLabBadge.url} alt="Swing Lab" className="h-9 md:h-10 w-auto object-contain" />
+            <img src={swingLabBadge.url} alt="UF Lab" className="h-9 md:h-10 w-auto object-contain" />
 
             <Button variant="ghost" size="sm" className="-mr-2 border border-accent" onClick={() => setHowToOpen(true)}>
               <HelpCircle className="h-4 w-4 mr-1" /> How To
@@ -256,7 +256,7 @@ export default function SwingLab() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <img src={swingLabBadge.url} alt="" className="h-6 w-6 rounded-full object-cover" />
-              {howToPage === 1 ? "How to use Swing Lab" : "How to customise your bag"}
+              {howToPage === 1 ? "How to use UF Lab" : "How to customise your bag"}
             </DialogTitle>
           </DialogHeader>
           {howToPage === 1 ? (
@@ -300,7 +300,7 @@ export default function SwingLab() {
               size="sm"
               onClick={() => setHowToPage(howToPage === 1 ? 2 : 1)}
             >
-              {howToPage === 1 ? "Customise your bag →" : "← Swing Lab basics"}
+              {howToPage === 1 ? "Customise your bag →" : "← UF Lab basics"}
             </Button>
             <span className="text-xs text-muted-foreground">{howToPage} / 2</span>
           </div>
@@ -313,9 +313,9 @@ export default function SwingLab() {
           <Card>
             <CardContent className="py-12 text-center space-y-3">
               <Target className="h-10 w-10 mx-auto text-muted-foreground" />
-              <h2 className="text-lg font-semibold">No swing lab sessions yet</h2>
+              <h2 className="text-lg font-semibold">No UF Lab sessions yet</h2>
               <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                Swing Lab data is captured when you hit <strong>Export</strong> in the GSPro driving range and finish your session.
+                UF Lab data is captured when you hit <strong>Export</strong> in the GSPro driving range and finish your session.
                 Your shots will appear here automatically after your booking ends.
               </p>
             </CardContent>
@@ -697,7 +697,7 @@ function OverviewTiles({
           icon={<TrendingUp className="h-3.5 w-3.5" />}
           value={sessions.length.toString()}
           sub={`${sessionsThisMonth} this month`}
-          info="Total Swing Lab sessions on your account. A session is one bay visit where shots were exported from GSPro."
+          info="Total UF Lab sessions on your account. A session is one bay visit where shots were exported from GSPro."
         />
 
         {/* Tile 2 — Shots */}
@@ -706,7 +706,7 @@ function OverviewTiles({
           icon={<Target className="h-3.5 w-3.5" />}
           value={totalShots.toLocaleString()}
           sub={totalShots > 0 ? `≈ ${buckets} range bucket${buckets === 1 ? "" : "s"}` : "—"}
-          info="Every shot you've captured in the Swing Lab. Bucket equivalent assumes ~50 balls per range bucket."
+          info="Every shot you've captured in the UF Lab. Bucket equivalent assumes ~50 balls per range bucket."
         />
 
         {/* Tile 3 — Longest carry */}

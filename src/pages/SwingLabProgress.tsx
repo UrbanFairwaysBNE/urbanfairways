@@ -270,7 +270,7 @@ export default function SwingLabProgress() {
     {
       key: "sessions",
       label: "Sessions / Week",
-      info: "Are you playing enough to improve? Your average Swing Lab sessions per week over the window. Practice frequency drives improvement more than any single session.",
+      info: "Are you playing enough to improve? Your average UF Lab sessions per week over the window. Practice frequency drives improvement more than any single session.",
       higherIsBetter: true,
       fmt: (v) => v.toFixed(1),
       compute: (_shots, sessCount, days) => {
@@ -291,7 +291,7 @@ export default function SwingLabProgress() {
           <Button variant="ghost" size="sm" onClick={() => navigate("/swing-lab")} className="gap-1">
             <ArrowLeft className="h-4 w-4" /> Back
           </Button>
-          <img src={swingLabBadge.url} alt="Swing Lab" className="h-9 md:h-10 object-contain" />
+          <img src={swingLabBadge.url} alt="UF Lab" className="h-9 md:h-10 object-contain" />
           <div className="w-16" />
         </div>
       </header>

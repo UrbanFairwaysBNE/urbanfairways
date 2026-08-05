@@ -132,7 +132,17 @@ const MyAccount = () => {
       toast.info("Payment method setup was cancelled.");
       navigate("/my-account", { replace: true });
     }
+
+    const pack = searchParams.get("pack");
+    if (pack === "success") {
+      toast.success("Payment received — your prepaid hours are on the way.");
+      navigate("/my-account", { replace: true });
+    } else if (pack === "cancelled") {
+      toast.info("Pack purchase cancelled.");
+      navigate("/my-account", { replace: true });
+    }
   }, [searchParams, navigate]);
+
 
   const fetchProfile = async () => {
     if (!user) return;

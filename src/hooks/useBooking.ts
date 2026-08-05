@@ -218,6 +218,8 @@ export function useBooking() {
   const isPaymentLimbo = !!userProfile?.isPaymentLimbo;
   const customHourlyRate = userProfile?.customHourlyRate ?? null;
   const depositBalance = userProfile?.depositBalance || 0;
+  const packHoursBalance = userProfile?.packHoursBalance || 0;
+
   const customSegment = userProfile?.customSegment ?? null;
 
   /**

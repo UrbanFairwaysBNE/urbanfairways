@@ -309,6 +309,17 @@ export default function Booking() {
       return;
     }
 
+    // Prepaid hours are always spent through createBooking (it handles the wallet,
+    // then credit, then card, and rolls everything back if a step fails)
+    if (packHoursToApply > 0) {
+      if (amountAfterHours <= 0) {
+        handleConfirmBooking("balance");
+      } else {
+        handleConfirmBooking("card", usePartialBalance && depositBalance > 0);
+      }
+      return;
+    }
+
     // If paying with balance and have enough, skip pending/checkout entirely
     if (selectedPaymentMethod === "balance" && depositBalance >= totalPrice) {
       handleConfirmBookingWithBalance();
@@ -320,6 +331,7 @@ export default function Booking() {
       handleConfirmBooking("card", true);
       return;
     }
+
 
     // ALWAYS create a pending booking first to lock the slot
     setIsSubmitting(true);

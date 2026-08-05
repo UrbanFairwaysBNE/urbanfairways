@@ -171,7 +171,7 @@ export function PrepaidPacksCard() {
             <Label className="text-sm font-medium">Redeem a pack code</Label>
             <div className="flex flex-col sm:flex-row gap-2">
               <Input
-                placeholder="PACK-XXXX-XXXX-XXXX"
+                placeholder="UF-XXXXXX"
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
                 className="font-mono tracking-wider uppercase"

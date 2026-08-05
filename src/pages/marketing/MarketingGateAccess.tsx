@@ -47,7 +47,7 @@ const MarketingGateAccess = () => {
     <MarketingLayout>
     <Seo title={`Gate & Bay Access Guide | ${tenant.venue_name}`} description={`How to access the ${tenant.venue_name} car park gate and your simulator bay outside staffed hours, step by step.`} path="/gate-access" />
       <section className="relative h-[22vh] min-h-[160px] flex items-end overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${venueInterior})` }} />
+        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${pageHeader})` }} />
         <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/70 to-primary/30" />
         <div className="relative container mx-auto px-4 pb-6">
           <p className="text-accent font-display font-bold tracking-[0.25em] uppercase text-xs mb-1.5">After-Hours Entry</p>

@@ -68,6 +68,8 @@ interface UnpaidBooking {
   start_time: string;
   end_time: string;
   total_price: number;
+  duration_hours?: number;
+  hourly_rate?: number;
   bay_name: string;
   customer_name: string;
   customer_id: string;
@@ -122,6 +124,8 @@ export default function AdminPOS() {
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [showBookingsDialog, setShowBookingsDialog] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<UnpaidBooking | null>(null);
+  const [packHoursBalance, setPackHoursBalance] = useState(0);
+  const [packHoursToApply, setPackHoursToApply] = useState(0);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -492,6 +496,21 @@ export default function AdminPOS() {
     }
   }, [selectedCustomer, customers]);
 
+  // Prepaid pack hours for the selected customer (separate wallet to $ credit)
+  useEffect(() => {
+    setPackHoursToApply(0);
+    if (!selectedCustomer) {
+      setPackHoursBalance(0);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.rpc('pack_hours_balance', { _user_id: selectedCustomer });
+      if (!cancelled) setPackHoursBalance(Number(data) || 0);
+    })();
+    return () => { cancelled = true; };
+  }, [selectedCustomer]);
+
   const addToCart = (product: POSProduct) => {
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id);
@@ -563,7 +582,22 @@ export default function AdminPOS() {
   const cartSubtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const surchargeAmount = surchargeEnabled ? cartSubtotal * (parseFloat(surchargePercent) || 0) / 100 : 0;
   const subtotalWithSurcharge = cartSubtotal + surchargeAmount;
-  const total = Math.max(0, subtotalWithSurcharge - creditToApply);
+
+  // Prepaid hours only pay for bay time, so they are valued at the booking's hourly rate
+  const packHourlyRate = selectedBooking
+    ? Number(selectedBooking.hourly_rate) ||
+      (Number(selectedBooking.duration_hours)
+        ? Number(selectedBooking.total_price) / Number(selectedBooking.duration_hours)
+        : 0)
+    : 0;
+  const maxPackHours = selectedBooking
+    ? Math.min(packHoursBalance, Number(selectedBooking.duration_hours) || 0)
+    : 0;
+  const packDiscount = Math.min(
+    Math.round(packHoursToApply * packHourlyRate * 100) / 100,
+    Math.max(0, subtotalWithSurcharge - creditToApply),
+  );
+  const total = Math.max(0, subtotalWithSurcharge - creditToApply - packDiscount);
 
   const [terminalPaymentIntentId, setTerminalPaymentIntentId] = useState<string | null>(null);
 
@@ -832,6 +866,23 @@ export default function AdminPOS() {
       });
     }
     
+    if (packHoursToApply > 0 && selectedCustomer) {
+      const { error: packError } = await supabase.rpc('consume_pack_hours', {
+        _user_id: selectedCustomer,
+        _hours: packHoursToApply,
+        _booking_id: selectedBooking?.id ?? null,
+        _description: 'POS payment - prepaid hours',
+      });
+      if (packError) throw packError;
+
+      transactionItems.push({
+        id: 'pack_hours_applied',
+        name: `Prepaid Hours Applied (${packHoursToApply}h)`,
+        price: -packDiscount,
+        quantity: 1,
+      });
+    }
+
     if (creditToApply > 0 && !creditUsed) {
       const newBalance = customerBalance - creditToApply;
       await supabase
@@ -856,6 +907,7 @@ export default function AdminPOS() {
       stripe_payment_intent_id: stripePaymentIntentId,
       customer_id: selectedCustomer || null,
       booking_id: selectedBooking?.id || null,
+      pack_hours_used: packHoursToApply || null,
     });
 
     // Close active bar tab if this payment was for a tab
@@ -1070,7 +1122,7 @@ export default function AdminPOS() {
         </div>
 
         {/* Subtotal and Surcharge breakdown */}
-        {((surchargeEnabled && surchargeAmount > 0) || creditToApply > 0) && (
+        {((surchargeEnabled && surchargeAmount > 0) || creditToApply > 0 || packDiscount > 0) && (
           <div className="space-y-1 text-sm text-muted-foreground">
             <div className="flex justify-between">
               <span>Subtotal</span>
@@ -1086,6 +1138,12 @@ export default function AdminPOS() {
               <div className="flex justify-between text-green-600">
                 <span>Credit Applied</span>
                 <span>-${creditToApply.toFixed(2)}</span>
+              </div>
+            )}
+            {packDiscount > 0 && (
+              <div className="flex justify-between text-green-600">
+                <span>Prepaid Hours ({packHoursToApply}h)</span>
+                <span>-${packDiscount.toFixed(2)}</span>
               </div>
             )}
           </div>
@@ -1434,6 +1492,47 @@ export default function AdminPOS() {
                   </Button>
                 </div>
               </div>
+            )}
+            {maxPackHours > 0 && packHoursToApply === 0 && (
+              <Button
+                variant="outline"
+                className="w-full h-16 text-lg justify-start gap-4"
+                onClick={() => {
+                  setPackHoursToApply(maxPackHours);
+                  toast.success(`${maxPackHours} prepaid ${maxPackHours === 1 ? 'hour' : 'hours'} applied`);
+                }}
+                disabled={isProcessing}
+              >
+                <Clock className="h-8 w-8 text-green-600" />
+                <div className="text-left">
+                  <span>Prepaid Hours</span>
+                  <p className="text-xs text-muted-foreground">
+                    {packHoursBalance}h available - apply {maxPackHours}h to this session
+                  </p>
+                </div>
+              </Button>
+            )}
+            {packHoursToApply > 0 && total <= 0 && (
+              <Button
+                className="w-full h-16 text-lg justify-start gap-4"
+                onClick={async () => {
+                  setIsProcessing(true);
+                  try {
+                    await saveTransaction('pack_hours', null);
+                    toast.success('Paid with prepaid hours');
+                    setShowPaymentDialog(false);
+                    clearCart();
+                  } catch (error: any) {
+                    toast.error(error.message || 'Payment failed');
+                  } finally {
+                    setIsProcessing(false);
+                  }
+                }}
+                disabled={isProcessing}
+              >
+                <Clock className="h-8 w-8" />
+                <span>Complete with Prepaid Hours</span>
+              </Button>
             )}
             <Button
               variant="outline"

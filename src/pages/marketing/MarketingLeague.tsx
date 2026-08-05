@@ -1,9 +1,11 @@
 import Seo from "@/components/Seo";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Globe, CalendarDays, Zap, Trophy, ArrowRight } from "lucide-react";
+import { Globe, CalendarDays, Zap, Trophy } from "lucide-react";
 import venueInterior from "@/assets/venue-interior.jpg";
-import { useTenant, hubUrl } from "@/config/tenant";
+import { useTenant } from "@/config/tenant";
+import { WeeklyLeagueBoard } from "@/components/compete/CompeteBoards";
+
 
 const features = [
   { icon: Globe, title: "Web Portal Access", body: "See every stat, every shot, every round on the go with our SGT web portal." },
@@ -66,21 +68,26 @@ const MarketingLeague = () => {
       </div>
     </section>
 
-    <section className="py-12 sm:py-20">
+    <section className="py-12 sm:py-16">
       <div className="container mx-auto px-4 max-w-3xl text-center">
-        <p className="text-lg text-foreground/80 leading-relaxed mb-8">
+        <p className="text-lg text-foreground/80 leading-relaxed">
           The {tenant.venue_name} League is the ultimate place to be for golfers looking to show off their skills. A perk of
           eligible membership tiers, it creates a great community and healthy competition. It's competitive, social, and the
           best way to get more out of every swing.
         </p>
-        <a
-          href={hubUrl(tenant, "/embed/leaderboard")}
-          className="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-accent-foreground font-display tracking-wide uppercase px-7 py-3.5 rounded-md"
-        >
-          View Leaderboard <ArrowRight className="h-4 w-4" />
-        </a>
       </div>
     </section>
+
+    <section className="pb-12 sm:pb-16">
+      <div className="container mx-auto px-4 max-w-5xl">
+        <p className="text-accent font-display font-bold tracking-[0.2em] uppercase text-sm mb-3 text-center">This week</p>
+        <h2 className="font-display text-3xl sm:text-4xl text-primary text-center leading-tight mb-8">
+          Live weekly leaderboard.
+        </h2>
+        <WeeklyLeagueBoard />
+      </div>
+    </section>
+
 
     <section className="bg-primary text-primary-foreground py-12 sm:py-20">
       <div className="container mx-auto px-4 grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl">

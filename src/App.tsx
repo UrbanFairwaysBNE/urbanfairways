@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, HashRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { BrowserRouter, HashRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Capacitor } from "@capacitor/core";
 import { App as CapacitorApp } from "@capacitor/app";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
@@ -58,7 +58,9 @@ const SwingLabProgress = lazy(() => import("./pages/SwingLabProgress"));
 const MarketingAbout = lazy(() => import("./pages/marketing/MarketingAbout"));
 const MarketingMembership = lazy(() => import("./pages/marketing/MarketingMembership"));
 const MarketingLeague = lazy(() => import("./pages/marketing/MarketingLeague"));
-const MarketingCompete = lazy(() => import("./pages/marketing/MarketingCompete"));
+const MarketingMonthlyWinner = lazy(() => import("./pages/marketing/MarketingMonthlyWinner"));
+const MarketingAmbrose = lazy(() => import("./pages/marketing/MarketingAmbrose"));
+
 const MarketingContact = lazy(() => import("./pages/marketing/MarketingContact"));
 const MarketingFAQs = lazy(() => import("./pages/marketing/MarketingFAQs"));
 const MarketingStaffedHours = lazy(() => import("./pages/marketing/MarketingStaffedHours"));
@@ -270,7 +272,10 @@ const App = () => {
             <Route path="/about" element={<MarketingAbout />} />
             <Route path="/membership-info" element={<MarketingMembership />} />
             <Route path="/league-info" element={<MarketingLeague />} />
-            <Route path="/compete-info" element={<MarketingCompete />} />
+            <Route path="/monthly-winner" element={<MarketingMonthlyWinner />} />
+            <Route path="/ambrose" element={<MarketingAmbrose />} />
+            <Route path="/compete-info" element={<Navigate to="/league-info" replace />} />
+
             <Route path="/contact" element={<MarketingContact />} />
             <Route path="/faqs" element={<MarketingFAQs />} />
             <Route path="/staffed-hours" element={<MarketingStaffedHours />} />

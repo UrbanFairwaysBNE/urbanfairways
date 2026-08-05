@@ -880,7 +880,7 @@ export function useBooking() {
       });
 
       if (chargeError) {
-        // Restore balance if card payment fails
+        // Restore balance and prepaid hours if card payment fails
         if (balanceDeduction > 0) {
           await supabase
             .from("profiles")
@@ -888,12 +888,13 @@ export function useBooking() {
             .eq("user_id", user.id);
           queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USER_PROFILE() });
         }
+        await rollbackPackHours();
         await supabase.from("bookings").delete().eq("id", bookingData.id);
         throw new Error(chargeError.message || "Payment failed");
       }
 
       if (chargeResult.error) {
-        // Restore balance if card payment fails
+        // Restore balance and prepaid hours if card payment fails
         if (balanceDeduction > 0) {
           await supabase
             .from("profiles")
@@ -901,8 +902,10 @@ export function useBooking() {
             .eq("user_id", user.id);
           queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USER_PROFILE() });
         }
+        await rollbackPackHours();
         await supabase.from("bookings").delete().eq("id", bookingData.id);
         throw new Error(chargeResult.error);
+
       }
 
       if (chargeResult.requiresCheckout) {

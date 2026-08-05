@@ -1,9 +1,11 @@
 import Seo from "@/components/Seo";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Globe, CalendarDays, Zap, Trophy, ArrowRight } from "lucide-react";
+import { Globe, CalendarDays, Zap, Trophy } from "lucide-react";
 import venueInterior from "@/assets/venue-interior.jpg";
-import { useTenant, hubUrl } from "@/config/tenant";
+import { useTenant } from "@/config/tenant";
+import { WeeklyLeagueBoard } from "@/components/compete/CompeteBoards";
+
 
 const features = [
   { icon: Globe, title: "Web Portal Access", body: "See every stat, every shot, every round on the go with our SGT web portal." },

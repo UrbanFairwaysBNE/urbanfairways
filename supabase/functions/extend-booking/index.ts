@@ -72,6 +72,8 @@ serve(async (req) => {
     const body = await req.json();
     const booking_id: string = body.booking_id;
     const additional_hours: number = Number(body.additional_hours);
+    const use_pack_hours: boolean = body.use_pack_hours === true;
+
 
     if (!booking_id || !additional_hours || additional_hours < 1 || additional_hours > 3) {
       throw new Error("Invalid request: additional_hours must be 1, 2 or 3");

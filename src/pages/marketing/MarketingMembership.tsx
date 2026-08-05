@@ -195,4 +195,69 @@ const MarketingMembership = () => {
   );
 };
 
+const TierCard = ({ tier: t, joinHref }: { tier: Tier; joinHref: string }) => (
+  <div
+    className={`relative rounded-2xl p-6 border transition-all hover:shadow-lg ${
+      t.highlight
+        ? "border-accent ring-2 ring-accent/20 mt-6 md:mt-0 bg-card text-card-foreground"
+        : t.subtle
+          ? "border-dashed border-border bg-muted/40 text-foreground"
+          : "border-border bg-card text-card-foreground"
+    }`}
+  >
+    {t.highlight && (
+      <span className="absolute -top-4 left-1/2 -translate-x-1/2 whitespace-nowrap bg-accent text-accent-foreground text-xs font-display uppercase tracking-wider px-4 py-1.5 rounded-full shadow-sm">
+        Most Popular
+      </span>
+    )}
+    {t.info && (
+      <TooltipProvider delayDuration={100}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              aria-label={t.info}
+              className="absolute top-4 right-4 text-foreground/40 hover:text-accent transition-colors"
+            >
+              <Info className="h-4 w-4" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent className="max-w-[220px] text-xs">{t.info}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    )}
+    <p className="text-xs font-bold uppercase tracking-wider mb-2 text-foreground/60">{t.tag}</p>
+    <h3 className={`font-display text-2xl uppercase tracking-wide mb-1 ${t.subtle ? "text-foreground/80" : ""}`}>{t.name}</h3>
+    <div className="mb-5">
+      <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold bg-accent/10 text-accent border border-accent/20">
+        <Clock className="h-3.5 w-3.5" />
+        {t.rate}
+      </span>
+    </div>
+    <div className="mb-6">
+      <span className="font-display text-5xl">{t.price}</span>
+      <span className="text-sm text-foreground/60"> /week</span>
+    </div>
+    <ul className="space-y-3 text-sm mb-7">
+      {t.perks.map((p) => (
+        <li key={p} className="flex gap-2">
+          <Check className="h-4 w-4 mt-0.5 text-accent shrink-0" />
+          <span>{p}</span>
+        </li>
+      ))}
+    </ul>
+    <a
+      href={joinHref}
+      className={`block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors ${
+        t.subtle
+          ? "border border-primary/40 text-primary hover:bg-primary/5"
+          : "bg-primary hover:bg-primary/90 text-primary-foreground"
+      }`}
+    >
+      Join
+    </a>
+  </div>
+);
+
+
 export default MarketingMembership;

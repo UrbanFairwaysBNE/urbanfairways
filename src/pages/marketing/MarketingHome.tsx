@@ -224,7 +224,7 @@ const MarketingHome = () => {
         </div>
       </section>
 
-      {/* SWING LAB */}
+      {/* UF LAB */}
       <section className="bg-muted py-12 sm:py-24">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-14">

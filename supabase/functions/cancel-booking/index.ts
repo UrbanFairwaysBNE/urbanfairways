@@ -137,10 +137,10 @@ serve(async (req) => {
       };
 
       console.log("[CANCEL-BOOKING] Stripe refund created:", refundResult);
-    } else if (booking.payment_method === "balance") {
-      // Refund to deposit balance
-      console.log("[CANCEL-BOOKING] Refunding to deposit balance:", booking.total_price);
-      
+    } else if (booking.payment_method === "balance" && cashPaid > 0) {
+      // Refund to deposit balance (only the part actually paid in dollars)
+      console.log("[CANCEL-BOOKING] Refunding to deposit balance:", cashPaid);
+
       const { data: profile, error: profileError } = await supabaseAdmin
         .from("profiles")
         .select("deposit_balance")
@@ -151,8 +151,8 @@ serve(async (req) => {
         throw new Error(`Failed to fetch profile: ${profileError.message}`);
       }
 
-      const newBalance = (profile.deposit_balance || 0) + booking.total_price;
-      
+      const newBalance = (profile.deposit_balance || 0) + cashPaid;
+
       const { error: updateBalanceError } = await supabaseAdmin
         .from("profiles")
         .update({ deposit_balance: newBalance })
@@ -164,14 +164,24 @@ serve(async (req) => {
 
       refundResult = {
         type: "balance",
-        amount: booking.total_price,
+        amount: cashPaid,
         new_balance: newBalance,
       };
 
       console.log("[CANCEL-BOOKING] Balance refund completed:", refundResult);
+    } else if (packHoursRestored > 0) {
+      refundResult = {
+        type: "prepaid_hours",
+        hours: packHoursRestored,
+      };
     } else {
       console.log("[CANCEL-BOOKING] No payment to refund (payment_method:", booking.payment_method, ")");
     }
+
+    if (packHoursRestored > 0 && refundResult && refundResult.type !== "prepaid_hours") {
+      (refundResult as Record<string, unknown>).pack_hours_returned = packHoursRestored;
+    }
+
 
     // Update booking status to cancelled
     const { error: updateError } = await supabaseAdmin

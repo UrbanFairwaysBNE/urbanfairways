@@ -2,7 +2,7 @@ import Seo from "@/components/Seo";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { ArrowRight, Check, Clock, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import venueInterior from "@/assets/venue-interior.jpg";
+import pageHeader from "@/assets/page-header-city.jpg";
 import { useTenant, hubUrl } from "@/config/tenant";
 import { useCasualRates } from "@/hooks/useCasualRates";
 
@@ -89,7 +89,7 @@ const MarketingMembership = () => {
   <MarketingLayout>
     <Seo title={`Golf Memberships | ${tenant.venue_name}`} description={`Compare ${tenant.venue_name} membership tiers, included simulator hours, member pricing and automated bay access.`} path="/membership-info" />
     <section className="relative h-[28vh] min-h-[220px] flex items-end overflow-hidden">
-      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${venueInterior})` }} />
+      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${pageHeader})` }} />
       <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/70 to-primary/30" />
       <div className="relative container mx-auto px-4 pb-8">
         <p className="text-accent font-display font-bold tracking-[0.25em] uppercase text-xs mb-1.5">Membership</p>

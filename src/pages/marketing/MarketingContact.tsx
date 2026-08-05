@@ -1,7 +1,7 @@
 import Seo from "@/components/Seo";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { Phone, Mail, MapPin } from "lucide-react";
-import venueInterior from "@/assets/venue-interior.jpg";
+import pageHeader from "@/assets/page-header-city.jpg";
 import { useTenant, formatTenantAddress } from "@/config/tenant";
 
 const MarketingContact = () => {
@@ -10,7 +10,7 @@ const MarketingContact = () => {
   <MarketingLayout>
     <Seo title={`Contact ${tenant.venue_name} | Indoor Golf`} description={`Get in touch with ${tenant.venue_name}. Find our address, phone number, staffed hours and directions to the centre.`} path="/contact" />
     <section className="relative h-[22vh] min-h-[160px] flex items-end overflow-hidden">
-      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${venueInterior})` }} />
+      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${pageHeader})` }} />
       <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/70 to-primary/30" />
       <div className="relative container mx-auto px-4 pb-6">
         <p className="text-accent font-display font-bold tracking-[0.25em] uppercase text-xs mb-1.5">Get in Touch</p>

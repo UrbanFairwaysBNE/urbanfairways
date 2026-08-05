@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar, Loader2, Repeat } from "lucide-react";
-import venueInterior from "@/assets/venue-interior.jpg";
+import pageHeader from "@/assets/page-header-city.jpg";
 import { useTenant } from "@/config/tenant";
 
 interface Event {
@@ -44,7 +44,7 @@ const MarketingWhatsOn = () => {
     <MarketingLayout>
     <Seo title={`What's On | Events at ${tenant.venue_name}`} description={`Upcoming events, leagues, competitions and specials at ${tenant.venue_name} indoor golf.`} path="/whats-on" />
       <section className="relative h-[17vh] min-h-[110px] flex items-end overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${venueInterior})` }} />
+        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${pageHeader})` }} />
         <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/70 to-primary/30" />
         <div className="relative container mx-auto px-4 pb-8">
           <p className="text-accent font-display font-bold tracking-[0.25em] uppercase text-xs mb-1.5">Welcome</p>

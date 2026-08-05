@@ -2,7 +2,7 @@ import Seo from "@/components/Seo";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { Users, Target, Wallet, Clock, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
-import venueInterior from "@/assets/venue-interior.jpg";
+import pageHeader from "@/assets/page-header-city.jpg";
 import { useTenant } from "@/config/tenant";
 import { AmbroseBoard, useNextAmbrose } from "@/components/compete/CompeteBoards";
 
@@ -42,7 +42,7 @@ const MarketingAmbrose = () => {
       />
 
       <section className="relative h-[19vh] min-h-[130px] flex items-end overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${venueInterior})` }} />
+        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${pageHeader})` }} />
         <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/80 to-primary/40" />
         <div className="relative container mx-auto px-4 pb-8">
           <p className="text-accent font-display font-bold tracking-[0.25em] uppercase text-xs mb-1.5">

@@ -203,10 +203,11 @@ const MarketingHome = () => {
               Pay as you go, or save with a membership.
             </h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            <PriceCard tier="Starter" rate="From $X/hr" price="$XX" tag="Off-peak weekdays only" perks={["Swing Lab access", "Cancel any time", "Peak times charged at visitor rate"]} joinHref={hubUrl(tenant, "/")} />
-            <PriceCard tier="Standard" rate="From $X/hr" price="$XX" tag="Most popular" highlight perks={["Play anytime", `${tenant.venue_name} League access`, "Swing Lab access", "Cancel any time"]} joinHref={hubUrl(tenant, "/")} />
-            <PriceCard tier="Premium" rate="From $X/hr" price="$XX" tag="Best value per round" perks={["Play anytime", `${tenant.venue_name} League access`, "Swing Lab access", "Priority booking", "Cancel any time"]} joinHref={hubUrl(tenant, "/")} />
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            <PriceCard tier="Practice Club" rate="$10/hr" price="$15" tag="Off-peak access" perks={["Mon–Fri 5:30am–4:00pm", "Sat–Sun 5:30am–10:00am", "2 guests", "Swing Lab access"]} joinHref={hubUrl(tenant, "/")} />
+            <PriceCard tier="Birdie" rate="$10/hr" price="$29" tag="Suits Most" highlight perks={["Play anytime", "2 guests", "Swing Lab access", "Member events & comps", "Priority bookings"]} joinHref={hubUrl(tenant, "/")} />
+            <PriceCard tier="Frontline" rate="$8/hr" price="$30" tag="Frontline & essential workers" perks={["Play anytime", "2 guests", "Swing Lab access", "Member events & comps", "TPI Assessment on joining", "Monthly 30min coaching session"]} joinHref={hubUrl(tenant, "/")} />
+            <PriceCard tier="Eagle" rate="$8/hr" price="$39" tag="Best value per round" perks={["Play anytime", "2 guests", "Swing Lab access", "Member events & comps", "Priority bookings", "Monthly 30min coaching session"]} joinHref={hubUrl(tenant, "/")} />
           </div>
           <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto mt-8">
             <div className="bg-card border border-border rounded-2xl p-7 text-card-foreground hover:shadow-lg transition-all">

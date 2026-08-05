@@ -137,8 +137,8 @@ serve(async (req: Request): Promise<Response> => {
       ],
       metadata,
       payment_intent_data: { metadata },
-      success_url: `${origin}/app/my-account?pack=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/app/my-account?pack=cancelled`,
+      success_url: `${origin}/my-account?pack=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/my-account?pack=cancelled`,
     });
 
     await supabase.from("pack_lots").update({ stripe_session_id: session.id }).eq("id", lot.id);

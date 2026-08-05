@@ -96,7 +96,7 @@ const MarketingUFLab = () => {
         <div className="container mx-auto px-4">
           <p className="text-accent font-display font-bold tracking-[0.2em] uppercase text-sm mb-3 text-center">What you get</p>
           <h2 className="font-display text-3xl sm:text-4xl text-primary leading-tight text-center mb-12">
-            Data that actually changes how you practise
+            Data that actually changes how you practice
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
             {features.map((f) => (

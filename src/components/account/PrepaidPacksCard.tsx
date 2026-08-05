@@ -31,6 +31,7 @@ export function PrepaidPacksCard() {
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [code, setCode] = useState("");
   const [isRedeeming, setIsRedeeming] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const activeLots = lots.filter((l) => l.status === "active" && Number(l.hours_remaining) > 0);
   const giftLots = lots.filter((l) => l.status === "unredeemed" && l.redemption_code);

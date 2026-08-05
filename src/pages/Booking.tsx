@@ -454,7 +454,8 @@ export default function Booking() {
         paymentMethod,
         undefined, // No new payment method ID - we use saved card
         partialAmount,
-        playingComp ? COMP_NOTE : undefined
+        playingComp ? COMP_NOTE : undefined,
+        packHoursToApply
       );
       
       // If charge-booking returned a checkout URL (no saved card), redirect there
@@ -470,14 +471,20 @@ export default function Booking() {
 
       const totalPrice = sessionTotal;
       let message = `Your bay is booked for ${format(selectedDate, "PPP")} at ${selectedTime}.`;
-      if (paymentMethod === "balance") {
+      if (packHoursToApply > 0) {
+        message += ` ${packHoursToApply} prepaid ${packHoursToApply === 1 ? "hour" : "hours"} used.`;
+      }
+      if (amountAfterHours <= 0 && packHoursToApply > 0) {
+        // Fully covered by prepaid hours — nothing else to say
+      } else if (paymentMethod === "balance") {
         message += " Balance deducted.";
       } else if (applyPartialBalance && depositBalance > 0) {
-        const cardAmount = totalPrice - depositBalance;
-        message += ` $${depositBalance.toFixed(2)} from balance, $${cardAmount.toFixed(2)} charged to card.`;
+        const cardAmount = Math.max(0, amountAfterHours - depositBalance);
+        message += ` $${Math.min(depositBalance, amountAfterHours).toFixed(2)} from balance, $${cardAmount.toFixed(2)} charged to card.`;
       } else if (savedCard) {
         message += ` Charged to your ${savedCard.brand} •••• ${savedCard.last4}.`;
       }
+
       
       toast({
         title: "Booking confirmed!",

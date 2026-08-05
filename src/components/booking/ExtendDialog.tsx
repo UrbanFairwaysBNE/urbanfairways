@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import { Loader2, Clock, Plus } from "lucide-react";
 import { calculateHourlyRate, isPeakTime } from "@/lib/pricing-utils";
 import { TierConfig, TIER_SELECT, normaliseTier } from "@/lib/tier-config";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface Booking {
   id: string;
@@ -54,12 +56,15 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
   const [nextBookingStart, setNextBookingStart] = useState<string | null>(null);
   const [closeTime, setCloseTime] = useState<string | null>(null);
   const [selectedHours, setSelectedHours] = useState<number>(1);
+  const [packHoursBalance, setPackHoursBalance] = useState(0);
+  const [applyPackHours, setApplyPackHours] = useState(true);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!open) return;
     setSelectedHours(1);
+    setApplyPackHours(true);
     (async () => {
       setLoading(true);
       try {
@@ -69,7 +74,7 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
           return;
         }
 
-      const [profRes, priceRes, nextRes, hoursRes] = await Promise.all([
+      const [profRes, priceRes, nextRes, hoursRes, packRes] = await Promise.all([
         supabase
           .from("profiles")
           .select("membership_tier, custom_hourly_rate, deposit_balance, custom_segment")
@@ -91,7 +96,10 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
           .select("close_time,is_open")
           .eq("day_of_week", new Date(booking.booking_date + "T00:00:00").getDay())
           .maybeSingle(),
+        supabase.rpc("pack_hours_balance", { _user_id: user.id }),
       ]);
+
+      setPackHoursBalance(Number(packRes.data) || 0);
 
       if (profRes.data) setProfile(profRes.data as Profile);
       if (priceRes.data) {
@@ -158,21 +166,33 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
   }, [booking]);
 
   const balance = profile?.deposit_balance ?? 0;
-  const fromBalance = Math.min(balance, extensionCost);
-  const fromCard = Math.max(0, extensionCost - fromBalance);
+  const packHoursAvailable = Math.min(packHoursBalance, selectedHours);
+  const packHoursToApply = applyPackHours ? packHoursAvailable : 0;
+  const packDiscount =
+    selectedHours > 0
+      ? Math.round((extensionCost / selectedHours) * packHoursToApply * 100) / 100
+      : 0;
+  const amountDue = Math.max(0, Math.round((extensionCost - packDiscount) * 100) / 100);
+  const fromBalance = Math.min(balance, amountDue);
+  const fromCard = Math.max(0, amountDue - fromBalance);
 
   const handleSubmit = async () => {
     setSubmitting(true);
     const t = toast.loading("Extending your booking...");
     try {
       const { data, error } = await supabase.functions.invoke("extend-booking", {
-        body: { booking_id: booking.id, additional_hours: selectedHours },
+        body: {
+          booking_id: booking.id,
+          additional_hours: selectedHours,
+          use_pack_hours: packHoursToApply > 0,
+        },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       toast.dismiss(t);
       const p = data.payment || {};
       let msg = `Extended by ${selectedHours}hr!`;
+      if (p.packHoursUsed) msg += ` ${p.packHoursUsed} prepaid ${p.packHoursUsed === 1 ? "hour" : "hours"} used.`;
       if (p.chargedToCard) msg += ` $${p.chargedToCard.toFixed(2)} charged to card.`;
       if (p.chargedFromBalance && !p.chargedToCard) msg += ` $${p.chargedFromBalance.toFixed(2)} from balance.`;
       toast.success(msg);
@@ -241,6 +261,24 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
                 <span>Additional {selectedHours}hr ({isPeak ? "peak" : "off-peak"})</span>
                 <span className="font-semibold">${extensionCost.toFixed(2)}</span>
               </div>
+              {packHoursBalance > 0 && extensionCost > 0 && (
+                <div className="flex items-start gap-2 pt-1">
+                  <Checkbox
+                    id="extend-pack-hours"
+                    checked={applyPackHours}
+                    onCheckedChange={(c) => setApplyPackHours(c === true)}
+                  />
+                  <Label htmlFor="extend-pack-hours" className="flex-1 cursor-pointer font-normal">
+                    <span className="flex justify-between">
+                      <span>
+                        Use {packHoursAvailable} of {packHoursBalance} prepaid{" "}
+                        {packHoursBalance === 1 ? "hour" : "hours"}
+                      </span>
+                      <span className="text-green-600">−${packDiscount.toFixed(2)}</span>
+                    </span>
+                  </Label>
+                </div>
+              )}
               {fromBalance > 0 && (
                 <div className="flex justify-between text-muted-foreground">
                   <span>From balance</span>

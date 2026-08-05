@@ -13,7 +13,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Clock, Loader2, Timer, Copy, Gift } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Clock, Loader2, Timer, Copy, Gift, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { formatBrisbaneDate } from "@/lib/brisbane-time";
 import { usePackHours, formatHours, type PackProduct } from "@/hooks/usePackHours";
@@ -30,6 +31,7 @@ export function PrepaidPacksCard() {
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [code, setCode] = useState("");
   const [isRedeeming, setIsRedeeming] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const activeLots = lots.filter((l) => l.status === "active" && Number(l.hours_remaining) > 0);
   const giftLots = lots.filter((l) => l.status === "unredeemed" && l.redemption_code);
@@ -64,20 +66,30 @@ export function PrepaidPacksCard() {
   return (
     <>
       <Card>
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center">
-              <Timer className="h-5 w-5 text-accent" />
-            </div>
-            <div>
-              <CardTitle>Prepaid Hours</CardTitle>
-              <CardDescription>
-                Buy simulator time up front and use it any day, any time.
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
+        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer select-none">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                  <Timer className="h-5 w-5 text-accent" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <CardTitle>Prepaid Hours</CardTitle>
+                  <CardDescription>
+                    {balance > 0
+                      ? `${formatHours(balance)} hours available`
+                      : "Buy simulator time up front and use it any day, any time."}
+                  </CardDescription>
+                </div>
+                <ChevronDown
+                  className={`h-5 w-5 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`}
+                />
+              </div>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
         <CardContent className="space-y-6">
+
           {/* Balance */}
           {balance > 0 && (
             <div className="rounded-lg border bg-muted/40 p-4">
@@ -183,6 +195,8 @@ export function PrepaidPacksCard() {
             </div>
           </div>
         </CardContent>
+          </CollapsibleContent>
+        </Collapsible>
       </Card>
 
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>

@@ -622,7 +622,10 @@ export function useBooking() {
     paymentMethod: PaymentMethod = "card",
     newPaymentMethodId?: string,
     partialBalanceAmount?: number,
-    notes?: string
+    notes?: string,
+    /** Prepaid pack hours to spend on this session (capped at balance and duration) */
+    packHoursToUse?: number
+
   ): Promise<{ booking: any; requiresCheckout?: boolean; checkoutUrl?: string }> => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");

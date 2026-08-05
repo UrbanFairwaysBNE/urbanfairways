@@ -113,8 +113,10 @@ export const usePushNotifications = () => {
     initPushNotifications();
 
     return () => {
+      if (!Capacitor.isNativePlatform()) return;
       PushNotifications.removeAllListeners();
     };
+
   }, []);
 
   // Save token when we have both token and userId

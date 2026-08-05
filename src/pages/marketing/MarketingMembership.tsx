@@ -1,11 +1,23 @@
 import Seo from "@/components/Seo";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
-import { ArrowRight, Check, Clock } from "lucide-react";
+import { ArrowRight, Check, Clock, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import venueInterior from "@/assets/venue-interior.jpg";
 import { useTenant, hubUrl } from "@/config/tenant";
 import { useCasualRates } from "@/hooks/useCasualRates";
 
-const tiers = [
+interface Tier {
+  name: string;
+  price: string;
+  rate: string;
+  tag: string;
+  perks: string[];
+  highlight?: boolean;
+  subtle?: boolean;
+  info?: string;
+}
+
+const tiers: Tier[] = [
   {
     name: "Practice Club",
     price: "$15",
@@ -34,22 +46,6 @@ const tiers = [
     ],
   },
   {
-    name: "Frontline",
-    price: "$30",
-    rate: "$8/hr",
-    tag: "Frontline & essential workers",
-    perks: [
-      "Play anytime",
-      "2 guests",
-      "Swing Lab access",
-      "Member events",
-      "Member competitions",
-      "Priority bookings",
-      "TPI Assessment on joining",
-      "Monthly 30min coaching session (does not carry over)",
-    ],
-  },
-  {
     name: "Eagle",
     price: "$39",
     rate: "$8/hr",
@@ -65,6 +61,26 @@ const tiers = [
     ],
   },
 ];
+
+const frontlineTier: Tier = {
+  name: "Frontline",
+  price: "$30",
+  rate: "$8/hr",
+  tag: "Frontline & essential workers",
+  subtle: true,
+  info: "This membership is available to Emergency Services, Defence & Nurses",
+  perks: [
+    "Play anytime",
+    "2 guests",
+    "Swing Lab access",
+    "Member events",
+    "Member competitions",
+    "Priority bookings",
+    "TPI Assessment on joining",
+    "Monthly 30min coaching session (does not carry over)",
+  ],
+};
+
 
 const MarketingMembership = () => {
   const { tenant } = useTenant();

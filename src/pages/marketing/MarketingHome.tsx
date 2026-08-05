@@ -212,7 +212,7 @@ const MarketingHome = () => {
           <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto mt-8">
             <div className="bg-card border border-border rounded-2xl p-7 text-card-foreground hover:shadow-lg transition-all">
               <p className="text-xs font-bold uppercase tracking-wider mb-2 text-foreground/60">Off-Peak</p>
-              <h3 className="font-display text-3xl uppercase tracking-wide mb-1">Visitor</h3>
+              <h3 className="font-display text-3xl uppercase tracking-wide mb-1">Casual</h3>
               <div className="mb-5">
                 <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold bg-accent/10 text-accent border border-accent/20">
                   <Clock className="h-3.5 w-3.5" />
@@ -227,7 +227,7 @@ const MarketingHome = () => {
             </div>
             <div className="bg-card border border-border rounded-2xl p-7 text-card-foreground hover:shadow-lg transition-all">
               <p className="text-xs font-bold uppercase tracking-wider mb-2 text-foreground/60">Peak</p>
-              <h3 className="font-display text-3xl uppercase tracking-wide mb-1">Visitor</h3>
+              <h3 className="font-display text-3xl uppercase tracking-wide mb-1">Casual</h3>
               <div className="mb-5">
                 <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold bg-accent/10 text-accent border border-accent/20">
                   <Clock className="h-3.5 w-3.5" />

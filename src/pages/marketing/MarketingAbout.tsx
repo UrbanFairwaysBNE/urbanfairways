@@ -17,7 +17,7 @@ const getHighlights = (venueName: string) => [
   },
   {
     icon: BadgePercent,
-    title: "Competitive Visitor Rates",
+    title: "Competitive Casual Rates",
     body: "Simple off-peak and peak pricing per bay, for groups of players.",
   },
   {

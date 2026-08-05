@@ -87,7 +87,7 @@ export function LoyaltyPromoSettings() {
       toast({
         title: "Loyalty settings saved",
         description: settings.enabled
-          ? `Visitors will earn $${settings.credit_amount.toFixed(2)} every ${settings.visit_threshold} visits.`
+          ? `Casual customers will earn $${settings.credit_amount.toFixed(2)} every ${settings.visit_threshold} visits.`
           : "Loyalty promo is disabled.",
       });
     }
@@ -105,10 +105,10 @@ export function LoyaltyPromoSettings() {
           <div className="min-w-0">
             <CardTitle className="flex items-center gap-2">
               <Gift className="h-5 w-5 shrink-0" />
-              Visitor Loyalty Promo
+              Casual Loyalty Promo
             </CardTitle>
             <CardDescription>
-              Reward visitors with credit after reaching a booking milestone
+              Reward casual customers with credit after reaching a booking milestone
             </CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -168,13 +168,13 @@ export function LoyaltyPromoSettings() {
               }
             />
             <p className="text-xs text-muted-foreground">
-              Added to visitor's balance automatically
+              Added to casual customer's balance automatically
             </p>
           </div>
         </div>
 
         <div className="p-3 bg-muted/30 rounded-lg border text-sm text-muted-foreground">
-          <strong className="text-foreground">How it works:</strong> When a visitor's total booking count reaches a multiple of {settings.visit_threshold} (e.g. {settings.visit_threshold}, {settings.visit_threshold * 2}, {settings.visit_threshold * 3}...), they automatically receive ${settings.credit_amount.toFixed(2)} credit and a notification email. Only visitors (non-members) are eligible.
+          <strong className="text-foreground">How it works:</strong> When a casual customer's total booking count reaches a multiple of {settings.visit_threshold} (e.g. {settings.visit_threshold}, {settings.visit_threshold * 2}, {settings.visit_threshold * 3}...), they automatically receive ${settings.credit_amount.toFixed(2)} credit and a notification email. Only casual customers (non-members) are eligible.
         </div>
 
         <Button onClick={saveSettings} disabled={isSaving} className="w-full">

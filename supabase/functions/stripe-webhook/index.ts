@@ -496,16 +496,16 @@ serve(async (req) => {
           });
         }
 
-        const alreadyVisitor = profile?.membership_tier === WALK_IN_TIER;
+        const alreadyCasual = profile?.membership_tier === WALK_IN_TIER;
         const firstName = profile?.first_name || customer.name?.split(" ")[0] || "there";
         const lastName = profile?.last_name || "";
-        const previousTier = alreadyVisitor ? "Member" : (profile?.membership_tier ? TIER_NAMES[profile.membership_tier] || profile.membership_tier : "Member");
+        const previousTier = alreadyCasual ? "Member" : (profile?.membership_tier ? TIER_NAMES[profile.membership_tier] || profile.membership_tier : "Member");
 
         // Determine if this cancellation was triggered by a payment failure
         const isPaymentFailure = subscription.metadata?.cancellation_reason === "payment_failed";
-        logStep("Processing subscription deletion", { email, previousTier, isPaymentFailure, alreadyVisitor });
+        logStep("Processing subscription deletion", { email, previousTier, isPaymentFailure, alreadyCasual });
 
-        if (!alreadyVisitor) {
+        if (!alreadyCasual) {
           const { error } = await supabaseAdmin
             .from("profiles")
             .update({ membership_tier: WALK_IN_TIER })
@@ -602,7 +602,7 @@ serve(async (req) => {
                 Hi ${firstName}, your <strong>${previousTier}</strong> membership has been cancelled.
               </p>
               <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
-                Your account has been reverted to Visitor status. You can still book sessions at our standard walk-in rates.
+                Your account has been reverted to Casual status. You can still book sessions at our standard walk-in rates.
               </p>
               <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 If you'd like to rejoin, simply re-register for a membership through your account.

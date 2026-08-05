@@ -173,7 +173,7 @@ export default function AdminSetupStatus() {
             fixTo: SETTINGS("pricing"),
           },
           {
-            label: "Default (visitor) tier",
+            label: "Default (casual) tier",
             detail: defaultTier
               ? `Default tier: ${(defaultTier as { tier_name?: string }).tier_name}`
               : "Mark exactly one tier as the default for non-members",

@@ -121,7 +121,7 @@ serve(async (req) => {
           first_name: firstName,
           last_name: lastName,
           phone: phone || null,
-          // All imported users start as visitors - they subscribe via Stripe for membership
+          // All imported users start as casual customers - they subscribe via Stripe for membership
           membership_tier: 'casual'
         })
         .eq("user_id", userId);

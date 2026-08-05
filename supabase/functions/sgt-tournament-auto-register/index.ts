@@ -354,17 +354,17 @@ async function registerAllMembersForTournament(
 
 
   // CRITICAL: Filter to only eligible members
-  // Eligible = linked profile with non-visitor tier, OR custom_segment='staff', OR exempt_from_cleanup
+  // Eligible = linked profile with non-casual tier, OR custom_segment='staff', OR exempt_from_cleanup
   if (!supabaseClient) {
     throw new Error("Supabase client not initialized");
   }
 
-  // Eligible profiles: non-visitor membership OR staff segment
+  // Eligible profiles: non-casual membership OR staff segment
   const { data: eligibleProfiles } = await supabaseClient
     .from("profiles")
     .select("sgt_user_id, membership_tier, custom_segment")
     .not("sgt_user_id", "is", null)
-    .or("membership_tier.neq.visitor,custom_segment.eq.staff");
+    .or("membership_tier.neq.casual,custom_segment.eq.staff");
 
   const { data: exemptMembers } = await supabaseClient
     .from("sgt_members")

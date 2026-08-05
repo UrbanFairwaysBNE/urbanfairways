@@ -29,10 +29,10 @@ const Membership = () => {
 
   // Subscription tiers and the walk-in tier come entirely from pricing config
   const subscriptionTiers = getSubscriptionTiers(pricing);
-  const visitorPricing = getDefaultTier(pricing);
-  const peakRate = visitorPricing ? Number(visitorPricing.hourly_rate) : 0;
-  const offPeakRate = visitorPricing
-    ? Number(visitorPricing.off_peak_hourly_rate ?? visitorPricing.hourly_rate)
+  const casualPricing = getDefaultTier(pricing);
+  const peakRate = casualPricing ? Number(casualPricing.hourly_rate) : 0;
+  const offPeakRate = casualPricing
+    ? Number(casualPricing.off_peak_hourly_rate ?? casualPricing.hourly_rate)
     : 0;
 
   useEffect(() => {
@@ -216,12 +216,12 @@ const Membership = () => {
           </div>
 
           {/* Walk-in pricing info */}
-          {visitorPricing && (
+          {casualPricing && (
           <Card className="mb-8 border-dashed">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Clock className="h-5 w-5" />
-                {visitorPricing.display_name} Pricing
+                {casualPricing.display_name} Pricing
               </CardTitle>
             </CardHeader>
             <CardContent>

@@ -609,7 +609,7 @@ export default function Booking() {
       </header>
 
       <main className="max-w-4xl mx-auto p-4 space-y-6">
-        {/* Membership payment limbo banner - forces visitor pricing */}
+        {/* Membership payment limbo banner - forces casual pricing */}
         {isPaymentLimbo && (
           <div className="rounded-lg border border-destructive bg-destructive/5 p-4">
             <div className="flex items-start gap-3">

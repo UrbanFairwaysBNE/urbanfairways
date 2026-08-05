@@ -1211,8 +1211,8 @@ export default function AdminSettings() {
             </CollapsibleSection>
 
             <CollapsibleSection
-              title="Visitor Loyalty Promo"
-              description="Reward visitors with credit after booking milestones"
+              title="Casual Loyalty Promo"
+              description="Reward casual customers with credit after booking milestones"
               icon={Gift}
             >
               <LoyaltyPromoSettings />

@@ -981,7 +981,7 @@ export default function AdminTimetable() {
                       </span>
                     </div>
                     <Badge className={getMembershipColor(selectedBooking.profile?.membership_tier || "")}>
-                      {selectedBooking.profile?.membership_tier || "Visitor"}
+                      {selectedBooking.profile?.membership_tier || "Casual"}
                     </Badge>
                   </div>
                   
@@ -1203,7 +1203,7 @@ export default function AdminTimetable() {
                     </span>
                   </div>
                   <Badge className={getMembershipColor(selectedBooking.profile?.membership_tier || "")}>
-                    {selectedBooking.profile?.membership_tier || "Visitor"}
+                    {selectedBooking.profile?.membership_tier || "Casual"}
                   </Badge>
                 </div>
 

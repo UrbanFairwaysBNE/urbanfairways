@@ -1060,7 +1060,7 @@ function FeedbackTab({ activeTab }: { activeTab: string }) {
 
       toast({
         title: "Feedback campaign sent",
-        description: `Sent ${data.sent} feedback request emails to lapsed visitors.`,
+        description: `Sent ${data.sent} feedback request emails to lapsed casual customers.`,
       });
       fetchFeedback();
     } catch (error: any) {

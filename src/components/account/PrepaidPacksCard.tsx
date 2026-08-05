@@ -193,6 +193,8 @@ export function PrepaidPacksCard() {
             </div>
           </div>
         </CardContent>
+          </CollapsibleContent>
+        </Collapsible>
       </Card>
 
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>

@@ -82,14 +82,15 @@ const SiteFooter = () => {
         <div>
           <h3 className="font-display tracking-wide uppercase text-accent mb-4">Play</h3>
           <p className="text-sm text-primary-foreground/85 mb-4">
-            Book and manage your sessions, become a member, all in the {tenant.venue_name} Hub.
+            Book and manage your sessions, become a member, all in the {tenant.venue_name} App.
           </p>
           <a
             href={hubUrl(tenant, "/")}
             className="inline-block bg-accent hover:bg-accent/90 text-accent-foreground font-display tracking-wide uppercase text-sm px-5 py-2.5 rounded-md"
           >
-            Open The Hub
+            Open The App
           </a>
+
         </div>
       </div>
 

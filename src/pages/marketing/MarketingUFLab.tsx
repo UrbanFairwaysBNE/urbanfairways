@@ -68,7 +68,7 @@ const MarketingUFLab = () => {
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${pageHeader})` }} />
         <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/70 to-primary/30" />
         <div className="relative container mx-auto px-4 pb-8">
-          <p className="text-accent font-display font-bold tracking-[0.25em] uppercase text-xs mb-1.5">Improve with real data</p>
+          <p className="text-brand-accent-soft font-display font-bold tracking-[0.25em] uppercase text-xs mb-1.5">Improve with real data</p>
           <h1 className="font-display text-3xl sm:text-5xl text-primary-foreground leading-none">UF Lab</h1>
         </div>
       </section>

@@ -1,7 +1,9 @@
 import Seo from "@/components/Seo";
 import { Link } from "react-router-dom";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
-import { Check, Clock, DollarSign, Trophy, Target, ArrowRight, BarChart3, Crosshair, TrendingUp, Activity, Gauge } from "lucide-react";
+import { Check, Clock, DollarSign, Trophy, Target, ArrowRight, BarChart3, Crosshair, TrendingUp, Activity, Gauge, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
 import venueInterior from "@/assets/venue-interior.jpg";
 import simBayImage from "@/assets/sim-bay.webp.asset.json";
 import heroVideo from "@/assets/hero-video-v3.mp4.asset.json";

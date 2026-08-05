@@ -64,20 +64,30 @@ export function PrepaidPacksCard() {
   return (
     <>
       <Card>
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center">
-              <Timer className="h-5 w-5 text-accent" />
-            </div>
-            <div>
-              <CardTitle>Prepaid Hours</CardTitle>
-              <CardDescription>
-                Buy simulator time up front and use it any day, any time.
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
+        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer select-none">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                  <Timer className="h-5 w-5 text-accent" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <CardTitle>Prepaid Hours</CardTitle>
+                  <CardDescription>
+                    {balance > 0
+                      ? `${formatHours(balance)} hours available`
+                      : "Buy simulator time up front and use it any day, any time."}
+                  </CardDescription>
+                </div>
+                <ChevronDown
+                  className={`h-5 w-5 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`}
+                />
+              </div>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
         <CardContent className="space-y-6">
+
           {/* Balance */}
           {balance > 0 && (
             <div className="rounded-lg border bg-muted/40 p-4">

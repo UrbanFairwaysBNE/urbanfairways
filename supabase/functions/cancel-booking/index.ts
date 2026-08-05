@@ -80,7 +80,7 @@ serve(async (req) => {
       total_price: booking.total_price
     });
 
-    let refundResult = null;
+    let refundResult: Record<string, unknown> | null = null;
 
     // ── Prepaid hours ──
     // Hours always go straight back to the customer's wallet (new expiry lots handled
@@ -179,7 +179,7 @@ serve(async (req) => {
     }
 
     if (packHoursRestored > 0 && refundResult && refundResult.type !== "prepaid_hours") {
-      (refundResult as Record<string, unknown>).pack_hours_returned = packHoursRestored;
+      refundResult.pack_hours_returned = packHoursRestored;
     }
 
 

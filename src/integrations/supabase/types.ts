@@ -526,6 +526,7 @@ export type Database = {
           hourly_rate: number
           id: string
           notes: string | null
+          pack_hours_used: number
           payment_method: string | null
           player_count: number
           start_time: string
@@ -545,6 +546,7 @@ export type Database = {
           hourly_rate: number
           id?: string
           notes?: string | null
+          pack_hours_used?: number
           payment_method?: string | null
           player_count?: number
           start_time: string
@@ -564,6 +566,7 @@ export type Database = {
           hourly_rate?: number
           id?: string
           notes?: string | null
+          pack_hours_used?: number
           payment_method?: string | null
           player_count?: number
           start_time?: string
@@ -2018,6 +2021,7 @@ export type Database = {
           customer_id: string | null
           id: string
           items: Json
+          pack_hours_used: number
           payment_method: string
           status: string
           stripe_payment_intent_id: string | null
@@ -2030,6 +2034,7 @@ export type Database = {
           customer_id?: string | null
           id?: string
           items: Json
+          pack_hours_used?: number
           payment_method: string
           status?: string
           stripe_payment_intent_id?: string | null
@@ -2042,6 +2047,7 @@ export type Database = {
           customer_id?: string | null
           id?: string
           items?: Json
+          pack_hours_used?: number
           payment_method?: string
           status?: string
           stripe_payment_intent_id?: string | null

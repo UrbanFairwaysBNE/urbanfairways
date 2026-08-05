@@ -857,9 +857,9 @@ export function useBooking() {
     if (packHoursUsed > 0) {
       await supabase
         .from("pack_transactions")
-        .update({ booking_id: bookingData.id })
+        .update({ related_booking_id: bookingData.id })
         .eq("user_id", user.id)
-        .is("booking_id", null)
+        .is("related_booking_id", null)
         .eq("transaction_type", "booking");
     }
 

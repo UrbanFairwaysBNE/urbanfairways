@@ -4,87 +4,11 @@ import { ArrowRight, Check, Clock, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import pageHeader from "@/assets/page-header-city.jpg";
 import { useTenant, hubUrl } from "@/config/tenant";
-import { useCasualRates } from "@/hooks/useCasualRates";
-
-interface Tier {
-  name: string;
-  price: string;
-  rate: string;
-  tag: string;
-  perks: string[];
-  highlight?: boolean;
-  subtle?: boolean;
-  info?: string;
-}
-
-const tiers: Tier[] = [
-  {
-    name: "Practice Club",
-    price: "$15",
-    rate: "$10/hr",
-    tag: "Off-peak access",
-    perks: [
-      "Mon–Fri 5:30am–4:00pm",
-      "Sat–Sun 5:30am–10:00am",
-      "2 guests",
-      "UF Lab access",
-    ],
-  },
-  {
-    name: "Birdie",
-    price: "$29",
-    rate: "$10/hr",
-    tag: "Suits Most",
-    highlight: true,
-    perks: [
-      "Play anytime",
-      "2 guests",
-      "UF Lab access",
-      "Member events",
-      "Member competitions",
-      "Priority bookings",
-    ],
-  },
-  {
-    name: "Eagle",
-    price: "$39",
-    rate: "$8/hr",
-    tag: "Best value per round",
-    perks: [
-      "Play anytime",
-      "2 guests",
-      "UF Lab access",
-      "Member events",
-      "Member competitions",
-      "Priority bookings",
-      "Monthly 30min coaching session (does not carry over)",
-    ],
-  },
-];
-
-const frontlineTier: Tier = {
-  name: "Frontline",
-  price: "$30",
-  rate: "$8/hr",
-  tag: "Frontline & essential workers",
-  subtle: true,
-  info: "This membership is available to Emergency Services, Defence & Nurses",
-  perks: [
-    "Play anytime",
-    "2 guests",
-    "UF Lab access",
-    "Member events",
-    "Member competitions",
-    "Priority bookings",
-    "TPI Assessment on joining",
-    "Monthly 30min coaching session (does not carry over)",
-  ],
-};
-
+import { useMarketingPricing, type MarketingTier } from "@/hooks/useMarketingPricing";
 
 const MarketingMembership = () => {
   const { tenant } = useTenant();
-  const { peakLabel, offPeakLabel, specials } = useCasualRates();
+  const { tiers, restrictedTiers, peakLabel, offPeakLabel, offPeakLines, peakLines, specials } = useMarketingPricing();
   return (
   <MarketingLayout>
     <Seo title={`Golf Memberships | ${tenant.venue_name}`} description={`Compare ${tenant.venue_name} membership tiers, included simulator hours, member pricing and automated bay access.`} path="/membership-info" />
@@ -143,8 +67,7 @@ const MarketingMembership = () => {
               </span>
             </div>
             <div className="text-sm text-foreground/60 mb-2 space-y-0.5">
-              <p>Mon–Fri 5:30am – 4:00pm</p>
-              <p>Sat–Sun 5:30am – 10:00am</p>
+              {offPeakLines.map((l) => <p key={l}>{l}</p>)}
             </div>
             <p className="text-sm text-foreground/60 mb-6">Per bay, up to 2 guests</p>
             <a href={hubUrl(tenant, "/")} className="block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors bg-accent hover:bg-accent/90 text-accent-foreground">
@@ -161,9 +84,7 @@ const MarketingMembership = () => {
               </span>
             </div>
             <div className="text-sm text-foreground/60 mb-2 space-y-0.5">
-              <p>Mon–Fri 4:00pm – 11:00pm</p>
-              <p>Sat–Sun 10:00am – 11:00pm</p>
-              <p>Public holidays all day</p>
+              {peakLines.map((l) => <p key={l}>{l}</p>)}
             </div>
             <p className="text-sm text-foreground/60 mb-6">Per bay, up to 2 guests</p>
             <a href={hubUrl(tenant, "/")} className="block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors bg-accent hover:bg-accent/90 text-accent-foreground">
@@ -202,7 +123,7 @@ const MarketingMembership = () => {
   );
 };
 
-const TierCard = ({ tier: t, joinHref }: { tier: Tier; joinHref: string }) => (
+const TierCard = ({ tier: t, joinHref }: { tier: MarketingTier; joinHref: string }) => (
   <div
     className={`relative rounded-2xl p-6 border transition-all hover:shadow-lg ${
       t.highlight
@@ -212,9 +133,9 @@ const TierCard = ({ tier: t, joinHref }: { tier: Tier; joinHref: string }) => (
           : "border-border bg-card text-card-foreground"
     }`}
   >
-    {t.highlight && (
+    {t.highlight && t.badge && (
       <span className="absolute -top-4 left-1/2 -translate-x-1/2 whitespace-nowrap bg-accent text-accent-foreground text-xs font-display uppercase tracking-wider px-4 py-1.5 rounded-full shadow-sm">
-        Most Popular
+        {t.badge}
       </span>
     )}
     {t.info && (

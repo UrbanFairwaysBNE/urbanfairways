@@ -29,7 +29,9 @@ Primary hook: `src/hooks/useBooking.ts`. Pricing helpers: `src/lib/pricing-utils
 
 ## Pricing
 
-- Visitor: peak and off-peak rates (Birdies: $35 / $25 per hour).
+- Casual: peak and off-peak rates.
+- Off-peak window: Mon–Fri 5:30am–4:00pm and Sat–Sun 5:30am–10:00am (venue timezone).
+  Everything outside that, plus public holidays, is peak.
 - Members: flat discounted hourly rate by tier; Weekday members are restricted to
   weekdays before 4pm.
 - Members booking an additional peak bay pay a surcharge rate.

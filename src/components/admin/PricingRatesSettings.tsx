@@ -7,7 +7,17 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Save, AlertCircle } from "lucide-react";
+import { Save, AlertCircle, AlertTriangle } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface TierRow {
   id: string;
@@ -44,6 +54,7 @@ export const PricingRatesSettings = () => {
   const [draft, setDraft] = useState<Draft>({});
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [confirmRow, setConfirmRow] = useState<TierRow | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -89,6 +100,17 @@ export const PricingRatesSettings = () => {
       d.hourly !== str(row.hourly_rate) ||
       d.offPeak !== str(row.off_peak_hourly_rate)
     );
+  };
+
+  const weeklyChanged = (row: TierRow) =>
+    !row.is_default && draft[row.id]?.weekly !== str(row.weekly_subscription_price);
+
+  const requestSave = (row: TierRow) => {
+    if (weeklyChanged(row)) {
+      setConfirmRow(row);
+      return;
+    }
+    save(row);
   };
 
   const save = async (row: TierRow) => {
@@ -187,8 +209,18 @@ export const PricingRatesSettings = () => {
             />
           </div>
 
+          {weeklyChanged(row) && (
+            <div className="flex gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
+              <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+              <p>
+                Changing the weekly fee applies to <strong>every {row.display_name} member</strong>,
+                existing and new — all members stay on one consistent price.
+              </p>
+            </div>
+          )}
+
           <div className="flex justify-end">
-            <Button size="sm" onClick={() => save(row)} disabled={!dirty || savingId === row.id}>
+            <Button size="sm" onClick={() => requestSave(row)} disabled={!dirty || savingId === row.id}>
               <Save className="h-4 w-4 mr-2" />
               {savingId === row.id ? "Saving..." : "Save"}
             </Button>
@@ -264,6 +296,17 @@ export const PricingRatesSettings = () => {
         </p>
       </div>
 
+      <div className="flex gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
+        <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+        <p>
+          <strong>Weekly membership fees apply to everyone.</strong> There is no grandfathering —
+          when you change a weekly fee, existing members are migrated to the new price at their next
+          billing date, so every member on a tier always pays the same amount. Hourly rates take
+          effect immediately for all bookings made from that point.
+        </p>
+      </div>
+
+
       <section className="space-y-3">
         <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Membership tiers
@@ -285,6 +328,43 @@ export const PricingRatesSettings = () => {
           casual.map(renderCasual)
         )}
       </section>
+
+      <AlertDialog open={!!confirmRow} onOpenChange={(o) => !o && setConfirmRow(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Change the {confirmRow?.display_name} weekly fee?
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-left">
+                <p>
+                  This changes the weekly fee from{" "}
+                  <strong>${str(confirmRow?.weekly_subscription_price ?? null) || "0"}</strong> to{" "}
+                  <strong>${confirmRow ? draft[confirmRow.id]?.weekly || "0" : ""}</strong>.
+                </p>
+                <p>
+                  <strong>Existing members are not grandfathered.</strong> Every current{" "}
+                  {confirmRow?.display_name} member will move to the new price at their next billing
+                  date, so all members on this tier pay the same amount.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                const row = confirmRow;
+                setConfirmRow(null);
+                if (row) save(row);
+              }}
+            >
+              Yes, update all members
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

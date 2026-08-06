@@ -186,7 +186,7 @@ const MarketingHome = () => {
                 <p>Mon–Fri 5:30am – 4:00pm</p>
                 <p>Sat–Sun 5:30am – 10:00am</p>
               </div>
-              <p className="text-sm text-foreground/60 mb-6">Per bay, up to 4 players</p>
+              <p className="text-sm text-foreground/60 mb-6">Per bay, up to 2 guests</p>
               <a href={hubUrl(tenant, "/")} className="block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors bg-accent hover:bg-accent/90 text-accent-foreground">
                 Book Now
               </a>
@@ -205,7 +205,7 @@ const MarketingHome = () => {
                 <p>Sat–Sun 10:00am – 11:00pm</p>
                 <p>Public holidays all day</p>
               </div>
-              <p className="text-sm text-foreground/60 mb-6">Per bay, up to 4 players</p>
+              <p className="text-sm text-foreground/60 mb-6">Per bay, up to 2 guests</p>
               <a href={hubUrl(tenant, "/")} className="block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors bg-accent hover:bg-accent/90 text-accent-foreground">
                 Book Now
               </a>

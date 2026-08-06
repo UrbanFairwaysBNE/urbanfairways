@@ -79,12 +79,8 @@ const Membership = () => {
   }, [searchParams]);
 
   const handleSubscribe = async (tier: PricingTier) => {
-    if (!tier.stripe_price_id) {
-      toast.error("Subscription not available for this tier");
-      return;
-    }
-
-    // Tiers that need eligibility confirmation ask for the customer's sector first
+    // Tiers that need eligibility confirmation ask for the customer's sector
+    // before anything else — submitting the dialog is what starts the flow.
     if (tier.requires_verification) {
       setVerifyingTier(tier);
       return;
@@ -110,7 +106,11 @@ const Membership = () => {
   };
 
   const continueSubscribe = async (tier: PricingTier) => {
-    
+    if (!tier.stripe_price_id) {
+      toast.error("Subscription not available for this tier");
+      return;
+    }
+
     // Check if user has a saved card - if not, show dialog
     if (!savedCard && !isLoadingSavedCard) {
       setPendingTier(tier);

@@ -296,6 +296,17 @@ export const PricingRatesSettings = () => {
         </p>
       </div>
 
+      <div className="flex gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
+        <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+        <p>
+          <strong>Weekly membership fees apply to everyone.</strong> There is no grandfathering —
+          when you change a weekly fee, existing members are migrated to the new price at their next
+          billing date, so every member on a tier always pays the same amount. Hourly rates take
+          effect immediately for all bookings made from that point.
+        </p>
+      </div>
+
+
       <section className="space-y-3">
         <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Membership tiers

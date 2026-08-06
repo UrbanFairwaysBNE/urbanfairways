@@ -11,11 +11,15 @@ const corsHeaders = {
 const MAX_TOTAL_HOURS = 4;
 
 function isPeakTime(dateStr: string, startTime: string): boolean {
+  // Off-peak: Mon-Fri 5:30am-4:00pm, Sat-Sun 5:30am-10:00am. Everything else is peak.
   const date = new Date(dateStr + "T00:00:00");
-  const dayOfWeek = date.getDay();
-  const hour = parseInt(startTime.split(":")[0], 10);
-  if (dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6) return true;
-  return hour >= 16;
+  const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
+  const [h, m] = startTime.split(":").map(Number);
+  const minutes = h * 60 + (m || 0);
+  const weekend = dayOfWeek === 0 || dayOfWeek === 6;
+  const start = 5 * 60 + 30;
+  const end = weekend ? 10 * 60 : 16 * 60;
+  return !(minutes >= start && minutes < end);
 }
 
 function calculateHourlyRate(

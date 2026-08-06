@@ -729,7 +729,7 @@ ${describeTiers(tiers)}
 
 ## Bookings & operations
 - Slots in 30-min increments, 1–4 hr bookings, open 8am–10pm.
-- Off-peak window (weekdays before 4pm) is historically quiet. Peak is weeknights after 4pm + all weekend.
+- Off-peak window is Mon-Fri 5:30am-4:00pm and Sat-Sun 5:30am-10:00am; everything else (and public holidays) is peak.
 - Staff are paid; "is it worth staffing X" usually means: does revenue/foot-traffic in that window justify wage cost? Answer with **bookings count + revenue + unique customers + bar/POS sales** for the specific day-of-week + hour window, ideally over the last 60–90 days.
 - Bay Controller is an Electron app per bay that auto-launches GSPro at booking start and shuts down after. Logs in bay_controller_logs.
 

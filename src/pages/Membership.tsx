@@ -13,6 +13,7 @@ import { usePricing, PricingTier } from "@/hooks/usePricing";
 import { getDefaultTier, isDefaultTier, subscriptionTiers as getSubscriptionTiers } from "@/lib/tier-config";
 import { useSavedCard } from "@/hooks/useSavedCard";
 import { NoCardDialog } from "@/components/booking/NoCardDialog";
+import { FrontlineVerificationDialog } from "@/components/membership/FrontlineVerificationDialog";
 
 const Membership = () => {
   const { tenant } = useTenant();
@@ -26,6 +27,7 @@ const Membership = () => {
   const [subscribingTier, setSubscribingTier] = useState<string | null>(null);
   const [pendingTier, setPendingTier] = useState<PricingTier | null>(null);
   const [showNoCardDialog, setShowNoCardDialog] = useState(false);
+  const [verifyingTier, setVerifyingTier] = useState<PricingTier | null>(null);
 
   // Subscription tiers and the walk-in tier come entirely from pricing config
   const subscriptionTiers = getSubscriptionTiers(pricing);
@@ -81,6 +83,33 @@ const Membership = () => {
       toast.error("Subscription not available for this tier");
       return;
     }
+
+    // Tiers that need eligibility confirmation ask for the customer's sector first
+    if (tier.requires_verification) {
+      setVerifyingTier(tier);
+      return;
+    }
+
+    await continueSubscribe(tier);
+  };
+
+  const handleVerificationConfirmed = async (sector: string) => {
+    const tier = verifyingTier;
+    setVerifyingTier(null);
+    if (!tier) return;
+
+    try {
+      await supabase.functions.invoke("notify-frontline-signup", {
+        body: { sector, tier_key: tier.tier, tier_name: tier.display_name },
+      });
+    } catch (err) {
+      console.error("[Membership] frontline notification failed", err);
+    }
+
+    await continueSubscribe(tier);
+  };
+
+  const continueSubscribe = async (tier: PricingTier) => {
     
     // Check if user has a saved card - if not, show dialog
     if (!savedCard && !isLoadingSavedCard) {
@@ -229,12 +258,12 @@ const Membership = () => {
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="text-orange-600 border-orange-300">Peak</Badge>
                   <span className="font-semibold">${peakRate}/hr</span>
-                  <span className="text-sm text-muted-foreground">(Fri-Sun, Mon-Thu 4pm+)</span>
+                  <span className="text-sm text-muted-foreground">(Mon–Fri from 4pm, Sat–Sun from 10am)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="text-green-600 border-green-300">Off-Peak</Badge>
                   <span className="font-semibold">${offPeakRate}/hr</span>
-                  <span className="text-sm text-muted-foreground">(Mon-Thu before 4pm)</span>
+                  <span className="text-sm text-muted-foreground">(Mon–Fri 5:30am–4pm, Sat–Sun 5:30am–10am)</span>
                 </div>
               </div>
             </CardContent>
@@ -359,6 +388,13 @@ const Membership = () => {
           </p>
         </div>
       </main>
+
+      <FrontlineVerificationDialog
+        open={!!verifyingTier}
+        tierName={verifyingTier?.display_name ?? ""}
+        onOpenChange={(open) => !open && setVerifyingTier(null)}
+        onConfirm={handleVerificationConfirmed}
+      />
 
       {/* No Card Dialog */}
       <NoCardDialog

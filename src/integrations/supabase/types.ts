@@ -2070,6 +2070,7 @@ export type Database = {
           is_default: boolean
           is_subscription: boolean
           off_peak_hourly_rate: number | null
+          requires_verification: boolean
           restricted_to_off_peak: boolean
           restrictions: string | null
           single_bay_at_peak: boolean
@@ -2092,6 +2093,7 @@ export type Database = {
           is_default?: boolean
           is_subscription?: boolean
           off_peak_hourly_rate?: number | null
+          requires_verification?: boolean
           restricted_to_off_peak?: boolean
           restrictions?: string | null
           single_bay_at_peak?: boolean
@@ -2114,6 +2116,7 @@ export type Database = {
           is_default?: boolean
           is_subscription?: boolean
           off_peak_hourly_rate?: number | null
+          requires_verification?: boolean
           restricted_to_off_peak?: boolean
           restrictions?: string | null
           single_bay_at_peak?: boolean
@@ -2190,6 +2193,7 @@ export type Database = {
           total_bookings: number
           updated_at: string
           user_id: string
+          verification_sector: string | null
         }
         Insert: {
           booking_flag_enabled?: boolean
@@ -2216,6 +2220,7 @@ export type Database = {
           total_bookings?: number
           updated_at?: string
           user_id: string
+          verification_sector?: string | null
         }
         Update: {
           booking_flag_enabled?: boolean
@@ -2242,6 +2247,7 @@ export type Database = {
           total_bookings?: number
           updated_at?: string
           user_id?: string
+          verification_sector?: string | null
         }
         Relationships: []
       }

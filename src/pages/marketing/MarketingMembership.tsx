@@ -34,14 +34,18 @@ const MarketingMembership = () => {
     <section className="pb-20">
       <div className="container mx-auto px-4 grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl">
         {tiers.map((t) => (
-          <TierCard key={t.name} tier={t} joinHref={hubUrl(tenant, "/")} />
+          <TierCard key={t.key} tier={t} joinHref={hubUrl(tenant, "/")} />
         ))}
       </div>
-      <div className="container mx-auto px-4 mt-6 max-w-5xl">
-        <div className="md:max-w-sm">
-          <TierCard tier={frontlineTier} joinHref={hubUrl(tenant, "/")} />
+      {restrictedTiers.length > 0 && (
+        <div className="container mx-auto px-4 mt-6 max-w-5xl">
+          <div className="md:max-w-sm grid gap-6">
+            {restrictedTiers.map((t) => (
+              <TierCard key={t.key} tier={t} joinHref={hubUrl(tenant, "/")} />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </section>
 
 

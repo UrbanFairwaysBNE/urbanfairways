@@ -1,5 +1,5 @@
 import Seo from "@/components/Seo";
-import { Clock, Phone, AlertTriangle } from "lucide-react";
+import { Clock, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { useTenant } from "@/config/tenant";

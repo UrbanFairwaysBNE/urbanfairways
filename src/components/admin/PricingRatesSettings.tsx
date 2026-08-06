@@ -101,6 +101,17 @@ export const PricingRatesSettings = () => {
     );
   };
 
+  const weeklyChanged = (row: TierRow) =>
+    !row.is_default && draft[row.id]?.weekly !== str(row.weekly_subscription_price);
+
+  const requestSave = (row: TierRow) => {
+    if (weeklyChanged(row)) {
+      setConfirmRow(row);
+      return;
+    }
+    save(row);
+  };
+
   const save = async (row: TierRow) => {
     const d = draft[row.id];
     const hourly = num(d.hourly);

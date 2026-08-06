@@ -200,7 +200,11 @@ const MarketingHome = () => {
                   {peakLabel ?? "—"}/hr
                 </span>
               </div>
-              <p className="text-sm text-foreground/60 mb-2">Mon–Fri from 4pm, Sat–Sun from 10am</p>
+              <div className="text-sm text-foreground/60 mb-2 space-y-0.5">
+                <p>Mon–Fri 4:00pm – 11:00pm</p>
+                <p>Sat–Sun 10:00am – 11:00pm</p>
+                <p>Public holidays all day</p>
+              </div>
               <p className="text-sm text-foreground/60 mb-6">Per bay, up to 4 players</p>
               <a href={hubUrl(tenant, "/")} className="block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors bg-accent hover:bg-accent/90 text-accent-foreground">
                 Book Now

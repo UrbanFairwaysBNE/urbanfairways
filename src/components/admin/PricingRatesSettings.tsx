@@ -303,8 +303,11 @@ export const PricingRatesSettings = () => {
             </Button>
           </div>
         </CardContent>
+          </CollapsibleContent>
+        </Collapsible>
       </Card>
     );
+
   };
 
   return (

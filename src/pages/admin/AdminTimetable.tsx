@@ -119,19 +119,32 @@ export default function AdminTimetable() {
   const { pricing } = usePricing();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { globalWindow } = useOperatingHours();
+  const { globalWindow, getForDate } = useOperatingHours();
 
-  const OPERATING_START_HOUR = globalWindow.startHour ?? FALLBACK_START_HOUR;
-  const OPERATING_END_HOUR = globalWindow.endHour ?? FALLBACK_END_HOUR;
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
+  // Slots follow the operating hours of the selected day (minute-accurate,
+  // so a 5:30am open starts the grid at 5:30, not 5:00).
+  const dayHours = getForDate(selectedDate);
+  const toMin = (t: string) => {
+    const [h, m] = t.split(":").map(Number);
+    return h * 60 + (m || 0);
+  };
+  const dayStartMinutes = dayHours.is_open
+    ? toMin(dayHours.open_time)
+    : globalWindow.startMinutes ?? FALLBACK_START_HOUR * 60;
+  const dayEndMinutes = dayHours.is_open
+    ? toMin(dayHours.close_time)
+    : globalWindow.endMinutes ?? FALLBACK_END_HOUR * 60;
+
+  const OPERATING_START_HOUR = Math.floor(dayStartMinutes / 60);
+  const OPERATING_END_HOUR = Math.ceil(dayEndMinutes / 60);
 
   const OPERATING_SLOTS: TimeSlot[] = [];
-  for (let hour = OPERATING_START_HOUR; hour < OPERATING_END_HOUR; hour++) {
-    OPERATING_SLOTS.push({ hour, minute: 0 });
-    OPERATING_SLOTS.push({ hour, minute: 30 });
+  for (let m = dayStartMinutes; m < dayEndMinutes; m += 30) {
+    OPERATING_SLOTS.push({ hour: Math.floor(m / 60), minute: m % 60 });
   }
-  
-  
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
   
   const [bays, setBays] = useState<Bay[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);

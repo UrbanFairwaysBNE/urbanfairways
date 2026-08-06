@@ -209,8 +209,18 @@ export const PricingRatesSettings = () => {
             />
           </div>
 
+          {weeklyChanged(row) && (
+            <div className="flex gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
+              <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+              <p>
+                Changing the weekly fee applies to <strong>every {row.display_name} member</strong>,
+                existing and new — all members stay on one consistent price.
+              </p>
+            </div>
+          )}
+
           <div className="flex justify-end">
-            <Button size="sm" onClick={() => save(row)} disabled={!dirty || savingId === row.id}>
+            <Button size="sm" onClick={() => requestSave(row)} disabled={!dirty || savingId === row.id}>
               <Save className="h-4 w-4 mr-2" />
               {savingId === row.id ? "Saving..." : "Save"}
             </Button>

@@ -45,24 +45,28 @@ export function useOperatingHours() {
   }, []);
 
   /**
-   * Global window across all days — earliest open hour to latest close hour.
+   * Global window across all days — earliest open time to latest close time.
    * Used for time slot generation so the timetable/picker always covers
-   * every possible bookable hour in the week.
+   * every possible bookable time in the week. Minute-accurate (e.g. 5:30am).
    */
   const globalWindow = (() => {
     const open = hours.filter((h) => h.is_open);
-    if (!open.length) return { startHour: 5, endHour: 23 };
-    const startHour = Math.min(
-      ...open.map((h) => parseInt(h.open_time.split(":")[0], 10))
-    );
-    const endHour = Math.max(
-      ...open.map((h) => {
-        const [h1, m1] = h.close_time.split(":").map(Number);
-        return m1 > 0 ? h1 + 1 : h1;
-      })
-    );
-    return { startHour, endHour };
+    if (!open.length)
+      return { startHour: 5, endHour: 23, startMinutes: 5 * 60, endMinutes: 23 * 60 };
+    const toMin = (t: string) => {
+      const [h, m] = t.split(":").map(Number);
+      return h * 60 + (m || 0);
+    };
+    const startMinutes = Math.min(...open.map((h) => toMin(h.open_time)));
+    const endMinutes = Math.max(...open.map((h) => toMin(h.close_time)));
+    return {
+      startHour: Math.floor(startMinutes / 60),
+      endHour: Math.ceil(endMinutes / 60),
+      startMinutes,
+      endMinutes,
+    };
   })();
+
 
   const getForDate = (date: Date): OperatingHour => {
     const d = date.getDay();

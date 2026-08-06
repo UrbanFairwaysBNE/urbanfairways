@@ -145,8 +145,19 @@ export const PackProductsSettings = () => {
       )}
 
       {packs.map((pack) => (
-        <Card key={pack.id}>
-          <CardContent className="pt-6 space-y-4">
+        <Collapsible key={pack.id}>
+          <Card>
+            <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 p-4 text-left [&[data-state=open]>svg]:rotate-180">
+              <div className="min-w-0">
+                <p className="font-medium truncate">{pack.name || "Untitled pack"}</p>
+                <p className="text-xs text-muted-foreground">
+                  {pack.hours}h · ${pack.price} · {pack.is_active ? "Active" : "Hidden"}
+                </p>
+              </div>
+              <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform" />
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+          <CardContent className="pt-0 space-y-4">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 space-y-2">
                 <Label htmlFor={`name-${pack.id}`}>Pack name</Label>

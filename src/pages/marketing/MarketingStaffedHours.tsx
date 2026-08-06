@@ -110,20 +110,9 @@ const MarketingStaffedHours = () => {
         </div>
       </section>
 
-      {/* No BYO */}
       <section className="py-10 sm:py-16 bg-background">
         <div className="container mx-auto px-4 max-w-3xl">
-          <div className="rounded-xl border-2 border-accent bg-accent/5 p-6 sm:p-8 text-center">
-            <div className="flex items-center justify-center gap-3 mb-3">
-              <AlertTriangle className="h-6 w-6 text-accent" />
-              <h2 className="font-display text-3xl uppercase tracking-wide text-primary">
-                Strict No BYO
-              </h2>
-            </div>
-            <p className="text-muted-foreground">
-              Drinks are available on-site, please don't bring your own.
-            </p>
-          </div>
+
 
           <div className="text-center mt-6 sm:mt-10">
             <Link

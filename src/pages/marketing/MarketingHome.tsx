@@ -11,7 +11,7 @@ import heroVideo from "@/assets/hero-video-v3.mp4.asset.json";
 import swingLabBadge from "@/assets/uf-lab-circle-dark.png";
 import googlePlayBadge from "@/assets/google-play-badge.svg";
 import { useTenant, hubUrl } from "@/config/tenant";
-import { useCasualRates } from "@/hooks/useCasualRates";
+import { useMarketingPricing, type MarketingTier } from "@/hooks/useMarketingPricing";
 
 const getFeatures = (venueName: string) => [
   { icon: Target, title: "High-Tech Simulators", body: "Tour-accurate launch data, 4K graphics and a huge library of world-famous courses." },
@@ -31,7 +31,7 @@ const swingLabFeatures = [
 
 const MarketingHome = () => {
   const { tenant } = useTenant();
-  const { peakLabel, offPeakLabel, specials } = useCasualRates();
+  const { tiers, restrictedTiers, peakLabel, offPeakLabel, offPeakLines, peakLines, specials } = useMarketingPricing();
   const features = getFeatures(tenant.venue_name);
   return (
     <MarketingLayout>
@@ -164,13 +164,17 @@ const MarketingHome = () => {
             </h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            <PriceCard tier="Practice Club" rate="$10/hr" price="$15" tag="Off-peak access" perks={["Mon–Fri 5:30am–4:00pm", "Sat–Sun 5:30am–10:00am", "2 guests", "UF Lab access"]} joinHref={hubUrl(tenant, "/")} />
-            <PriceCard tier="Birdie" rate="$10/hr" price="$29" tag="Suits Most" highlight perks={["Play anytime", "2 guests", "UF Lab access", "Member events & comps", "Priority bookings"]} joinHref={hubUrl(tenant, "/")} />
-            <PriceCard tier="Eagle" rate="$8/hr" price="$39" tag="Best value per round" perks={["Play anytime", "2 guests", "UF Lab access", "Member events & comps", "Priority bookings", "Monthly 30min coaching session"]} joinHref={hubUrl(tenant, "/")} />
+            {tiers.map((t) => (
+              <PriceCard key={t.key} tier={t} joinHref={hubUrl(tenant, "/")} />
+            ))}
           </div>
-          <div className="max-w-sm mx-auto mt-6">
-            <PriceCard tier="Frontline" rate="$8/hr" price="$30" tag="Frontline & essential workers" subtle info="This membership is available to Emergency Services, Defence & Nurses" perks={["Play anytime", "2 guests", "UF Lab access", "Member events & comps", "TPI Assessment on joining", "Monthly 30min coaching session"]} joinHref={hubUrl(tenant, "/")} />
-          </div>
+          {restrictedTiers.length > 0 && (
+            <div className="max-w-sm mx-auto mt-6 grid gap-6">
+              {restrictedTiers.map((t) => (
+                <PriceCard key={t.key} tier={t} joinHref={hubUrl(tenant, "/")} />
+              ))}
+            </div>
+          )}
 
           <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto mt-8">
             <div className="bg-card border border-border rounded-2xl p-7 text-card-foreground hover:shadow-lg transition-all">
@@ -183,8 +187,7 @@ const MarketingHome = () => {
                 </span>
               </div>
               <div className="text-sm text-foreground/60 mb-2 space-y-0.5">
-                <p>Mon–Fri 5:30am – 4:00pm</p>
-                <p>Sat–Sun 5:30am – 10:00am</p>
+                {offPeakLines.map((l) => <p key={l}>{l}</p>)}
               </div>
               <p className="text-sm text-foreground/60 mb-6">Per bay, up to 2 guests</p>
               <a href={hubUrl(tenant, "/")} className="block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors bg-accent hover:bg-accent/90 text-accent-foreground">
@@ -201,9 +204,7 @@ const MarketingHome = () => {
                 </span>
               </div>
               <div className="text-sm text-foreground/60 mb-2 space-y-0.5">
-                <p>Mon–Fri 4:00pm – 11:00pm</p>
-                <p>Sat–Sun 10:00am – 11:00pm</p>
-                <p>Public holidays all day</p>
+                {peakLines.map((l) => <p key={l}>{l}</p>)}
               </div>
               <p className="text-sm text-foreground/60 mb-6">Per bay, up to 2 guests</p>
               <a href={hubUrl(tenant, "/")} className="block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors bg-accent hover:bg-accent/90 text-accent-foreground">
@@ -301,25 +302,13 @@ const MarketingHome = () => {
 
 const PriceCard = ({
   tier,
-  rate,
-  price,
-  tag,
-  perks,
-  highlight,
-  subtle,
-  info,
   joinHref,
 }: {
-  tier: string;
-  rate: string;
-  price: string;
-  tag: string;
-  perks: string[];
-  highlight?: boolean;
-  subtle?: boolean;
-  info?: string;
+  tier: MarketingTier;
   joinHref: string;
-}) => (
+}) => {
+  const { name, rate, price, tag, perks, highlight, subtle, info, badge } = tier;
+  return (
   <div
     className={`relative rounded-2xl p-7 border transition-all hover:shadow-lg ${
       highlight
@@ -329,9 +318,9 @@ const PriceCard = ({
           : "border-border bg-card text-card-foreground"
     }`}
   >
-    {highlight && (
-      <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-accent-foreground text-xs font-display uppercase tracking-wider px-3 py-1 rounded-full">
-        Most Popular
+    {highlight && badge && (
+      <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap bg-accent text-accent-foreground text-xs font-display uppercase tracking-wider px-3 py-1 rounded-full">
+        {badge}
       </span>
     )}
     {info && (
@@ -351,7 +340,7 @@ const PriceCard = ({
       </TooltipProvider>
     )}
     <p className="text-xs font-bold uppercase tracking-wider mb-2 text-foreground/60">{tag}</p>
-    <h3 className={`font-display text-3xl uppercase tracking-wide mb-1 ${subtle ? "text-foreground/80" : ""}`}>{tier}</h3>
+    <h3 className={`font-display text-3xl uppercase tracking-wide mb-1 ${subtle ? "text-foreground/80" : ""}`}>{name}</h3>
     <div className="mb-5">
       <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold bg-accent/10 text-accent border border-accent/20">
         <Clock className="h-3.5 w-3.5" />

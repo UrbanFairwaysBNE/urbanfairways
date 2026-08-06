@@ -106,7 +106,11 @@ const Membership = () => {
   };
 
   const continueSubscribe = async (tier: PricingTier) => {
-    
+    if (!tier.stripe_price_id) {
+      toast.error("Subscription not available for this tier");
+      return;
+    }
+
     // Check if user has a saved card - if not, show dialog
     if (!savedCard && !isLoadingSavedCard) {
       setPendingTier(tier);

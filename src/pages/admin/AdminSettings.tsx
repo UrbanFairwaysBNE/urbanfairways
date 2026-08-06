@@ -1127,9 +1127,26 @@ export default function AdminSettings() {
 
           {/* Pricing Settings */}
           <TabsContent value="pricing" className="space-y-4">
+            <CollapsibleSection
+              title="Pricing"
+              description="Membership weekly fees, member hourly rates and casual peak / off-peak rates"
+              icon={DollarSign}
+            >
+              <PricingRatesSettings />
+            </CollapsibleSection>
+
+            <CollapsibleSection
+              title="Prepaid Packs"
+              description="Prepaid hour packs customers can buy or gift (separate to $ credit)"
+              icon={Gift}
+            >
+              <PackProductsSettings />
+            </CollapsibleSection>
+
             <CollapsibleSection title="Public Holidays" description="Manage public holiday dates for peak pricing">
               <PublicHolidaysSection />
             </CollapsibleSection>
+
 
             <CollapsibleSection title="Customer Overrides" description="Set custom hourly rates for specific customers (overrides tier pricing)">
               <Card>

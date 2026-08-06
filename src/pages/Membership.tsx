@@ -229,12 +229,12 @@ const Membership = () => {
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="text-orange-600 border-orange-300">Peak</Badge>
                   <span className="font-semibold">${peakRate}/hr</span>
-                  <span className="text-sm text-muted-foreground">(Fri-Sun, Mon-Thu 4pm+)</span>
+                  <span className="text-sm text-muted-foreground">(Mon–Fri from 4pm, Sat–Sun from 10am)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="text-green-600 border-green-300">Off-Peak</Badge>
                   <span className="font-semibold">${offPeakRate}/hr</span>
-                  <span className="text-sm text-muted-foreground">(Mon-Thu before 4pm)</span>
+                  <span className="text-sm text-muted-foreground">(Mon–Fri 5:30am–4pm, Sat–Sun 5:30am–10am)</span>
                 </div>
               </div>
             </CardContent>

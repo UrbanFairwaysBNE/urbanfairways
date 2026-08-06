@@ -182,7 +182,7 @@ const MarketingHome = () => {
                   {offPeakLabel ?? "—"}/hr
                 </span>
               </div>
-              <p className="text-sm text-foreground/60 mb-2">Off-peak hours</p>
+              <p className="text-sm text-foreground/60 mb-2">Mon–Fri 5:30am–4pm, Sat–Sun 5:30am–10am</p>
               <p className="text-sm text-foreground/60 mb-6">Per bay, up to 4 players</p>
               <a href={hubUrl(tenant, "/")} className="block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors bg-accent hover:bg-accent/90 text-accent-foreground">
                 Book Now
@@ -197,7 +197,7 @@ const MarketingHome = () => {
                   {peakLabel ?? "—"}/hr
                 </span>
               </div>
-              <p className="text-sm text-foreground/60 mb-2">Peak hours</p>
+              <p className="text-sm text-foreground/60 mb-2">Mon–Fri from 4pm, Sat–Sun from 10am</p>
               <p className="text-sm text-foreground/60 mb-6">Per bay, up to 4 players</p>
               <a href={hubUrl(tenant, "/")} className="block text-center font-display uppercase tracking-wide text-sm px-5 py-3 rounded-md transition-colors bg-accent hover:bg-accent/90 text-accent-foreground">
                 Book Now

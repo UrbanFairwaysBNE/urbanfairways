@@ -328,6 +328,43 @@ export const PricingRatesSettings = () => {
           casual.map(renderCasual)
         )}
       </section>
+
+      <AlertDialog open={!!confirmRow} onOpenChange={(o) => !o && setConfirmRow(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Change the {confirmRow?.display_name} weekly fee?
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-left">
+                <p>
+                  This changes the weekly fee from{" "}
+                  <strong>${str(confirmRow?.weekly_subscription_price ?? null) || "0"}</strong> to{" "}
+                  <strong>${confirmRow ? draft[confirmRow.id]?.weekly || "0" : ""}</strong>.
+                </p>
+                <p>
+                  <strong>Existing members are not grandfathered.</strong> Every current{" "}
+                  {confirmRow?.display_name} member will move to the new price at their next billing
+                  date, so all members on this tier pay the same amount.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                const row = confirmRow;
+                setConfirmRow(null);
+                if (row) save(row);
+              }}
+            >
+              Yes, update all members
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

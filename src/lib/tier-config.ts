@@ -21,11 +21,13 @@ export interface TierConfig {
   grants_range_access: boolean;
   single_bay_at_peak: boolean;
   is_default: boolean;
+  /** Tier requires eligibility verification (e.g. frontline workers). */
+  requires_verification: boolean;
 }
 
 /** Columns to select when loading tiers from `pricing_config`. */
 export const TIER_SELECT =
-  "id, tier, display_name, hourly_rate, off_peak_hourly_rate, weekly_subscription_price, stripe_product_id, stripe_price_id, display_order, is_subscription, description, features, restrictions, restricted_to_off_peak, grants_league_access, grants_range_access, single_bay_at_peak, is_default";
+  "id, tier, display_name, hourly_rate, off_peak_hourly_rate, weekly_subscription_price, stripe_product_id, stripe_price_id, display_order, is_subscription, description, features, restrictions, restricted_to_off_peak, grants_league_access, grants_range_access, single_bay_at_peak, is_default, requires_verification";
 
 /** Normalise a raw `pricing_config` row into a TierConfig. */
 export function normaliseTier(row: Record<string, unknown>): TierConfig {
@@ -57,6 +59,7 @@ export function normaliseTier(row: Record<string, unknown>): TierConfig {
     grants_range_access: !!row.grants_range_access,
     single_bay_at_peak: !!row.single_bay_at_peak,
     is_default: !!row.is_default,
+    requires_verification: !!row.requires_verification,
   };
 }
 

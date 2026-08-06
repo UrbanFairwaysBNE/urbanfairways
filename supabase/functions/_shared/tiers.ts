@@ -13,11 +13,12 @@ export interface TierRow {
   grants_range_access: boolean;
   is_subscription: boolean;
   is_default: boolean;
+  requires_verification: boolean;
   display_order: number;
 }
 
 export const TIER_SELECT =
-  "tier, display_name, hourly_rate, weekly_subscription_price, off_peak_hourly_rate, restricted_to_off_peak, single_bay_at_peak, grants_league_access, grants_range_access, is_subscription, is_default, display_order";
+  "tier, display_name, hourly_rate, weekly_subscription_price, off_peak_hourly_rate, restricted_to_off_peak, single_bay_at_peak, grants_league_access, grants_range_access, is_subscription, is_default, requires_verification, display_order";
 
 /** Load every configured tier. Returns [] for a venue with no pricing yet. */
 export async function loadTiers(
@@ -38,6 +39,7 @@ export async function loadTiers(
     grants_range_access: !!r.grants_range_access,
     is_subscription: !!r.is_subscription,
     is_default: !!r.is_default,
+    requires_verification: !!r.requires_verification,
     display_order: Number(r.display_order ?? 0),
   }));
 }

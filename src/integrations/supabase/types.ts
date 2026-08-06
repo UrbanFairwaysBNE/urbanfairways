@@ -2068,11 +2068,16 @@ export type Database = {
           hourly_rate: number
           id: string
           is_default: boolean
+          is_highlighted: boolean
           is_subscription: boolean
+          marketing_badge: string | null
+          marketing_note: string | null
+          marketing_tag: string | null
           off_peak_hourly_rate: number | null
           requires_verification: boolean
           restricted_to_off_peak: boolean
           restrictions: string | null
+          show_on_marketing: boolean
           single_bay_at_peak: boolean
           stripe_price_id: string | null
           stripe_product_id: string | null
@@ -2091,11 +2096,16 @@ export type Database = {
           hourly_rate: number
           id?: string
           is_default?: boolean
+          is_highlighted?: boolean
           is_subscription?: boolean
+          marketing_badge?: string | null
+          marketing_note?: string | null
+          marketing_tag?: string | null
           off_peak_hourly_rate?: number | null
           requires_verification?: boolean
           restricted_to_off_peak?: boolean
           restrictions?: string | null
+          show_on_marketing?: boolean
           single_bay_at_peak?: boolean
           stripe_price_id?: string | null
           stripe_product_id?: string | null
@@ -2114,11 +2124,16 @@ export type Database = {
           hourly_rate?: number
           id?: string
           is_default?: boolean
+          is_highlighted?: boolean
           is_subscription?: boolean
+          marketing_badge?: string | null
+          marketing_note?: string | null
+          marketing_tag?: string | null
           off_peak_hourly_rate?: number | null
           requires_verification?: boolean
           restricted_to_off_peak?: boolean
           restrictions?: string | null
+          show_on_marketing?: boolean
           single_bay_at_peak?: boolean
           stripe_price_id?: string | null
           stripe_product_id?: string | null

@@ -155,16 +155,26 @@ export const PricingRatesSettings = () => {
     const dirty = isDirty(row);
     return (
       <Card key={row.id}>
-        <CardContent className="pt-5 space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-semibold">{row.display_name}</span>
-            {row.requires_verification && (
-              <Badge variant="outline" className="text-xs">Verification required</Badge>
-            )}
-            {!row.stripe_price_id && (
-              <Badge variant="secondary" className="text-xs">Stripe not linked</Badge>
-            )}
-          </div>
+        <Collapsible>
+          <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 p-4 text-left [&[data-state=open]>svg]:rotate-180">
+            <div className="flex flex-wrap items-center gap-2 min-w-0">
+              <span className="font-semibold">{row.display_name}</span>
+              <span className="text-sm text-muted-foreground">
+                ${d.weekly || "0"}/wk · ${d.hourly || "0"}/hr
+              </span>
+              {row.requires_verification && (
+                <Badge variant="outline" className="text-xs">Verification required</Badge>
+              )}
+              {!row.stripe_price_id && (
+                <Badge variant="secondary" className="text-xs">Stripe not linked</Badge>
+              )}
+              {dirty && <Badge className="text-xs">Unsaved</Badge>}
+            </div>
+            <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform" />
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+        <CardContent className="pt-0 space-y-4">
+
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">

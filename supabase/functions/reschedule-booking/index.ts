@@ -10,20 +10,18 @@ const corsHeaders = {
 
 /**
  * Determines if a given date and time is during peak hours.
- * Peak times: Friday-Sunday (all day) + Monday-Thursday (4pm onwards)
+ * Off-peak: Mon-Fri 5:30am-4:00pm, Sat-Sun 5:30am-10:00am; everything else peak.
  */
 function isPeakTime(dateStr: string, startTime: string): boolean {
+  // Off-peak: Mon-Fri 5:30am-4:00pm, Sat-Sun 5:30am-10:00am. Everything else is peak.
   const date = new Date(dateStr + "T00:00:00");
   const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
-  const hour = parseInt(startTime.split(":")[0], 10);
-  
-  // Weekend (Friday = 5, Saturday = 6, Sunday = 0) is always peak
-  if (dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6) {
-    return true;
-  }
-  
-  // Monday-Thursday: peak if 4pm (16:00) or later
-  return hour >= 16;
+  const [h, m] = startTime.split(":").map(Number);
+  const minutes = h * 60 + (m || 0);
+  const weekend = dayOfWeek === 0 || dayOfWeek === 6;
+  const start = 5 * 60 + 30;
+  const end = weekend ? 10 * 60 : 16 * 60;
+  return !(minutes >= start && minutes < end);
 }
 
 /**

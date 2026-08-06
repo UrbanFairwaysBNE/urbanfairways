@@ -31,9 +31,10 @@ const MarketingStaffedHours = () => {
             Staffed Hours
           </h1>
           <p className="mt-4 text-primary-foreground/80 max-w-2xl mx-auto">
-            Open every day during <span className="text-accent-soft font-semibold">extended access hours</span> for
-            casual customers and members.
+            Open every day with <span className="text-accent-soft font-semibold">automated access</span>.
+            Staffed hours may be added periodically.
           </p>
+
         </div>
       </section>
 

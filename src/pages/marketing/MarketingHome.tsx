@@ -370,7 +370,8 @@ const PriceCard = ({
       Join
     </a>
   </div>
-);
+  );
+};
 
 
 export default MarketingHome;

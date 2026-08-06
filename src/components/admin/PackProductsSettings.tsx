@@ -270,7 +270,9 @@ export const PackProductsSettings = () => {
               </AlertDialog>
             </div>
           </CardContent>
-        </Card>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
       ))}
 
       <Button variant="outline" onClick={addPack}>

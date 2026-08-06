@@ -23,11 +23,17 @@ export interface TierConfig {
   is_default: boolean;
   /** Tier requires eligibility verification (e.g. frontline workers). */
   requires_verification: boolean;
+  /** Marketing display copy (website + app tier cards). */
+  marketing_tag: string | null;
+  marketing_badge: string | null;
+  marketing_note: string | null;
+  is_highlighted: boolean;
+  show_on_marketing: boolean;
 }
 
 /** Columns to select when loading tiers from `pricing_config`. */
 export const TIER_SELECT =
-  "id, tier, display_name, hourly_rate, off_peak_hourly_rate, weekly_subscription_price, stripe_product_id, stripe_price_id, display_order, is_subscription, description, features, restrictions, restricted_to_off_peak, grants_league_access, grants_range_access, single_bay_at_peak, is_default, requires_verification";
+  "id, tier, display_name, hourly_rate, off_peak_hourly_rate, weekly_subscription_price, stripe_product_id, stripe_price_id, display_order, is_subscription, description, features, restrictions, restricted_to_off_peak, grants_league_access, grants_range_access, single_bay_at_peak, is_default, requires_verification, marketing_tag, marketing_badge, marketing_note, is_highlighted, show_on_marketing";
 
 /** Normalise a raw `pricing_config` row into a TierConfig. */
 export function normaliseTier(row: Record<string, unknown>): TierConfig {
@@ -60,6 +66,11 @@ export function normaliseTier(row: Record<string, unknown>): TierConfig {
     single_bay_at_peak: !!row.single_bay_at_peak,
     is_default: !!row.is_default,
     requires_verification: !!row.requires_verification,
+    marketing_tag: (row.marketing_tag as string | null) ?? null,
+    marketing_badge: (row.marketing_badge as string | null) ?? null,
+    marketing_note: (row.marketing_note as string | null) ?? null,
+    is_highlighted: !!row.is_highlighted,
+    show_on_marketing: row.show_on_marketing === undefined ? true : !!row.show_on_marketing,
   };
 }
 

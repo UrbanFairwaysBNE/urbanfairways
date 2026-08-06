@@ -19,6 +19,35 @@ export const OFF_PEAK_WINDOWS: Record<number, { start: string; end: string }> = 
   6: { start: "05:30", end: "10:00" }, // Saturday
 };
 
+/** Format "16:00" as "4:00pm". */
+export function formatClock(time: string): string {
+  const [h, m] = time.split(":").map(Number);
+  const suffix = h >= 12 ? "pm" : "am";
+  const hour12 = h % 12 === 0 ? 12 : h % 12;
+  return `${hour12}:${String(m ?? 0).padStart(2, "0")}${suffix}`;
+}
+
+/** Off-peak windows rendered as display lines, e.g. ["Mon–Fri 5:30am – 4:00pm", ...]. */
+export function offPeakLines(): string[] {
+  const week = OFF_PEAK_WINDOWS[1];
+  const weekend = OFF_PEAK_WINDOWS[6];
+  return [
+    `Mon–Fri ${formatClock(week.start)} – ${formatClock(week.end)}`,
+    `Sat–Sun ${formatClock(weekend.start)} – ${formatClock(weekend.end)}`,
+  ];
+}
+
+/** Peak windows rendered as display lines, given the venue closing time. */
+export function peakLines(closeTime = "23:00"): string[] {
+  const week = OFF_PEAK_WINDOWS[1];
+  const weekend = OFF_PEAK_WINDOWS[6];
+  return [
+    `Mon–Fri ${formatClock(week.end)} – ${formatClock(closeTime)}`,
+    `Sat–Sun ${formatClock(weekend.end)} – ${formatClock(closeTime)}`,
+    "Public holidays all day",
+  ];
+}
+
 /** Human-readable summary of the off-peak windows, for UI copy. */
 export const OFF_PEAK_SUMMARY = "Mon–Fri 5:30am–4:00pm, Sat–Sun 5:30am–10:00am";
 /** Human-readable summary of peak hours, for UI copy. */

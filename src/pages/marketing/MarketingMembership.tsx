@@ -102,7 +102,7 @@ const MarketingMembership = () => {
     <section className="py-10 sm:py-20">
       <div className="container mx-auto px-4 max-w-3xl text-center">
         <p className="text-lg text-foreground/80 leading-relaxed">
-          Pay a simple weekly fee to unlock your member hourly rate. Book anytime and play at a fraction of the casual price. No lock-in contracts. Cancel any time.
+          Pay a simple weekly fee to unlock your member hourly rate and play at a fraction of the casual price. Choose the membership that suits your lifestyle and the times you like to play. No lock-in contracts. Cancel any time.
         </p>
       </div>
     </section>

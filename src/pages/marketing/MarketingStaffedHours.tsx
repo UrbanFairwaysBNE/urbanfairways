@@ -3,16 +3,24 @@ import { Clock, Phone, AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { useTenant } from "@/config/tenant";
-
-const hours = [
-  { day: "Monday, Thursday", time: "4PM – 9PM" },
-  { day: "Friday", time: "2PM – 9PM" },
-  { day: "Saturday", time: "11AM – 9PM" },
-  { day: "Sunday", time: "11AM – 5PM" },
-];
+import { useOperatingHours } from "@/hooks/useOperatingHours";
+import { useStaffedHours, groupDayRanges } from "@/hooks/useStaffedHours";
 
 const MarketingStaffedHours = () => {
   const { tenant } = useTenant();
+  const { hours: operating, isLoading: loadingOperating } = useOperatingHours();
+  const { staffedRanges, hasStaffedHours, isLoading: loadingStaffed } = useStaffedHours();
+
+  const openRanges = groupDayRanges(
+    operating
+      .filter((h) => h.is_open)
+      .map((h) => ({
+        day_of_week: h.day_of_week,
+        start_time: h.open_time,
+        end_time: h.close_time,
+      }))
+  );
+
   return (
     <MarketingLayout>
     <Seo title={`Staffed Hours & Opening Times | ${tenant.venue_name}`} description={`Current staffed hours and automated bay access times for ${tenant.venue_name} indoor golf.`} path="/staffed-hours" />
@@ -23,7 +31,7 @@ const MarketingStaffedHours = () => {
             Staffed Hours
           </h1>
           <p className="mt-4 text-primary-foreground/80 max-w-2xl mx-auto">
-            Open every day during <span className="text-accent font-semibold">extended access hours</span> for
+            Open every day during <span className="text-accent-soft font-semibold">extended access hours</span> for
             casual customers and members.
           </p>
         </div>
@@ -37,8 +45,23 @@ const MarketingStaffedHours = () => {
               <Clock className="h-6 w-6 text-accent" />
               <h2 className="font-display text-2xl uppercase tracking-wide">Opening Hours</h2>
             </div>
-            <p className="text-4xl font-display tracking-wide text-primary">Extended Hours</p>
-            <p className="text-muted-foreground mt-2">Every day, for casual customers and members*.</p>
+            {loadingOperating ? (
+              <p className="text-muted-foreground">Loading…</p>
+            ) : openRanges.length ? (
+              <ul className="divide-y divide-border">
+                {openRanges.map((h) => (
+                  <li key={h.day} className="flex items-center justify-between py-3">
+                    <span className="font-medium">{h.day}</span>
+                    <span className="font-display tracking-wide text-primary">{h.time}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-muted-foreground">Hours coming soon.</p>
+            )}
+            <p className="text-muted-foreground mt-4 text-sm">
+              Automated access for casual customers and members*.
+            </p>
           </div>
 
           <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
@@ -46,17 +69,27 @@ const MarketingStaffedHours = () => {
               <Clock className="h-6 w-6 text-accent" />
               <h2 className="font-display text-2xl uppercase tracking-wide">Staffed Hours</h2>
             </div>
-            <ul className="divide-y divide-border">
-              {hours.map((h) => (
-                <li key={h.day} className="flex items-center justify-between py-3">
-                  <span className="font-medium">{h.day}</span>
-                  <span className="font-display tracking-wide text-primary">{h.time}</span>
-                </li>
-              ))}
-            </ul>
+            {loadingStaffed ? (
+              <p className="text-muted-foreground">Loading…</p>
+            ) : hasStaffedHours ? (
+              <ul className="divide-y divide-border">
+                {staffedRanges.map((h) => (
+                  <li key={h.day} className="flex items-center justify-between py-3">
+                    <span className="font-medium">{h.day}</span>
+                    <span className="font-display tracking-wide text-primary">{h.time}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-muted-foreground">
+                Our centre is currently fully automated — no staffed hours are scheduled. Tech
+                support is always available over the phone.
+              </p>
+            )}
           </div>
         </div>
       </section>
+
 
       {/* Automated centre note */}
       <section className="py-8 sm:py-12 bg-muted/40">

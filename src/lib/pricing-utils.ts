@@ -5,24 +5,43 @@
 import { TierConfig, findTier, getDefaultTier } from "@/lib/tier-config";
 
 /**
+ * Venue off-peak windows (Brisbane local time), by day of week.
+ * Off-peak: Mon–Fri 5:30am–4:00pm, Sat–Sun 5:30am–10:00am.
+ * Everything outside these windows (and all public holidays) is peak.
+ */
+export const OFF_PEAK_WINDOWS: Record<number, { start: string; end: string }> = {
+  0: { start: "05:30", end: "10:00" }, // Sunday
+  1: { start: "05:30", end: "16:00" },
+  2: { start: "05:30", end: "16:00" },
+  3: { start: "05:30", end: "16:00" },
+  4: { start: "05:30", end: "16:00" },
+  5: { start: "05:30", end: "16:00" },
+  6: { start: "05:30", end: "10:00" }, // Saturday
+};
+
+/** Human-readable summary of the off-peak windows, for UI copy. */
+export const OFF_PEAK_SUMMARY = "Mon–Fri 5:30am–4:00pm, Sat–Sun 5:30am–10:00am";
+/** Human-readable summary of peak hours, for UI copy. */
+export const PEAK_SUMMARY = "Mon–Fri from 4:00pm, Sat–Sun from 10:00am";
+
+function toMinutes(time: string): number {
+  const [h, m] = time.split(":").map(Number);
+  return h * 60 + (m || 0);
+}
+
+/**
  * Determines if a given date and time is during peak hours.
- * Peak: Saturday & Sunday (all day) + Monday-Friday from 4pm.
- * Off-peak: Monday-Friday before 4pm.
+ * Off-peak: Mon–Fri 5:30am–4:00pm, Sat–Sun 5:30am–10:00am. Everything else is peak.
  * Public holidays are treated as peak all day (pass `isPublicHoliday`).
  */
 export function isPeakTime(date: Date, startTime: string, isPublicHoliday = false): boolean {
   if (isPublicHoliday) return true;
 
-  const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
-  const hour = parseInt(startTime.split(":")[0], 10);
+  const window = OFF_PEAK_WINDOWS[date.getDay()];
+  if (!window) return true;
 
-  // Weekend (Saturday = 6, Sunday = 0) is always peak
-  if (dayOfWeek === 0 || dayOfWeek === 6) {
-    return true;
-  }
-
-  // Monday-Friday: peak if 4pm (16:00) or later
-  return hour >= 16;
+  const minutes = toMinutes(startTime);
+  return !(minutes >= toMinutes(window.start) && minutes < toMinutes(window.end));
 }
 
 /**
@@ -32,6 +51,7 @@ export function isPeakTime(date: Date, startTime: string, isPublicHoliday = fals
 export function isOffPeakTime(date: Date, startTime: string, isPublicHoliday = false): boolean {
   return !isPeakTime(date, startTime, isPublicHoliday);
 }
+
 
 /** Add a (possibly fractional) number of hours to a HH:MM time string. */
 export function addDurationToTime(startTime: string, durationHours: number): string {

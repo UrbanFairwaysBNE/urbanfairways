@@ -468,15 +468,15 @@ export default function AdminTimetable() {
   // Calculate position of current time indicator
   const getCurrentTimePosition = () => {
     // Use currentTime state to ensure component re-renders when time updates
-    const hours = currentTime.getHours();
-    const minutes = currentTime.getMinutes();
-    
-    // Only show during operating hours (5am - 11pm)
-    if (hours < OPERATING_START_HOUR || hours >= OPERATING_END_HOUR) return null;
-    
+    const nowMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+
+    // Only show during the day's operating hours
+    if (nowMinutes < dayStartMinutes || nowMinutes >= dayEndMinutes) return null;
+
     // Calculate position: each 30-min slot is SLOT_HEIGHT pixels
-    const minutesSinceStart = (hours - OPERATING_START_HOUR) * 60 + minutes;
+    const minutesSinceStart = nowMinutes - dayStartMinutes;
     const position = (minutesSinceStart / 30) * SLOT_HEIGHT;
+
     
     return position;
   };

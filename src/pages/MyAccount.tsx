@@ -457,7 +457,8 @@ const MyAccount = () => {
             </Card>
           )}
 
-          {/* Membership Tier */}
+          {/* Membership Tier — corporate accounts bill through their company wallet */}
+          {!corporateAccount && (
           <Card>
             <CardHeader>
               <div className="flex items-center gap-3">

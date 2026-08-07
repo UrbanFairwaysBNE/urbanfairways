@@ -172,7 +172,9 @@ export default function AdminCustomers() {
 
   // Make admin state
   const [isTogglingAdmin, setIsTogglingAdmin] = useState(false);
+  const [corporateMap, setCorporateMap] = useState<Record<string, { company: string; role: "owner" | "staff" }>>({});
   const [corporateCustomer, setCorporateCustomer] = useState<Customer | null>(null);
+
   const [corporateName, setCorporateName] = useState("");
   const [isSavingCorporate, setIsSavingCorporate] = useState(false);
 
@@ -237,8 +239,28 @@ export default function AdminCustomers() {
 
     setCustomers(customersWithCounts);
     setTotalCount(customersWithCounts.length);
+
+    // Corporate owners + linked staff, for the "Corporate" indicator
+    const [{ data: accounts }, { data: staff }] = await Promise.all([
+      supabase.from("corporate_accounts").select("id, company_name, owner_user_id, is_active"),
+      supabase.from("corporate_staff").select("corporate_id, user_id, status"),
+    ]);
+    const map: Record<string, { company: string; role: "owner" | "staff" }> = {};
+    const byId: Record<string, string> = {};
+    (accounts || []).forEach((a: any) => {
+      byId[a.id] = a.company_name;
+      if (a.is_active !== false) map[a.owner_user_id] = { company: a.company_name, role: "owner" };
+    });
+    (staff || []).forEach((s: any) => {
+      if (s.user_id && s.status === "active" && byId[s.corporate_id] && !map[s.user_id]) {
+        map[s.user_id] = { company: byId[s.corporate_id], role: "staff" };
+      }
+    });
+    setCorporateMap(map);
+
     setIsLoading(false);
   };
+
 
   const filteredCustomers = useMemo(() => {
     return customers.filter(customer => {
@@ -1286,9 +1308,17 @@ export default function AdminCustomers() {
                       {visibleColumns.map((col) => (
                         <TableCell key={col.key}>
                           {col.key === "membership_tier" ? (
-                            <Badge className={getMembershipColor(customer.membership_tier)}>
-                              {customer.membership_tier || "Casual"}
-                            </Badge>
+                            <div className="flex flex-wrap items-center gap-1">
+                              <Badge className={getMembershipColor(customer.membership_tier)}>
+                                {customer.membership_tier || "Casual"}
+                              </Badge>
+                              {corporateMap[customer.user_id] && (
+                                <Badge variant="outline" className="border-brand-accent text-brand-accent">
+                                  {corporateMap[customer.user_id].role === "owner" ? "Corporate" : "Corp staff"} · {corporateMap[customer.user_id].company}
+                                </Badge>
+                              )}
+                            </div>
+
                           ) : col.key === "created_at" ? (
                             format(new Date(customer.created_at), "MMM d, yyyy")
                           ) : col.key === "phone" ? (
@@ -1431,9 +1461,17 @@ export default function AdminCustomers() {
                     <h3 className="font-medium text-lg truncate">
                       {selectedCustomer.first_name} {selectedCustomer.last_name}
                     </h3>
-                    <Badge className={getMembershipColor(selectedCustomer.membership_tier)}>
-                      {selectedCustomer.membership_tier || "Casual"}
-                    </Badge>
+                    <div className="flex flex-wrap items-center gap-1">
+                      <Badge className={getMembershipColor(selectedCustomer.membership_tier)}>
+                        {selectedCustomer.membership_tier || "Casual"}
+                      </Badge>
+                      {corporateMap[selectedCustomer.user_id] && (
+                        <Badge variant="outline" className="border-brand-accent text-brand-accent">
+                          {corporateMap[selectedCustomer.user_id].role === "owner" ? "Corporate" : "Corp staff"} · {corporateMap[selectedCustomer.user_id].company}
+                        </Badge>
+                      )}
+                    </div>
+
                   </div>
                   {isMobile ? (
                     <Button

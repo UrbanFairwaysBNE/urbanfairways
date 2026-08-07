@@ -19,18 +19,19 @@ import { EmailPreviewFrame } from "@/components/admin/EmailPreviewFrame";
 
 // Kept in sync with supabase/functions/_shared/email-wrapper.ts DEFAULTS.
 const buildDefaultHeaderHtml = (t: TenantSettings) => `<tr>
-  <td align="center" style="background-color:#1C1F24; padding:18px; border-radius:16px 16px 0 0;">
+  <td align="center" style="background-color:#2E3032; padding:22px; border-radius:16px 16px 0 0;">
     <img
-      src="${bookingUrl(t, "/__l5e/assets-v1/9691088f-3b4b-41b4-bcb3-d4cd4de1540c/venue-logo-email.png")}"
-      width="140"
+      src="https://urbanfairways.lovable.app/__l5e/assets-v1/95842b02-e160-42b4-a144-568773f3de07/uf-email-logo.png"
+      width="260"
       alt="${t.venue_name}"
-      style="display:block; width:140px; height:auto; border:0;"
+      style="display:block; width:260px; max-width:80%; height:auto; border:0;"
     />
   </td>
 </tr>`;
 
 const buildDefaultFooterHtml = (t: TenantSettings) => `<tr>
-  <td style="background-color:#1C1F24; padding:22px; border-radius:0 0 16px 16px;">
+  <td style="background-color:#2E3032; padding:22px; border-radius:0 0 16px 16px;">
+
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr>
         <td align="center" style="padding-bottom:14px;">

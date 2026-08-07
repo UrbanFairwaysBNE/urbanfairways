@@ -39,10 +39,13 @@ const NEUTRAL_TENANT: TenantConfig = {
 // seeded by the email_layout migration. ---
 export function defaultHeaderHtml(tenant: TenantConfig = NEUTRAL_TENANT): string {
   return `<tr>
-  <td align="center" style="background-color:#2F3134; padding:18px; border-radius:16px 16px 0 0;">
-    <div style="font-family:Archivo, Impact, Arial Black, sans-serif; font-size:26px; letter-spacing:0.5px; color:#FFFFFF;">
-      ${tenant.venue_name}
-    </div>
+  <td align="center" style="background-color:#2E3032; padding:22px; border-radius:16px 16px 0 0;">
+    <img
+      src="https://urbanfairways.lovable.app/__l5e/assets-v1/95842b02-e160-42b4-a144-568773f3de07/uf-email-logo.png"
+      width="260"
+      alt="${tenant.venue_name}"
+      style="display:block; width:260px; max-width:80%; height:auto; border:0;"
+    />
   </td>
 </tr>`;
 }
@@ -80,7 +83,7 @@ export function defaultFooterHtml(tenant: TenantConfig = NEUTRAL_TENANT): string
     : "";
 
   return `<tr>
-  <td style="background-color:#2F3134; padding:22px; border-radius:0 0 16px 16px;">
+  <td style="background-color:#2E3032; padding:22px; border-radius:0 0 16px 16px;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
       ${socialsRow}
       <tr>

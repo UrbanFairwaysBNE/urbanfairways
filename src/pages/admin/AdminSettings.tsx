@@ -135,6 +135,30 @@ const TEMPLATE_TAGS: Record<string, { tag: string; description: string }[]> = {
     { tag: "{handicap}", description: "Starting handicap that was applied (e.g. 12.5 or 'Combo (auto)')" },
     { tag: "{guide_url}", description: "Link to the league player guide" },
   ],
+  pack_purchase: [
+    { tag: "{first_name}", description: "Customer's first name" },
+    { tag: "{last_name}", description: "Customer's last name" },
+    { tag: "{email}", description: "Customer's email address" },
+    { tag: "{pack_name}", description: "Name of the pack purchased (e.g. Practice Pack)" },
+    { tag: "{hours}", description: "Hours included in the pack (e.g. 5)" },
+    { tag: "{price}", description: "Amount paid (e.g. $150.00)" },
+    { tag: "{validity_days}", description: "Validity period in days (e.g. 90)" },
+    { tag: "{expiry_date}", description: "Date the hours expire (e.g. 5 November 2026)" },
+    { tag: "{balance_hours}", description: "Total prepaid hours balance after purchase" },
+  ],
+  corporate_pack_purchase: [
+    { tag: "{first_name}", description: "Buyer's first name" },
+    { tag: "{last_name}", description: "Buyer's last name" },
+    { tag: "{email}", description: "Buyer's email address" },
+    { tag: "{company_name}", description: "Corporate account company name" },
+    { tag: "{company_line}", description: "Reads ' for Acme Pty Ltd' — blank if no company name" },
+    { tag: "{pack_name}", description: "Name of the corporate pack purchased" },
+    { tag: "{hours}", description: "Hours included in the pack (e.g. 50)" },
+    { tag: "{price}", description: "Amount paid (e.g. $1000.00)" },
+    { tag: "{validity_days}", description: "Validity period in days (e.g. 365)" },
+    { tag: "{expiry_date}", description: "Date the hours expire" },
+    { tag: "{balance_hours}", description: "Shared company wallet balance after purchase" },
+  ],
 };
 
 

@@ -528,6 +528,10 @@ const MyAccount = () => {
           {/* Prepaid Hour Packs */}
           <PrepaidPacksCard />
 
+          {/* Corporate staff access */}
+          <CorporateStaffCard />
+
+
           {/* Redeem Gift Card */}
 
           <Card>

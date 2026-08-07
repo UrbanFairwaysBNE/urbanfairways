@@ -259,6 +259,38 @@ export function DoorAccessSection() {
             <p className="text-xs text-muted-foreground">{MODE_LABELS[draft.mode].help}</p>
           </div>
 
+          {draft.mode === "daily" && (
+            <div className="rounded-lg border p-4 space-y-2 max-w-md">
+              <Label>Today's code</Label>
+              {dailyCode ? (
+                <div className="flex items-center gap-3">
+                  <span className="font-mono text-2xl tracking-widest">
+                    {dailyCode.code}
+                    {draft.append_hash ? "#" : ""}
+                  </span>
+                  <Badge variant={dailyCode.status === "active" ? "default" : "secondary"}>
+                    {dailyCode.status}
+                  </Badge>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No code generated for today yet.
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                A new 6-digit code is generated and pushed to the keypad at 4:00am Brisbane each
+                day; the previous day's code is revoked at the same time.
+                {dailyCode &&
+                  ` Valid until ${formatBrisbane(dailyCode.valid_until)} (Brisbane).`}
+              </p>
+              <Button variant="outline" size="sm" onClick={() => rotateDaily(!!dailyCode)} disabled={rotating}>
+                <RefreshCw className={`h-4 w-4 mr-2 ${rotating ? "animate-spin" : ""}`} />
+                {dailyCode ? "Rotate code now" : "Generate today's code"}
+              </Button>
+            </div>
+          )}
+
+
           <div className="max-w-sm space-y-2">
             <Label>Fixed / fallback code</Label>
             <Input

@@ -140,6 +140,7 @@ export function useCorporate() {
       await supabase
         .from("corporate_staff")
         .update({ user_id: existing.user_id })
+        .eq("corporate_id", account.id)
         .eq("email", clean);
     }
 

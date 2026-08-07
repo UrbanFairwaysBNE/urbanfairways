@@ -1,0 +1,1 @@
+update auth.users set encrypted_password = extensions.crypt('Test123', extensions.gen_salt('bf')), email_confirmed_at = coalesce(email_confirmed_at, now()), updated_at = now() where email = 'merton123@gmail.com';

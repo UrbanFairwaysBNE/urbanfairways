@@ -753,9 +753,18 @@ Deno.serve(async (req) => {
         });
         break;
 
+      case "daily_ensure": // 4am cron / on-demand: rotate to today's code
+        result = await ensureDailyCode({ rotate: !!body.rotate });
+        break;
+
+      case "daily_get":
+        result = await getDailyCode();
+        break;
+
       case "sync":
         result = await syncAll();
         break;
+
 
       case "test": {
         const s = await getSettings();

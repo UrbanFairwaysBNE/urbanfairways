@@ -1308,9 +1308,17 @@ export default function AdminCustomers() {
                       {visibleColumns.map((col) => (
                         <TableCell key={col.key}>
                           {col.key === "membership_tier" ? (
-                            <Badge className={getMembershipColor(customer.membership_tier)}>
-                              {customer.membership_tier || "Casual"}
-                            </Badge>
+                            <div className="flex flex-wrap items-center gap-1">
+                              <Badge className={getMembershipColor(customer.membership_tier)}>
+                                {customer.membership_tier || "Casual"}
+                              </Badge>
+                              {corporateMap[customer.user_id] && (
+                                <Badge variant="outline" className="border-brand-accent text-brand-accent">
+                                  {corporateMap[customer.user_id].role === "owner" ? "Corporate" : "Corp staff"} · {corporateMap[customer.user_id].company}
+                                </Badge>
+                              )}
+                            </div>
+
                           ) : col.key === "created_at" ? (
                             format(new Date(customer.created_at), "MMM d, yyyy")
                           ) : col.key === "phone" ? (

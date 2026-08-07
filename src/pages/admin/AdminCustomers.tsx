@@ -237,8 +237,28 @@ export default function AdminCustomers() {
 
     setCustomers(customersWithCounts);
     setTotalCount(customersWithCounts.length);
+
+    // Corporate owners + linked staff, for the "Corporate" indicator
+    const [{ data: accounts }, { data: staff }] = await Promise.all([
+      supabase.from("corporate_accounts").select("id, company_name, owner_user_id, is_active"),
+      supabase.from("corporate_staff").select("corporate_id, user_id, status"),
+    ]);
+    const map: Record<string, { company: string; role: "owner" | "staff" }> = {};
+    const byId: Record<string, string> = {};
+    (accounts || []).forEach((a: any) => {
+      byId[a.id] = a.company_name;
+      if (a.is_active !== false) map[a.owner_user_id] = { company: a.company_name, role: "owner" };
+    });
+    (staff || []).forEach((s: any) => {
+      if (s.user_id && s.status === "active" && byId[s.corporate_id] && !map[s.user_id]) {
+        map[s.user_id] = { company: byId[s.corporate_id], role: "staff" };
+      }
+    });
+    setCorporateMap(map);
+
     setIsLoading(false);
   };
+
 
   const filteredCustomers = useMemo(() => {
     return customers.filter(customer => {

@@ -102,6 +102,9 @@ export function usePackHours(userId?: string | null) {
         return;
       }
 
+      // Staff see the company's lots too (RLS allows it via pack_wallet_owner)
+      const { data: walletOwner } = await supabase.rpc("pack_wallet_owner", { _user_id: uid });
+      const ownerFilter = walletOwner && walletOwner !== uid ? `,user_id.eq.${walletOwner}` : "";
 
       const [balanceRes, lotsRes, txRes] = await Promise.all([
         supabase.rpc("pack_hours_balance", { _user_id: uid }),
@@ -110,7 +113,7 @@ export function usePackHours(userId?: string | null) {
           .select(
             "id, product_name, hours_total, hours_remaining, expires_at, status, is_gift, redemption_code, recipient_name, purchased_at",
           )
-          .or(`user_id.eq.${uid},purchaser_user_id.eq.${uid}`)
+          .or(`user_id.eq.${uid},purchaser_user_id.eq.${uid}${ownerFilter}`)
           .neq("status", "pending_payment")
           .order("created_at", { ascending: false }),
         supabase

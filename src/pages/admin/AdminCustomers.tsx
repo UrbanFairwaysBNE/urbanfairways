@@ -120,6 +120,7 @@ const DEFAULT_COLUMNS: ColumnConfig[] = [
 
 export default function AdminCustomers() {
   const { isAdmin, isLoading: authLoading } = useAdminAuth();
+  const isMobile = useIsMobile();
   const { pricing } = usePricing();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();

@@ -352,9 +352,8 @@ serve(async (req) => {
       doorCode = (sysSettings as any)?.door_code || doorCode;
     }
 
-    const perBookingMode =
-      (doorSettings as any)?.mode === "per_booking" ||
-      (doorSettings as any)?.mode === "unstaffed_only";
+    const doorMode = (doorSettings as any)?.mode;
+    const perBookingMode = doorMode === "per_booking" || doorMode === "unstaffed_only";
 
     if (perBookingMode && notification_type !== "cancellation") {
       try {
@@ -375,7 +374,22 @@ serve(async (req) => {
       } catch (e) {
         console.error("[NOTIFY] Door code issue failed, using fallback:", e);
       }
+    } else if (doorMode === "daily" && notification_type !== "cancellation") {
+      // Daily rotating code — resolve (and if needed create) today's code.
+      try {
+        const { data: daily } = await supabaseClient.functions.invoke("door-code-manager", {
+          body: { action: "daily_ensure" },
+        });
+        if ((daily as any)?.code) {
+          doorCode = (doorSettings as any)?.append_hash
+            ? `${(daily as any).code}#`
+            : (daily as any).code;
+        }
+      } catch (e) {
+        console.error("[NOTIFY] Daily door code lookup failed, using fallback:", e);
+      }
     }
+
 
 
     // SMS-specific short date / 24h times (used by cancellation template)

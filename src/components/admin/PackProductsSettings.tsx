@@ -34,24 +34,29 @@ interface PackProduct {
   validity_days: number;
   is_active: boolean;
   display_order: number;
+  is_corporate: boolean;
 }
 
-const blankPack = (order: number): Omit<PackProduct, "id"> => ({
+const blankPack = (order: number, isCorporate: boolean): Omit<PackProduct, "id"> => ({
   name: "",
   description: "",
-  hours: 5,
-  price: 150,
-  validity_days: 90,
+  hours: isCorporate ? 50 : 5,
+  price: isCorporate ? 1000 : 150,
+  validity_days: isCorporate ? 365 : 90,
   is_active: true,
   display_order: order,
+  is_corporate: isCorporate,
 });
 
 /**
  * Prepaid hour packs (a separate wallet to the $ credit balance).
  * Every pack shares the same purchase → lot → FIFO consumption logic, so new
  * packs only need name, hours, price and validity.
+ *
+ * `isCorporate` splits retail packs from company packs — corporate packs are
+ * only visible to accounts flagged as corporate.
  */
-export const PackProductsSettings = () => {
+export const PackProductsSettings = ({ isCorporate = false }: { isCorporate?: boolean }) => {
   const [packs, setPacks] = useState<PackProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -61,6 +66,7 @@ export const PackProductsSettings = () => {
     const { data, error } = await supabase
       .from("pack_products")
       .select("*")
+      .eq("is_corporate", isCorporate)
       .order("display_order");
     if (error) {
       toast.error("Could not load packs");
@@ -72,7 +78,8 @@ export const PackProductsSettings = () => {
 
   useEffect(() => {
     load();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCorporate]);
 
   const update = (id: string, patch: Partial<PackProduct>) => {
     setPacks((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
@@ -111,7 +118,10 @@ export const PackProductsSettings = () => {
   const addPack = async () => {
     const { data, error } = await supabase
       .from("pack_products")
-      .insert({ ...blankPack(packs.length), name: "New Pack" })
+      .insert({
+        ...blankPack(packs.length, isCorporate),
+        name: isCorporate ? "New Corporate Pack" : "New Pack",
+      })
       .select()
       .single();
     if (error) {
@@ -145,7 +155,9 @@ export const PackProductsSettings = () => {
     <div className="space-y-4">
       {packs.length === 0 && (
         <p className="text-sm text-muted-foreground">
-          No packs yet. Add one to let customers prepay for sim time.
+          {isCorporate
+            ? "No corporate packs yet. Add one so companies can prepay for staff sim time."
+            : "No packs yet. Add one to let customers prepay for sim time."}
         </p>
       )}
 
@@ -282,7 +294,7 @@ export const PackProductsSettings = () => {
 
       <Button variant="outline" onClick={addPack}>
         <Plus className="h-4 w-4 mr-2" />
-        Add Pack
+        {isCorporate ? "Add Corporate Pack" : "Add Pack"}
       </Button>
     </div>
   );

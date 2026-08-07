@@ -10,6 +10,7 @@ export interface PackProduct {
   description: string | null;
   is_active: boolean;
   display_order: number;
+  is_corporate: boolean;
 }
 
 export interface PackLot {
@@ -52,6 +53,10 @@ export function usePackHours(userId?: string | null) {
   const [products, setProducts] = useState<PackProduct[]>([]);
   const [transactions, setTransactions] = useState<PackTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [corporate, setCorporate] = useState<{
+    companyName: string;
+    isOwner: boolean;
+  } | null>(null);
 
   const refresh = useCallback(async () => {
     setIsLoading(true);
@@ -59,13 +64,36 @@ export function usePackHours(userId?: string | null) {
       const { data: auth } = await supabase.auth.getUser();
       const uid = userId ?? auth.user?.id ?? null;
 
+      // Corporate accounts see corporate packs only; everyone else sees retail packs
+      let isCorpOwner = false;
+      let isCorpStaff = false;
+      if (uid) {
+        const { data: accounts } = await supabase
+          .from("corporate_accounts")
+          .select("owner_user_id, company_name")
+          .eq("is_active", true)
+          .limit(1);
+        const acc = accounts?.[0];
+        if (acc) {
+          isCorpOwner = acc.owner_user_id === uid;
+          isCorpStaff = !isCorpOwner;
+          setCorporate({ companyName: acc.company_name, isOwner: isCorpOwner });
+        } else {
+          setCorporate(null);
+        }
+      }
+
       const productsRes = await supabase
         .from("pack_products")
-        .select("id, name, hours, price, validity_days, description, is_active, display_order")
+        .select(
+          "id, name, hours, price, validity_days, description, is_active, display_order, is_corporate",
+        )
         .eq("is_active", true)
+        .eq("is_corporate", isCorpOwner)
         .order("display_order");
 
-      setProducts((productsRes.data ?? []) as PackProduct[]);
+      // Staff can spend the company wallet but never buy packs themselves
+      setProducts(isCorpStaff ? [] : ((productsRes.data ?? []) as PackProduct[]));
 
       if (!uid) {
         setBalance(0);
@@ -74,6 +102,10 @@ export function usePackHours(userId?: string | null) {
         return;
       }
 
+      // Staff see the company's lots too (RLS allows it via pack_wallet_owner)
+      const { data: walletOwner } = await supabase.rpc("pack_wallet_owner", { _user_id: uid });
+      const ownerFilter = walletOwner && walletOwner !== uid ? `,user_id.eq.${walletOwner}` : "";
+
       const [balanceRes, lotsRes, txRes] = await Promise.all([
         supabase.rpc("pack_hours_balance", { _user_id: uid }),
         supabase
@@ -81,7 +113,7 @@ export function usePackHours(userId?: string | null) {
           .select(
             "id, product_name, hours_total, hours_remaining, expires_at, status, is_gift, redemption_code, recipient_name, purchased_at",
           )
-          .or(`user_id.eq.${uid},purchaser_user_id.eq.${uid}`)
+          .or(`user_id.eq.${uid},purchaser_user_id.eq.${uid}${ownerFilter}`)
           .neq("status", "pending_payment")
           .order("created_at", { ascending: false }),
         supabase
@@ -126,5 +158,15 @@ export function usePackHours(userId?: string | null) {
     return result.hours ?? 0;
   };
 
-  return { balance, lots, products, transactions, isLoading, refresh, purchase, redeemCode };
+  return {
+    balance,
+    lots,
+    products,
+    transactions,
+    corporate,
+    isLoading,
+    refresh,
+    purchase,
+    redeemCode,
+  };
 }

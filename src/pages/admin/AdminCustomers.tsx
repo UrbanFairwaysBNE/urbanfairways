@@ -34,6 +34,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -49,6 +51,7 @@ import {
   Search, 
   Filter, 
   MoreVertical, 
+  Building2,
   Mail, 
   Phone, 
   User, 
@@ -167,6 +170,9 @@ export default function AdminCustomers() {
 
   // Make admin state
   const [isTogglingAdmin, setIsTogglingAdmin] = useState(false);
+  const [corporateCustomer, setCorporateCustomer] = useState<Customer | null>(null);
+  const [corporateName, setCorporateName] = useState("");
+  const [isSavingCorporate, setIsSavingCorporate] = useState(false);
 
   // Custom billing state
   const [isTogglingCustomBilling, setIsTogglingCustomBilling] = useState(false);
@@ -585,6 +591,53 @@ export default function AdminCustomers() {
   };
 
   // Toggle admin role for a customer
+  /** Promote a customer to a corporate account owner (or rename their company). */
+  const saveCorporateAccount = async () => {
+    if (!corporateCustomer) return;
+    const name = corporateName.trim();
+    if (!name) {
+      toast({ title: "Enter a company name", variant: "destructive" });
+      return;
+    }
+    setIsSavingCorporate(true);
+    try {
+      const { data: existing } = await supabase
+        .from("corporate_accounts")
+        .select("id")
+        .eq("owner_user_id", corporateCustomer.user_id)
+        .maybeSingle();
+
+      if (existing) {
+        const { error } = await supabase
+          .from("corporate_accounts")
+          .update({ company_name: name, is_active: true })
+          .eq("id", existing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("corporate_accounts")
+          .insert({ owner_user_id: corporateCustomer.user_id, company_name: name });
+        if (error) throw error;
+      }
+
+      toast({
+        title: "Corporate account saved",
+        description: `${corporateCustomer.first_name} ${corporateCustomer.last_name} now manages ${name}.`,
+        duration: 4000,
+      });
+      setCorporateCustomer(null);
+      setCorporateName("");
+    } catch (e) {
+      toast({
+        title: "Could not save",
+        description: e instanceof Error ? e.message : "Unknown error",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSavingCorporate(false);
+    }
+  };
+
   const toggleAdminRole = async (customer: Customer) => {
     setIsTogglingAdmin(true);
     
@@ -1286,6 +1339,15 @@ export default function AdminCustomers() {
                               <Shield className="h-4 w-4 mr-2" />
                               Make Admin
                             </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setCorporateCustomer(customer);
+                                setCorporateName("");
+                              }}
+                            >
+                              <Building2 className="h-4 w-4 mr-2" />
+                              Make Corporate
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -1296,6 +1358,48 @@ export default function AdminCustomers() {
             </Table>
           )}
         </div>
+
+        {/* Make Corporate Dialog */}
+        <Dialog
+          open={!!corporateCustomer}
+          onOpenChange={(o) => !o && setCorporateCustomer(null)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Make corporate account</DialogTitle>
+              <DialogDescription>
+                {corporateCustomer
+                  ? `${corporateCustomer.first_name} ${corporateCustomer.last_name} will manage the company wallet, buy corporate packs and add staff.`
+                  : ""}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Label htmlFor="corp-name">Company name</Label>
+              <Input
+                id="corp-name"
+                value={corporateName}
+                maxLength={120}
+                placeholder="Acme Pty Ltd"
+                onChange={(e) => setCorporateName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") saveCorporateAccount();
+                }}
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setCorporateCustomer(null)}
+                disabled={isSavingCorporate}
+              >
+                Cancel
+              </Button>
+              <Button onClick={saveCorporateAccount} disabled={isSavingCorporate}>
+                {isSavingCorporate ? "Saving..." : "Make corporate"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Customer Details Dialog */}
         <Dialog 

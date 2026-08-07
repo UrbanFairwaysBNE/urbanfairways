@@ -25,6 +25,8 @@ import {
 import { MembershipPaymentIssueDialog } from "@/components/membership/MembershipPaymentIssueDialog";
 import { AlertCircle } from "lucide-react";
 import { PrepaidPacksCard } from "@/components/account/PrepaidPacksCard";
+import { CorporateStaffCard } from "@/components/account/CorporateStaffCard";
+import { useCorporate } from "@/hooks/useCorporate";
 
 
 
@@ -68,6 +70,7 @@ const MyAccount = () => {
   const [isAddingPaymentMethod, setIsAddingPaymentMethod] = useState(false);
   const [deletingPaymentMethodId, setDeletingPaymentMethodId] = useState<string | null>(null);
   const [showMembershipBlockDialog, setShowMembershipBlockDialog] = useState(false);
+  const { account: corporateAccount } = useCorporate();
   const [showPaymentIssueDialog, setShowPaymentIssueDialog] = useState(false);
   const [isOpeningBillingPortal, setIsOpeningBillingPortal] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -457,7 +460,8 @@ const MyAccount = () => {
             </Card>
           )}
 
-          {/* Membership Tier */}
+          {/* Membership Tier — corporate accounts bill through their company wallet */}
+          {!corporateAccount && (
           <Card>
             <CardHeader>
               <div className="flex items-center gap-3">
@@ -493,6 +497,7 @@ const MyAccount = () => {
               </div>
             </CardContent>
           </Card>
+          )}
 
           {/* Account Credit */}
           {(profile?.deposit_balance || 0) > 0 && (
@@ -522,6 +527,10 @@ const MyAccount = () => {
 
           {/* Prepaid Hour Packs */}
           <PrepaidPacksCard />
+
+          {/* Corporate staff access */}
+          <CorporateStaffCard />
+
 
           {/* Redeem Gift Card */}
 

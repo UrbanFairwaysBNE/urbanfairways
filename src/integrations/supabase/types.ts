@@ -743,6 +743,74 @@ export type Database = {
         }
         Relationships: []
       }
+      corporate_accounts: {
+        Row: {
+          company_name: string
+          created_at: string
+          id: string
+          is_active: boolean
+          owner_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          company_name: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          owner_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          owner_user_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      corporate_staff: {
+        Row: {
+          corporate_id: string
+          created_at: string
+          email: string
+          id: string
+          monthly_hour_cap: number | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          corporate_id: string
+          created_at?: string
+          email: string
+          id?: string
+          monthly_hour_cap?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          corporate_id?: string
+          created_at?: string
+          email?: string
+          id?: string
+          monthly_hour_cap?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corporate_staff_corporate_id_fkey"
+            columns: ["corporate_id"]
+            isOneToOne: false
+            referencedRelation: "corporate_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deposit_transactions: {
         Row: {
           amount: number
@@ -1899,6 +1967,7 @@ export type Database = {
           hours: number
           id: string
           is_active: boolean
+          is_corporate: boolean
           name: string
           price: number
           updated_at: string
@@ -1911,6 +1980,7 @@ export type Database = {
           hours: number
           id?: string
           is_active?: boolean
+          is_corporate?: boolean
           name: string
           price: number
           updated_at?: string
@@ -1923,6 +1993,7 @@ export type Database = {
           hours?: number
           id?: string
           is_active?: boolean
+          is_corporate?: boolean
           name?: string
           price?: number
           updated_at?: string
@@ -3663,6 +3734,11 @@ export type Database = {
         }
         Returns: number
       }
+      corporate_hours_used_this_month: {
+        Args: { _user_id: string }
+        Returns: number
+      }
+      corporate_id_for_user: { Args: { _user_id: string }; Returns: string }
       expire_pack_lots: { Args: never; Returns: number }
       has_role: {
         Args: {
@@ -3671,8 +3747,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_corporate_owner: { Args: { _user_id: string }; Returns: boolean }
       is_paying_member: { Args: { _user_id: string }; Returns: boolean }
       pack_hours_balance: { Args: { _user_id: string }; Returns: number }
+      pack_wallet_owner: { Args: { _user_id: string }; Returns: string }
       redeem_pack_code: { Args: { _code: string }; Returns: Json }
       restore_pack_hours: {
         Args: {

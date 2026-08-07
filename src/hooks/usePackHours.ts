@@ -158,5 +158,15 @@ export function usePackHours(userId?: string | null) {
     return result.hours ?? 0;
   };
 
-  return { balance, lots, products, transactions, isLoading, refresh, purchase, redeemCode };
+  return {
+    balance,
+    lots,
+    products,
+    transactions,
+    corporate,
+    isLoading,
+    refresh,
+    purchase,
+    redeemCode,
+  };
 }

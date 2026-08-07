@@ -83,7 +83,7 @@ export function defaultFooterHtml(tenant: TenantConfig = NEUTRAL_TENANT): string
     : "";
 
   return `<tr>
-  <td style="background-color:#2F3134; padding:22px; border-radius:0 0 16px 16px;">
+  <td style="background-color:#2E3032; padding:22px; border-radius:0 0 16px 16px;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
       ${socialsRow}
       <tr>

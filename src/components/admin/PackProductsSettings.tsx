@@ -118,7 +118,10 @@ export const PackProductsSettings = ({ isCorporate = false }: { isCorporate?: bo
   const addPack = async () => {
     const { data, error } = await supabase
       .from("pack_products")
-      .insert({ ...blankPack(packs.length), name: "New Pack" })
+      .insert({
+        ...blankPack(packs.length, isCorporate),
+        name: isCorporate ? "New Corporate Pack" : "New Pack",
+      })
       .select()
       .single();
     if (error) {

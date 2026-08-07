@@ -115,8 +115,10 @@ export const EmailLayoutEditor = () => {
     setSaving(true);
     const { error } = await supabase
       .from("email_layout")
-      .update({ header_html: header, footer_html: footer, updated_at: new Date().toISOString() })
-      .eq("id", "global");
+      .upsert(
+        { id: "global", header_html: header, footer_html: footer, updated_at: new Date().toISOString() },
+        { onConflict: "id" },
+      );
 
     if (error) {
       toast({ title: "Save failed", description: error.message, variant: "destructive" });

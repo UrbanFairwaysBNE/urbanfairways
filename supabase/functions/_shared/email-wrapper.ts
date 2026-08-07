@@ -4,7 +4,7 @@
 // template. Individual template bodies should contain body content ONLY.
 
 import type { TenantConfig } from "./tenant.ts";
-import { tenantAddress } from "./tenant.ts";
+import { getTenant, tenantAddress } from "./tenant.ts";
 
 export interface EmailCta {
   text: string;
@@ -195,8 +195,9 @@ export function applyTenantTokens(html: string, tenant: TenantConfig): string {
 
 export async function fetchEmailLayout(
   supabase: any,
-  tenant: TenantConfig = NEUTRAL_TENANT,
+  tenant?: TenantConfig,
 ): Promise<EmailLayout> {
+  const t = tenant ?? (await getTenant().catch(() => NEUTRAL_TENANT));
   try {
     const { data } = await supabase
       .from("email_layout")
@@ -206,16 +207,16 @@ export async function fetchEmailLayout(
 
     return {
       header_html: data?.header_html
-        ? applyTenantTokens(data.header_html, tenant)
-        : defaultHeaderHtml(tenant),
+        ? applyTenantTokens(data.header_html, t)
+        : defaultHeaderHtml(t),
       footer_html: data?.footer_html
-        ? applyTenantTokens(data.footer_html, tenant)
-        : defaultFooterHtml(tenant),
+        ? applyTenantTokens(data.footer_html, t)
+        : defaultFooterHtml(t),
     };
   } catch (_err) {
     return {
-      header_html: defaultHeaderHtml(tenant),
-      footer_html: defaultFooterHtml(tenant),
+      header_html: defaultHeaderHtml(t),
+      footer_html: defaultFooterHtml(t),
     };
   }
 }
@@ -229,8 +230,9 @@ export async function renderBrandedEmail(
   heading: string,
   bodyContent: string,
   ctaButton?: EmailCta,
-  tenant: TenantConfig = NEUTRAL_TENANT,
+  tenant?: TenantConfig,
 ): Promise<string> {
-  const layout = await fetchEmailLayout(supabase, tenant);
-  return buildEmailTemplate(heading, bodyContent, ctaButton, layout, tenant);
+  const t = tenant ?? (await getTenant().catch(() => NEUTRAL_TENANT));
+  const layout = await fetchEmailLayout(supabase, t);
+  return buildEmailTemplate(heading, bodyContent, ctaButton, layout, t);
 }

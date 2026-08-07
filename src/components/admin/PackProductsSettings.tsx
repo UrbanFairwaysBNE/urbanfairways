@@ -294,7 +294,7 @@ export const PackProductsSettings = ({ isCorporate = false }: { isCorporate?: bo
 
       <Button variant="outline" onClick={addPack}>
         <Plus className="h-4 w-4 mr-2" />
-        Add Pack
+        {isCorporate ? "Add Corporate Pack" : "Add Pack"}
       </Button>
     </div>
   );

@@ -494,6 +494,7 @@ const MyAccount = () => {
               </div>
             </CardContent>
           </Card>
+          )}
 
           {/* Account Credit */}
           {(profile?.deposit_balance || 0) > 0 && (

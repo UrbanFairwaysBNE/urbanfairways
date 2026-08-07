@@ -79,6 +79,7 @@ import { GiftCardsSection } from "@/components/admin/GiftCardsSection";
 import { CreditTransactionHistory } from "@/components/admin/CreditTransactionHistory";
 import { MembersSection } from "@/components/admin/MembersSection";
 import { format } from "date-fns";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Customer {
   id: string;

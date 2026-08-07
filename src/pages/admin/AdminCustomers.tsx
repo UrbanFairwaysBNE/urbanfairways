@@ -167,6 +167,9 @@ export default function AdminCustomers() {
 
   // Make admin state
   const [isTogglingAdmin, setIsTogglingAdmin] = useState(false);
+  const [corporateCustomer, setCorporateCustomer] = useState<Customer | null>(null);
+  const [corporateName, setCorporateName] = useState("");
+  const [isSavingCorporate, setIsSavingCorporate] = useState(false);
 
   // Custom billing state
   const [isTogglingCustomBilling, setIsTogglingCustomBilling] = useState(false);

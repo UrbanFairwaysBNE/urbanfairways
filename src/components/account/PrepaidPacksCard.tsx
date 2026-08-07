@@ -224,37 +224,44 @@ export function PrepaidPacksCard() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
-            <div className="flex items-start gap-3 rounded-lg border p-3">
-              <Checkbox
-                id="pack-gift"
-                checked={isGift}
-                onCheckedChange={(v) => setIsGift(Boolean(v))}
-              />
-              <div className="space-y-1">
-                <Label htmlFor="pack-gift" className="flex items-center gap-2 cursor-pointer">
-                  <Gift className="h-4 w-4" /> Buying this as a gift
-                </Label>
-                <p className="text-xs text-muted-foreground">
-                  We'll email you a redemption code to pass on. The hours land in their account
-                  when they redeem it.
-                </p>
-              </div>
-            </div>
-
-            {isGift && (
-              <div className="space-y-2">
-                <Label htmlFor="pack-recipient">Recipient name (optional)</Label>
-                <Input
-                  id="pack-recipient"
-                  value={recipientName}
-                  maxLength={80}
-                  onChange={(e) => setRecipientName(e.target.value)}
-                  placeholder="Who's it for?"
+          {corporate ? (
+            <p className="text-sm text-muted-foreground">
+              These hours go into your company wallet and can be used by any staff member you've
+              given access to.
+            </p>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 rounded-lg border p-3">
+                <Checkbox
+                  id="pack-gift"
+                  checked={isGift}
+                  onCheckedChange={(v) => setIsGift(Boolean(v))}
                 />
+                <div className="space-y-1">
+                  <Label htmlFor="pack-gift" className="flex items-center gap-2 cursor-pointer">
+                    <Gift className="h-4 w-4" /> Buying this as a gift
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    We'll email you a redemption code to pass on. The hours land in their account
+                    when they redeem it.
+                  </p>
+                </div>
               </div>
-            )}
-          </div>
+
+              {isGift && (
+                <div className="space-y-2">
+                  <Label htmlFor="pack-recipient">Recipient name (optional)</Label>
+                  <Input
+                    id="pack-recipient"
+                    value={recipientName}
+                    maxLength={80}
+                    onChange={(e) => setRecipientName(e.target.value)}
+                    placeholder="Who's it for?"
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setSelected(null)} disabled={isPurchasing}>

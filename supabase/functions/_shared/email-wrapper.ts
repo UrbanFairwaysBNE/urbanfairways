@@ -173,8 +173,9 @@ export function buildEmailTemplate(
 </html>`;
 }
 
-// Fetches the current email layout from the DB, falling back to defaults on
-// any error. Accepts any Supabase client that exposes `.from().select()`.
+// Fetches the current email layout from the DB. Sending must fail rather than
+// silently substituting a different header/footer when the saved global layout
+// cannot be read.
 // Substitutes tenant merge values into stored layout HTML so the seeded
 // header/footer stay venue-agnostic in the database.
 export function applyTenantTokens(html: string, tenant: TenantConfig): string {
@@ -198,27 +199,24 @@ export async function fetchEmailLayout(
   tenant?: TenantConfig,
 ): Promise<EmailLayout> {
   const t = tenant ?? (await getTenant().catch(() => NEUTRAL_TENANT));
-  try {
-    const { data } = await supabase
-      .from("email_layout")
-      .select("header_html, footer_html")
-      .eq("id", "global")
-      .maybeSingle();
+  const { data, error } = await supabase
+    .from("email_layout")
+    .select("header_html, footer_html")
+    .eq("id", "global")
+    .single();
 
-    return {
-      header_html: data?.header_html
-        ? applyTenantTokens(data.header_html, t)
-        : defaultHeaderHtml(t),
-      footer_html: data?.footer_html
-        ? applyTenantTokens(data.footer_html, t)
-        : defaultFooterHtml(t),
-    };
-  } catch (_err) {
-    return {
-      header_html: defaultHeaderHtml(t),
-      footer_html: defaultFooterHtml(t),
-    };
+  if (error) {
+    throw new Error(`Unable to load the saved global email layout: ${error.message}`);
   }
+
+  if (!data?.header_html?.trim() || !data?.footer_html?.trim()) {
+    throw new Error("The saved global email header or footer is empty");
+  }
+
+  return {
+    header_html: applyTenantTokens(data.header_html, t),
+    footer_html: applyTenantTokens(data.footer_html, t),
+  };
 }
 
 

@@ -16,6 +16,14 @@ const log = (step: string, details?: unknown) =>
 
 type Kind = "purchase" | "gift" | "expiry_reminder";
 
+const applyTags = (html: string, tags: Record<string, string>): string => {
+  let out = html;
+  for (const [tag, value] of Object.entries(tags)) {
+    out = out.replaceAll(tag, value);
+  }
+  return out;
+};
+
 serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 

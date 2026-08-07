@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { Resend } from "npm:resend@2.0.0";
-import { getTenant, tenantBookingUrl, tenantAddress, TenantConfig } from "../_shared/tenant.ts";
+import { getTenant, TenantConfig } from "../_shared/tenant.ts";
+import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -42,35 +43,7 @@ const buildFeedbackLinks = (token: string) => {
   };
 };
 
-const buildFeedbackEmail = (tenant: TenantConfig, _firstName: string, _feedbackUrl: string) => {
-  const mapsQuery = encodeURIComponent(tenantAddress(tenant));
-  const phoneDigits = (tenant.support_phone || "").replace(/[^\d+]/g, "");
-  return `<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <style>
-    @import url("https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Manrope:wght@400;600&display=swap");
-  </style>
-</head>
-<body style="margin:0; padding:0; background-color:#F5F3EF;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F5F3EF;">
-    <tr>
-      <td align="center" style="padding:24px 12px;">
-        <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px; width:100%;">
-          <!-- HEADER -->
-          <tr>
-            <td align="center" style="background-color:#2F3134; padding:18px; border-radius:16px 16px 0 0;">
-              <div style="font-family:Archivo, Impact, Arial Black, sans-serif; font-size:26px; color:#FFFFFF; text-align:center; letter-spacing:0.5px;">${tenant.venue_name}</div>
-            </td>
-          </tr>
-          <!-- BODY -->
-          <tr>
-            <td style="background-color:#F5F3EF; padding:30px 22px; border-left:1px solid rgba(47,49,52,0.12); border-right:1px solid rgba(47,49,52,0.12);">
-              <h1 style="margin:0 0 16px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:30px; line-height:1.1; color:#2F3134; text-align:center;">
-                THANKS FOR PLAYING!
-              </h1>
+const buildFeedbackBody = (tenant: TenantConfig) => `
               <p style="font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center; margin:0 0 8px;">
                 Hey {{first_name}},
               </p>
@@ -121,40 +94,7 @@ const buildFeedbackEmail = (tenant: TenantConfig, _firstName: string, _feedbackU
                   </td>
                 </tr>
               </table>
-            </td>
-          </tr>
-          <!-- FOOTER -->
-          <tr>
-            <td style="background-color:#2F3134; padding:22px; border-radius:0 0 16px 16px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                  <td align="center" style="padding-bottom:14px;">
-                    <a href="${tenant.socials?.instagram ?? "#"}" style="margin:0 8px; text-decoration:none;">
-                      <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram" width="28" height="28" style="display:inline-block; border:0;" />
-                    </a>
-                    <a href="${tenant.socials?.facebook ?? "#"}" style="margin:0 8px; text-decoration:none;">
-                      <img src="https://cdn-icons-png.flaticon.com/512/174/174848.png" alt="Facebook" width="28" height="28" style="display:inline-block; border:0;" />
-                    </a>
-                  </td>
-                </tr>
-                <tr>
-                  <td align="center" style="font-family:Manrope, Arial, sans-serif; font-size:14px; line-height:1.7; color:#FFFFFF;">
-                    <div><a href="https://www.google.com/maps/search/?api=1&query=${mapsQuery}" style="color:#FFFFFF; text-decoration:underline;">${tenantAddress(tenant)}</a></div>
-                    <div><a href="tel:${phoneDigits}" style="color:#FFFFFF; text-decoration:underline;">${tenant.support_phone}</a></div>
-                    <div><a href="${tenantBookingUrl(tenant, "/")}" style="color:#FFFFFF; text-decoration:underline;">${tenant.booking_domain}</a></div>
-                    <div style="margin-top:10px; font-size:12px; opacity:0.75;">© ${tenant.venue_name}</div>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`;
-};
+`;
 
 // Render template by replacing placeholders
 const renderTemplate = (template: string, vars: Record<string, string>) => {
@@ -190,7 +130,7 @@ Deno.serve(async (req) => {
       const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
       const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-      let emailTemplate = buildFeedbackEmail(tenant, "", "");
+      let emailTemplate = buildFeedbackBody(tenant);
       const { data: templateRow } = await supabase
         .from("email_templates")
         .select("html_content")
@@ -201,11 +141,11 @@ Deno.serve(async (req) => {
       if (templateRow?.html_content) {
         emailTemplate = templateRow.html_content;
       } else {
-        emailTemplate = buildFeedbackEmail(tenant, "{{first_name}}", "{{feedback_url}}");
+        emailTemplate = buildFeedbackBody(tenant);
       }
 
       const testLinks = buildFeedbackLinks("test-preview");
-      const renderedHtml = renderTemplate(emailTemplate, {
+      const renderedBody = renderTemplate(emailTemplate, {
         first_name: testName || "there",
          feedback_url: testLinks.feedbackUrl,
          feedback_url_bad: testLinks.feedbackUrlBad,
@@ -217,7 +157,7 @@ Deno.serve(async (req) => {
         from: `${tenant.venue_name} <${tenant.sender_email}>`,
         to: [testEmail],
         subject: `Thanks for playing at ${tenant.venue_name}! How was it? 🏌️`,
-        html: renderedHtml,
+        html: await renderBrandedEmail(supabase, "THANKS FOR PLAYING!", renderedBody, undefined, tenant),
       });
 
       logStep("TEST email sent", { testEmail });
@@ -234,7 +174,7 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     // Try to load template from email_templates table
-    let emailTemplate = buildFeedbackEmail(tenant, "", "");
+    let emailTemplate = buildFeedbackBody(tenant);
     const { data: templateRow } = await supabase
       .from("email_templates")
       .select("html_content")
@@ -246,7 +186,7 @@ Deno.serve(async (req) => {
       emailTemplate = templateRow.html_content;
       logStep("Using template from email_templates table");
     } else {
-      emailTemplate = buildFeedbackEmail(tenant, "{{first_name}}", "{{feedback_url}}");
+      emailTemplate = buildFeedbackBody(tenant);
       logStep("Using default hardcoded template");
     }
 
@@ -347,7 +287,7 @@ Deno.serve(async (req) => {
         const token = trackingRecord.id;
         const links = buildFeedbackLinks(token);
 
-        const renderedHtml = renderTemplate(emailTemplate, {
+        const renderedBody = renderTemplate(emailTemplate, {
           first_name: user.first_name || "there",
           feedback_url: links.feedbackUrl,
           feedback_url_bad: links.feedbackUrlBad,
@@ -359,7 +299,7 @@ Deno.serve(async (req) => {
           from: `${tenant.venue_name} <${tenant.sender_email}>`,
           to: [user.email],
           subject: `Thanks for playing at ${tenant.venue_name}! How was it? 🏌️`,
-          html: renderedHtml,
+          html: await renderBrandedEmail(supabase, "THANKS FOR PLAYING!", renderedBody, undefined, tenant),
         });
 
         sentCount++;

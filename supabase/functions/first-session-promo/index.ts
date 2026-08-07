@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { Resend } from "npm:resend@2.0.0";
 import { getTenant, tenantHubUrl, TenantConfig } from "../_shared/tenant.ts";
+import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -272,7 +273,13 @@ serve(async (req: Request): Promise<Response> => {
           from: `${tenant.venue_name} <${tenant.sender_email}>`,
           to: [user.email],
           subject,
-          html: htmlContent,
+          html: await renderBrandedEmail(
+            supabase,
+            "A Gift From Us To You!",
+            htmlContent,
+            { text: "Book Your Free Session", url: tenantHubUrl(tenant, "/booking") },
+            tenant,
+          ),
         });
 
         if (emailResponse.error) {
@@ -307,15 +314,7 @@ serve(async (req: Request): Promise<Response> => {
         `<tr><td style="padding:8px;border-bottom:1px solid #eee;">${u.first_name} ${u.last_name}</td><td style="padding:8px;border-bottom:1px solid #eee;">${u.email}</td></tr>`
       ).join('');
 
-      const reportHtml = `<!doctype html>
-<html>
-<head><meta charset="utf-8"><title>First Session Promo Report</title></head>
-<body style="font-family:Arial,sans-serif;margin:0;padding:20px;background:#f5f5f5;">
-  <div style="max-width:600px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
-    <div style="background:#2F3134;color:#fff;padding:20px;text-align:center;">
-      <h1 style="margin:0;font-size:24px;">First Session Promo Report</h1>
-    </div>
-    <div style="padding:24px;">
+      const reportBody = `
       <p style="color:#333;font-size:16px;margin:0 0 16px;">The automated First Session Free campaign has been triggered.</p>
       <div style="background:#f8f9fa;border-radius:8px;padding:16px;margin-bottom:20px;">
         <p style="margin:0 0 8px;"><strong>Total Processed:</strong> ${results.processed}</p>
@@ -333,13 +332,15 @@ serve(async (req: Request): Promise<Response> => {
         <tbody>${customerList}</tbody>
       </table>
       ${results.errors.length > 0 ? `<div style="margin-top:20px;padding:12px;background:#fff3cd;border-radius:6px;"><strong>Errors:</strong><ul style="margin:8px 0 0;padding-left:20px;">${results.errors.map(e => `<li>${e}</li>`).join('')}</ul></div>` : ''}
-    </div>
-    <div style="background:#f8f9fa;padding:16px;text-align:center;color:#666;font-size:12px;">
-      Report generated at ${new Date().toLocaleString('en-AU', { timeZone: 'Australia/Brisbane' })} AEST
-    </div>
-  </div>
-</body>
-</html>`;
+    `;
+
+      const reportHtml = await renderBrandedEmail(
+        supabase,
+        "First Session Promo Report",
+        reportBody,
+        undefined,
+        tenant,
+      );
 
       try {
         await resend.emails.send({
@@ -379,61 +380,21 @@ serve(async (req: Request): Promise<Response> => {
 });
 
 function getDefaultTemplate(tenant: TenantConfig): string {
-  return `<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Your Free Hour</title>
-</head>
-<body style="margin:0; padding:0; background-color:#F5F3EF;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F5F3EF;">
-    <tr>
-      <td align="center" style="padding:24px 12px;">
-        <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px; width:100%;">
-          <tr>
-            <td align="center" style="background-color:#2F3134; padding:18px; border-radius:16px 16px 0 0;">
-              <div style="font-family:Archivo, Impact, Arial Black, sans-serif; font-size:26px; color:#FFFFFF; text-align:center; letter-spacing:0.5px;">${tenant.venue_name}</div>
-            </td>
-          </tr>
-          <tr>
-            <td style="background-color:#F5F3EF; padding:26px 22px; border-left:1px solid rgba(47,49,52,0.12); border-right:1px solid rgba(47,49,52,0.12);">
-              <h1 style="margin:0 0 14px; font-family:Arial, sans-serif; font-size:34px; line-height:1.1; color:#2F3134; text-align:center;">A Gift From Us To You!</h1>
-              <p style="margin:0 0 18px; font-family:Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
+  return `
+              <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 Hi {first_name}, we noticed you haven't booked your first session yet. We'd love to see you at ${tenant.venue_name}, so we've added credit to your account!
               </p>
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#2F3134; border-radius:12px; margin:18px 0;">
                 <tr>
                   <td style="padding:30px; text-align:center;">
-                    <p style="margin:0 0 8px; font-family:Arial, sans-serif; font-size:14px; color:#F5F3EF; opacity:0.9;">Your Account Credit</p>
-                    <p style="margin:0; font-family:Arial, sans-serif; font-size:52px; font-weight:bold; color:#B5772A;">$35.00</p>
-                    <p style="margin:8px 0 0; font-family:Arial, sans-serif; font-size:14px; color:#F5F3EF; opacity:0.9;">Enough for 1 hour off-peak!</p>
+                    <p style="margin:0 0 8px; font-family:Manrope, Arial, sans-serif; font-size:14px; color:#F5F3EF; opacity:0.9;">Your Account Credit</p>
+                    <p style="margin:0; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:52px; color:#B5772A;">$35.00</p>
+                    <p style="margin:8px 0 0; font-family:Manrope, Arial, sans-serif; font-size:14px; color:#F5F3EF; opacity:0.9;">Enough for 1 hour off-peak!</p>
                   </td>
                 </tr>
               </table>
-              <p style="margin:18px 0; font-family:Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
+              <p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 This credit has been automatically added to your account and will be applied at checkout. No code needed!
               </p>
-              <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:22px auto 0;">
-                <tr>
-                  <td bgcolor="#B5772A" style="border-radius:12px;">
-                    <a href="${tenantHubUrl(tenant, "/booking")}" style="display:inline-block; padding:14px 28px; font-family:Arial, sans-serif; font-size:18px; font-weight:bold; color:#FFFFFF; text-decoration:none;">Book Your Free Session</a>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-          <tr>
-            <td style="background-color:#2F3134; padding:22px; border-radius:0 0 16px 16px;">
-              <p style="margin:0; font-family:Arial, sans-serif; font-size:13px; color:#F5F3EF; text-align:center; opacity:0.85;">
-                ${tenant.venue_name} | <a href="mailto:${tenant.support_email}" style="color:#B5772A; text-decoration:none;">${tenant.support_email}</a>
-              </p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`;
+  `;
 }

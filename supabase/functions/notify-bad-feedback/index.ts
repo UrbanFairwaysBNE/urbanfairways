@@ -1,4 +1,6 @@
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { getTenant } from "../_shared/tenant.ts";
+import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,20 +23,21 @@ Deno.serve(async (req) => {
     const customerEmail = email || "Not provided";
     const customerComment = comment || "No comment provided";
 
-    const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
-        <div style="background: #DC2626; color: white; padding: 16px 20px; border-radius: 12px 12px 0 0; text-align: center;">
-          <h2 style="margin: 0;">⚠️ Bad Feedback Received</h2>
-        </div>
-        <div style="background: #F5F3EF; padding: 20px; border: 1px solid #e5e5e5; border-top: none; border-radius: 0 0 12px 12px;">
-          <p style="margin: 0 0 12px;"><strong>Customer:</strong> ${customerName}</p>
-          <p style="margin: 0 0 12px;"><strong>Email:</strong> ${customerEmail}</p>
-          <p style="margin: 0 0 12px;"><strong>Rating:</strong> 😟 Bad</p>
-          <p style="margin: 0 0 4px;"><strong>Comment:</strong></p>
-          <p style="margin: 0; padding: 12px; background: white; border-radius: 8px; border: 1px solid #e5e5e5;">${customerComment}</p>
-        </div>
-      </div>
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } },
+    );
+
+    const body = `
+      <p style="margin:0 0 12px; font-family:Manrope, Arial, sans-serif; font-size:16px; color:#2F3134;"><strong>Customer:</strong> ${customerName}</p>
+      <p style="margin:0 0 12px; font-family:Manrope, Arial, sans-serif; font-size:16px; color:#2F3134;"><strong>Email:</strong> ${customerEmail}</p>
+      <p style="margin:0 0 12px; font-family:Manrope, Arial, sans-serif; font-size:16px; color:#2F3134;"><strong>Rating:</strong> Bad</p>
+      <p style="margin:0 0 6px; font-family:Manrope, Arial, sans-serif; font-size:16px; color:#2F3134;"><strong>Comment:</strong></p>
+      <p style="margin:0; padding:12px; background:#FFFFFF; border-radius:8px; border:1px solid rgba(47,49,52,0.12); font-family:Manrope, Arial, sans-serif; font-size:16px; color:#2F3134;">${customerComment}</p>
     `;
+
+    const html = await renderBrandedEmail(supabase, "BAD FEEDBACK RECEIVED", body, undefined, tenant);
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",

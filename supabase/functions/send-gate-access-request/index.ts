@@ -1,4 +1,6 @@
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { getTenant } from "../_shared/tenant.ts";
+import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -27,20 +29,22 @@ Deno.serve(async (req) => {
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
 
-    const html = `
-      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#F5F3EF;">
-        <div style="background:#2F3134;color:#fff;padding:18px 22px;border-radius:12px 12px 0 0;">
-          <h2 style="margin:0;font-size:20px;">New Gate Access Request</h2>
-          <p style="margin:6px 0 0;font-size:13px;opacity:.9;">Approve in the app to send Noke SMS invite.</p>
-        </div>
-        <div style="background:#fff;padding:20px 22px;border:1px solid #e5e5e5;border-top:none;border-radius:0 0 12px 12px;">
-          <table style="width:100%;border-collapse:collapse;font-size:14px;">
-            <tr><td style="padding:8px 0;font-weight:600;color:#2F3134;width:120px;">Full Name</td><td style="padding:8px 0;color:#222;">${safe(fullName)}</td></tr>
-            <tr><td style="padding:8px 0;font-weight:600;color:#2F3134;">Email</td><td style="padding:8px 0;color:#222;">${safe(email)}</td></tr>
-            <tr><td style="padding:8px 0;font-weight:600;color:#2F3134;">Phone</td><td style="padding:8px 0;color:#222;">${safe(phone)}</td></tr>
-          </table>
-        </div>
-      </div>`;
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } },
+    );
+
+    const body = `
+      <p style="margin:0 0 16px; font-family:Manrope, Arial, sans-serif; font-size:16px; color:#2F3134; text-align:center;">Approve in the app to send the access invite.</p>
+      <table role="presentation" style="width:100%; border-collapse:collapse; font-family:Manrope, Arial, sans-serif; font-size:16px; color:#2F3134;">
+        <tr><td style="padding:8px 0; font-weight:600; width:120px;">Full Name</td><td style="padding:8px 0;">${safe(fullName)}</td></tr>
+        <tr><td style="padding:8px 0; font-weight:600;">Email</td><td style="padding:8px 0;">${safe(email)}</td></tr>
+        <tr><td style="padding:8px 0; font-weight:600;">Phone</td><td style="padding:8px 0;">${safe(phone)}</td></tr>
+      </table>
+    `;
+
+    const html = await renderBrandedEmail(supabase, "NEW GATE ACCESS REQUEST", body, undefined, tenant);
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",

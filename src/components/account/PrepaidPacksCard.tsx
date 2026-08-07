@@ -24,7 +24,8 @@ import { usePackHours, formatHours, type PackProduct } from "@/hooks/usePackHour
  * they buy simulator time only, work any day/time, and expire per pack.
  */
 export function PrepaidPacksCard() {
-  const { balance, lots, products, isLoading, refresh, purchase, redeemCode } = usePackHours();
+  const { balance, lots, products, corporate, isLoading, refresh, purchase, redeemCode } =
+    usePackHours();
   const [selected, setSelected] = useState<PackProduct | null>(null);
   const [isGift, setIsGift] = useState(false);
   const [recipientName, setRecipientName] = useState("");

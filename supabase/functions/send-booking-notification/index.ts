@@ -427,17 +427,8 @@ serve(async (req) => {
     let htmlContent: string;
     let smsMessage: string;
 
-    // Check if user has already been approved for Google review reward
-    let hasReviewReward = false;
-    if (notification_type === "confirmation") {
-      const { data: reviewReward } = await supabaseClient
-        .from("google_review_rewards")
-        .select("id")
-        .eq("user_id", booking.user_id)
-        .maybeSingle();
-      hasReviewReward = !!reviewReward;
-      logStep("Review reward check", { hasReviewReward });
-    }
+
+
 
     if (notification_type === "confirmation" || notification_type === "reschedule") {
       // Use custom subject if available

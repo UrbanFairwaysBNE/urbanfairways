@@ -10,6 +10,7 @@ export interface PackProduct {
   description: string | null;
   is_active: boolean;
   display_order: number;
+  is_corporate: boolean;
 }
 
 export interface PackLot {

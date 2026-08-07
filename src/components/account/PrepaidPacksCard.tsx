@@ -75,11 +75,17 @@ export function PrepaidPacksCard() {
                   <Timer className="h-5 w-5 text-accent" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <CardTitle>Prepaid Hours</CardTitle>
+                  <CardTitle>
+                    {corporate ? `${corporate.companyName} Hours` : "Prepaid Hours"}
+                  </CardTitle>
                   <CardDescription>
                     {balance > 0
                       ? `${formatHours(balance)} hours available`
-                      : "Buy simulator time up front and use it any day, any time."}
+                      : corporate
+                        ? corporate.isOwner
+                          ? "Buy a corporate pack and share the hours with your staff."
+                          : "Your company has no hours left — ask your manager to top up."
+                        : "Buy simulator time up front and use it any day, any time."}
                   </CardDescription>
                 </div>
                 <ChevronDown

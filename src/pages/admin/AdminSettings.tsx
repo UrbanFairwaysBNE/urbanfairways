@@ -1145,6 +1145,14 @@ export default function AdminSettings() {
               <PackProductsSettings />
             </CollapsibleSection>
 
+            <CollapsibleSection
+              title="Corporate Packs"
+              description="Hour packs only corporate accounts can buy and share with their staff"
+              icon={Building2}
+            >
+              <PackProductsSettings isCorporate />
+            </CollapsibleSection>
+
             <CollapsibleSection title="Public Holidays" description="Manage public holiday dates for peak pricing">
               <PublicHolidaysSection />
             </CollapsibleSection>

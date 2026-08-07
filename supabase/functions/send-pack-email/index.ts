@@ -14,7 +14,7 @@ const corsHeaders = {
 const log = (step: string, details?: unknown) =>
   console.log(`[SEND-PACK-EMAIL] ${step}${details ? ` - ${JSON.stringify(details)}` : ""}`);
 
-type Kind = "purchase" | "gift" | "expiry_reminder";
+type Kind = "purchase" | "gift" | "expiry_reminder" | "redeemed";
 
 const applyTags = (html: string, tags: Record<string, string>): string => {
   let out = html;
@@ -42,6 +42,15 @@ serve(async (req: Request): Promise<Response> => {
       .eq("id", pack_lot_id)
       .maybeSingle();
     if (!lot) throw new Error("Pack not found");
+
+    // Redemption emails are triggered by the customer, so verify they own the pack
+    if (kind === "redeemed") {
+      const token = (req.headers.get("Authorization") ?? "").replace("Bearer ", "");
+      const { data: userData } = await supabase.auth.getUser(token);
+      if (!userData?.user || userData.user.id !== lot.user_id) {
+        throw new Error("Not authorised to send this email");
+      }
+    }
 
     const tenant = await getTenant();
     const accountUrl = tenantBookingUrl(tenant, "/my-account");

@@ -75,14 +75,81 @@ serve(async (req: Request): Promise<Response> => {
       cta = { text: "Redeem a pack", url: accountUrl };
     } else if (kind === "purchase") {
       to = lot.purchaser_email;
-      subject = `${lot.product_name} added to your account`;
-      heading = "Your prepaid hours are ready";
-      body = `
-        <p>Thanks for your purchase${lot.purchaser_name ? `, ${lot.purchaser_name}` : ""}.</p>
-        <p><strong>${Number(lot.hours_total)} hours</strong> of simulator time have been added to your account. They can be used any time, any day, and can be combined with your card or account credit if a session costs more than the hours you have left.</p>
-        <p>Your hours expire on <strong>${expiryText}</strong>.</p>
-      `;
+
+      const { data: product } = await supabase
+        .from("pack_products")
+        .select("is_corporate")
+        .eq("id", lot.product_id)
+        .maybeSingle();
+      const isCorporate = Boolean(product?.is_corporate);
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("first_name, last_name, email")
+        .eq("user_id", lot.purchaser_user_id ?? lot.user_id)
+        .maybeSingle();
+
+      let companyName = "";
+      if (isCorporate) {
+        const { data: corp } = await supabase
+          .from("corporate_accounts")
+          .select("company_name")
+          .eq("owner_user_id", lot.purchaser_user_id ?? lot.user_id)
+          .maybeSingle();
+        companyName = corp?.company_name || "";
+      }
+
+      let balanceHours = Number(lot.hours_remaining ?? lot.hours_total);
+      const balanceUserId = lot.user_id ?? lot.purchaser_user_id;
+      if (balanceUserId) {
+        const { data: bal } = await supabase.rpc("pack_hours_balance", { _user_id: balanceUserId });
+        if (bal !== null && bal !== undefined) balanceHours = Number(bal);
+      }
+
+      const templateKey = isCorporate ? "corporate_pack_purchase" : "pack_purchase";
+      const { data: tpl } = await supabase
+        .from("email_templates")
+        .select("subject, html_content, is_active")
+        .eq("template_key", templateKey)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      const priceText = lot.price_paid != null
+        ? `$${Number(lot.price_paid).toFixed(2)}`
+        : "";
+
+      const tags: Record<string, string> = {
+        "{first_name}": profile?.first_name || lot.purchaser_name?.split(" ")[0] || "there",
+        "{last_name}": profile?.last_name || "",
+        "{email}": to || "",
+        "{pack_name}": lot.product_name || "Prepaid pack",
+        "{hours}": String(Number(lot.hours_total)),
+        "{price}": priceText,
+        "{validity_days}": String(lot.validity_days ?? ""),
+        "{expiry_date}": expiryText,
+        "{balance_hours}": String(balanceHours),
+        "{company_name}": companyName,
+        "{company_line}": companyName ? ` for ${companyName}` : "",
+      };
+
+      heading = isCorporate ? "Your company hours are ready" : "Your prepaid hours are ready";
+      subject = applyTags(
+        tpl?.subject || `${lot.product_name} added to your account`,
+        tags,
+      );
+
+      if (tpl?.html_content) {
+        body = applyTags(tpl.html_content, tags);
+      } else {
+        body = `
+          <p>Thanks for your purchase${lot.purchaser_name ? `, ${lot.purchaser_name}` : ""}.</p>
+          <p><strong>${Number(lot.hours_total)} hours</strong> of simulator time have been added to your account. They can be used any time, any day, and can be combined with your card or account credit if a session costs more than the hours you have left.</p>
+          <p>Your hours expire on <strong>${expiryText}</strong>.</p>
+        `;
+      }
+
       cta = { text: "Book a bay", url: tenantBookingUrl(tenant, "/booking") };
+
     } else {
       // expiry_reminder
       const { data: profile } = await supabase

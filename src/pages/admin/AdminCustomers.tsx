@@ -1359,6 +1359,48 @@ export default function AdminCustomers() {
           )}
         </div>
 
+        {/* Make Corporate Dialog */}
+        <Dialog
+          open={!!corporateCustomer}
+          onOpenChange={(o) => !o && setCorporateCustomer(null)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Make corporate account</DialogTitle>
+              <DialogDescription>
+                {corporateCustomer
+                  ? `${corporateCustomer.first_name} ${corporateCustomer.last_name} will manage the company wallet, buy corporate packs and add staff.`
+                  : ""}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Label htmlFor="corp-name">Company name</Label>
+              <Input
+                id="corp-name"
+                value={corporateName}
+                maxLength={120}
+                placeholder="Acme Pty Ltd"
+                onChange={(e) => setCorporateName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") saveCorporateAccount();
+                }}
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setCorporateCustomer(null)}
+                disabled={isSavingCorporate}
+              >
+                Cancel
+              </Button>
+              <Button onClick={saveCorporateAccount} disabled={isSavingCorporate}>
+                {isSavingCorporate ? "Saving..." : "Make corporate"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         {/* Customer Details Dialog */}
         <Dialog 
           open={!!selectedCustomer} 

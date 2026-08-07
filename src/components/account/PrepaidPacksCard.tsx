@@ -203,6 +203,7 @@ export function PrepaidPacksCard() {
               </div>
             </div>
           )}
+        </CardContent>
           </CollapsibleContent>
         </Collapsible>
       </Card>

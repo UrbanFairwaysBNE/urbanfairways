@@ -228,7 +228,24 @@ export function DoorAccessSection() {
     setDraft((d) => (d ? { ...d, [key]: value } : d));
 
   const staffCodes = codes.filter((c) => c.scope === "staff");
-  const otherCodes = codes.filter((c) => c.scope !== "staff");
+  const dailyCode = codes.find((c) => c.scope === "daily") || null;
+  const otherCodes = codes.filter((c) => c.scope !== "staff" && c.scope !== "daily");
+
+  const rotateDaily = async (rotate: boolean) => {
+    setRotating(true);
+    const { data, error } = await supabase.functions.invoke("door-code-manager", {
+      body: { action: "daily_ensure", rotate },
+    });
+    setRotating(false);
+    if (error || !data?.success) {
+      const msg = error?.message || data?.error || "Unknown error";
+      toast({ title: "Could not rotate daily code", description: msg, variant: "destructive", duration: 6000 });
+    } else {
+      toast({ title: `Today's code is ${data.code}`, duration: 5000 });
+    }
+    load();
+  };
+
 
 
   return (

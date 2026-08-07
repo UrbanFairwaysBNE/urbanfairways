@@ -144,6 +144,11 @@ export function useCorporate() {
         .eq("email", clean);
     }
 
+    // Invite email so the staff member knows they have access (non-blocking)
+    supabase.functions
+      .invoke("send-corporate-staff-invite", { body: { staff_email: clean } })
+      .catch(() => undefined);
+
     await refresh();
   };
 

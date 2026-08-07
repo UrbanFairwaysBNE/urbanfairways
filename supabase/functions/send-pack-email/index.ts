@@ -14,7 +14,7 @@ const corsHeaders = {
 const log = (step: string, details?: unknown) =>
   console.log(`[SEND-PACK-EMAIL] ${step}${details ? ` - ${JSON.stringify(details)}` : ""}`);
 
-type Kind = "purchase" | "gift" | "expiry_reminder";
+type Kind = "purchase" | "gift" | "expiry_reminder" | "redeemed";
 
 const applyTags = (html: string, tags: Record<string, string>): string => {
   let out = html;
@@ -42,6 +42,15 @@ serve(async (req: Request): Promise<Response> => {
       .eq("id", pack_lot_id)
       .maybeSingle();
     if (!lot) throw new Error("Pack not found");
+
+    // Redemption emails are triggered by the customer, so verify they own the pack
+    if (kind === "redeemed") {
+      const token = (req.headers.get("Authorization") ?? "").replace("Bearer ", "");
+      const { data: userData } = await supabase.auth.getUser(token);
+      if (!userData?.user || userData.user.id !== lot.user_id) {
+        throw new Error("Not authorised to send this email");
+      }
+    }
 
     const tenant = await getTenant();
     const accountUrl = tenantBookingUrl(tenant, "/my-account");
@@ -150,6 +159,54 @@ serve(async (req: Request): Promise<Response> => {
 
       cta = { text: "Book a bay", url: tenantBookingUrl(tenant, "/booking") };
 
+    } else if (kind === "redeemed") {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("email, first_name, last_name")
+        .eq("user_id", lot.user_id)
+        .maybeSingle();
+      to = profile?.email ?? null;
+
+      let balanceHours = Number(lot.hours_remaining ?? lot.hours_total);
+      if (lot.user_id) {
+        const { data: bal } = await supabase.rpc("pack_hours_balance", { _user_id: lot.user_id });
+        if (bal !== null && bal !== undefined) balanceHours = Number(bal);
+      }
+
+      const { data: tpl } = await supabase
+        .from("email_templates")
+        .select("subject, html_content, is_active")
+        .eq("template_key", "pack_redeemed")
+        .eq("is_active", true)
+        .maybeSingle();
+
+      const tags: Record<string, string> = {
+        "{first_name}": profile?.first_name || lot.recipient_name?.split(" ")[0] || "there",
+        "{last_name}": profile?.last_name || "",
+        "{email}": to || "",
+        "{pack_name}": lot.product_name || "Prepaid pack",
+        "{hours}": String(Number(lot.hours_total)),
+        "{validity_days}": String(lot.validity_days ?? ""),
+        "{expiry_date}": expiryText,
+        "{balance_hours}": String(balanceHours),
+        "{redemption_code}": lot.redemption_code || "",
+        "{purchaser_name}": lot.purchaser_name || "",
+      };
+
+      heading = "Your hours are ready";
+      subject = applyTags(tpl?.subject || `Your ${lot.product_name} hours are ready`, tags);
+
+      if (tpl?.html_content) {
+        body = applyTags(tpl.html_content, tags);
+      } else {
+        body = `
+          <p>Hi ${tags["{first_name}"]},</p>
+          <p>Your code has been redeemed and <strong>${Number(lot.hours_total)} hours</strong> of simulator time have been added to your account.</p>
+          <p>Your prepaid balance is now <strong>${balanceHours} hours</strong>, and these hours expire on <strong>${expiryText}</strong>.</p>
+        `;
+      }
+
+      cta = { text: "Book a bay", url: tenantBookingUrl(tenant, "/booking") };
     } else {
       // expiry_reminder
       const { data: profile } = await supabase

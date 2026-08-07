@@ -525,23 +525,23 @@ serve(async (req) => {
 
         // Send ONE cancellation email — different content for payment failure vs voluntary
         if (resend) {
-          const templateKey = isPaymentFailure ? "membership_payment_failed" : "membership_cancelled";
+          // The same "membership cancelled" template is used whether the customer
+          // cancelled, an admin cancelled, or a failed payment moved them to Casual.
           const { data: emailTemplate } = await supabaseAdmin
             .from("email_templates")
             .select("*")
-            .eq("template_key", templateKey)
+            .eq("template_key", "membership_cancelled")
             .eq("is_active", true)
-            .single();
+            .maybeSingle();
 
-          // Fallback: try the generic template if specific one not found
           let finalTemplate = emailTemplate;
           if (!finalTemplate && isPaymentFailure) {
             const { data: fallbackTemplate } = await supabaseAdmin
               .from("email_templates")
               .select("*")
-              .eq("template_key", "membership_cancelled")
+              .eq("template_key", "membership_payment_failed")
               .eq("is_active", true)
-              .single();
+              .maybeSingle();
             finalTemplate = fallbackTemplate;
           }
 

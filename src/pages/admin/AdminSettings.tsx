@@ -159,6 +159,26 @@ const TEMPLATE_TAGS: Record<string, { tag: string; description: string }[]> = {
     { tag: "{expiry_date}", description: "Date the hours expire" },
     { tag: "{balance_hours}", description: "Shared company wallet balance after purchase" },
   ],
+  pack_redeemed: [
+    { tag: "{first_name}", description: "Redeemer's first name" },
+    { tag: "{last_name}", description: "Redeemer's last name" },
+    { tag: "{email}", description: "Redeemer's email address" },
+    { tag: "{pack_name}", description: "Name of the pack redeemed" },
+    { tag: "{hours}", description: "Hours added to their balance" },
+    { tag: "{balance_hours}", description: "Total prepaid hours balance after redeeming" },
+    { tag: "{validity_days}", description: "Validity period in days" },
+    { tag: "{expiry_date}", description: "Date the hours expire" },
+    { tag: "{redemption_code}", description: "The code that was redeemed" },
+    { tag: "{purchaser_name}", description: "Name of the person who bought the pack (if known)" },
+  ],
+  corporate_staff_invite: [
+    { tag: "{first_name}", description: "Staff member's first name (if they already have an account)" },
+    { tag: "{email}", description: "Staff member's email address" },
+    { tag: "{company_name}", description: "Company account name" },
+    { tag: "{owner_name}", description: "Name of the company account owner" },
+    { tag: "{monthly_cap}", description: "Monthly hour cap, blank if unlimited" },
+    { tag: "{cap_line}", description: "Ready-made sentence about their monthly hour allowance" },
+  ],
 };
 
 

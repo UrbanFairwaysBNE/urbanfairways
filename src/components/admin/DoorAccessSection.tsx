@@ -95,6 +95,10 @@ export function DoorAccessSection() {
   const [namedExpiry, setNamedExpiry] = useState(() => bneLocalInput(60 * 24 * 30));
   const [issuingNamed, setIssuingNamed] = useState(false);
 
+  // Daily rotating code
+  const [rotating, setRotating] = useState(false);
+
+
   const load = async () => {
     setIsLoading(true);
     const [{ data: s }, { data: c }] = await Promise.all([

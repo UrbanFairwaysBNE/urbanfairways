@@ -53,6 +53,7 @@ serve(async (req) => {
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
     // Find and cancel Stripe subscription
+    let cancelledAny = false;
     const customers = await stripe.customers.list({ email: profile.email, limit: 1 });
     
     if (customers.data.length > 0) {
@@ -67,11 +68,14 @@ serve(async (req) => {
 
       for (const sub of subscriptions.data) {
         await stripe.subscriptions.cancel(sub.id);
+        cancelledAny = true;
         logStep("Cancelled subscription", { subscriptionId: sub.id });
       }
     } else {
       logStep("No Stripe customer found, skipping subscription cancellation");
     }
+
+    const previousTier = profile.membership_tier || "Member";
 
     // Update profile to casual tier
     const { error: updateError } = await supabaseClient
@@ -84,8 +88,64 @@ serve(async (req) => {
     }
     logStep("Updated profile to casual tier");
 
-    // Email notification is now handled by the Stripe webhook (stripe-webhook function)
-    // when the subscription.deleted event fires, preventing duplicate emails
+    // When Stripe cancelled a subscription, the webhook sends the cancellation email.
+    // With no live subscription there is no webhook, so send it here using the same
+    // membership_cancelled template.
+    if (!cancelledAny && profile.email) {
+      try {
+        const tenant = await getTenant();
+        const resendKey = Deno.env.get("RESEND_API_KEY");
+        if (resendKey) {
+          const { data: tpl } = await supabaseClient
+            .from("email_templates")
+            .select("subject, html_content, is_active")
+            .eq("template_key", "membership_cancelled")
+            .eq("is_active", true)
+            .maybeSingle();
+
+          const tags: Record<string, string> = {
+            "{first_name}": profile.first_name || "there",
+            "{last_name}": profile.last_name || "",
+            "{email}": profile.email,
+            "{tier_name}": previousTier,
+          };
+          const applyTags = (s: string) => {
+            let out = s;
+            for (const [k, v] of Object.entries(tags)) out = out.replaceAll(k, v);
+            return out;
+          };
+
+          const subject = applyTags(
+            tpl?.subject || `Your ${tenant.venue_name} Membership Has Been Cancelled`,
+          );
+          const body = tpl?.html_content
+            ? applyTags(tpl.html_content)
+            : `
+              <p>Hi ${tags["{first_name}"]}, your <strong>${previousTier}</strong> membership has been cancelled.</p>
+              <p>Your account has been reverted to Casual status. You can still book sessions at our standard casual rates.</p>
+            `;
+
+          const html = await renderBrandedEmail(
+            supabaseClient,
+            "Membership Cancelled",
+            body,
+            { text: "Rejoin Membership", url: tenantHubUrl(tenant, "/membership") },
+            tenant,
+          );
+
+          const resend = new Resend(resendKey);
+          await resend.emails.send({
+            from: `${tenant.venue_name} <${tenant.sender_email}>`,
+            to: [profile.email],
+            subject,
+            html,
+          });
+          logStep("Cancellation email sent (no Stripe subscription)", { email: profile.email });
+        }
+      } catch (emailErr: any) {
+        logStep("Failed to send cancellation email (non-blocking)", { error: emailErr?.message });
+      }
+    }
 
     return new Response(
       JSON.stringify({ success: true, message: "Membership cancelled successfully" }),

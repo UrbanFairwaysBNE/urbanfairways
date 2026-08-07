@@ -585,6 +585,53 @@ export default function AdminCustomers() {
   };
 
   // Toggle admin role for a customer
+  /** Promote a customer to a corporate account owner (or rename their company). */
+  const saveCorporateAccount = async () => {
+    if (!corporateCustomer) return;
+    const name = corporateName.trim();
+    if (!name) {
+      toast({ title: "Enter a company name", variant: "destructive" });
+      return;
+    }
+    setIsSavingCorporate(true);
+    try {
+      const { data: existing } = await supabase
+        .from("corporate_accounts")
+        .select("id")
+        .eq("owner_user_id", corporateCustomer.user_id)
+        .maybeSingle();
+
+      if (existing) {
+        const { error } = await supabase
+          .from("corporate_accounts")
+          .update({ company_name: name, is_active: true })
+          .eq("id", existing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("corporate_accounts")
+          .insert({ owner_user_id: corporateCustomer.user_id, company_name: name });
+        if (error) throw error;
+      }
+
+      toast({
+        title: "Corporate account saved",
+        description: `${corporateCustomer.first_name} ${corporateCustomer.last_name} now manages ${name}.`,
+        duration: 4000,
+      });
+      setCorporateCustomer(null);
+      setCorporateName("");
+    } catch (e) {
+      toast({
+        title: "Could not save",
+        description: e instanceof Error ? e.message : "Unknown error",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSavingCorporate(false);
+    }
+  };
+
   const toggleAdminRole = async (customer: Customer) => {
     setIsTogglingAdmin(true);
     

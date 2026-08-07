@@ -1461,9 +1461,17 @@ export default function AdminCustomers() {
                     <h3 className="font-medium text-lg truncate">
                       {selectedCustomer.first_name} {selectedCustomer.last_name}
                     </h3>
-                    <Badge className={getMembershipColor(selectedCustomer.membership_tier)}>
-                      {selectedCustomer.membership_tier || "Casual"}
-                    </Badge>
+                    <div className="flex flex-wrap items-center gap-1">
+                      <Badge className={getMembershipColor(selectedCustomer.membership_tier)}>
+                        {selectedCustomer.membership_tier || "Casual"}
+                      </Badge>
+                      {corporateMap[selectedCustomer.user_id] && (
+                        <Badge variant="outline" className="border-brand-accent text-brand-accent">
+                          {corporateMap[selectedCustomer.user_id].role === "owner" ? "Corporate" : "Corp staff"} · {corporateMap[selectedCustomer.user_id].company}
+                        </Badge>
+                      )}
+                    </div>
+
                   </div>
                   {isMobile ? (
                     <Button

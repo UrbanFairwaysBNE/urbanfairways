@@ -79,6 +79,7 @@ import { GiftCardsSection } from "@/components/admin/GiftCardsSection";
 import { CreditTransactionHistory } from "@/components/admin/CreditTransactionHistory";
 import { MembersSection } from "@/components/admin/MembersSection";
 import { format } from "date-fns";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Customer {
   id: string;
@@ -119,6 +120,7 @@ const DEFAULT_COLUMNS: ColumnConfig[] = [
 
 export default function AdminCustomers() {
   const { isAdmin, isLoading: authLoading } = useAdminAuth();
+  const isMobile = useIsMobile();
   const { pricing } = usePricing();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -1433,6 +1435,20 @@ export default function AdminCustomers() {
                       {selectedCustomer.membership_tier || "Casual"}
                     </Badge>
                   </div>
+                  {isMobile ? (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => toggleBookingFlag(selectedCustomer)}
+                      className={selectedCustomer.booking_flag_enabled ? "text-brand-accent hover:text-brand-accent" : "text-muted-foreground"}
+                      aria-label="Toggle booking flag"
+                      title={selectedCustomer.booking_flag_enabled
+                        ? "Booking flag ON — admin is emailed whenever this customer makes a booking. Tap to disable."
+                        : "Enable booking flag to email the admin whenever this customer makes a booking."}
+                    >
+                      <Flag className={`h-5 w-5 ${selectedCustomer.booking_flag_enabled ? "fill-current" : ""}`} />
+                    </Button>
+                  ) : (
                   <TooltipProvider delayDuration={150}>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -1453,7 +1469,9 @@ export default function AdminCustomers() {
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
+                  )}
                 </div>
+
 
 
                 <hr className="border-border" />

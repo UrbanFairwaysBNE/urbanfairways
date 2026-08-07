@@ -1,6 +1,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { Resend } from "npm:resend@2.0.0";
+import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
+import { getTenant, tenantHubUrl } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -37,7 +40,7 @@ serve(async (req) => {
     // Get user profile
     const { data: profile, error: profileError } = await supabaseClient
       .from("profiles")
-      .select("email, membership_tier, custom_billing")
+      .select("email, first_name, last_name, membership_tier, custom_billing")
       .eq("user_id", user_id)
       .single();
 

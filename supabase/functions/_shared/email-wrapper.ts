@@ -4,7 +4,7 @@
 // template. Individual template bodies should contain body content ONLY.
 
 import type { TenantConfig } from "./tenant.ts";
-import { tenantAddress } from "./tenant.ts";
+import { getTenant, tenantAddress } from "./tenant.ts";
 
 export interface EmailCta {
   text: string;

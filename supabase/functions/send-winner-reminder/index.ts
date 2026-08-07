@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { getTenant, tenantHubUrl, TenantConfig } from "../_shared/tenant.ts";
+import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,57 +10,20 @@ const corsHeaders = {
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
-const buildEmailHtml = (tenant: TenantConfig, heading: string, bodyContent: string, ctaText: string) => `<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>${tenant.venue_name} Email</title>
-  <style>
-    @import url("https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Manrope:wght@400;600&display=swap");
-  </style>
-</head>
-<body style="margin:0; padding:0; background-color:#F5F3EF;">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F5F3EF;">
-<tr><td align="center" style="padding:24px 12px;">
-<table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px; width:100%;">
-  <tr>
-    <td align="center" style="background-color:#2F3134; padding:18px; border-radius:16px 16px 0 0;">
-      <div style="font-family:Archivo, Impact, Arial Black, sans-serif; font-size:26px; color:#FFFFFF; text-align:center; letter-spacing:0.5px;">${tenant.venue_name}</div>
-    </td>
-  </tr>
-  <tr>
-    <td style="background-color:#F5F3EF; padding:26px 22px; border-left:1px solid rgba(47,49,52,0.12); border-right:1px solid rgba(47,49,52,0.12);">
-      <h1 style="margin:0 0 14px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:34px; line-height:1.1; color:#2F3134; text-align:center;">
-        ${heading}
-      </h1>
-      ${bodyContent}
-      <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:22px auto 0;">
-        <tr>
-          <td bgcolor="#B5772A" style="border-radius:12px;">
-            <a href="${tenantHubUrl(tenant, "/admin/sgt-manager")}"
-               style="display:inline-block; padding:14px 24px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:18px; letter-spacing:0.3px; color:#FFFFFF; text-decoration:none;">
-              ${ctaText}
-            </a>
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-  <tr>
-    <td style="background-color:#2F3134; padding:22px; border-radius:0 0 16px 16px;">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr><td align="center" style="font-family:Manrope, Arial, sans-serif; font-size:12px; color:#F5F3EF; opacity:0.8;">
-          <p style="margin:0;">© ${tenant.venue_name}</p>
-        </td></tr>
-      </table>
-    </td>
-  </tr>
-</table>
-</td></tr>
-</table>
-</body>
-</html>`;
+const buildEmailHtml = (
+  supabase: any,
+  tenant: TenantConfig,
+  heading: string,
+  bodyContent: string,
+  ctaText: string,
+) =>
+  renderBrandedEmail(
+    supabase,
+    heading,
+    bodyContent,
+    { text: ctaText, url: tenantHubUrl(tenant, "/admin/sgt-manager") },
+    tenant,
+  );
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -100,7 +64,8 @@ serve(async (req) => {
         : "";
 
       subject = "⏰ Reminder: Confirm This Week's League Winner";
-      htmlContent = buildEmailHtml(
+      htmlContent = await buildEmailHtml(
+        supabase,
         tenant,
         "Weekly Winner Reminder",
         `<p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
@@ -119,7 +84,8 @@ serve(async (req) => {
       const monthName = prevMonth.toLocaleString("en-AU", { month: "long", year: "numeric" });
 
       subject = `⏰ Reminder: Confirm ${monthName} Monthly League Winner`;
-      htmlContent = buildEmailHtml(
+      htmlContent = await buildEmailHtml(
+        supabase,
         tenant,
         "Monthly Winner Reminder",
         `<p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">

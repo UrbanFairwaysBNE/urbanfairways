@@ -155,7 +155,9 @@ export const PackProductsSettings = ({ isCorporate = false }: { isCorporate?: bo
     <div className="space-y-4">
       {packs.length === 0 && (
         <p className="text-sm text-muted-foreground">
-          No packs yet. Add one to let customers prepay for sim time.
+          {isCorporate
+            ? "No corporate packs yet. Add one so companies can prepay for staff sim time."
+            : "No packs yet. Add one to let customers prepay for sim time."}
         </p>
       )}
 

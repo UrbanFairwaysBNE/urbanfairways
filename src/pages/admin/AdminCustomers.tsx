@@ -172,7 +172,9 @@ export default function AdminCustomers() {
 
   // Make admin state
   const [isTogglingAdmin, setIsTogglingAdmin] = useState(false);
+  const [corporateMap, setCorporateMap] = useState<Record<string, { company: string; role: "owner" | "staff" }>>({});
   const [corporateCustomer, setCorporateCustomer] = useState<Customer | null>(null);
+
   const [corporateName, setCorporateName] = useState("");
   const [isSavingCorporate, setIsSavingCorporate] = useState(false);
 

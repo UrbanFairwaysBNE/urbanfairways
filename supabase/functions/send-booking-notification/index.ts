@@ -481,7 +481,7 @@ serve(async (req) => {
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#2F3134; border-radius:12px; margin:18px 0;">
                 <tr>
                   <td style="padding:20px; font-family:Manrope, Arial, sans-serif; font-size:15px; color:#F5F3EF; text-align:center;">
-                    <p style="margin:0 0 10px 0;"><strong>Door Access Code:</strong> 7675#</p>
+                    <p style="margin:0 0 10px 0;"><strong>Door Access Code:</strong> ${doorCode}</p>
                     ${needsBoomGate ? `
                     <p style="margin:0; font-size:14px;">
                       <strong>IMPORTANT:</strong> You will require Boom gate access for your booking time.<br/>
@@ -492,9 +492,7 @@ serve(async (req) => {
                 </tr>
               </table>
 
-              
 
-              ${reviewCtaHtml}
               
               <p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 We look forward to seeing you at ${tenant.venue_name}!

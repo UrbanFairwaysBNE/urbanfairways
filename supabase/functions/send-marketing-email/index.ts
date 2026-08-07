@@ -157,7 +157,7 @@ async function sendEmailsInBackground(
             </p>`;
 
         const brandedHtml = await renderBrandedEmail(
-          supabaseClient,
+          supabaseForUpdate,
           personalizedSubject,
           bodyContent + unsubscribeBlock,
           undefined,

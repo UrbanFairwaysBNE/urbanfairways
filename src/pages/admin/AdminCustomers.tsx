@@ -1336,6 +1336,15 @@ export default function AdminCustomers() {
                               <Shield className="h-4 w-4 mr-2" />
                               Make Admin
                             </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setCorporateCustomer(customer);
+                                setCorporateName("");
+                              }}
+                            >
+                              <Building2 className="h-4 w-4 mr-2" />
+                              Make Corporate
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>

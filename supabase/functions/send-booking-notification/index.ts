@@ -427,17 +427,8 @@ serve(async (req) => {
     let htmlContent: string;
     let smsMessage: string;
 
-    // Check if user has already been approved for Google review reward
-    let hasReviewReward = false;
-    if (notification_type === "confirmation") {
-      const { data: reviewReward } = await supabaseClient
-        .from("google_review_rewards")
-        .select("id")
-        .eq("user_id", booking.user_id)
-        .maybeSingle();
-      hasReviewReward = !!reviewReward;
-      logStep("Review reward check", { hasReviewReward });
-    }
+
+
 
     if (notification_type === "confirmation" || notification_type === "reschedule") {
       // Use custom subject if available
@@ -452,63 +443,17 @@ serve(async (req) => {
         : (isFirstTimeUnstaffed ? "booking_confirmation_first_unstaffed" : "booking_confirmation");
 
       smsMessage = (await renderSmsTemplate(smsKey)) ?? "";
-
-
-      // Build Google Review CTA block (only for confirmations, not reschedules, and not if already rewarded)
-      const reviewCtaHtml = (!isReschedule && !hasReviewReward) ? `
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border:1px solid rgba(47,49,52,0.12);">
-                <tr>
-                  <td style="padding:20px; text-align:center;">
-                    <p style="margin:0 0 8px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:18px; color:#2F3134;">
-                      ENJOYING ${tenant.venue_name.toUpperCase()}? ⭐
-                    </p>
-                    <p style="margin:0 0 14px; font-family:Manrope, Arial, sans-serif; font-size:14px; color:#2F3134; line-height:1.5;">
-                      Leave us a Google Review and receive <strong>$15 credit</strong> on your next visit!
-                    </p>
-                    <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0">
-                      <tr>
-                        <td bgcolor="#B5772A" style="border-radius:8px;">
-                          <a href="https://g.page/r/CSMrsLoxE318EBM/review"
-                             style="display:inline-block; padding:10px 20px; font-family:Manrope, Arial, sans-serif; font-size:14px; font-weight:600; color:#FFFFFF; text-decoration:none;">
-                            Leave a Review →
-                          </a>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
-      ` : '';
-
-
-
-
       const headingText = isReschedule ? "Booking Rescheduled!" : "Booking Confirmed!";
-      
+
       // Check if custom template exists (only for confirmation, not reschedule)
       if (!isReschedule && emailTemplate?.html_content) {
-        let bodyContent = replaceTemplateTags(emailTemplate.html_content, templateTags);
-        // Insert Google Review CTA after "First Time at {venue}?" section
-        if (reviewCtaHtml) {
-          const firstTimeIndex = bodyContent.indexOf(`First Time at ${tenant.venue_name}`);
-          if (firstTimeIndex !== -1) {
-            const afterFirstTime = bodyContent.indexOf('</table>', firstTimeIndex);
-            if (afterFirstTime !== -1) {
-              const insertAt = afterFirstTime + '</table>'.length;
-              bodyContent = bodyContent.slice(0, insertAt) + reviewCtaHtml + bodyContent.slice(insertAt);
-            }
-          } else {
-            const lookForwardIndex = bodyContent.indexOf('We look forward');
-            if (lookForwardIndex !== -1) {
-              bodyContent = bodyContent.slice(0, lookForwardIndex) + reviewCtaHtml + bodyContent.slice(lookForwardIndex);
-            }
-          }
-        }
+        const bodyContent = replaceTemplateTags(emailTemplate.html_content, templateTags);
         htmlContent = await renderBrandedEmail(supabaseClient, headingText, bodyContent, {
           text: "View My Bookings",
           url: tenantHubUrl(tenant, "/my-bookings")
         });
-        logStep("Using custom email template with wrapper", { reviewCtaInjected: !!reviewCtaHtml, templateKey });
+        logStep("Using custom email template with wrapper", { templateKey });
+
       } else {
         const introText = isReschedule 
           ? `Hi ${profile.first_name}, your golf simulator booking has been successfully rescheduled!`
@@ -536,7 +481,7 @@ serve(async (req) => {
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#2F3134; border-radius:12px; margin:18px 0;">
                 <tr>
                   <td style="padding:20px; font-family:Manrope, Arial, sans-serif; font-size:15px; color:#F5F3EF; text-align:center;">
-                    <p style="margin:0 0 10px 0;"><strong>Door Access Code:</strong> 7675#</p>
+                    <p style="margin:0 0 10px 0;"><strong>Door Access Code:</strong> ${doorCode}</p>
                     ${needsBoomGate ? `
                     <p style="margin:0; font-size:14px;">
                       <strong>IMPORTANT:</strong> You will require Boom gate access for your booking time.<br/>
@@ -547,9 +492,7 @@ serve(async (req) => {
                 </tr>
               </table>
 
-              
 
-              ${reviewCtaHtml}
               
               <p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 We look forward to seeing you at ${tenant.venue_name}!

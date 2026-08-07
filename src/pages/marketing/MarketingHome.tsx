@@ -14,10 +14,10 @@ import { useTenant, hubUrl } from "@/config/tenant";
 import { useMarketingPricing, type MarketingTier } from "@/hooks/useMarketingPricing";
 
 const getFeatures = (venueName: string) => [
-  { icon: Target, title: "High-Tech Simulators", body: "Tour-accurate launch data, 4K graphics and a huge library of world-famous courses." },
-  { icon: Clock, title: "Extended Access Hours", body: "Simulator bays available across extended hours, book any time, play any time." },
+  { icon: Target, title: "High-Tech Simulators", body: "ProTee VX overhead launch monitors, tour-accurate data, 4K graphics and a huge library of world-famous courses." },
+  { icon: Clock, title: "Extended Access Hours", body: "Seven simulator bays open across extended hours for maximum availability — book any time, play any time." },
   { icon: DollarSign, title: "Affordable Memberships", body: "Pay a simple weekly fee to unlock your member hourly rate." },
-  { icon: Trophy, title: "Competitions & League", body: `Eligible members get access to the ${venueName} League. Other members can still jump into local weekly comps.` },
+  { icon: Trophy, title: "Competitions & League", body: `Eligible members get access to the ${venueName} League, and everyone is welcome in our local weekly comps.` },
 ];
 
 const swingLabFeatures = [
@@ -126,7 +126,7 @@ const MarketingHome = () => {
           <div className="text-center max-w-2xl mx-auto mb-14">
             <p className="text-accent font-display font-bold tracking-[0.2em] uppercase text-sm mb-3">Why {tenant.venue_name}</p>
             <h2 className="font-display text-4xl sm:text-5xl leading-tight">
-              Tour-level tech. Local prices. Zero excuses.
+              Elite data. Open all hours. Fair prices.
             </h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">

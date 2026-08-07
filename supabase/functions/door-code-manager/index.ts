@@ -698,7 +698,12 @@ async function syncAll() {
     }
   }
 
-  return { success: true, expired, retried, corrected, revoked, reRevoked };
+  // Daily rotating mode: make sure today's code exists and yesterday's is gone
+  let daily: unknown = null;
+  if (s.mode === "daily") daily = await ensureDailyCode();
+
+  return { success: true, expired, retried, corrected, revoked, reRevoked, daily };
+
 }
 
 Deno.serve(async (req) => {

@@ -152,8 +152,16 @@ export function usePackHours(userId?: string | null) {
   const redeemCode = async (code: string) => {
     const { data, error } = await supabase.rpc("redeem_pack_code", { _code: code.trim() });
     if (error) throw new Error(error.message);
-    const result = data as { success: boolean; error?: string; hours?: number };
+    const result = data as { success: boolean; error?: string; hours?: number; lot_id?: string };
     if (!result?.success) throw new Error(result?.error || "Could not redeem that code");
+
+    // Confirmation email to the person who redeemed the code (non-blocking)
+    if (result.lot_id) {
+      supabase.functions
+        .invoke("send-pack-email", { body: { pack_lot_id: result.lot_id, kind: "redeemed" } })
+        .catch(() => undefined);
+    }
+
     await refresh();
     return result.hours ?? 0;
   };

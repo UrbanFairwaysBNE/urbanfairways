@@ -54,7 +54,7 @@ jobs:
 
               let latestPatch = localPatch;
               try {
-                const response = await fetch('https://github.com/UrbanFairwaysBNE/UF-Bay-Controller/releases/latest/download/latest.yml', {
+                const response = await fetch('https://github.com/UrbanFairwaysBNE/urbanfairways/releases/latest/download/latest.yml', {
                   headers: { 'Cache-Control': 'no-cache' }
                 });
 

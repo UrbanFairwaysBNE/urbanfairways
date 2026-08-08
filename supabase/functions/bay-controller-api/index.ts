@@ -8,6 +8,9 @@ const DEPLOYED_AT = new Date().toISOString();
 const SETTINGS_FILES = new Set(["dpsV2x3.gss", "Settings.vgs"]);
 const SETTINGS_BUCKET = "gspro-user-settings";
 const CSV_BUCKET = "range-session-csv";
+// Urban Fairways runs 7 bays; venue clock is Australia/Brisbane (AEST/UTC+10, no DST)
+const MAX_BAY_NUMBER = 7;
+const VENUE_UTC_OFFSET_HOURS = 10;
 
 // Full CORS headers compatible with supabase-js client
 const corsHeaders = {

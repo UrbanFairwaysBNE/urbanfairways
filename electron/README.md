@@ -50,7 +50,7 @@ To run in development mode:
 ## Features
 
 - **Password Protection**: App requires password "Holeinone1" to access
-- **Bay Selection**: Select which bay (1-6) this controller manages
+- **Bay Selection**: Select which bay (1-7) this controller manages
 - **Booking Sync**: Pulls bookings from the venue platform in real-time
 - **TAPO Plug Control**: Scans network for TAPO P110 smart plugs
 - **Auto Power Control**: Turns on 3 minutes before booking, off when done

@@ -23,7 +23,7 @@ REM ============================================================
 REM --- Configuration ---
 REM Update this path to match your installation
 set "APP_PATH=%LOCALAPPDATA%\Programs\bay-controller\Bay Controller.exe"
-set "PROCESS_NAME=Bay Controller.exe"
+set "PROCESS_NAME=UF Bay Controller.exe"
 set "CHECK_INTERVAL=30"
 
 REM Log file for watchdog activity

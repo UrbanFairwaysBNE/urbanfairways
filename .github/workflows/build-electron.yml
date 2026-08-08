@@ -140,7 +140,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ steps.set_version.outputs.new_version }}
-          name: Urban Fairways Bay Controller ${{ steps.set_version.outputs.new_version }}
+          name: UF Bay Controller ${{ steps.set_version.outputs.new_version }}
           files: |
             ${{ steps.resolve_updater_asset.outputs.asset_path }}
             electron/dist-electron/latest.yml

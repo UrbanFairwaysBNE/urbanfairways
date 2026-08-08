@@ -11,7 +11,7 @@
   },
   "build": {
     "appId": "au.com.urbanfairways.baycontroller",
-    "productName": "Urban Fairways Bay Controller",
+    "productName": "UF Bay Controller",
     "directories": {
       "output": "dist-electron"
     },
@@ -50,7 +50,8 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "runAfterFinish": true,
-      "artifactName": "UrbanFairwaysBayController-Setup-${version}.${ext}"
+      "shortcutName": "UF Bay Controller",
+      "artifactName": "UFBayController-Setup-${version}.${ext}"
     }
   },
   "devDependencies": {

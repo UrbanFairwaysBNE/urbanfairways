@@ -408,10 +408,14 @@ export const PricingRatesSettings = () => {
                   <strong>${confirmRow ? draft[confirmRow.id]?.weekly || "0" : ""}</strong>.
                 </p>
                 <p>
-                  <strong>Existing members are not grandfathered.</strong> Every current{" "}
-                  {confirmRow?.display_name} member will move to the new price at their next billing
-                  date, so all members on this tier pay the same amount.
+                  <strong>Existing members are not grandfathered.</strong>{" "}
+                  {affected === null
+                    ? "Checking Stripe for active subscribers on this tier…"
+                    : affected === 0
+                      ? "No active Stripe subscribers on this tier right now, so only new sign-ups are affected."
+                      : `${affected} active Stripe subscription${affected === 1 ? "" : "s"} will be moved onto the new price straight away, with the charge prorated and their billing date left unchanged.`}
                 </p>
+
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>

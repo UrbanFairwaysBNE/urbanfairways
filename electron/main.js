@@ -8,7 +8,10 @@ const execAsync = promisify(exec);
 
 // The controller loads the live app (webviews, booking data, extend links) from
 // this origin. Override with the HUB_ORIGIN env var while the domain is pending.
-const HUB_ORIGIN = process.env.HUB_ORIGIN || "https://urbanfairways.com.au";
+// GO-LIVE: change this to "https://urbanfairways.com.au" when the custom domain
+// is connected, then push to main so the controller auto-updates on every bay PC.
+// See docs/platform/GO-LIVE-CHECKLIST.md
+const HUB_ORIGIN = process.env.HUB_ORIGIN || "https://urbanfairways.lovable.app";
 const VENUE_NAME = process.env.VENUE_NAME || "Urban Fairways";
 
 // =====================================================

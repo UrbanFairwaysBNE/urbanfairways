@@ -3467,22 +3467,57 @@ function stopGsproWatcher() {
   }
 }
 
-// Load config on startup
+// Load config on startup, then auto-detect this PC's GSPro folder if unset
 loadBaselineConfig();
+autoDetectGsproFolder();
 
 // IPC: Get baseline config
 ipcMain.handle('get-baseline-config', async () => {
   const storagePath = getBaselineStoragePath();
   const hasDpsFile = fs.existsSync(path.join(storagePath, 'dpsV2x3.gss'));
   const hasSettingsFile = fs.existsSync(path.join(storagePath, 'Settings.vgs'));
-  
+  const resolvedProteeConfigPath = getProteeConfigPath();
+
   return {
     ...baselineConfig,
     hasDpsFile,
     hasSettingsFile,
+    resolvedProteeConfigPath,
+    proteeConfigFound: fs.existsSync(resolvedProteeConfigPath),
     isWatching: !!gsproWatchInterval,
   };
 });
+
+// IPC: Browse for the ProTee Labs Config file (paths differ per bay PC)
+ipcMain.handle('browse-protee-config', async () => {
+  try {
+    const current = getProteeConfigPath();
+    const result = await dialog.showOpenDialog(mainWindow, {
+      title: 'Select ProTee Labs Config File',
+      defaultPath: fs.existsSync(current) ? current : path.dirname(getDefaultProteeConfigPath()),
+      properties: ['openFile'],
+    });
+
+    if (result.canceled || result.filePaths.length === 0) {
+      return { success: false, canceled: true };
+    }
+
+    baselineConfig.proteeConfigPath = result.filePaths[0];
+    saveBaselineConfig();
+    return { success: true, configPath: baselineConfig.proteeConfigPath };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// IPC: Reset the ProTee config path back to auto-detection
+ipcMain.handle('reset-protee-config-path', async () => {
+  baselineConfig.proteeConfigPath = '';
+  saveBaselineConfig();
+  const resolved = getProteeConfigPath();
+  return { success: true, configPath: resolved, found: fs.existsSync(resolved) };
+});
+
 
 // IPC: Get display device paths (friendly name -> device path mapping)
 ipcMain.handle('get-display-device-paths', async () => {

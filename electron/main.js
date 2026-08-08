@@ -3187,18 +3187,69 @@ ipcMain.handle('clear-auto-paste', async () => {
 // GSPRO BASELINE SETTINGS MANAGEMENT
 // =====================================================
 
-// Protee Labs config path (hardcoded per plan)
-const PROTEE_CONFIG_PATH = 'C:\\Users\\Golf Sim\\AppData\\Roaming\\ProTeeUnited\\Configs\\Config';
+// Protee Labs config path.
+// NEVER hardcode a Windows username here — bay PCs differ per venue.
+// Resolution order: explicit admin-configured path -> %APPDATA% of the
+// logged-in user -> legacy Birdies path (only if it actually exists).
+const LEGACY_PROTEE_CONFIG_PATH = 'C:\\Users\\Golf Sim\\AppData\\Roaming\\ProTeeUnited\\Configs\\Config';
+
+function getDefaultProteeConfigPath() {
+  const roaming = process.env.APPDATA
+    || path.join(require('os').homedir(), 'AppData', 'Roaming');
+  return path.join(roaming, 'ProTeeUnited', 'Configs', 'Config');
+}
+
+function getProteeConfigPath() {
+  if (baselineConfig.proteeConfigPath && baselineConfig.proteeConfigPath.trim() !== '') {
+    return baselineConfig.proteeConfigPath;
+  }
+  const auto = getDefaultProteeConfigPath();
+  try {
+    if (fs.existsSync(auto)) return auto;
+    if (fs.existsSync(LEGACY_PROTEE_CONFIG_PATH)) return LEGACY_PROTEE_CONFIG_PATH;
+  } catch { /* noop */ }
+  return auto;
+}
 
 // State for baseline settings
 let baselineConfig = {
-  gsproFolderPath: '', // C:\Users\<user>\AppData\Local\GSPro
+  gsproFolderPath: '', // e.g. %LOCALAPPDATA%\GSPro — auto-detected on first run
   dpsFilePath: '',     // Full path to dpsV2x3.gss in GSPro folder
   settingsFilePath: '', // Full path to Settings.vgs in GSPro folder
+  proteeConfigPath: '', // Optional override for the ProTee Labs Config file
   enabled: false,
   proteeDisplayLabel: '', // Friendly display name (e.g., "BenQ RE6504")
   proteeScreenId: '',     // Resolved \\?\DISPLAY#...  device path
 };
+
+// Auto-detect the GSPro data folder for this PC when it hasn't been set yet.
+// Uses the logged-in user's own LOCALAPPDATA, so a venue with a differently
+// named Windows account works without any manual configuration.
+function autoDetectGsproFolder() {
+  if (baselineConfig.gsproFolderPath && baselineConfig.gsproFolderPath.trim() !== '') return;
+  try {
+    const localAppData = process.env.LOCALAPPDATA
+      || path.join(require('os').homedir(), 'AppData', 'Local');
+    const candidates = [
+      path.join(localAppData, 'GSPro'),
+      path.join(require('os').homedir(), 'AppData', 'Local', 'GSPro'),
+    ];
+    for (const folder of candidates) {
+      if (!fs.existsSync(folder)) continue;
+      baselineConfig.gsproFolderPath = folder;
+      const dps = path.join(folder, 'dpsV2x3.gss');
+      const settings = path.join(folder, 'Settings.vgs');
+      if (!baselineConfig.dpsFilePath && fs.existsSync(dps)) baselineConfig.dpsFilePath = dps;
+      if (!baselineConfig.settingsFilePath && fs.existsSync(settings)) baselineConfig.settingsFilePath = settings;
+      console.log('[Baseline] Auto-detected GSPro folder:', folder);
+      saveBaselineConfig();
+      return;
+    }
+    console.log('[Baseline] No GSPro folder auto-detected; awaiting manual selection');
+  } catch (error) {
+    console.error('[Baseline] GSPro auto-detect failed:', error.message);
+  }
+}
 
 // State for process monitoring
 let gsproWatchInterval = null;

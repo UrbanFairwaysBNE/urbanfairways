@@ -106,9 +106,17 @@ export const PricingRatesSettings = () => {
   const weeklyChanged = (row: TierRow) =>
     !row.is_default && draft[row.id]?.weekly !== str(row.weekly_subscription_price);
 
-  const requestSave = (row: TierRow) => {
+  const requestSave = async (row: TierRow) => {
     if (weeklyChanged(row)) {
       setConfirmRow(row);
+      setAffected(null);
+      const weekly = num(draft[row.id]?.weekly ?? "");
+      if (weekly !== null && weekly > 0) {
+        const { data } = await supabase.functions.invoke("sync-tier-price", {
+          body: { tierKey: row.tier, weeklyPrice: weekly, dryRun: true },
+        });
+        if (typeof data?.affected === "number") setAffected(data.affected);
+      }
       return;
     }
     save(row);
@@ -121,13 +129,38 @@ export const PricingRatesSettings = () => {
       toast.error("Hourly rate is required and must be a positive number");
       return;
     }
+    const weekly = row.is_default ? null : num(d.weekly);
+    const needsStripe = weeklyChanged(row) && weekly !== null && weekly > 0;
+
     setSavingId(row.id);
+
+    // Weekly fee changes go through Stripe first: a new weekly price is created
+    // and every active subscriber on this tier is moved onto it. Only if Stripe
+    // succeeds do we keep the new figure in the database.
+    if (needsStripe) {
+      const { data, error: fnError } = await supabase.functions.invoke("sync-tier-price", {
+        body: { tierKey: row.tier, weeklyPrice: weekly },
+      });
+      if (fnError || data?.error) {
+        setSavingId(null);
+        toast.error(`Stripe didn't accept the new ${row.display_name} price: ${data?.error ?? fnError?.message}`);
+        return;
+      }
+      if (data?.failures?.length) {
+        toast.warning(
+          `${data.migrated} member${data.migrated === 1 ? "" : "s"} moved, but ${data.failures.length} subscription${data.failures.length === 1 ? "" : "s"} couldn't be updated. Check the payments log.`,
+        );
+      } else if (data?.migrated > 0) {
+        toast.success(`Stripe updated — ${data.migrated} active member${data.migrated === 1 ? "" : "s"} moved to $${weekly}/wk`);
+      }
+    }
+
     const { error } = await supabase
       .from("pricing_config")
       .update({
         hourly_rate: hourly,
         off_peak_hourly_rate: num(d.offPeak),
-        weekly_subscription_price: row.is_default ? null : num(d.weekly),
+        weekly_subscription_price: weekly,
       })
       .eq("id", row.id);
     setSavingId(null);
@@ -138,6 +171,7 @@ export const PricingRatesSettings = () => {
     toast.success(`${row.display_name} pricing updated`);
     load();
   };
+
 
   if (loading) {
     return (

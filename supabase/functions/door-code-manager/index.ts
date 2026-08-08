@@ -454,7 +454,7 @@ async function ensureDailyCode(opts: { rotate?: boolean } = {}) {
     .in("status", ["pending", "active"]);
 
   for (const row of live || []) {
-    const isToday = row.valid_from === validFrom.toISOString();
+    const isToday = Date.parse(row.valid_from) === validFrom.getTime();
     if (isToday && !opts.rotate) continue;
     await revokeCode(row, s, opts.rotate ? "daily code rotated" : "previous day's daily code");
   }
@@ -640,8 +640,8 @@ async function issueForBooking(bookingId: string, force = false) {
 
   if (existing) {
     const changed =
-      existing.valid_from !== validFrom.toISOString() ||
-      existing.valid_until !== validUntil.toISOString();
+      Date.parse(existing.valid_from) !== validFrom.getTime() ||
+      Date.parse(existing.valid_until) !== validUntil.getTime();
     if (changed) {
       await supabase
         .from("door_codes")
@@ -749,8 +749,8 @@ async function syncAll() {
 
     const { validFrom, validUntil } = bookingWindow(booking, s);
     if (
-      row.valid_from !== validFrom.toISOString() ||
-      row.valid_until !== validUntil.toISOString()
+      Date.parse(row.valid_from) !== validFrom.getTime() ||
+      Date.parse(row.valid_until) !== validUntil.getTime()
     ) {
       await supabase
         .from("door_codes")

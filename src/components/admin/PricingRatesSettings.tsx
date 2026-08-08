@@ -56,6 +56,8 @@ export const PricingRatesSettings = () => {
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [confirmRow, setConfirmRow] = useState<TierRow | null>(null);
+  const [affected, setAffected] = useState<number | null>(null);
+
 
   const load = async () => {
     setLoading(true);

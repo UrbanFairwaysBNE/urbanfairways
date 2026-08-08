@@ -662,7 +662,7 @@ async function syncAll() {
   const { data: past } = await supabase
     .from("door_codes")
     .select("*")
-    .in("status", ["pending", "active"])
+    .in("status", ["scheduled", "pending", "active"])
     .lt("valid_until", now.toISOString());
   for (const row of past || []) {
     const tuya = await getTuya(s, row.scope === "test" || row.scope === "staff");

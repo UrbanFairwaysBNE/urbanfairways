@@ -291,6 +291,41 @@ export default function AdminPOS() {
     setLoadingProducts(false);
   };
 
+  const fetchCategories = async () => {
+    const { data, error } = await supabase
+      .from('pos_categories')
+      .select('name')
+      .order('display_order', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching POS categories:', error);
+    } else {
+      setCategories((data || []).map(c => c.name));
+    }
+  };
+
+  // Golf hour buttons mirror the venue's Casual peak / off-peak rates live,
+  // so POS prices can never drift from pricing_config.
+  const fetchGolfRates = async () => {
+    const { data, error } = await supabase
+      .from('pricing_config')
+      .select('hourly_rate, off_peak_hourly_rate')
+      .eq('is_default', true)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error fetching casual rates:', error);
+      return;
+    }
+    if (data) {
+      setGolfRates({
+        peak: Number(data.hourly_rate),
+        offPeak: Number(data.off_peak_hourly_rate ?? data.hourly_rate),
+      });
+    }
+  };
+
+
   const fetchUnpaidBookings = async () => {
     const today = format(new Date(), 'yyyy-MM-dd');
     const { data, error } = await supabase

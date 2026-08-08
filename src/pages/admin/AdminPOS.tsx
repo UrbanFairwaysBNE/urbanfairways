@@ -123,6 +123,9 @@ export default function AdminPOS() {
   const [unpaidBookings, setUnpaidBookings] = useState<UnpaidBooking[]>([]);
   const [selectedFamily, setSelectedFamily] = useState<string>("categories");
   const [families, setFamilies] = useState<string[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [golfRates, setGolfRates] = useState<{ peak: number; offPeak: number } | null>(null);
+
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [showBookingsDialog, setShowBookingsDialog] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<UnpaidBooking | null>(null);
@@ -182,11 +185,14 @@ export default function AdminPOS() {
   useEffect(() => {
     if (isAdmin) {
       fetchProducts();
+      fetchCategories();
+      fetchGolfRates();
       fetchUnpaidBookings();
       fetchCustomers();
       fetchOpenTabs();
     }
   }, [isAdmin]);
+
 
   // Refresh customer list when Bar Tabs dialog opens so new customers appear
   useEffect(() => {
@@ -287,6 +293,41 @@ export default function AdminPOS() {
     }
     setLoadingProducts(false);
   };
+
+  const fetchCategories = async () => {
+    const { data, error } = await supabase
+      .from('pos_categories')
+      .select('name')
+      .order('display_order', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching POS categories:', error);
+    } else {
+      setCategories((data || []).map(c => c.name));
+    }
+  };
+
+  // Golf hour buttons mirror the venue's Casual peak / off-peak rates live,
+  // so POS prices can never drift from pricing_config.
+  const fetchGolfRates = async () => {
+    const { data, error } = await supabase
+      .from('pricing_config')
+      .select('hourly_rate, off_peak_hourly_rate')
+      .eq('is_default', true)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error fetching casual rates:', error);
+      return;
+    }
+    if (data) {
+      setGolfRates({
+        peak: Number(data.hourly_rate),
+        offPeak: Number(data.off_peak_hourly_rate ?? data.hourly_rate),
+      });
+    }
+  };
+
 
   const fetchUnpaidBookings = async () => {
     const today = format(new Date(), 'yyyy-MM-dd');
@@ -972,9 +1013,20 @@ export default function AdminPOS() {
     }
   };
 
+  // Live bay-hire buttons, priced from pricing_config. Increase qty for extra hours.
+  const golfHourProducts: POSProduct[] = golfRates
+    ? [
+        { id: 'bay-hour-peak', name: '1hr Bay Hire — Peak', price: golfRates.peak, family: 'Golf' },
+        { id: 'bay-hour-off-peak', name: '1hr Bay Hire — Off-Peak', price: golfRates.offPeak, family: 'Golf' },
+      ]
+    : [];
+
+  const allProducts: POSProduct[] = [...golfHourProducts, ...products];
+
   const filteredProducts = selectedFamily === 'all'
-    ? products
-    : products.filter(p => p.family === selectedFamily);
+    ? allProducts
+    : allProducts.filter(p => p.family === selectedFamily);
+
 
   if (isLoading) {
     return (
@@ -990,8 +1042,9 @@ export default function AdminPOS() {
     return null;
   }
 
-  // Define all category names (including empty ones for navigation)
-  const ALL_FAMILIES = ['Golf', 'Drinks & Snacks', 'Merch & Other'];
+  // Categories are admin-managed in Settings, so empty ones still show for navigation
+  const ALL_FAMILIES = categories;
+
 
   // Cart Panel Component (reused for both layouts)
   const CartPanel = ({ className = "" }: { className?: string }) => (
@@ -1239,7 +1292,7 @@ export default function AdminPOS() {
                 /* Category Selection View */
                 <div className="grid grid-cols-3 gap-3">
                   {ALL_FAMILIES.map(family => {
-                    const productCount = products.filter(p => p.family === family).length;
+                    const productCount = allProducts.filter(p => p.family === family).length;
                     return (
                       <button
                         key={family}
@@ -1327,7 +1380,7 @@ export default function AdminPOS() {
                 /* Category Selection View */
                 <div className="grid grid-cols-3 gap-6 w-full">
                   {ALL_FAMILIES.map(family => {
-                    const productCount = products.filter(p => p.family === family).length;
+                    const productCount = allProducts.filter(p => p.family === family).length;
                     return (
                       <button
                         key={family}

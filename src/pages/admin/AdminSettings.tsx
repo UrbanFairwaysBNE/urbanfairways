@@ -36,6 +36,8 @@ import { SalesReporting } from "@/components/admin/SalesReporting";
 import { LoyaltyPromoSettings } from "@/components/admin/LoyaltyPromoSettings";
 import { PackProductsSettings } from "@/components/admin/PackProductsSettings";
 import { PricingRatesSettings } from "@/components/admin/PricingRatesSettings";
+import { POSCategoriesSettings } from "@/components/admin/POSCategoriesSettings";
+
 
 import { ActivityLog } from "@/components/admin/ActivityLog";
 import VenueDetailsSection from "@/components/admin/VenueDetailsSection";
@@ -327,8 +329,21 @@ export default function AdminSettings() {
   const [togglingBay, setTogglingBay] = useState<string | null>(null);
 
 
-  // Get unique families from products
-  const families = [...new Set(products.map(p => p.family).filter(Boolean))] as string[];
+  // Category suggestions: managed POS categories plus anything already used by a product
+  const [posCategoryNames, setPosCategoryNames] = useState<string[]>([]);
+  const families = [...new Set([
+    ...posCategoryNames,
+    ...products.map(p => p.family).filter(Boolean) as string[],
+  ])];
+
+  useEffect(() => {
+    supabase
+      .from("pos_categories")
+      .select("name")
+      .order("display_order")
+      .then(({ data }) => setPosCategoryNames((data || []).map(c => c.name)));
+  }, []);
+
 
   // Email Templates
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
@@ -1339,7 +1354,15 @@ export default function AdminSettings() {
               </Card>
             </CollapsibleSection>
 
+            <CollapsibleSection
+              title="POS Categories"
+              description="Category tiles shown on the POS home screen. Golf includes live peak / off-peak bay hire."
+            >
+              <POSCategoriesSettings />
+            </CollapsibleSection>
+
             <CollapsibleSection title="Table Service" description="Configure table service hours and settings">
+
               <TableServiceSettings />
             </CollapsibleSection>
           </TabsContent>

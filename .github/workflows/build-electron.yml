@@ -54,7 +54,7 @@ jobs:
 
               let latestPatch = localPatch;
               try {
-                const response = await fetch('https://github.com/BirdiesBayside/birdie-bay-booker/releases/latest/download/latest.yml', {
+                const response = await fetch('https://github.com/UrbanFairwaysBNE/UF-Bay-Controller/releases/latest/download/latest.yml', {
                   headers: { 'Cache-Control': 'no-cache' }
                 });
 
@@ -129,7 +129,7 @@ jobs:
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4
         with:
-          name: BirdiesBayController-Windows
+          name: UrbanFairwaysBayController-Windows
           path: |
             ${{ steps.resolve_updater_asset.outputs.asset_path }}
             electron/dist-electron/latest.yml
@@ -140,7 +140,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ steps.set_version.outputs.new_version }}
-          name: Bay Controller Build ${{ steps.set_version.outputs.new_version }}
+          name: Urban Fairways Bay Controller ${{ steps.set_version.outputs.new_version }}
           files: |
             ${{ steps.resolve_updater_asset.outputs.asset_path }}
             electron/dist-electron/latest.yml

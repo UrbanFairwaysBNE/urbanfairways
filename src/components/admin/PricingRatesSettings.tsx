@@ -56,6 +56,8 @@ export const PricingRatesSettings = () => {
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [confirmRow, setConfirmRow] = useState<TierRow | null>(null);
+  const [affected, setAffected] = useState<number | null>(null);
+
 
   const load = async () => {
     setLoading(true);
@@ -106,9 +108,17 @@ export const PricingRatesSettings = () => {
   const weeklyChanged = (row: TierRow) =>
     !row.is_default && draft[row.id]?.weekly !== str(row.weekly_subscription_price);
 
-  const requestSave = (row: TierRow) => {
+  const requestSave = async (row: TierRow) => {
     if (weeklyChanged(row)) {
       setConfirmRow(row);
+      setAffected(null);
+      const weekly = num(draft[row.id]?.weekly ?? "");
+      if (weekly !== null && weekly > 0) {
+        const { data } = await supabase.functions.invoke("sync-tier-price", {
+          body: { tierKey: row.tier, weeklyPrice: weekly, dryRun: true },
+        });
+        if (typeof data?.affected === "number") setAffected(data.affected);
+      }
       return;
     }
     save(row);
@@ -121,13 +131,38 @@ export const PricingRatesSettings = () => {
       toast.error("Hourly rate is required and must be a positive number");
       return;
     }
+    const weekly = row.is_default ? null : num(d.weekly);
+    const needsStripe = weeklyChanged(row) && weekly !== null && weekly > 0;
+
     setSavingId(row.id);
+
+    // Weekly fee changes go through Stripe first: a new weekly price is created
+    // and every active subscriber on this tier is moved onto it. Only if Stripe
+    // succeeds do we keep the new figure in the database.
+    if (needsStripe) {
+      const { data, error: fnError } = await supabase.functions.invoke("sync-tier-price", {
+        body: { tierKey: row.tier, weeklyPrice: weekly },
+      });
+      if (fnError || data?.error) {
+        setSavingId(null);
+        toast.error(`Stripe didn't accept the new ${row.display_name} price: ${data?.error ?? fnError?.message}`);
+        return;
+      }
+      if (data?.failures?.length) {
+        toast.warning(
+          `${data.migrated} member${data.migrated === 1 ? "" : "s"} moved, but ${data.failures.length} subscription${data.failures.length === 1 ? "" : "s"} couldn't be updated. Check the payments log.`,
+        );
+      } else if (data?.migrated > 0) {
+        toast.success(`Stripe updated — ${data.migrated} active member${data.migrated === 1 ? "" : "s"} moved to $${weekly}/wk`);
+      }
+    }
+
     const { error } = await supabase
       .from("pricing_config")
       .update({
         hourly_rate: hourly,
         off_peak_hourly_rate: num(d.offPeak),
-        weekly_subscription_price: row.is_default ? null : num(d.weekly),
+        weekly_subscription_price: weekly,
       })
       .eq("id", row.id);
     setSavingId(null);
@@ -138,6 +173,7 @@ export const PricingRatesSettings = () => {
     toast.success(`${row.display_name} pricing updated`);
     load();
   };
+
 
   if (loading) {
     return (
@@ -317,19 +353,22 @@ export const PricingRatesSettings = () => {
         <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
         <p>
           These rates are the single source of truth — the app, homepage and membership page all
-          read from here. Stripe subscriptions are not linked yet, so changing a weekly fee updates
-          what's displayed and charged for new sign-ups only once Stripe is wired up.
+          read from here, and weekly fees are pushed straight to Stripe when you save. Saving a new
+          weekly fee creates the new Stripe price and moves every active member on that tier onto
+          it, so nothing needs updating in Stripe by hand.
         </p>
+
       </div>
 
       <div className="flex gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
         <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
         <p>
           <strong>Weekly membership fees apply to everyone.</strong> There is no grandfathering —
-          when you change a weekly fee, existing members are migrated to the new price at their next
-          billing date, so every member on a tier always pays the same amount. Hourly rates take
-          effect immediately for all bookings made from that point.
+          saving a new weekly fee moves every active member on that tier onto it immediately in
+          Stripe, prorated, with their billing date unchanged. Hourly rates take effect immediately
+          for all bookings made from that point.
         </p>
+
       </div>
 
 
@@ -370,10 +409,14 @@ export const PricingRatesSettings = () => {
                   <strong>${confirmRow ? draft[confirmRow.id]?.weekly || "0" : ""}</strong>.
                 </p>
                 <p>
-                  <strong>Existing members are not grandfathered.</strong> Every current{" "}
-                  {confirmRow?.display_name} member will move to the new price at their next billing
-                  date, so all members on this tier pay the same amount.
+                  <strong>Existing members are not grandfathered.</strong>{" "}
+                  {affected === null
+                    ? "Checking Stripe for active subscribers on this tier…"
+                    : affected === 0
+                      ? "No active Stripe subscribers on this tier right now, so only new sign-ups are affected."
+                      : `${affected} active Stripe subscription${affected === 1 ? "" : "s"} will be moved onto the new price straight away, with the charge prorated and their billing date left unchanged.`}
                 </p>
+
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>

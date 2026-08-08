@@ -15,7 +15,25 @@ declare global {
       getAppVersion: () => Promise<string>;
       tapoInit: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
       tapoTestLogin: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-      controlPlug: (email: string, password: string, ip: string, action: 'on' | 'off' | 'status') => Promise<{ success: boolean; isOn?: boolean; error?: string }>;
+      controlPlug: (email: string, password: string, ip: string, action: 'on' | 'off' | 'status', mac?: string) => Promise<{ success: boolean; isOn?: boolean; error?: string; resolved_ip?: string; mac_recovery?: 'recovered' | 'failed' | 'not_found'; nickname?: string }>;
+      discoverPlugs: (email: string, password: string, subnets?: string) => Promise<{
+        success: boolean;
+        error?: string;
+        subnets?: string[];
+        candidates?: number;
+        plugs?: Array<{
+          ip: string;
+          mac?: string;
+          mac_key?: string;
+          nickname?: string;
+          model?: string;
+          firmware?: string;
+          hardware?: string;
+          device_id?: string;
+          isOn?: boolean;
+          firmware_risk?: boolean;
+        }>;
+      }>;
       diagnosePlug: (email: string, password: string, ip: string) => Promise<{
         success: boolean;
         ip: string;

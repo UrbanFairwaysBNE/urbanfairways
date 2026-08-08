@@ -38,7 +38,15 @@ interface TapoPlug {
   isOn: boolean;
   deviceId?: string;
   type: 'monitor' | 'projector';
+  /** Burned-in MAC address — the stable identity used to re-find the plug
+   *  after a DHCP lease change. IP is only a cached hint. */
+  mac?: string;
+  nickname?: string;
+  model?: string;
+  firmware?: string;
+  firmwareRisk?: boolean;
 }
+
 
 interface BayPlugAssignment {
   bayNumber: number;
@@ -176,6 +184,31 @@ export default function BayController() {
     return saved ? JSON.parse(saved) : [];
   });
   const [plugAssignmentsLoaded, setPlugAssignmentsLoaded] = useState(false);
+  const [isDiscoveringPlugs, setIsDiscoveringPlugs] = useState(false);
+
+  /**
+   * Persist a plug's new IP after the controller re-resolved it by MAC address.
+   * Keeps both the discovered list and the bay assignments in sync so the next
+   * control call hits the fast path straight away.
+   */
+  const applyResolvedIp = (plugId: string, resolvedIp: string) => {
+    if (!resolvedIp) return;
+    console.log(`[Plugs] Plug ${plugId} moved to ${resolvedIp} — updating cached IP`);
+    setDiscoveredPlugs(prev => {
+      const updated = prev.map(p => (p.id === plugId ? { ...p, ip: resolvedIp } : p));
+      localStorage.setItem("bayController_discoveredPlugs", JSON.stringify(updated));
+      return updated;
+    });
+    setBayPlugAssignments(prev => {
+      const updated = prev.map(a => ({
+        ...a,
+        plugs: a.plugs.map(p => (p.id === plugId ? { ...p, ip: resolvedIp } : p)),
+      }));
+      localStorage.setItem("bayController_bayPlugAssignments", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   const [preStartMinutes, setPreStartMinutes] = useState(3);
   const [warningMinutes, setWarningMinutes] = useState([5, 1]);
   const [showSettings, setShowSettings] = useState(false);
@@ -1312,8 +1345,11 @@ export default function BayController() {
             tapoEmailRef.current, 
             tapoPasswordRef.current, 
             cleanIp, 
-            action
+            action,
+            plug.mac
           );
+          if (result.resolved_ip) applyResolvedIp(plug.id, result.resolved_ip);
+
           console.log(`Control result for ${plug.name}:`, result);
           if (!result.success) {
             toast.error(`Failed to turn ${action} ${plug.name}: ${result.error}`);
@@ -2661,6 +2697,107 @@ export default function BayController() {
     toast.success("Plug removed");
   };
 
+  /**
+   * Search the local network for Tapo plugs and merge them into the plug list.
+   * Existing plugs are matched by MAC address, so a plug that changed IP is
+   * updated in place (assignments are preserved) rather than duplicated.
+   */
+  const discoverPlugs = async () => {
+    if (!isElectron || !window.electronAPI?.discoverPlugs) {
+      toast.error("Plug search requires the desktop app");
+      return;
+    }
+    if (!tapoEmail || !tapoPassword) {
+      toast.error("Enter your TAPO email and password first");
+      return;
+    }
+
+    setIsDiscoveringPlugs(true);
+    try {
+      const result = await window.electronAPI.discoverPlugs(tapoEmail, tapoPassword);
+      if (!result.success) {
+        toast.error(result.error || "Plug search failed");
+        return;
+      }
+
+      const found = result.plugs || [];
+      if (found.length === 0) {
+        toast.warning("No Tapo plugs found. Check the PC and plugs are on the same network with client isolation off.");
+        return;
+      }
+
+      const normalize = (mac?: string) => (mac || "").replace(/[^0-9a-zA-Z]/g, "").toUpperCase();
+      let added = 0;
+      let updated = 0;
+      const macToNewIp: Record<string, string> = {};
+
+      setDiscoveredPlugs(prev => {
+        const next = [...prev];
+        for (const d of found) {
+          const key = normalize(d.mac);
+          const existingIndex = next.findIndex(p => normalize(p.mac) === key && key !== "");
+          if (existingIndex >= 0) {
+            const existing = next[existingIndex];
+            if (existing.ip !== d.ip) updated++;
+            macToNewIp[key] = d.ip;
+            next[existingIndex] = {
+              ...existing,
+              ip: d.ip,
+              nickname: d.nickname,
+              model: d.model,
+              firmware: d.firmware,
+              firmwareRisk: d.firmware_risk,
+              isOn: !!d.isOn,
+            };
+          } else {
+            added++;
+            next.push({
+              id: key || `plug-${Date.now()}-${added}`,
+              name: d.nickname || d.ip,
+              nickname: d.nickname,
+              ip: d.ip,
+              mac: d.mac,
+              model: d.model,
+              firmware: d.firmware,
+              firmwareRisk: d.firmware_risk,
+              isOn: !!d.isOn,
+              deviceId: d.device_id,
+              type: 'monitor',
+            });
+          }
+        }
+        localStorage.setItem("bayController_discoveredPlugs", JSON.stringify(next));
+        return next;
+      });
+
+      // Keep bay assignments pointing at the current IPs
+      if (Object.keys(macToNewIp).length > 0) {
+        setBayPlugAssignments(prev => {
+          const next = prev.map(a => ({
+            ...a,
+            plugs: a.plugs.map(p => {
+              const newIp = macToNewIp[normalize(p.mac)];
+              return newIp ? { ...p, ip: newIp } : p;
+            }),
+          }));
+          localStorage.setItem("bayController_bayPlugAssignments", JSON.stringify(next));
+          return next;
+        });
+      }
+
+      const risky = found.filter(d => d.firmware_risk);
+      toast.success(`Found ${found.length} plug(s) — ${added} new, ${updated} IP change(s) fixed`);
+      if (risky.length > 0) {
+        toast.warning(`${risky.length} plug(s) on firmware 1.4.x — local control may be blocked. Do not install these in a bay.`);
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Plug search failed");
+    } finally {
+      setIsDiscoveringPlugs(false);
+    }
+  };
+
+
   // Test TAPO login credentials
   const testTapoLogin = async () => {
     if (!isElectron || !window.electronAPI) {
@@ -2749,7 +2886,8 @@ export default function BayController() {
         console.log(`Attempting to turn ON plug: ${plug.name} (${plug.type}) at ${cleanIp}`);
         
         try {
-          const result = await window.electronAPI.controlPlug(tapoEmail, tapoPassword, cleanIp, 'on');
+          const result = await window.electronAPI.controlPlug(tapoEmail, tapoPassword, cleanIp, 'on', plug.mac);
+          if (result.resolved_ip) applyResolvedIp(plug.id, result.resolved_ip);
           console.log(`Control result for ${plug.name}:`, result);
           return { plug, success: result.success, error: result.error };
         } catch (error) {
@@ -2907,7 +3045,8 @@ export default function BayController() {
       const plugPromises = bayPlugs.map(async (plug) => {
         console.log(`Attempting to turn OFF plug: ${plug.name} (${plug.type}) at ${plug.ip}`);
         try {
-          const result = await window.electronAPI.controlPlug(tapoEmail, tapoPassword, plug.ip, 'off');
+          const result = await window.electronAPI.controlPlug(tapoEmail, tapoPassword, plug.ip, 'off', plug.mac);
+          if (result.resolved_ip) applyResolvedIp(plug.id, result.resolved_ip);
           console.log(`Control result for ${plug.name}:`, result);
           return { plug, success: result.success, error: result.error };
         } catch (error) {
@@ -3793,7 +3932,13 @@ export default function BayController() {
                       <p className="font-medium">{plug.name}</p>
                       <Badge variant="outline" className="text-xs capitalize">{plug.type}</Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground">{plug.ip}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {plug.ip}{plug.mac ? ` · ${plug.mac}` : " · no MAC (manual)"}
+                      {plug.firmware ? ` · fw ${plug.firmware}` : ""}
+                    </p>
+                    {plug.firmwareRisk && (
+                      <p className="text-xs text-destructive">Firmware 1.4.x — local control may be blocked</p>
+                    )}
                   </div>
                   <Button 
                     size="sm" 
@@ -3807,11 +3952,31 @@ export default function BayController() {
             </div>
           )}
 
+          {/* Network search — binds plugs by MAC so DHCP changes can't break them */}
+          <div className="space-y-2 p-3 bg-muted/50 rounded-lg border">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-sm font-medium">Search network for plugs</p>
+                <p className="text-xs text-muted-foreground">
+                  Finds every Tapo plug and locks it to its MAC address
+                </p>
+              </div>
+              <Button
+                onClick={discoverPlugs}
+                size="sm"
+                disabled={isDiscoveringPlugs || !isElectron}
+              >
+                {isDiscoveringPlugs ? "Searching..." : "Search"}
+              </Button>
+            </div>
+          </div>
+
           {/* Manual plug entry */}
           <div className="space-y-3 p-3 bg-muted/50 rounded-lg border border-dashed">
             <p className="text-xs text-muted-foreground">
-              Find plug IPs in your router admin page or TAPO mobile app (Device Settings → Device Info)
+              Manual fallback: find plug IPs in your router admin page or TAPO mobile app (Device Settings → Device Info)
             </p>
+
             <div className="grid grid-cols-3 gap-2">
               <Input
                 placeholder="Name (e.g., Bay 1)"
@@ -3857,7 +4022,13 @@ export default function BayController() {
                       <p className="font-medium">{plug.name}</p>
                       <Badge variant="outline" className="text-xs capitalize">{plug.type}</Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground">{plug.ip}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {plug.ip}{plug.mac ? ` · ${plug.mac}` : " · no MAC (manual)"}
+                      {plug.firmware ? ` · fw ${plug.firmware}` : ""}
+                    </p>
+                    {plug.firmwareRisk && (
+                      <p className="text-xs text-destructive">Firmware 1.4.x — local control may be blocked</p>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <Select onValueChange={(value) => assignPlugToBay(plug, parseInt(value))}>
@@ -3886,7 +4057,8 @@ export default function BayController() {
 
           {discoveredPlugs.length === 0 && (
             <p className="text-sm text-muted-foreground text-center py-2">
-              No plugs added yet. Add plugs manually using IP addresses above.
+              No plugs yet. Hit Search to find them on the network, or add one manually by IP.
+
             </p>
           )}
         </CollapsibleSettingsCard>

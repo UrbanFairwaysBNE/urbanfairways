@@ -746,7 +746,7 @@ async function testTapoLogin(email, password) {
 // Control a specific TAPO plug using bundled tapo_control.exe
 // P110 plugs require the Python 'tapo' library - bundled as standalone .exe via PyInstaller
 // Includes retry logic for transient KLAP authentication failures
-async function controlTapoPlug(email, password, deviceIp, action, retryCount = 0) {
+async function controlTapoPlug(email, password, deviceIp, action, retryCount = 0, mac = null) {
   const { spawn } = require('child_process');
   const path = require('path');
   const fs = require('fs');
@@ -797,7 +797,11 @@ async function controlTapoPlug(email, password, deviceIp, action, retryCount = 0
     
     console.log('Using tapo_control.exe:', exePath);
     
-    const proc = spawn(exePath, [cleanEmail, cleanPassword, cleanIp, action], {
+    // Pass the MAC (when known) so the script can self-heal after a DHCP change
+    const args = [cleanEmail, cleanPassword, cleanIp, action];
+    if (mac && typeof mac === 'string' && mac.trim() !== '') args.push(mac.trim());
+
+    const proc = spawn(exePath, args, {
       shell: false,
       windowsHide: true
     });
@@ -847,7 +851,9 @@ async function controlTapoPlug(email, password, deviceIp, action, retryCount = 0
     console.log(`TAPO control failed for ${deviceIp}, retrying in ${delay}ms... (${retryCount + 1}/${MAX_RETRIES})`);
     
     await new Promise(r => setTimeout(r, delay));
-    return controlTapoPlug(email, password, deviceIp, action, retryCount + 1);
+    // If the script already re-resolved the plug by MAC, retry at the new IP
+    const nextIp = result.resolved_ip || deviceIp;
+    return controlTapoPlug(email, password, nextIp, action, retryCount + 1, mac);
   }
   
   // Clean up the retryable flag before returning
@@ -939,6 +945,52 @@ async function diagnoseTapoPlug(email, password, deviceIp) {
     });
   });
 }
+
+// Discover every Tapo plug on the network (fast broadcast + concurrent sweep).
+// Returns identity keyed by MAC address so assignments survive DHCP changes.
+async function discoverTapoPlugs(email, password, subnets) {
+  const { spawn } = require('child_process');
+  const path = require('path');
+  const fs = require('fs');
+
+  return new Promise((resolve) => {
+    if (!email || !password) {
+      resolve({ success: false, error: 'TAPO credentials not configured' });
+      return;
+    }
+
+    const possiblePaths = [
+      path.join(__dirname, 'tapo_control.exe'),
+      path.join(process.resourcesPath || '', 'tapo_control.exe'),
+      path.join(app.getAppPath(), 'tapo_control.exe'),
+    ];
+    const exePath = possiblePaths.find(p => {
+      try { fs.accessSync(p); return true; } catch { return false; }
+    });
+    if (!exePath) {
+      resolve({ success: false, error: 'tapo_control.exe not found. Please reinstall the Bay Controller app.' });
+      return;
+    }
+
+    const args = ['--discover', email.trim(), password.trim()];
+    if (subnets && String(subnets).trim() !== '') args.push(String(subnets).trim());
+
+    const proc = spawn(exePath, args, { shell: false, windowsHide: true });
+    let stdout = '';
+    let stderr = '';
+    proc.stdout.on('data', d => { stdout += d.toString(); });
+    proc.stderr.on('data', d => { stderr += d.toString(); });
+    proc.on('error', err => resolve({ success: false, error: `Failed to run discovery: ${err.message}` }));
+    proc.on('close', (code) => {
+      try {
+        resolve(JSON.parse(stdout.trim()));
+      } catch {
+        resolve({ success: false, error: stderr || stdout || `Discovery exited with code ${code}` });
+      }
+    });
+  });
+}
+
 
 // =====================================================
 // APP AUTOMATION - PowerShell-based window management
@@ -1997,9 +2049,15 @@ ipcMain.handle('tapo-test-login', async (event, { email, password }) => {
 });
 
 
-ipcMain.handle('control-plug', async (event, { email, password, ip, action }) => {
-  console.log(`Controlling plug at ${ip}: ${action}`);
-  return await controlTapoPlug(email, password, ip, action);
+ipcMain.handle('control-plug', async (event, { email, password, ip, action, mac }) => {
+  console.log(`Controlling plug at ${ip}${mac ? ` (mac ${mac})` : ''}: ${action}`);
+  return await controlTapoPlug(email, password, ip, action, 0, mac || null);
+});
+
+// Fast network discovery of Tapo plugs — returns nickname/MAC/model/firmware
+ipcMain.handle('discover-plugs', async (event, { email, password, subnets } = {}) => {
+  console.log('Discovering TAPO plugs on the network...');
+  return await discoverTapoPlugs(email, password, subnets);
 });
 
 // Diagnose a plug - runs the --diagnose command for detailed debugging

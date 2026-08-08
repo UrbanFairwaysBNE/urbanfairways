@@ -77,7 +77,24 @@ fix a single-monitor window-position bug.
 repositioning afterwards (it fought the user). F7/F9 toggle overlays; F10 does a manual
 reposition and state restore.
 
+## Smart plugs (Tapo) — MAC binding
+
+Plugs are identified by **MAC address**, never by IP. IP is a disposable cache.
+
+- **Search** in the plug section runs `tapo_control.exe --discover`: a UDP broadcast probe
+  (ports 20002/9999) plus a concurrent port-80 sweep of the local /24, then authenticates
+  each hit to read nickname, model, MAC and firmware. Seconds, not minutes.
+- Assignments store `{mac, nickname, ip}`. Every control call passes the MAC; if the cached
+  IP fails, the script re-discovers the plug by MAC, updates the cache and retries. DHCP
+  reshuffles are invisible.
+- **Firmware 1.4.x is unsupported** (TP-Link's TPAP encryption blocks all local control).
+  Discovery flags those units in red — never install one in a bay. Keep auto-update OFF in
+  the Tapo app and keep Third-Party Compatibility ON.
+- Belt and braces: still add DHCP reservations for the plug MACs, and confirm plugs and bay
+  PCs share a subnet with AP client isolation disabled.
+
 ## Kiosk Mode (Beta)
+
 
 Locks the PC to the simulator experience during a session; staff unlock with a code.
 

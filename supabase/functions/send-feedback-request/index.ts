@@ -16,7 +16,7 @@ const logStep = (step: string, details?: any) => {
 };
 
 const normalizeSiteUrl = (rawUrl: string | undefined) => {
-  const fallbackUrl = "https://birdie-bay-bookings.lovable.app";
+  const fallbackUrl = "https://urbanfairways.lovable.app";
   if (!rawUrl) return fallbackUrl;
 
   const trimmedUrl = rawUrl.trim();

@@ -346,7 +346,8 @@ export default function BayController() {
 
   // Helper to add debug log
   const addLog = useCallback((message: string, type: 'info' | 'error' | 'success' = 'info') => {
-    const time = new Date().toLocaleTimeString();
+    // Always Brisbane time so logs match the venue clock regardless of the PC's OS timezone
+    const time = new Date().toLocaleTimeString('en-AU', { timeZone: 'Australia/Brisbane', hour12: false });
     setDebugLogs(prev => [...prev.slice(-49), { time, message, type }]); // Keep last 50 logs
   }, []);
 
@@ -3513,7 +3514,7 @@ export default function BayController() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
-              {[1, 2, 3, 4, 5, 6].map((bay) => (
+              {[1, 2, 3, 4, 5, 6, 7].map((bay) => (
                 <Button
                   key={bay}
                   variant="outline"
@@ -3864,7 +3865,7 @@ export default function BayController() {
                         <SelectValue placeholder="Add to Bay" />
                       </SelectTrigger>
                       <SelectContent>
-                        {[1, 2, 3, 4, 5, 6].map((bay) => (
+                        {[1, 2, 3, 4, 5, 6, 7].map((bay) => (
                           <SelectItem key={bay} value={bay.toString()}>Bay {bay}</SelectItem>
                         ))}
                       </SelectContent>

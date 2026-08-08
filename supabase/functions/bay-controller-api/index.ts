@@ -116,7 +116,8 @@ const parseFilenameDate = (name: string | null | undefined): { date: string; iso
   if (!m) return null;
   const [, mm, dd, yy, hh, mi, ss] = m;
   const year = 2000 + Number(yy);
-  const utcMs = Date.UTC(year, Number(mm) - 1, Number(dd), Number(hh) - 10, Number(mi), Number(ss));
+  // Bay PC clocks run on venue local time (Australia/Brisbane, AEST/UTC+10, no DST)
+  const utcMs = Date.UTC(year, Number(mm) - 1, Number(dd), Number(hh) - VENUE_UTC_OFFSET_HOURS, Number(mi), Number(ss));
   if (!Number.isFinite(utcMs)) return null;
   return { date: `${year}-${mm}-${dd}`, iso: new Date(utcMs).toISOString() };
 };
@@ -155,8 +156,8 @@ serve(async (req) => {
 
     console.log(`[${VERSION}] Bay Controller API - Action: ${action || "bookings"}, Bay: ${bayNumber}, Version: ${appVersion}`);
 
-    if (!bayNumber || bayNumber < 1 || bayNumber > 6) {
-      return jsonResponse({ error: "Invalid bay number. Must be 1-6." }, 400);
+    if (!bayNumber || bayNumber < 1 || bayNumber > MAX_BAY_NUMBER) {
+      return jsonResponse({ error: `Invalid bay number. Must be 1-${MAX_BAY_NUMBER}.` }, 400);
     }
 
     // Get the bay ID from bay number

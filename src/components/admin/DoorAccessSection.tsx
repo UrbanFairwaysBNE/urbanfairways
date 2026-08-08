@@ -17,6 +17,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { KeyRound, RefreshCw } from "lucide-react";
 import { formatBrisbane } from "@/lib/brisbane-time";
+import { DailyCodeCalendar } from "@/components/admin/DailyCodeCalendar";
 
 interface DoorAccessSettings {
   id: string;

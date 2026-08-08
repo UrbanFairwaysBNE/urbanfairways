@@ -1292,7 +1292,7 @@ export default function AdminPOS() {
                 /* Category Selection View */
                 <div className="grid grid-cols-3 gap-3">
                   {ALL_FAMILIES.map(family => {
-                    const productCount = products.filter(p => p.family === family).length;
+                    const productCount = allProducts.filter(p => p.family === family).length;
                     return (
                       <button
                         key={family}
@@ -1380,7 +1380,7 @@ export default function AdminPOS() {
                 /* Category Selection View */
                 <div className="grid grid-cols-3 gap-6 w-full">
                   {ALL_FAMILIES.map(family => {
-                    const productCount = products.filter(p => p.family === family).length;
+                    const productCount = allProducts.filter(p => p.family === family).length;
                     return (
                       <button
                         key={family}

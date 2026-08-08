@@ -152,7 +152,6 @@ Deno.serve(async (req) => {
           items: [{ id: a.itemId, price: newPrice.id }],
           proration_behavior: "create_prorations",
           billing_cycle_anchor: "unchanged",
-```
         });
         migrated++;
       } catch (e) {

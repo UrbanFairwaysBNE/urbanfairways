@@ -36,6 +36,8 @@ import { SalesReporting } from "@/components/admin/SalesReporting";
 import { LoyaltyPromoSettings } from "@/components/admin/LoyaltyPromoSettings";
 import { PackProductsSettings } from "@/components/admin/PackProductsSettings";
 import { PricingRatesSettings } from "@/components/admin/PricingRatesSettings";
+import { POSCategoriesSettings } from "@/components/admin/POSCategoriesSettings";
+
 
 import { ActivityLog } from "@/components/admin/ActivityLog";
 import VenueDetailsSection from "@/components/admin/VenueDetailsSection";

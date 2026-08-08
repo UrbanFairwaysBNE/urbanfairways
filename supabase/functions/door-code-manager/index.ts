@@ -385,7 +385,8 @@ async function ensureDailyCalendar(days = DAILY_CALENDAR_DAYS) {
     .in("status", ["scheduled", "pending", "active"])
     .gte("valid_from", doorDayWindow(start).validFrom.toISOString())
     .lt("valid_from", doorDayWindow(end).validFrom.toISOString());
-  const have = new Set<string>((existing || []).map((r: any) => r.valid_from));
+  // Normalise: PostgREST returns "+00:00" offsets, Date#toISOString returns "Z".
+  const have = new Set<number>((existing || []).map((r: any) => Date.parse(r.valid_from)));
 
   // One pass over every live code so we only pay for the uniqueness read once.
   const { data: live } = await supabase
@@ -400,7 +401,7 @@ async function ensureDailyCalendar(days = DAILY_CALENDAR_DAYS) {
   for (let i = 0; i < days; i++) {
     const day = addDays(start, i);
     const { validFrom, validUntil } = doorDayWindow(day);
-    if (have.has(validFrom.toISOString())) continue;
+    if (have.has(validFrom.getTime())) continue;
 
     let code = "";
     for (let attempt = 0; attempt < 500; attempt++) {

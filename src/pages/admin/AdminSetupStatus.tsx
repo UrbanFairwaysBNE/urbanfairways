@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, XCircle, MinusCircle, ArrowRight } from "lucide-react";
+import { CheckCircle2, XCircle, MinusCircle, ArrowRight, AlertTriangle } from "lucide-react";
 import { TENANT_DEFAULTS, useTenant } from "@/config/tenant";
 
 type CheckState = "ok" | "missing" | "optional-missing";
@@ -390,6 +390,40 @@ export default function AdminSetupStatus() {
             are optional integrations.
           </p>
         </div>
+
+        {!window.location.hostname.endsWith("urbanfairways.com.au") && (
+          <Card className="border-destructive/40 bg-destructive/5">
+            <CardHeader className="pb-2">
+              <CardTitle className="font-display text-base uppercase tracking-wide flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-destructive" />
+                Before switching to urbanfairways.com.au
+              </CardTitle>
+              <CardDescription>
+                Still running on a testing URL. Two things break the moment the domain
+                changes unless they are handed over first.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-sm text-foreground space-y-2">
+              <p>
+                <span className="font-semibold">1. Stripe webhooks</span> — re-point the
+                endpoint to the new URL and re-save{" "}
+                <code className="text-xs">STRIPE_WEBHOOK_SECRET</code> if Stripe issues a new
+                signing secret. Payments fail silently otherwise.
+              </p>
+              <p>
+                <span className="font-semibold">2. Bay Controller</span> — update{" "}
+                <code className="text-xs">HUB_ORIGIN</code> in{" "}
+                <code className="text-xs">electron/main.js</code> and push to main so every
+                bay PC auto-updates. All bay automation stops otherwise.
+              </p>
+              <p className="text-muted-foreground">
+                Full list: <code className="text-xs">docs/platform/GO-LIVE-CHECKLIST.md</code>
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+
 
         <Card>
           <CardContent className="p-4 flex flex-wrap items-center justify-between gap-3">

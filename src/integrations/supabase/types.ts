@@ -1970,6 +1970,8 @@ export type Database = {
           is_corporate: boolean
           name: string
           price: number
+          stripe_price_id: string | null
+          stripe_product_id: string | null
           updated_at: string
           validity_days: number
         }
@@ -1983,6 +1985,8 @@ export type Database = {
           is_corporate?: boolean
           name: string
           price: number
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
           updated_at?: string
           validity_days?: number
         }
@@ -1996,6 +2000,8 @@ export type Database = {
           is_corporate?: boolean
           name?: string
           price?: number
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
           updated_at?: string
           validity_days?: number
         }

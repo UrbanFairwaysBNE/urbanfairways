@@ -204,10 +204,10 @@ serve(async (req: Request): Promise<Response> => {
         <p style="margin:0 0 8px;"><strong>Successful:</strong> ${results.success}</p>
         <p style="margin:0;"><strong>Failed:</strong> ${results.failed}</p>
       </div>
-      <h3 style="color:#2F3134;margin:0 0 12px;">Customers Emailed:</h3>
+      <h3 style="color:#1C1F24;margin:0 0 12px;">Customers Emailed:</h3>
       <table style="width:100%;border-collapse:collapse;">
         <thead>
-          <tr style="background:#2F3134;color:#fff;">
+          <tr style="background:#1C1F24;color:#fff;">
             <th style="padding:10px;text-align:left;">Name</th>
             <th style="padding:10px;text-align:left;">Email</th>
           </tr>
@@ -263,19 +263,19 @@ serve(async (req: Request): Promise<Response> => {
 
 function getDefaultTemplate(tenant: TenantConfig): string {
   return `
-              <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
-                Hi {first_name}, we noticed you haven't booked your first session yet. We'd love to see you at ${tenant.venue_name}, so we've added credit to your account!
+              <p style="margin:0 0 18px; font-family:Montserrat, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1C1F24; text-align:center;">
+                Hi {first_name}, you have signed up to ${tenant.venue_name} but haven't booked your first session yet. To get you into a bay, we've dropped credit straight onto your account.
               </p>
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#2F3134; border-radius:12px; margin:18px 0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1C1F24; border-radius:12px; margin:18px 0;">
                 <tr>
                   <td style="padding:30px; text-align:center;">
-                    <p style="margin:0 0 8px; font-family:Manrope, Arial, sans-serif; font-size:14px; color:#F5F3EF; opacity:0.9;">Your Account Credit</p>
-                    <p style="margin:0; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:52px; color:#5F6F52;">$35.00</p>
-                    <p style="margin:8px 0 0; font-family:Manrope, Arial, sans-serif; font-size:14px; color:#F5F3EF; opacity:0.9;">Enough for 1 hour off-peak!</p>
+                    <p style="margin:0 0 8px; font-family:Montserrat, Arial, sans-serif; font-size:14px; color:#F4F1EB; opacity:0.9;">Your Account Credit</p>
+                    <p style="margin:0; font-family:Montserrat, Arial Black, Arial, sans-serif; font-weight:bold; font-size:52px; color:#5F6F52;">$40.00</p>
+                    <p style="margin:8px 0 0; font-family:Montserrat, Arial, sans-serif; font-size:14px; color:#F4F1EB; opacity:0.9;">A full hour off-peak, on us.</p>
                   </td>
                 </tr>
               </table>
-              <p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
+              <p style="margin:18px 0 0; font-family:Montserrat, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1C1F24; text-align:center;">
                 This credit has been automatically added to your account and will be applied at checkout. No code needed!
               </p>
   `;

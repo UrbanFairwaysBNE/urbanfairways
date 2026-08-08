@@ -189,6 +189,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Set GSPro folder path manually
   setGsproFolder: (folderPath) => ipcRenderer.invoke('set-gspro-folder', { folderPath }),
   
+  // ProTee Labs config path (per-PC; auto-detected, override with Browse)
+  browseProteeConfig: () => ipcRenderer.invoke('browse-protee-config'),
+  resetProteeConfigPath: () => ipcRenderer.invoke('reset-protee-config-path'),
+
   // Browse and upload a baseline file
   browseBaselineFile: (fileName) => ipcRenderer.invoke('browse-baseline-file', { fileName }),
   

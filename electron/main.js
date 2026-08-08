@@ -6,8 +6,10 @@ const { exec, spawn } = require('child_process');
 const { promisify } = require('util');
 const execAsync = promisify(exec);
 
-const HUB_ORIGIN = process.env.HUB_ORIGIN || "https://hub.example.com";
-const VENUE_NAME = process.env.VENUE_NAME || "Your Venue";
+// The controller loads the live app (webviews, booking data, extend links) from
+// this origin. Override with the HUB_ORIGIN env var while the domain is pending.
+const HUB_ORIGIN = process.env.HUB_ORIGIN || "https://urbanfairways.com.au";
+const VENUE_NAME = process.env.VENUE_NAME || "Urban Fairways";
 
 // =====================================================
 // SINGLE INSTANCE LOCK - Prevent multiple instances
@@ -1582,11 +1584,11 @@ async function showWelcomeWindows(firstName) {
     <head>
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Manrope:wght@300;400;500&display=swap" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-          font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+          font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
           background: #f5f3ef;
           display: flex;
           align-items: center;
@@ -1609,7 +1611,7 @@ async function showWelcomeWindows(firstName) {
           filter: drop-shadow(0 10px 30px rgba(31, 76, 37, 0.15));
         }
         h1 {
-          font-family: 'Archivo', system-ui, sans-serif;
+          font-family: 'Montserrat', system-ui, sans-serif;
           font-size: 96px;
           font-weight: 400;
           color: #2f3134;
@@ -1618,7 +1620,7 @@ async function showWelcomeWindows(firstName) {
           letter-spacing: 2px;
         }
         h2 {
-          font-family: 'Archivo', system-ui, sans-serif;
+          font-family: 'Montserrat', system-ui, sans-serif;
           font-size: 56px;
           font-weight: 400;
           color: #b5772a;
@@ -1627,7 +1629,7 @@ async function showWelcomeWindows(firstName) {
           letter-spacing: 1px;
         }
         p {
-          font-family: 'Manrope', system-ui, sans-serif;
+          font-family: 'Montserrat', system-ui, sans-serif;
           font-size: 28px;
           font-weight: 400;
           color: #2f3134;
@@ -1664,7 +1666,7 @@ async function showWelcomeWindows(firstName) {
           text-align: left;
         }
         .etiquette h3 {
-          font-family: 'Archivo', system-ui, sans-serif;
+          font-family: 'Montserrat', system-ui, sans-serif;
           font-size: 36px;
           font-weight: 400;
           color: #2f3134;
@@ -1682,7 +1684,7 @@ async function showWelcomeWindows(firstName) {
           display: flex;
           align-items: flex-start;
           gap: 12px;
-          font-family: 'Manrope', system-ui, sans-serif;
+          font-family: 'Montserrat', system-ui, sans-serif;
           font-size: 22px;
           color: #2f3134;
           opacity: 0.85;
@@ -2379,12 +2381,12 @@ async function showSgtInfoOverlay(displayLabel) {
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           html, body {
             background: transparent;
-            font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
           }
           .overlay {
             background: white;
@@ -2683,12 +2685,12 @@ async function showSgtHideConfirmation(displayLabel) {
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           html, body {
             background: transparent;
-            font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
             width: 100%;
             height: 100%;
           }
@@ -3187,18 +3189,69 @@ ipcMain.handle('clear-auto-paste', async () => {
 // GSPRO BASELINE SETTINGS MANAGEMENT
 // =====================================================
 
-// Protee Labs config path (hardcoded per plan)
-const PROTEE_CONFIG_PATH = 'C:\\Users\\Golf Sim\\AppData\\Roaming\\ProTeeUnited\\Configs\\Config';
+// Protee Labs config path.
+// NEVER hardcode a Windows username here — bay PCs differ per venue.
+// Resolution order: explicit admin-configured path -> %APPDATA% of the
+// logged-in user -> legacy Birdies path (only if it actually exists).
+const LEGACY_PROTEE_CONFIG_PATH = 'C:\\Users\\Golf Sim\\AppData\\Roaming\\ProTeeUnited\\Configs\\Config';
+
+function getDefaultProteeConfigPath() {
+  const roaming = process.env.APPDATA
+    || path.join(require('os').homedir(), 'AppData', 'Roaming');
+  return path.join(roaming, 'ProTeeUnited', 'Configs', 'Config');
+}
+
+function getProteeConfigPath() {
+  if (baselineConfig.proteeConfigPath && baselineConfig.proteeConfigPath.trim() !== '') {
+    return baselineConfig.proteeConfigPath;
+  }
+  const auto = getDefaultProteeConfigPath();
+  try {
+    if (fs.existsSync(auto)) return auto;
+    if (fs.existsSync(LEGACY_PROTEE_CONFIG_PATH)) return LEGACY_PROTEE_CONFIG_PATH;
+  } catch { /* noop */ }
+  return auto;
+}
 
 // State for baseline settings
 let baselineConfig = {
-  gsproFolderPath: '', // C:\Users\<user>\AppData\Local\GSPro
+  gsproFolderPath: '', // e.g. %LOCALAPPDATA%\GSPro — auto-detected on first run
   dpsFilePath: '',     // Full path to dpsV2x3.gss in GSPro folder
   settingsFilePath: '', // Full path to Settings.vgs in GSPro folder
+  proteeConfigPath: '', // Optional override for the ProTee Labs Config file
   enabled: false,
   proteeDisplayLabel: '', // Friendly display name (e.g., "BenQ RE6504")
   proteeScreenId: '',     // Resolved \\?\DISPLAY#...  device path
 };
+
+// Auto-detect the GSPro data folder for this PC when it hasn't been set yet.
+// Uses the logged-in user's own LOCALAPPDATA, so a venue with a differently
+// named Windows account works without any manual configuration.
+function autoDetectGsproFolder() {
+  if (baselineConfig.gsproFolderPath && baselineConfig.gsproFolderPath.trim() !== '') return;
+  try {
+    const localAppData = process.env.LOCALAPPDATA
+      || path.join(require('os').homedir(), 'AppData', 'Local');
+    const candidates = [
+      path.join(localAppData, 'GSPro'),
+      path.join(require('os').homedir(), 'AppData', 'Local', 'GSPro'),
+    ];
+    for (const folder of candidates) {
+      if (!fs.existsSync(folder)) continue;
+      baselineConfig.gsproFolderPath = folder;
+      const dps = path.join(folder, 'dpsV2x3.gss');
+      const settings = path.join(folder, 'Settings.vgs');
+      if (!baselineConfig.dpsFilePath && fs.existsSync(dps)) baselineConfig.dpsFilePath = dps;
+      if (!baselineConfig.settingsFilePath && fs.existsSync(settings)) baselineConfig.settingsFilePath = settings;
+      console.log('[Baseline] Auto-detected GSPro folder:', folder);
+      saveBaselineConfig();
+      return;
+    }
+    console.log('[Baseline] No GSPro folder auto-detected; awaiting manual selection');
+  } catch (error) {
+    console.error('[Baseline] GSPro auto-detect failed:', error.message);
+  }
+}
 
 // State for process monitoring
 let gsproWatchInterval = null;
@@ -3293,9 +3346,10 @@ async function restoreBaselineFiles() {
   
   // Restore Protee Labs config (CurrentStartupScreen)
   if (baselineConfig.proteeScreenId) {
+    const proteeConfigPath = getProteeConfigPath();
     try {
-      if (fs.existsSync(PROTEE_CONFIG_PATH)) {
-        let configContent = fs.readFileSync(PROTEE_CONFIG_PATH, 'utf-8');
+      if (fs.existsSync(proteeConfigPath)) {
+        let configContent = fs.readFileSync(proteeConfigPath, 'utf-8');
         const regex = /^CurrentStartupScreen=.*$/m;
         if (regex.test(configContent)) {
           configContent = configContent.replace(regex, `CurrentStartupScreen=${baselineConfig.proteeScreenId}`);
@@ -3303,11 +3357,11 @@ async function restoreBaselineFiles() {
           // Append if not found
           configContent += `\nCurrentStartupScreen=${baselineConfig.proteeScreenId}`;
         }
-        fs.writeFileSync(PROTEE_CONFIG_PATH, configContent);
+        fs.writeFileSync(proteeConfigPath, configContent);
         console.log('Restored Protee CurrentStartupScreen to:', baselineConfig.proteeScreenId);
         results.push({ file: 'Protee Config', success: true });
       } else {
-        console.log('Protee config file not found at:', PROTEE_CONFIG_PATH);
+        console.log('Protee config file not found at:', proteeConfigPath);
         results.push({ file: 'Protee Config', success: false, error: 'Config file not found' });
       }
     } catch (error) {
@@ -3359,6 +3413,7 @@ async function getDisplayDevicePaths() {
 
 // Read current Protee config CurrentStartupScreen value
 function readProteeCurrentScreen() {
+  const PROTEE_CONFIG_PATH = getProteeConfigPath();
   try {
     if (!fs.existsSync(PROTEE_CONFIG_PATH)) {
       return { success: false, error: 'Config file not found', path: PROTEE_CONFIG_PATH };
@@ -3414,22 +3469,57 @@ function stopGsproWatcher() {
   }
 }
 
-// Load config on startup
+// Load config on startup, then auto-detect this PC's GSPro folder if unset
 loadBaselineConfig();
+autoDetectGsproFolder();
 
 // IPC: Get baseline config
 ipcMain.handle('get-baseline-config', async () => {
   const storagePath = getBaselineStoragePath();
   const hasDpsFile = fs.existsSync(path.join(storagePath, 'dpsV2x3.gss'));
   const hasSettingsFile = fs.existsSync(path.join(storagePath, 'Settings.vgs'));
-  
+  const resolvedProteeConfigPath = getProteeConfigPath();
+
   return {
     ...baselineConfig,
     hasDpsFile,
     hasSettingsFile,
+    resolvedProteeConfigPath,
+    proteeConfigFound: fs.existsSync(resolvedProteeConfigPath),
     isWatching: !!gsproWatchInterval,
   };
 });
+
+// IPC: Browse for the ProTee Labs Config file (paths differ per bay PC)
+ipcMain.handle('browse-protee-config', async () => {
+  try {
+    const current = getProteeConfigPath();
+    const result = await dialog.showOpenDialog(mainWindow, {
+      title: 'Select ProTee Labs Config File',
+      defaultPath: fs.existsSync(current) ? current : path.dirname(getDefaultProteeConfigPath()),
+      properties: ['openFile'],
+    });
+
+    if (result.canceled || result.filePaths.length === 0) {
+      return { success: false, canceled: true };
+    }
+
+    baselineConfig.proteeConfigPath = result.filePaths[0];
+    saveBaselineConfig();
+    return { success: true, configPath: baselineConfig.proteeConfigPath };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// IPC: Reset the ProTee config path back to auto-detection
+ipcMain.handle('reset-protee-config-path', async () => {
+  baselineConfig.proteeConfigPath = '';
+  saveBaselineConfig();
+  const resolved = getProteeConfigPath();
+  return { success: true, configPath: resolved, found: fs.existsSync(resolved) };
+});
+
 
 // IPC: Get display device paths (friendly name -> device path mapping)
 ipcMain.handle('get-display-device-paths', async () => {

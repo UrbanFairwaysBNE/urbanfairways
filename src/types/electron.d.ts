@@ -91,10 +91,15 @@ declare global {
         hasDpsFile: boolean;
         hasSettingsFile: boolean;
         isWatching: boolean;
+        proteeConfigPath?: string;
+        resolvedProteeConfigPath?: string;
+        proteeConfigFound?: boolean;
       }>;
       // GSPro folder / baseline files
       browseGsproFolder: () => Promise<{ success: boolean; canceled?: boolean; folderPath?: string; dpsFilePath?: string; settingsFilePath?: string; error?: string }>;
       setGsproFolder: (folderPath: string) => Promise<{ success: boolean; dpsFilePath?: string; settingsFilePath?: string; error?: string }>;
+      browseProteeConfig: () => Promise<{ success: boolean; canceled?: boolean; configPath?: string; error?: string }>;
+      resetProteeConfigPath: () => Promise<{ success: boolean; configPath?: string; found?: boolean }>;
       browseBaselineFile: (fileName: string) => Promise<{ success: boolean; canceled?: boolean; sourcePath?: string; storedPath?: string; error?: string }>;
       setBaselineEnabled: (enabled: boolean) => Promise<{ success: boolean; enabled: boolean }>;
       restoreBaselineNow: () => Promise<{ success: boolean; results?: { file: string; success: boolean; error?: string }[]; error?: string }>;

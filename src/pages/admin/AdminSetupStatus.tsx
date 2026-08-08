@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, XCircle, MinusCircle, ArrowRight } from "lucide-react";
+import { CheckCircle2, XCircle, MinusCircle, ArrowRight, AlertTriangle } from "lucide-react";
 import { TENANT_DEFAULTS, useTenant } from "@/config/tenant";
 
 type CheckState = "ok" | "missing" | "optional-missing";

@@ -52,7 +52,7 @@ serve(async (req: Request): Promise<Response> => {
 
     const { data: product, error: productErr } = await supabase
       .from("pack_products")
-      .select("id, name, hours, price, validity_days, is_active")
+      .select("id, name, hours, price, validity_days, is_active, stripe_price_id")
       .eq("id", productId)
       .maybeSingle();
 
@@ -117,19 +117,21 @@ serve(async (req: Request): Promise<Response> => {
       mode: "payment",
       customer_email: user.email,
       line_items: [
-        {
-          price_data: {
-            currency: "aud",
-            product_data: {
-              name: `${product.name} — ${Number(product.hours)} hours`,
-              description: isGift
-                ? `Gift pack${recipientName ? ` for ${recipientName}` : ""} · valid ${product.validity_days} days from redemption`
-                : `Valid ${product.validity_days} days from purchase`,
+        product.stripe_price_id
+          ? { price: product.stripe_price_id, quantity: 1 }
+          : {
+              price_data: {
+                currency: "aud",
+                product_data: {
+                  name: `${product.name} — ${Number(product.hours)} hours`,
+                  description: isGift
+                    ? `Gift pack${recipientName ? ` for ${recipientName}` : ""} · valid ${product.validity_days} days from redemption`
+                    : `Valid ${product.validity_days} days from purchase`,
+                },
+                unit_amount: Math.round(Number(product.price) * 100),
+              },
+              quantity: 1,
             },
-            unit_amount: Math.round(Number(product.price) * 100),
-          },
-          quantity: 1,
-        },
       ],
       metadata,
       payment_intent_data: { metadata },

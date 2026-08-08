@@ -296,11 +296,15 @@ async function issueNamedCode(opts: {
 }
 
 /* ------------------------------------------------------------------ *
- * Daily rotating code
- * A "door day" runs 04:00 → 04:00 Brisbane. At 04:00 the previous day's
- * code is revoked (removed from the keypad) and a fresh random 6-digit
- * code is issued and pushed for the new day.
+ * Daily rotating code — rolling calendar
+ * A "door day" runs 04:00 → 04:00 Brisbane. Codes for the next
+ * DAILY_CALENDAR_DAYS days are pre-generated and stored as `scheduled`, so a
+ * booking made months ahead can be emailed the code for its own date. Only the
+ * current day's code is ever pushed to the keypad: at 04:00 yesterday's is
+ * revoked and today's scheduled code is activated.
  * ------------------------------------------------------------------ */
+
+const DAILY_CALENDAR_DAYS = 120; // ~4 months of look-ahead
 
 /** The door-day (YYYY-MM-DD) that the given instant belongs to. */
 function currentDoorDay(now: Date = new Date()): string {
@@ -309,62 +313,40 @@ function currentDoorDay(now: Date = new Date()): string {
     .slice(0, 10);
 }
 
+/** The door-day a booking belongs to (sessions before 04:00 belong to the previous day). */
+function bookingDoorDay(booking: { booking_date: string; start_time: string }): string {
+  return currentDoorDay(new Date(`${booking.booking_date}T${booking.start_time}${BNE_OFFSET}`));
+}
+
 function doorDayWindow(day: string) {
   const validFrom = new Date(`${day}T04:00:00${BNE_OFFSET}`);
   const validUntil = new Date(validFrom.getTime() + 24 * 3600 * 1000);
   return { validFrom, validUntil };
 }
 
-/**
- * Ensures a live daily code exists for the current door-day, revoking any
- * daily code from a previous day. Idempotent — safe to call from the 4am cron,
- * the sync sweep, or an email send.
- */
-async function ensureDailyCode(opts: { rotate?: boolean } = {}) {
-  const s = await getSettings();
-  const day = currentDoorDay();
-  const { validFrom, validUntil } = doorDayWindow(day);
+function addDays(day: string, n: number): string {
+  return new Date(Date.parse(`${day}T00:00:00Z`) + n * 86400_000).toISOString().slice(0, 10);
+}
 
-  // Existing daily codes
-  const { data: dailies } = await supabase
+/** The stored daily row for a door-day, if any (scheduled, pending or active). */
+async function dailyRowForDay(day: string) {
+  const { validFrom } = doorDayWindow(day);
+  const { data } = await supabase
     .from("door_codes")
     .select("*")
     .eq("scope", "daily")
-    .in("status", ["pending", "active"]);
+    .eq("valid_from", validFrom.toISOString())
+    .in("status", ["scheduled", "pending", "active"])
+    .maybeSingle();
+  return data as any | null;
+}
 
-  let current = (dailies || []).find(
-    (r: any) => r.valid_from === validFrom.toISOString() && !opts.rotate,
-  );
+/** Creates the scheduled row for a door-day if it's missing. No keypad push. */
+async function ensureScheduledDay(day: string, s: Settings) {
+  const existing = await dailyRowForDay(day);
+  if (existing) return existing;
 
-  // Revoke yesterday's (or all, when forcing a rotation)
-  for (const row of dailies || []) {
-    if (current && row.id === current.id) continue;
-    await revokeCode(row, s, opts.rotate ? "daily code rotated" : "previous day's daily code");
-  }
-
-  if (current) {
-    // Retry the keypad push if it never landed
-    if (current.status === "pending") {
-      await pushToProvider(current, s, `Daily ${day}`);
-      const { data: refreshed } = await supabase
-        .from("door_codes")
-        .select("*")
-        .eq("id", current.id)
-        .maybeSingle();
-      current = refreshed || current;
-    }
-    return {
-      success: true,
-      day,
-      code: current.code,
-      door_code_id: current.id,
-      status: current.status,
-      created: false,
-      valid_from: validFrom.toISOString(),
-      valid_until: validUntil.toISOString(),
-    };
-  }
-
+  const { validFrom, validUntil } = doorDayWindow(day);
   const code = await generateUniqueCode(s);
   const { data: inserted, error } = await supabase
     .from("door_codes")
@@ -376,40 +358,181 @@ async function ensureDailyCode(opts: { rotate?: boolean } = {}) {
       scope: "daily",
       valid_from: validFrom.toISOString(),
       valid_until: validUntil.toISOString(),
-      status: "pending",
+      status: "scheduled",
       provider: s.provider,
     })
     .select()
     .single();
-  if (error) return { success: false, error: error.message };
+  // Unique index race: another call created it first — just read it back.
+  if (error) return await dailyRowForDay(day);
+  return inserted as any;
+}
 
-  const push = await pushToProvider(inserted, s, `Daily ${day}`);
-  await logEvent(inserted.id, null, "daily_code_issued", { day, ...push });
+/**
+ * Tops the rolling calendar up to DAILY_CALENDAR_DAYS of future codes.
+ * Done as one read + one bulk insert — day-by-day round trips are far too slow
+ * for a four-month horizon.
+ */
+async function ensureDailyCalendar(days = DAILY_CALENDAR_DAYS) {
+  const s = await getSettings();
+  const start = currentDoorDay();
+  const end = addDays(start, days);
+
+  const { data: existing } = await supabase
+    .from("door_codes")
+    .select("valid_from")
+    .eq("scope", "daily")
+    .in("status", ["scheduled", "pending", "active"])
+    .gte("valid_from", doorDayWindow(start).validFrom.toISOString())
+    .lt("valid_from", doorDayWindow(end).validFrom.toISOString());
+  // Normalise: PostgREST returns "+00:00" offsets, Date#toISOString returns "Z".
+  const have = new Set<number>((existing || []).map((r: any) => Date.parse(r.valid_from)));
+
+  // One pass over every live code so we only pay for the uniqueness read once.
+  const { data: live } = await supabase
+    .from("door_codes")
+    .select("code")
+    .gt("valid_until", new Date(Date.now() - 24 * 3600 * 1000).toISOString());
+  const taken = new Set<string>((live || []).map((r: any) => r.code));
+  const fixedDigits = (s.fixed_code || "").replace(/\D/g, "");
+  if (fixedDigits) taken.add(fixedDigits);
+
+  const rows: Record<string, unknown>[] = [];
+  for (let i = 0; i < days; i++) {
+    const day = addDays(start, i);
+    const { validFrom, validUntil } = doorDayWindow(day);
+    if (have.has(validFrom.getTime())) continue;
+
+    let code = "";
+    for (let attempt = 0; attempt < 500; attempt++) {
+      const candidate = String(Math.floor(Math.random() * 1_000_000)).padStart(6, "0");
+      if (candidate === "000000" || candidate === "111111") continue;
+      if (taken.has(candidate)) continue;
+      code = candidate;
+      taken.add(candidate);
+      break;
+    }
+    if (!code) break;
+
+    rows.push({
+      booking_id: null,
+      user_id: null,
+      code,
+      label: `Daily ${day}`,
+      scope: "daily",
+      valid_from: validFrom.toISOString(),
+      valid_until: validUntil.toISOString(),
+      status: "scheduled",
+      provider: s.provider,
+    });
+  }
+
+  if (rows.length) {
+    const { error } = await supabase.from("door_codes").insert(rows);
+    if (error) return { success: false, error: error.message, created: 0 };
+  }
+
+  return { success: true, days, from: start, to: addDays(start, days - 1), created: rows.length };
+}
+
+/**
+ * Activates the current door-day's code on the keypad, revoking any daily code
+ * from an earlier day, then tops the calendar back up. Idempotent — safe from
+ * the 4am cron, the sync sweep, or an email send.
+ */
+async function ensureDailyCode(opts: { rotate?: boolean } = {}) {
+  const s = await getSettings();
+  const day = currentDoorDay();
+  const { validFrom, validUntil } = doorDayWindow(day);
+
+  // Anything live on the keypad from a previous door-day (or today's, when
+  // forcing a fresh rotation) gets pulled off first.
+  const { data: live } = await supabase
+    .from("door_codes")
+    .select("*")
+    .eq("scope", "daily")
+    .in("status", ["pending", "active"]);
+
+  for (const row of live || []) {
+    const isToday = Date.parse(row.valid_from) === validFrom.getTime();
+    if (isToday && !opts.rotate) continue;
+    await revokeCode(row, s, opts.rotate ? "daily code rotated" : "previous day's daily code");
+  }
+
+  // A forced rotation also discards today's scheduled code so a new one is made.
+  if (opts.rotate) {
+    const scheduled = await dailyRowForDay(day);
+    if (scheduled && scheduled.status === "scheduled") {
+      await supabase.from("door_codes").update({ status: "revoked" }).eq("id", scheduled.id);
+    }
+  }
+
+  let current = await ensureScheduledDay(day, s);
+  if (!current) return { success: false, error: "Could not resolve today's daily code" };
+
+  const created = current.status === "scheduled";
+  if (current.status !== "active") {
+    const push = await pushToProvider(current, s, `Daily ${day}`);
+    await logEvent(current.id, null, "daily_code_activated", { day, ...push });
+    current = (await dailyRowForDay(day)) || current;
+  }
+
+  const calendar = await ensureDailyCalendar();
 
   return {
     success: true,
     day,
-    code,
-    door_code_id: inserted.id,
-    created: true,
+    code: current.code,
+    door_code_id: current.id,
+    status: current.status,
+    created,
     valid_from: validFrom.toISOString(),
     valid_until: validUntil.toISOString(),
-    ...push,
+    calendar,
   };
 }
 
-/** Today's daily code, if one exists (no side effects). */
-async function getDailyCode() {
-  const day = currentDoorDay();
-  const { validFrom } = doorDayWindow(day);
+/**
+ * The code for a given door-day (defaults to today), creating the scheduled row
+ * on demand so a booking far in the future always resolves to a real code.
+ */
+async function getDailyCode(dayInput?: string) {
+  const s = await getSettings();
+  const day = dayInput && /^\d{4}-\d{2}-\d{2}$/.test(dayInput) ? dayInput : currentDoorDay();
+  const row = (await dailyRowForDay(day)) || (await ensureScheduledDay(day, s));
+  return { success: true, day, code: (row as any)?.code || null, row: row || null };
+}
+
+/** The upcoming calendar for the admin screen. */
+async function listDailyCalendar(days = 60) {
+  const start = currentDoorDay();
+  const { validFrom: from } = doorDayWindow(start);
+  const { validFrom: to } = doorDayWindow(addDays(start, days));
   const { data } = await supabase
     .from("door_codes")
-    .select("id, code, status, valid_from, valid_until")
+    .select("id, code, status, valid_from, valid_until, label")
     .eq("scope", "daily")
-    .eq("valid_from", validFrom.toISOString())
-    .in("status", ["pending", "active"])
-    .maybeSingle();
-  return { success: true, day, code: (data as any)?.code || null, row: data || null };
+    .in("status", ["scheduled", "pending", "active"])
+    .gte("valid_from", from.toISOString())
+    .lt("valid_from", to.toISOString())
+    .order("valid_from", { ascending: true });
+  return { success: true, today: start, days: data || [] };
+}
+
+/** Regenerate the code for one future day (today uses daily_ensure + rotate). */
+async function regenerateDailyDay(day: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return { success: false, error: "Invalid date" };
+  const s = await getSettings();
+  const today = currentDoorDay();
+  if (day <= today) return await ensureDailyCode({ rotate: true });
+
+  const existing = await dailyRowForDay(day);
+  if (existing) {
+    await supabase.from("door_codes").update({ status: "revoked" }).eq("id", existing.id);
+    await logEvent(existing.id, null, "daily_code_replaced", { day });
+  }
+  const row = await ensureScheduledDay(day, s);
+  return { success: true, day, code: (row as any)?.code || null };
 }
 
 
@@ -517,8 +640,8 @@ async function issueForBooking(bookingId: string, force = false) {
 
   if (existing) {
     const changed =
-      existing.valid_from !== validFrom.toISOString() ||
-      existing.valid_until !== validUntil.toISOString();
+      Date.parse(existing.valid_from) !== validFrom.getTime() ||
+      Date.parse(existing.valid_until) !== validUntil.getTime();
     if (changed) {
       await supabase
         .from("door_codes")
@@ -590,7 +713,7 @@ async function syncAll() {
   const { data: past } = await supabase
     .from("door_codes")
     .select("*")
-    .in("status", ["pending", "active"])
+    .in("status", ["scheduled", "pending", "active"])
     .lt("valid_until", now.toISOString());
   for (const row of past || []) {
     const tuya = await getTuya(s, row.scope === "test" || row.scope === "staff");
@@ -626,8 +749,8 @@ async function syncAll() {
 
     const { validFrom, validUntil } = bookingWindow(booking, s);
     if (
-      row.valid_from !== validFrom.toISOString() ||
-      row.valid_until !== validUntil.toISOString()
+      Date.parse(row.valid_from) !== validFrom.getTime() ||
+      Date.parse(row.valid_until) !== validUntil.getTime()
     ) {
       await supabase
         .from("door_codes")
@@ -753,13 +876,26 @@ Deno.serve(async (req) => {
         });
         break;
 
-      case "daily_ensure": // 4am cron / on-demand: rotate to today's code
+      case "daily_ensure": // 4am cron / on-demand: activate today's code
         result = await ensureDailyCode({ rotate: !!body.rotate });
         break;
 
-      case "daily_get":
-        result = await getDailyCode();
+      case "daily_get": // optional { day: "YYYY-MM-DD" } for a future booking
+        result = await getDailyCode(body.day);
         break;
+
+      case "daily_calendar": // upcoming pre-generated codes for the admin screen
+        result = await listDailyCalendar(body.days || 60);
+        break;
+
+      case "daily_backfill": // top the rolling calendar up to ~4 months
+        result = await ensureDailyCalendar(body.days || DAILY_CALENDAR_DAYS);
+        break;
+
+      case "daily_regenerate": // replace the code for one specific day
+        result = await regenerateDailyDay(body.day);
+        break;
+
 
       case "sync":
         result = await syncAll();

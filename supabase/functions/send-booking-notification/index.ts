@@ -375,10 +375,17 @@ serve(async (req) => {
         console.error("[NOTIFY] Door code issue failed, using fallback:", e);
       }
     } else if (doorMode === "daily" && notification_type !== "cancellation") {
-      // Daily rotating code — resolve (and if needed create) today's code.
+      // Daily rotating code — resolve the code for THIS booking's door-day, not
+      // today's. Door days run 04:00 → 04:00 Brisbane, so a session starting
+      // before 4am belongs to the previous day. Codes are pre-generated ~4
+      // months ahead, and daily_get creates the row on demand if it's beyond.
       try {
+        const startMs = Date.parse(`${booking.booking_date}T${booking.start_time}+10:00`);
+        const doorDay = new Date(startMs + 10 * 3600 * 1000 - 4 * 3600 * 1000)
+          .toISOString()
+          .slice(0, 10);
         const { data: daily } = await supabaseClient.functions.invoke("door-code-manager", {
-          body: { action: "daily_ensure" },
+          body: { action: "daily_get", day: doorDay },
         });
         if ((daily as any)?.code) {
           doorCode = (doorSettings as any)?.append_hash

@@ -1042,8 +1042,9 @@ export default function AdminPOS() {
     return null;
   }
 
-  // Define all category names (including empty ones for navigation)
-  const ALL_FAMILIES = ['Golf', 'Drinks & Snacks', 'Merch & Other'];
+  // Categories are admin-managed in Settings, so empty ones still show for navigation
+  const ALL_FAMILIES = categories;
+
 
   // Cart Panel Component (reused for both layouts)
   const CartPanel = ({ className = "" }: { className?: string }) => (

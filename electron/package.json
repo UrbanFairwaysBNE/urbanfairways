@@ -50,7 +50,8 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "runAfterFinish": true,
-      "artifactName": "UrbanFairwaysBayController-Setup-${version}.${ext}"
+      "shortcutName": "UF Bay Controller",
+      "artifactName": "UFBayController-Setup-${version}.${ext}"
     }
   },
   "devDependencies": {

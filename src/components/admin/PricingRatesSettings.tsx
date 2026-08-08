@@ -364,10 +364,11 @@ export const PricingRatesSettings = () => {
         <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
         <p>
           <strong>Weekly membership fees apply to everyone.</strong> There is no grandfathering —
-          when you change a weekly fee, existing members are migrated to the new price at their next
-          billing date, so every member on a tier always pays the same amount. Hourly rates take
-          effect immediately for all bookings made from that point.
+          saving a new weekly fee moves every active member on that tier onto it immediately in
+          Stripe, prorated, with their billing date unchanged. Hourly rates take effect immediately
+          for all bookings made from that point.
         </p>
+
       </div>
 
 

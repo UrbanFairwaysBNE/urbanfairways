@@ -37,8 +37,8 @@
     ],
     "publish": {
       "provider": "github",
-      "owner": "your-org",
-      "repo": "bay-controller"
+      "owner": "UrbanFairwaysBNE",
+      "repo": "UF-Bay-Controller"
     },
     "win": {
       "target": "nsis",

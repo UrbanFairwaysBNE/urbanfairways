@@ -1339,7 +1339,15 @@ export default function AdminSettings() {
               </Card>
             </CollapsibleSection>
 
+            <CollapsibleSection
+              title="POS Categories"
+              description="Category tiles shown on the POS home screen. Golf includes live peak / off-peak bay hire."
+            >
+              <POSCategoriesSettings />
+            </CollapsibleSection>
+
             <CollapsibleSection title="Table Service" description="Configure table service hours and settings">
+
               <TableServiceSettings />
             </CollapsibleSection>
           </TabsContent>

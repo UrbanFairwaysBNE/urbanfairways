@@ -353,9 +353,11 @@ export const PricingRatesSettings = () => {
         <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
         <p>
           These rates are the single source of truth — the app, homepage and membership page all
-          read from here. Stripe subscriptions are not linked yet, so changing a weekly fee updates
-          what's displayed and charged for new sign-ups only once Stripe is wired up.
+          read from here, and weekly fees are pushed straight to Stripe when you save. Saving a new
+          weekly fee creates the new Stripe price and moves every active member on that tier onto
+          it, so nothing needs updating in Stripe by hand.
         </p>
+
       </div>
 
       <div className="flex gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">

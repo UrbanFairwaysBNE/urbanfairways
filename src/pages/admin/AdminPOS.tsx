@@ -1013,9 +1013,20 @@ export default function AdminPOS() {
     }
   };
 
+  // Live bay-hire buttons, priced from pricing_config. Increase qty for extra hours.
+  const golfHourProducts: POSProduct[] = golfRates
+    ? [
+        { id: 'bay-hour-peak', name: '1hr Bay Hire — Peak', price: golfRates.peak, family: 'Golf' },
+        { id: 'bay-hour-off-peak', name: '1hr Bay Hire — Off-Peak', price: golfRates.offPeak, family: 'Golf' },
+      ]
+    : [];
+
+  const allProducts: POSProduct[] = [...golfHourProducts, ...products];
+
   const filteredProducts = selectedFamily === 'all'
-    ? products
-    : products.filter(p => p.family === selectedFamily);
+    ? allProducts
+    : allProducts.filter(p => p.family === selectedFamily);
+
 
   if (isLoading) {
     return (

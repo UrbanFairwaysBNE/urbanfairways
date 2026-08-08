@@ -6,8 +6,10 @@ const { exec, spawn } = require('child_process');
 const { promisify } = require('util');
 const execAsync = promisify(exec);
 
-const HUB_ORIGIN = process.env.HUB_ORIGIN || "https://hub.example.com";
-const VENUE_NAME = process.env.VENUE_NAME || "Your Venue";
+// The controller loads the live app (webviews, booking data, extend links) from
+// this origin. Override with the HUB_ORIGIN env var while the domain is pending.
+const HUB_ORIGIN = process.env.HUB_ORIGIN || "https://urbanfairways.com.au";
+const VENUE_NAME = process.env.VENUE_NAME || "Urban Fairways";
 
 // =====================================================
 // SINGLE INSTANCE LOCK - Prevent multiple instances
@@ -1582,11 +1584,11 @@ async function showWelcomeWindows(firstName) {
     <head>
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Manrope:wght@300;400;500&display=swap" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-          font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+          font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
           background: #f5f3ef;
           display: flex;
           align-items: center;
@@ -1609,7 +1611,7 @@ async function showWelcomeWindows(firstName) {
           filter: drop-shadow(0 10px 30px rgba(31, 76, 37, 0.15));
         }
         h1 {
-          font-family: 'Archivo', system-ui, sans-serif;
+          font-family: 'Montserrat', system-ui, sans-serif;
           font-size: 96px;
           font-weight: 400;
           color: #2f3134;
@@ -1618,7 +1620,7 @@ async function showWelcomeWindows(firstName) {
           letter-spacing: 2px;
         }
         h2 {
-          font-family: 'Archivo', system-ui, sans-serif;
+          font-family: 'Montserrat', system-ui, sans-serif;
           font-size: 56px;
           font-weight: 400;
           color: #b5772a;
@@ -1627,7 +1629,7 @@ async function showWelcomeWindows(firstName) {
           letter-spacing: 1px;
         }
         p {
-          font-family: 'Manrope', system-ui, sans-serif;
+          font-family: 'Montserrat', system-ui, sans-serif;
           font-size: 28px;
           font-weight: 400;
           color: #2f3134;
@@ -1664,7 +1666,7 @@ async function showWelcomeWindows(firstName) {
           text-align: left;
         }
         .etiquette h3 {
-          font-family: 'Archivo', system-ui, sans-serif;
+          font-family: 'Montserrat', system-ui, sans-serif;
           font-size: 36px;
           font-weight: 400;
           color: #2f3134;
@@ -1682,7 +1684,7 @@ async function showWelcomeWindows(firstName) {
           display: flex;
           align-items: flex-start;
           gap: 12px;
-          font-family: 'Manrope', system-ui, sans-serif;
+          font-family: 'Montserrat', system-ui, sans-serif;
           font-size: 22px;
           color: #2f3134;
           opacity: 0.85;
@@ -2379,12 +2381,12 @@ async function showSgtInfoOverlay(displayLabel) {
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           html, body {
             background: transparent;
-            font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
           }
           .overlay {
             background: white;
@@ -2683,12 +2685,12 @@ async function showSgtHideConfirmation(displayLabel) {
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           html, body {
             background: transparent;
-            font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
             width: 100%;
             height: 100%;
           }

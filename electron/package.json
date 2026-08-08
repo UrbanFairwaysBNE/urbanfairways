@@ -11,7 +11,7 @@
   },
   "build": {
     "appId": "au.com.urbanfairways.baycontroller",
-    "productName": "Urban Fairways Bay Controller",
+    "productName": "UF Bay Controller",
     "directories": {
       "output": "dist-electron"
     },

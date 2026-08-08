@@ -27,6 +27,9 @@ interface BaselineConfig {
   hasDpsFile: boolean;
   hasSettingsFile: boolean;
   isWatching: boolean;
+  proteeConfigPath?: string;
+  resolvedProteeConfigPath?: string;
+  proteeConfigFound?: boolean;
 }
 
 interface AppRestoreSettingsProps {
@@ -109,6 +112,32 @@ export function AppRestoreSettings({ isElectron }: AppRestoreSettingsProps) {
       loadConfig();
     } else if (!result.canceled) {
       toast.error(`Failed to set folder: ${result.error}`);
+    }
+  };
+
+  const browseProteeConfig = async () => {
+    if (!window.electronAPI) return;
+
+    const result = await window.electronAPI.browseProteeConfig();
+    if (result.success) {
+      toast.success(`ProTee config set: ${result.configPath}`);
+      loadConfig();
+    } else if (!result.canceled) {
+      toast.error(`Failed to set ProTee config: ${result.error}`);
+    }
+  };
+
+  const resetProteeConfig = async () => {
+    if (!window.electronAPI) return;
+
+    const result = await window.electronAPI.resetProteeConfigPath();
+    if (result.success) {
+      toast.success(
+        result.found
+          ? `Auto-detected: ${result.configPath}`
+          : `Reset to auto-detect (not found yet: ${result.configPath})`
+      );
+      loadConfig();
     }
   };
 
@@ -236,7 +265,32 @@ export function AppRestoreSettings({ isElectron }: AppRestoreSettingsProps) {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            Usually: C:\Users\[User]\AppData\Local\GSPro
+            Auto-detected from this PC's user profile (%LOCALAPPDATA%\GSPro). Browse only if this bay stores GSPro elsewhere.
+          </p>
+        </div>
+
+        {/* ProTee Labs Config file */}
+        <div className="space-y-2">
+          <Label>ProTee Labs Config File</Label>
+          <div className="flex gap-2">
+            <Input
+              value={config?.proteeConfigPath || config?.resolvedProteeConfigPath || ''}
+              readOnly
+              placeholder="Auto-detecting..."
+              className="text-sm"
+            />
+            <Button variant="outline" size="sm" onClick={browseProteeConfig}>
+              <FolderOpen className="h-4 w-4 mr-1" />
+              Browse
+            </Button>
+            <Button variant="ghost" size="sm" onClick={resetProteeConfig}>
+              Auto
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {config?.proteeConfigFound
+              ? "Found on this PC — startup screen restore will work."
+              : "Not found yet. Auto-detects %APPDATA%\\ProTeeUnited\\Configs\\Config; browse if this PC differs."}
           </p>
         </div>
 

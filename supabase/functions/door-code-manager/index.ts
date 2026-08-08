@@ -368,20 +368,70 @@ async function ensureScheduledDay(day: string, s: Settings) {
   return inserted as any;
 }
 
-/** Tops the rolling calendar up to DAILY_CALENDAR_DAYS of future codes. */
+/**
+ * Tops the rolling calendar up to DAILY_CALENDAR_DAYS of future codes.
+ * Done as one read + one bulk insert — day-by-day round trips are far too slow
+ * for a four-month horizon.
+ */
 async function ensureDailyCalendar(days = DAILY_CALENDAR_DAYS) {
   const s = await getSettings();
   const start = currentDoorDay();
-  let created = 0;
+  const end = addDays(start, days);
+
+  const { data: existing } = await supabase
+    .from("door_codes")
+    .select("valid_from")
+    .eq("scope", "daily")
+    .in("status", ["scheduled", "pending", "active"])
+    .gte("valid_from", doorDayWindow(start).validFrom.toISOString())
+    .lt("valid_from", doorDayWindow(end).validFrom.toISOString());
+  const have = new Set<string>((existing || []).map((r: any) => r.valid_from));
+
+  // One pass over every live code so we only pay for the uniqueness read once.
+  const { data: live } = await supabase
+    .from("door_codes")
+    .select("code")
+    .gt("valid_until", new Date(Date.now() - 24 * 3600 * 1000).toISOString());
+  const taken = new Set<string>((live || []).map((r: any) => r.code));
+  const fixedDigits = (s.fixed_code || "").replace(/\D/g, "");
+  if (fixedDigits) taken.add(fixedDigits);
+
+  const rows: Record<string, unknown>[] = [];
   for (let i = 0; i < days; i++) {
     const day = addDays(start, i);
-    const before = await dailyRowForDay(day);
-    if (!before) {
-      await ensureScheduledDay(day, s);
-      created++;
+    const { validFrom, validUntil } = doorDayWindow(day);
+    if (have.has(validFrom.toISOString())) continue;
+
+    let code = "";
+    for (let attempt = 0; attempt < 500; attempt++) {
+      const candidate = String(Math.floor(Math.random() * 1_000_000)).padStart(6, "0");
+      if (candidate === "000000" || candidate === "111111") continue;
+      if (taken.has(candidate)) continue;
+      code = candidate;
+      taken.add(candidate);
+      break;
     }
+    if (!code) break;
+
+    rows.push({
+      booking_id: null,
+      user_id: null,
+      code,
+      label: `Daily ${day}`,
+      scope: "daily",
+      valid_from: validFrom.toISOString(),
+      valid_until: validUntil.toISOString(),
+      status: "scheduled",
+      provider: s.provider,
+    });
   }
-  return { success: true, days, from: start, to: addDays(start, days - 1), created };
+
+  if (rows.length) {
+    const { error } = await supabase.from("door_codes").insert(rows);
+    if (error) return { success: false, error: error.message, created: 0 };
+  }
+
+  return { success: true, days, from: start, to: addDays(start, days - 1), created: rows.length };
 }
 
 /**

@@ -126,6 +126,7 @@ export default function AdminMarketing() {
   // First session promo counter
   const [promoEligibleCount, setPromoEligibleCount] = useState<number | null>(null);
   const PROMO_THRESHOLD = 10;
+  const PROMO_WAIT_DAYS = 7;
   
   // First session promo success tracking
   const [promoStats, setPromoStats] = useState<{ sent: number; converted: number } | null>(null);
@@ -184,37 +185,39 @@ export default function AdminMarketing() {
 
   const fetchPromoEligibleCount = async () => {
     try {
-      // Get users who haven't received the promo, opted into marketing, created >24h ago
-      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      
-      const { data: eligibleProfiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select("user_id, created_at")
-        .is("first_session_promo_sent", null)
-        .eq("marketing_opt_out", false)
-        .lt("created_at", twentyFourHoursAgo);
-      
-      if (profilesError) {
-        console.error("Error fetching promo eligible profiles:", profilesError);
-        return;
+      // Same eligibility rules as the first-session-promo edge function — keep in sync.
+      // Never sent the promo, opted into marketing, signed up more than 7 days ago.
+      const signupCutoff = new Date(Date.now() - PROMO_WAIT_DAYS * 24 * 60 * 60 * 1000).toISOString();
+
+      // Page through profiles — PostgREST caps a single request at 1000 rows
+      const eligibleProfiles: { user_id: string }[] = [];
+      const PAGE = 1000;
+      for (let from = 0; ; from += PAGE) {
+        const { data: page, error: profilesError } = await supabase
+          .from("profiles")
+          .select("user_id, created_at")
+          .is("first_session_promo_sent", null)
+          .eq("marketing_opt_out", false)
+          .lt("created_at", signupCutoff)
+          .order("created_at", { ascending: true })
+          .range(from, from + PAGE - 1);
+
+        if (profilesError) {
+          console.error("Error fetching promo eligible profiles:", profilesError);
+          return;
+        }
+        if (!page || page.length === 0) break;
+        eligibleProfiles.push(...page);
+        if (page.length < PAGE) break;
       }
-      
-      if (!eligibleProfiles || eligibleProfiles.length === 0) {
+
+      if (eligibleProfiles.length === 0) {
         setPromoEligibleCount(0);
         return;
       }
-      
-      // Filter out bulk import users (created 2026-01-18 between 07:00-08:00 UTC)
-      const bulkImportStart = new Date("2026-01-18T07:00:00Z").getTime();
-      const bulkImportEnd = new Date("2026-01-18T08:00:00Z").getTime();
-      
-      const filteredProfiles = eligibleProfiles.filter(user => {
-        const createdAt = new Date(user.created_at).getTime();
-        return createdAt < bulkImportStart || createdAt > bulkImportEnd;
-      });
-      
+
       // Get user_ids who have non-cancelled bookings — batch to avoid PostgREST 1000-row cap
-      const userIds = filteredProfiles.map(p => p.user_id);
+      const userIds = eligibleProfiles.map(p => p.user_id);
       const usersWithBookings = new Set<string>();
       const BATCH = 100;
       for (let i = 0; i < userIds.length; i += BATCH) {
@@ -231,7 +234,7 @@ export default function AdminMarketing() {
         bookings?.forEach(b => usersWithBookings.add(b.user_id));
       }
 
-      const eligibleCount = filteredProfiles.filter(p => !usersWithBookings.has(p.user_id)).length;
+      const eligibleCount = eligibleProfiles.filter(p => !usersWithBookings.has(p.user_id)).length;
 
       setPromoEligibleCount(eligibleCount);
     } catch (error) {

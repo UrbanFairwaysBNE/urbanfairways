@@ -84,8 +84,8 @@ const buildFeedbackBody = (tenant: TenantConfig) => `
               <!-- CTA BUTTON -->
               <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:16px auto 0;">
                 <tr>
-                  <td bgcolor="#B5772A" style="border-radius:12px;">
-                    <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="{{feedback_url}}" style="height:46px;v-text-anchor:middle;width:200px;" arcsize="26%" fillcolor="#B5772A" stroke="f"><v:textbox><center><![endif]-->
+                  <td bgcolor="#5F6F52" style="border-radius:12px;">
+                    <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="{{feedback_url}}" style="height:46px;v-text-anchor:middle;width:200px;" arcsize="26%" fillcolor="#5F6F52" stroke="f"><v:textbox><center><![endif]-->
                     <a href="{{feedback_url}}" target="_blank" rel="noopener noreferrer"
                        style="display:block; padding:14px 24px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:18px; letter-spacing:0.3px; color:#FFFFFF; text-decoration:none; text-align:center;">
                       GIVE FEEDBACK

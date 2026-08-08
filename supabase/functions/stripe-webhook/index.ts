@@ -376,7 +376,7 @@ serve(async (req) => {
                 <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                   ${changeCopy}
                 </p>
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #B5772A;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #5F6F52;">
                   <tr>
                     <td style="padding:20px; font-family:Manrope, Arial, sans-serif; font-size:15px; color:#2F3134; text-align:center;">
                       <p style="margin:5px 0;"><strong>Previous:</strong> ${previousTierName}</p>
@@ -398,7 +398,7 @@ serve(async (req) => {
                 <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                   Hi ${firstName}, congratulations! Your <strong>${tierName}</strong> membership is now active.
                 </p>
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #B5772A;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #5F6F52;">
                   <tr>
                     <td style="padding:20px; font-family:Manrope, Arial, sans-serif; font-size:15px; color:#2F3134; text-align:center;">
                       <p style="margin:5px 0;"><strong>Membership:</strong> ${tierName}</p>
@@ -571,7 +571,7 @@ serve(async (req) => {
               <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 Hi ${firstName}, unfortunately your card payment for your <strong>${previousTier}</strong> membership could not be processed.
               </p>
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #B5772A;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #5F6F52;">
                 <tr>
                   <td style="padding:20px; font-family:Manrope, Arial, sans-serif; font-size:15px; color:#2F3134;">
                     <h3 style="margin:0 0 10px 0; font-family:Archivo, Impact, Arial Black, sans-serif; color:#2F3134;">What happened?</h3>

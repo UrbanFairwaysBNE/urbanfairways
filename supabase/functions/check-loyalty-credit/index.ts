@@ -195,7 +195,7 @@ serve(async (req: Request): Promise<Response> => {
                 <tr>
                   <td style="padding:30px; text-align:center;">
                     <p style="margin:0 0 8px; font-family:Manrope, Arial, sans-serif; font-size:14px; color:#F5F3EF; opacity:0.9;">Loyalty Credit</p>
-                    <p style="margin:0; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:52px; font-weight:bold; color:#B5772A;">$${credit_amount.toFixed(2)}</p>
+                    <p style="margin:0; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:52px; font-weight:bold; color:#5F6F52;">$${credit_amount.toFixed(2)}</p>
                   </td>
                 </tr>
               </table>

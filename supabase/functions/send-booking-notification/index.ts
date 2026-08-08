@@ -478,7 +478,7 @@ serve(async (req) => {
                 ${introText}
               </p>
               
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #B5772A;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #5F6F52;">
                 <tr>
                   <td style="padding:20px; font-family:Manrope, Arial, sans-serif; font-size:15px; color:#2F3134;">
                     <p style="margin:5px 0;"><strong>Date:</strong> ${bookingDate}</p>
@@ -499,7 +499,7 @@ serve(async (req) => {
                     ${needsBoomGate ? `
                     <p style="margin:0; font-size:14px;">
                       <strong>IMPORTANT:</strong> You will require Boom gate access for your booking time.<br/>
-                      <a href="${tenantBookingUrl(tenant, "/gate-access")}" style="color:#B5772A;">Request gate access here</a>
+                      <a href="${tenantBookingUrl(tenant, "/gate-access")}" style="color:#5F6F52;">Request gate access here</a>
                     </p>
                     ` : ''}
                   </td>

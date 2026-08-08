@@ -388,7 +388,7 @@ function getDefaultTemplate(tenant: TenantConfig): string {
                 <tr>
                   <td style="padding:30px; text-align:center;">
                     <p style="margin:0 0 8px; font-family:Manrope, Arial, sans-serif; font-size:14px; color:#F5F3EF; opacity:0.9;">Your Account Credit</p>
-                    <p style="margin:0; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:52px; color:#B5772A;">$35.00</p>
+                    <p style="margin:0; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:52px; color:#5F6F52;">$35.00</p>
                     <p style="margin:8px 0 0; font-family:Manrope, Arial, sans-serif; font-size:14px; color:#F5F3EF; opacity:0.9;">Enough for 1 hour off-peak!</p>
                   </td>
                 </tr>

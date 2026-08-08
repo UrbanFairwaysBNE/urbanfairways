@@ -182,11 +182,14 @@ export default function AdminPOS() {
   useEffect(() => {
     if (isAdmin) {
       fetchProducts();
+      fetchCategories();
+      fetchGolfRates();
       fetchUnpaidBookings();
       fetchCustomers();
       fetchOpenTabs();
     }
   }, [isAdmin]);
+
 
   // Refresh customer list when Bar Tabs dialog opens so new customers appear
   useEffect(() => {

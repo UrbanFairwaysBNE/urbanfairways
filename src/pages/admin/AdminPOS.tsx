@@ -123,6 +123,9 @@ export default function AdminPOS() {
   const [unpaidBookings, setUnpaidBookings] = useState<UnpaidBooking[]>([]);
   const [selectedFamily, setSelectedFamily] = useState<string>("categories");
   const [families, setFamilies] = useState<string[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [golfRates, setGolfRates] = useState<{ peak: number; offPeak: number } | null>(null);
+
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [showBookingsDialog, setShowBookingsDialog] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<UnpaidBooking | null>(null);

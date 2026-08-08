@@ -825,13 +825,26 @@ Deno.serve(async (req) => {
         });
         break;
 
-      case "daily_ensure": // 4am cron / on-demand: rotate to today's code
+      case "daily_ensure": // 4am cron / on-demand: activate today's code
         result = await ensureDailyCode({ rotate: !!body.rotate });
         break;
 
-      case "daily_get":
-        result = await getDailyCode();
+      case "daily_get": // optional { day: "YYYY-MM-DD" } for a future booking
+        result = await getDailyCode(body.day);
         break;
+
+      case "daily_calendar": // upcoming pre-generated codes for the admin screen
+        result = await listDailyCalendar(body.days || 60);
+        break;
+
+      case "daily_backfill": // top the rolling calendar up to ~4 months
+        result = await ensureDailyCalendar(body.days || DAILY_CALENDAR_DAYS);
+        break;
+
+      case "daily_regenerate": // replace the code for one specific day
+        result = await regenerateDailyDay(body.day);
+        break;
+
 
       case "sync":
         result = await syncAll();

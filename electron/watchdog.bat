@@ -28,6 +28,7 @@ set "CHECK_INTERVAL=30"
 
 REM Log file for watchdog activity
 set "LOG_FILE=%LOCALAPPDATA%\uf-bay-controller\watchdog.log"
+if not exist "%LOCALAPPDATA%\uf-bay-controller" mkdir "%LOCALAPPDATA%\uf-bay-controller"
 
 echo [%date% %time%] Watchdog started. Monitoring: %PROCESS_NAME% >> "%LOG_FILE%"
 

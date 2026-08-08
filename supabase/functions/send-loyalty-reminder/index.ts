@@ -39,7 +39,7 @@ const bodyFor = (tenant: TenantConfig, firstName: string, balance: number, isFin
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#2F3134;border-radius:12px;margin:18px 0;">
       <tr><td style="padding:30px;text-align:center;">
         <p style="margin:0 0 8px;font-family:Manrope,Arial,sans-serif;font-size:14px;color:#F5F3EF;opacity:0.9;">Your Credit Balance</p>
-        <p style="margin:0;font-family:Archivo,Impact,Arial Black,sans-serif;font-size:52px;color:#B5772A;">$${balance.toFixed(2)}</p>
+        <p style="margin:0;font-family:Archivo,Impact,Arial Black,sans-serif;font-size:52px;color:#5F6F52;">$${balance.toFixed(2)}</p>
       </td></tr>
     </table>
     <p style="margin:18px 0 0;font-family:Manrope,Arial,sans-serif;font-size:16px;line-height:1.6;color:#2F3134;text-align:center;">${outro}</p>

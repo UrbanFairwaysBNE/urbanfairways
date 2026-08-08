@@ -122,7 +122,7 @@ serve(async (req: Request): Promise<Response> => {
 
       const messageBlock = personalMessage
         ? `
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #B5772A;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #5F6F52;">
           <tr>
             <td style="padding:18px 22px; font-family:Manrope, Arial, sans-serif; font-size:15px; line-height:1.6; color:#2F3134; font-style:italic;">
               "${escapeHtml(personalMessage)}"
@@ -138,7 +138,7 @@ serve(async (req: Request): Promise<Response> => {
           <tr>
             <td style="padding:30px; text-align:center;">
               <p style="margin:0 0 8px; font-family:Manrope, Arial, sans-serif; font-size:14px; color:#F5F3EF; opacity:0.9; letter-spacing:1px; text-transform:uppercase;">Gift Card Value</p>
-              <p style="margin:0; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:56px; color:#B5772A;">$${amount.toFixed(2)}</p>
+              <p style="margin:0; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:56px; color:#5F6F52;">$${amount.toFixed(2)}</p>
             </td>
           </tr>
         </table>
@@ -186,7 +186,7 @@ serve(async (req: Request): Promise<Response> => {
                 <tr>
                   <td style="padding:34px 28px; text-align:center;">
                     <p style="margin:0 0 6px; font-family:Manrope, Arial, sans-serif; font-size:13px; color:#2F3134; letter-spacing:2px; text-transform:uppercase; opacity:0.8;">${escapeHtml(tenant.venue_name)} Gift Card</p>
-                    <p style="margin:0 0 18px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:64px; line-height:1; color:#B5772A;">$${amount.toFixed(2)}</p>
+                    <p style="margin:0 0 18px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:64px; line-height:1; color:#5F6F52;">$${amount.toFixed(2)}</p>
                     <p style="margin:0 0 6px; font-family:Manrope, Arial, sans-serif; font-size:14px; color:#2F3134; opacity:0.75;">To</p>
                     <p style="margin:0 0 18px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:28px; color:#2F3134;">${escapeHtml(recipientName)}</p>
                     ${personalMessage ? `<p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:15px; line-height:1.5; color:#2F3134; font-style:italic; padding:0 12px;">"${escapeHtml(personalMessage)}"</p>` : ""}
@@ -217,7 +217,7 @@ serve(async (req: Request): Promise<Response> => {
             <td style="padding:20px 22px;">
               <p style="margin:0 0 10px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:18px; color:#2F3134; text-align:center; letter-spacing:0.5px;">How ${escapeHtml(recipientName)} Redeems Their Gift</p>
               <ol style="margin:0; padding-left:22px; font-family:Manrope, Arial, sans-serif; font-size:14px; line-height:1.7; color:#2F3134;">
-                <li>Head to <a href="${tenantHubUrl(tenant, "/")}" style="color:#B5772A; text-decoration:underline;"><strong>${tenant.hub_domain}</strong></a> and create a free account (or sign in).</li>
+                <li>Head to <a href="${tenantHubUrl(tenant, "/")}" style="color:#5F6F52; text-decoration:underline;"><strong>${tenant.hub_domain}</strong></a> and create a free account (or sign in).</li>
                 <li>Go to <strong>My Account</strong> and find the <strong>"Redeem Gift Card"</strong> section.</li>
                 <li>Enter the redemption code above — credit applies to their account instantly.</li>
                 <li>Book a bay and the credit is automatically used at checkout.</li>

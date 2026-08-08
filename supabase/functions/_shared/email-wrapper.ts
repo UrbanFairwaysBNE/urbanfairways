@@ -120,7 +120,7 @@ export function buildEmailTemplate(
     ? `
               <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:22px auto 0;">
                 <tr>
-                  <td bgcolor="#B5772A" style="border-radius:12px;">
+                  <td bgcolor="#5F6F52" style="border-radius:12px;">
                     <a href="${ctaButton.url}"
                        style="display:inline-block; padding:14px 24px; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:18px; letter-spacing:0.3px; color:#FFFFFF; text-decoration:none;">
                       ${ctaButton.text}

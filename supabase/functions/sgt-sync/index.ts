@@ -270,7 +270,7 @@ serve(async (req) => {
                   "NEW LEAGUE MEMBER",
                   `<p style="margin:0 0 12px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;"><strong>${linked.username}</strong> (${linked.email}) has been auto-linked to their local profile via SGT sync.</p>
                    <p style="margin:0 0 12px; font-family:Manrope, Arial, sans-serif; font-size:15px; color:#2F3134; text-align:center;">SGT User ID: ${linked.sgtUserId}</p>
-                   <p style="margin:0; font-family:Manrope, Arial, sans-serif; font-size:15px; color:#B5772A; text-align:center; font-weight:600;">⚠️ Action Required: Set their handicap to complete onboarding.</p>`,
+                   <p style="margin:0; font-family:Manrope, Arial, sans-serif; font-size:15px; color:#5F6F52; text-align:center; font-weight:600;">⚠️ Action Required: Set their handicap to complete onboarding.</p>`,
                   { text: "OPEN PENDING ONBOARDING", url: `${siteUrl}/admin/sgt-manager?tab=registrations` },
                   tenant,
                 ),

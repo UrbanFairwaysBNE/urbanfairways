@@ -57,7 +57,7 @@ serve(async (req: Request): Promise<Response> => {
         <tr>
           <td style="padding:30px; text-align:center;">
             <p style="margin:0 0 8px; font-family:Manrope, Arial, sans-serif; font-size:14px; color:#F5F3EF; opacity:0.9; letter-spacing:1px; text-transform:uppercase;">Gift Card Value</p>
-            <p style="margin:0; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:56px; color:#B5772A;">$${amount.toFixed(2)}</p>
+            <p style="margin:0; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:56px; color:#5F6F52;">$${amount.toFixed(2)}</p>
           </td>
         </tr>
       </table>

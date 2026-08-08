@@ -25,10 +25,10 @@ function buildNewMemberBody(data: { username: string; email: string; sgtUserId: 
               <p style="margin:0 0 14px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
                 A new member has joined the ${tenant.venue_name} League via the app.
               </p>
-              <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:14px; line-height:1.6; color:#B5772A; text-align:center; font-weight:600;">
+              <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:14px; line-height:1.6; color:#5F6F52; text-align:center; font-weight:600;">
                 ⚠️ Action Required: Set their handicap to complete onboarding
               </p>
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #B5772A;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #5F6F52;">
                 <tr>
                   <td style="padding:20px; font-family:Manrope, Arial, sans-serif; font-size:15px; color:#2F3134;">
                     <h3 style="margin:0 0 16px 0; font-family:Archivo, Impact, Arial Black, sans-serif; color:#2F3134;">Member Details</h3>

@@ -3344,9 +3344,10 @@ async function restoreBaselineFiles() {
   
   // Restore Protee Labs config (CurrentStartupScreen)
   if (baselineConfig.proteeScreenId) {
+    const proteeConfigPath = getProteeConfigPath();
     try {
-      if (fs.existsSync(PROTEE_CONFIG_PATH)) {
-        let configContent = fs.readFileSync(PROTEE_CONFIG_PATH, 'utf-8');
+      if (fs.existsSync(proteeConfigPath)) {
+        let configContent = fs.readFileSync(proteeConfigPath, 'utf-8');
         const regex = /^CurrentStartupScreen=.*$/m;
         if (regex.test(configContent)) {
           configContent = configContent.replace(regex, `CurrentStartupScreen=${baselineConfig.proteeScreenId}`);
@@ -3354,11 +3355,11 @@ async function restoreBaselineFiles() {
           // Append if not found
           configContent += `\nCurrentStartupScreen=${baselineConfig.proteeScreenId}`;
         }
-        fs.writeFileSync(PROTEE_CONFIG_PATH, configContent);
+        fs.writeFileSync(proteeConfigPath, configContent);
         console.log('Restored Protee CurrentStartupScreen to:', baselineConfig.proteeScreenId);
         results.push({ file: 'Protee Config', success: true });
       } else {
-        console.log('Protee config file not found at:', PROTEE_CONFIG_PATH);
+        console.log('Protee config file not found at:', proteeConfigPath);
         results.push({ file: 'Protee Config', success: false, error: 'Config file not found' });
       }
     } catch (error) {
@@ -3410,6 +3411,7 @@ async function getDisplayDevicePaths() {
 
 // Read current Protee config CurrentStartupScreen value
 function readProteeCurrentScreen() {
+  const PROTEE_CONFIG_PATH = getProteeConfigPath();
   try {
     if (!fs.existsSync(PROTEE_CONFIG_PATH)) {
       return { success: false, error: 'Config file not found', path: PROTEE_CONFIG_PATH };

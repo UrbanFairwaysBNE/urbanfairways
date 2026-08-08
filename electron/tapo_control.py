@@ -18,10 +18,12 @@ import asyncio
 import json
 import socket
 import struct
+import threading
+import time
 from typing import Any, Dict, List, Optional, Tuple
 
 DEVICE_TYPES = ["p100", "p110", "p105", "p115"]
-SCRIPT_VERSION = "2026-01-17-2"
+SCRIPT_VERSION = "2026-08-08-mac-binding"
 
 
 async def probe_device_raw(ip: str) -> Dict[str, Any]:
@@ -115,6 +117,176 @@ async def connect_any(client, ip: str) -> Tuple[Optional[Any], Optional[Any], Op
     return None, None, None, attempts
 
 
+def normalize_mac(mac: Optional[str]) -> str:
+    """Strip separators and upper-case a MAC so 'AA-BB-CC' == 'aa:bb:cc'."""
+    if not mac:
+        return ""
+    return "".join(ch for ch in mac if ch.isalnum()).upper()
+
+
+def firmware_risk(fw: Optional[str]) -> bool:
+    """Firmware 1.4.x introduced TP-Link's new TPAP encryption which the
+    local `tapo` library cannot yet speak. Flag it so it never reaches a bay."""
+    if not fw:
+        return False
+    return str(fw).strip().startswith("1.4")
+
+
+def local_subnet_prefix() -> Optional[str]:
+    ip = get_local_ip()
+    if not ip:
+        return None
+    return ".".join(ip.split(".")[:3])
+
+
+def broadcast_probe(timeout: float = 2.0) -> List[str]:
+    """Fire TP-Link discovery broadcasts (UDP 20002 new protocol, 9999 legacy)
+    and collect the IPs of anything that answers. Best-effort fast path: some
+    firmware/router combos swallow broadcast, so callers must fall back."""
+    found: List[str] = []
+    probes = [
+        (20002, b'\x02\x00\x00\x01\x01\xe5\x11\x00' + b'\x00' * 8 +
+                json.dumps({"params": {"rsa_key": "-----BEGIN PUBLIC KEY-----\n-----END PUBLIC KEY-----\n"}}).encode()),
+        (9999, bytes(bytearray([0xd0, 0xf2, 0x81, 0xf8, 0x8b, 0xff, 0x9a, 0xf7,
+                                0xd5, 0xef, 0x94, 0xb6, 0xc5, 0xa0, 0xd4, 0x8b,
+                                0xf9, 0x9c, 0xf0, 0x91, 0xe8, 0xb7, 0xc4, 0xb0,
+                                0xd1, 0xa5, 0xc0, 0xe2]))),
+    ]
+    for port, payload in probes:
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+            sock.settimeout(0.4)
+            sock.sendto(payload, ("255.255.255.255", port))
+            deadline = time.time() + timeout
+            while time.time() < deadline:
+                try:
+                    _data, addr = sock.recvfrom(4096)
+                    if addr[0] not in found:
+                        found.append(addr[0])
+                except socket.timeout:
+                    continue
+                except Exception:
+                    break
+            sock.close()
+        except Exception:
+            continue
+    return found
+
+
+def fast_sweep(prefix: str, timeout: float = 0.4, workers: int = 128) -> List[str]:
+    """Concurrent port-80 sweep of a /24 — a whole subnet in ~1-2 seconds."""
+    open_ips: List[str] = []
+    lock = threading.Lock()
+
+    def probe(host: int):
+        ip = f"{prefix}.{host}"
+        if check_port_open(ip, 80, timeout=timeout):
+            with lock:
+                open_ips.append(ip)
+
+    threads: List[threading.Thread] = []
+    for host in range(1, 255):
+        t = threading.Thread(target=probe, args=(host,), daemon=True)
+        threads.append(t)
+
+    # Run in waves so we never open more than `workers` sockets at once
+    for i in range(0, len(threads), workers):
+        wave = threads[i:i + workers]
+        for t in wave:
+            t.start()
+        for t in wave:
+            t.join()
+
+    return sorted(open_ips, key=lambda x: int(x.split(".")[-1]))
+
+
+async def identify(client, ip: str) -> Optional[Dict[str, Any]]:
+    """Authenticate to an IP and return its identity (mac, nickname, firmware)."""
+    device, info, connected_as, _attempts = await connect_any(client, ip)
+    if device is None or info is None:
+        return None
+
+    fw = getattr(info, "fw_ver", None) or getattr(info, "firmware_version", None)
+    mac = getattr(info, "mac", None)
+    return {
+        "ip": ip,
+        "mac": mac,
+        "mac_key": normalize_mac(mac),
+        "nickname": getattr(info, "nickname", None) or "Unnamed plug",
+        "model": getattr(info, "model", None) or (connected_as.upper() if connected_as else None),
+        "firmware": fw,
+        "hardware": getattr(info, "hw_ver", None) or getattr(info, "hardware_version", None),
+        "device_id": getattr(info, "device_id", None),
+        "isOn": getattr(info, "device_on", False),
+        "connected_as": connected_as,
+        "firmware_risk": firmware_risk(fw),
+    }
+
+
+async def discover_devices(email: str, password: str, subnets: Optional[List[str]] = None) -> Dict[str, Any]:
+    """Find every reachable Tapo plug and report identity keyed by MAC address."""
+    try:
+        from tapo import ApiClient
+    except ImportError:
+        return {"success": False, "error": "tapo package not installed. Run: pip install tapo"}
+
+    client = ApiClient(email, password)
+
+    prefixes: List[str] = []
+    if subnets:
+        for s in subnets:
+            p = ".".join(s.strip().split(".")[:3])
+            if p and p not in prefixes:
+                prefixes.append(p)
+    else:
+        local = local_subnet_prefix()
+        if not local:
+            return {"success": False, "error": "Could not determine local IP address"}
+        prefixes.append(local)
+
+    candidates: List[str] = []
+    for ip in broadcast_probe():
+        if ip not in candidates:
+            candidates.append(ip)
+    for prefix in prefixes:
+        for ip in fast_sweep(prefix):
+            if ip not in candidates:
+                candidates.append(ip)
+
+    plugs: List[Dict[str, Any]] = []
+    for ip in candidates:
+        try:
+            ident = await identify(client, ip)
+            if ident:
+                plugs.append(ident)
+        except Exception:
+            continue
+
+    return {
+        "success": True,
+        "script_version": SCRIPT_VERSION,
+        "tapo_version": _get_tapo_version(),
+        "subnets": [f"{p}.0/24" for p in prefixes],
+        "candidates": len(candidates),
+        "plugs": plugs,
+    }
+
+
+async def resolve_mac(email: str, password: str, mac: str, subnets: Optional[List[str]] = None) -> Optional[Dict[str, Any]]:
+    """Locate the current IP of a plug by its (immutable) MAC address."""
+    target = normalize_mac(mac)
+    if not target:
+        return None
+    result = await discover_devices(email, password, subnets)
+    if not result.get("success"):
+        return None
+    for plug in result.get("plugs", []):
+        if plug.get("mac_key") == target:
+            return plug
+    return None
+
+
 def classify_error(raw: str, ip: str) -> Tuple[str, bool]:
     lower = (raw or "").lower()
 
@@ -133,7 +305,27 @@ def classify_error(raw: str, ip: str) -> Tuple[str, bool]:
     return raw or "Unknown error", False
 
 
-async def control_plug(email: str, password: str, ip: str, action: str):
+async def control_plug(email: str, password: str, ip: str, action: str, mac: Optional[str] = None):
+    """Control a plug. `ip` is only a cached hint — if it fails and a MAC is
+    known, re-discover the plug on the network and retry at its new address."""
+    result = await _control_at_ip(email, password, ip, action)
+    if result.get("success") or not mac:
+        return result
+
+    located = await resolve_mac(email, password, mac)
+    if not located or located.get("ip") == ip:
+        result["mac_recovery"] = "not_found"
+        return result
+
+    retried = await _control_at_ip(email, password, located["ip"], action)
+    retried["resolved_ip"] = located["ip"]
+    retried["mac_recovery"] = "recovered" if retried.get("success") else "failed"
+    retried["nickname"] = located.get("nickname")
+    return retried
+
+
+async def _control_at_ip(email: str, password: str, ip: str, action: str):
+
     try:
         from tapo import ApiClient
 
@@ -409,8 +601,10 @@ async def list_help():
     return {
         "success": True,
         "usage": {
-            "control": "tapo_control.exe <email> <password> <ip> <on|off|status>",
-            "scan": "tapo_control.exe --scan <email> <password>",
+            "control": "tapo_control.exe <email> <password> <ip> <on|off|status> [mac]",
+            "discover": "tapo_control.exe --discover <email> <password> [subnet,subnet]",
+            "resolve": "tapo_control.exe --resolve <email> <password> <mac>",
+            "scan": "tapo_control.exe --scan <email> <password>  (legacy slow sweep)",
             "diagnose": "tapo_control.exe --diagnose <email> <password> <ip>"
         }
     }
@@ -420,7 +614,29 @@ def main():
         result = asyncio.run(list_help())
         print(json.dumps(result))
         return
-    
+
+    # Fast MAC-based discovery (preferred)
+    if sys.argv[1] == "--discover":
+        if len(sys.argv) < 4:
+            print(json.dumps({"success": False, "error": "Usage: --discover <email> <password> [subnets]"}))
+            return
+        subnets = sys.argv[4].split(",") if len(sys.argv) > 4 and sys.argv[4].strip() else None
+        result = asyncio.run(discover_devices(sys.argv[2], sys.argv[3], subnets))
+        print(json.dumps(result))
+        return
+
+    # Resolve a plug's current IP from its MAC address
+    if sys.argv[1] == "--resolve":
+        if len(sys.argv) < 5:
+            print(json.dumps({"success": False, "error": "Usage: --resolve <email> <password> <mac>"}))
+            return
+        located = asyncio.run(resolve_mac(sys.argv[2], sys.argv[3], sys.argv[4]))
+        if located:
+            print(json.dumps({"success": True, "plug": located}))
+        else:
+            print(json.dumps({"success": False, "error": f"No plug with MAC {sys.argv[4]} found on the network"}))
+        return
+
     # Handle --scan command
     if sys.argv[1] == "--scan":
         if len(sys.argv) < 4:
@@ -448,16 +664,18 @@ def main():
         return
     
     if len(sys.argv) < 5:
-        print(json.dumps({"success": False, "error": "Usage: <email> <password> <ip> <on|off|status>"}))
+        print(json.dumps({"success": False, "error": "Usage: <email> <password> <ip> <on|off|status> [mac]"}))
         return
     
     email = sys.argv[1]
     password = sys.argv[2]
     ip = sys.argv[3]
     action = sys.argv[4].lower()
+    mac = sys.argv[5] if len(sys.argv) > 5 else None
     
-    result = asyncio.run(control_plug(email, password, ip, action))
+    result = asyncio.run(control_plug(email, password, ip, action, mac))
     print(json.dumps(result))
+
 
 if __name__ == "__main__":
     main()

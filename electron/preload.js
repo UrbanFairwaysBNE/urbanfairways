@@ -11,9 +11,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Test TAPO login credentials
   tapoTestLogin: (email, password) => ipcRenderer.invoke('tapo-test-login', { email, password }),
   
-  // Control a specific plug (on/off/status)
-  controlPlug: (email, password, ip, action) => 
-    ipcRenderer.invoke('control-plug', { email, password, ip, action }),
+  // Control a specific plug (on/off/status). `mac` enables self-healing
+  // re-resolution if the plug's IP changed via DHCP.
+  controlPlug: (email, password, ip, action, mac) =>
+    ipcRenderer.invoke('control-plug', { email, password, ip, action, mac }),
+
+  // Discover all Tapo plugs on the network (nickname + MAC + model + firmware)
+  discoverPlugs: (email, password, subnets) =>
+    ipcRenderer.invoke('discover-plugs', { email, password, subnets }),
   
   // Diagnose a plug (detailed connection debugging)
   diagnosePlug: (email, password, ip) => 

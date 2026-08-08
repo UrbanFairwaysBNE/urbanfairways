@@ -51,7 +51,7 @@ serve(async (req) => {
     const customerId = customers.data[0].id;
     logStep("Found Stripe customer", { customerId });
 
-    const origin = req.headers.get("origin") || "https://hltrcuypuxhetcjyvedl.lovable.app";
+    const origin = req.headers.get("origin") || "https://urbanfairways.lovable.app";
     
     // Create billing portal session
     // Note: Cancellation settings must be configured in Stripe Dashboard

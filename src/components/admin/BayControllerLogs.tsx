@@ -228,7 +228,7 @@ export function BayControllerLogs() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Bays</SelectItem>
-                  {[1, 2, 3, 4, 5, 6].map((num) => (
+                  {[1, 2, 3, 4, 5, 6, 7].map((num) => (
                     <SelectItem key={num} value={num.toString()}>
                       Bay {num}
                     </SelectItem>

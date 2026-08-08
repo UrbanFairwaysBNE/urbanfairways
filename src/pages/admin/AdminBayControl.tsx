@@ -55,8 +55,8 @@ interface BayStatus {
   isManualMode: boolean;
 }
 
-// Always have 6 bays to display
-const DEFAULT_BAYS: Bay[] = [1, 2, 3, 4, 5, 6].map((num) => ({
+// Always have 7 bays to display
+const DEFAULT_BAYS: Bay[] = [1, 2, 3, 4, 5, 6, 7].map((num) => ({
   id: `bay-${num}`,
   bay_number: num,
   name: `Bay ${num}`,
@@ -383,7 +383,7 @@ export default function AdminBayControl() {
             <h1 className="text-2xl font-display uppercase">Bay Control</h1>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
+            {[1, 2, 3, 4, 5, 6, 7].map((i) => (
               <Card key={i}>
                 <CardContent className="p-4">
                   <Skeleton className="h-32 w-full" />

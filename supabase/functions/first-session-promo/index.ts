@@ -6,6 +6,11 @@ import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
+// Urban Fairways campaign settings
+const CREDIT_AMOUNT = 40;          // $40 = one off-peak Casual hour
+const DEFAULT_THRESHOLD = 10;      // batch up to 10 eligible customers before sending
+const ELIGIBILITY_WAIT_DAYS = 7;   // give new signups a week to book by themselves
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -64,7 +69,7 @@ serve(async (req: Request): Promise<Response> => {
       // No body or invalid JSON, use defaults
     }
 
-    const threshold = options.threshold ?? 10;
+    const threshold = options.threshold ?? DEFAULT_THRESHOLD;
     const force = options.force ?? false;
     const dryRun = options.dry_run ?? false;
 
@@ -74,33 +79,31 @@ serve(async (req: Request): Promise<Response> => {
     // - No bookings (excluding cancelled)
     // - Marketing opt-out = false
     // - first_session_promo_sent IS NULL
-    // - Created more than 24 hours ago
-    // - Exclude bulk import batch (created on 2025-01-18 between 07:00 and 07:40 UTC)
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    
-    // First get all potential users, then filter in code for bulk import
-    const { data: allEligibleUsers, error: fetchError } = await supabase
-      .from("profiles")
-      .select("id, user_id, email, first_name, last_name, deposit_balance, created_at")
-      .is("first_session_promo_sent", null)
-      .eq("marketing_opt_out", false)
-      .lt("created_at", twentyFourHoursAgo);
+    // - Created more than 7 days ago (give them a week to book on their own)
+    const signupCutoff = new Date(Date.now() - ELIGIBILITY_WAIT_DAYS * 24 * 60 * 60 * 1000).toISOString();
 
-    if (fetchError) {
-      throw new Error(`Failed to fetch profiles: ${String(fetchError)}`);
+    // Page through profiles — PostgREST caps a single request at 1000 rows
+    const eligibleUsers: (EligibleUser & { created_at: string })[] = [];
+    const PAGE = 1000;
+    for (let from = 0; ; from += PAGE) {
+      const { data: page, error: fetchError } = await supabase
+        .from("profiles")
+        .select("id, user_id, email, first_name, last_name, deposit_balance, created_at")
+        .is("first_session_promo_sent", null)
+        .eq("marketing_opt_out", false)
+        .lt("created_at", signupCutoff)
+        .order("created_at", { ascending: true })
+        .range(from, from + PAGE - 1);
+
+      if (fetchError) {
+        throw new Error(`Failed to fetch profiles: ${String(fetchError)}`);
+      }
+      if (!page || page.length === 0) break;
+      eligibleUsers.push(...(page as (EligibleUser & { created_at: string })[]));
+      if (page.length < PAGE) break;
     }
 
-    // Filter out bulk import users (created 2026-01-18 between 07:00-08:00 UTC)
-    const bulkImportStart = new Date("2026-01-18T07:00:00Z").getTime();
-    const bulkImportEnd = new Date("2026-01-18T08:00:00Z").getTime();
-    
-    const eligibleUsers = (allEligibleUsers || []).filter(user => {
-      const createdAt = new Date(user.created_at).getTime();
-      // Exclude if created during bulk import window
-      return createdAt < bulkImportStart || createdAt > bulkImportEnd;
-    });
-
-    logStep("After bulk import filter", { count: eligibleUsers.length });
+    logStep("Profiles never sent the promo", { count: eligibleUsers.length });
 
     // Get all user_ids who have non-cancelled bookings (batch query)
     const userIds = eligibleUsers.map(u => u.user_id);
@@ -216,7 +219,6 @@ serve(async (req: Request): Promise<Response> => {
       errors: [] as string[],
     };
 
-    const CREDIT_AMOUNT = 35;
     const BATCH_DELAY_MS = 600;
 
     for (let i = 0; i < finalEligibleUsers.length; i++) {
@@ -249,7 +251,7 @@ serve(async (req: Request): Promise<Response> => {
             balance_before: currentBalance,
             balance_after: newBalance,
             transaction_type: "promo_credit",
-            description: "First Session Free - $35 credit",
+            description: `First Session Free - $${CREDIT_AMOUNT} credit`,
           });
 
         if (txError) {
@@ -324,7 +326,7 @@ serve(async (req: Request): Promise<Response> => {
       <h3 style="color:#2F3134;margin:0 0 12px;">Customers Included:</h3>
       <table style="width:100%;border-collapse:collapse;">
         <thead>
-          <tr style="background:#2F3134;color:#fff;">
+          <tr style="background:#1C1F24;color:#F4F1EB;">
             <th style="padding:10px;text-align:left;">Name</th>
             <th style="padding:10px;text-align:left;">Email</th>
           </tr>
@@ -381,20 +383,20 @@ serve(async (req: Request): Promise<Response> => {
 
 function getDefaultTemplate(tenant: TenantConfig): string {
   return `
-              <p style="margin:0 0 18px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
-                Hi {first_name}, we noticed you haven't booked your first session yet. We'd love to see you at ${tenant.venue_name}, so we've added credit to your account!
+              <p style="margin:0 0 18px; font-family:Montserrat, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1C1F24; text-align:center;">
+                Hi {first_name}, you have signed up to ${tenant.venue_name} but haven't booked your first session yet. To get you into a bay, we've dropped credit straight onto your account.
               </p>
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#2F3134; border-radius:12px; margin:18px 0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1C1F24; border-radius:12px; margin:18px 0;">
                 <tr>
                   <td style="padding:30px; text-align:center;">
-                    <p style="margin:0 0 8px; font-family:Manrope, Arial, sans-serif; font-size:14px; color:#F5F3EF; opacity:0.9;">Your Account Credit</p>
-                    <p style="margin:0; font-family:Archivo, Impact, Arial Black, sans-serif; font-size:52px; color:#5F6F52;">$35.00</p>
-                    <p style="margin:8px 0 0; font-family:Manrope, Arial, sans-serif; font-size:14px; color:#F5F3EF; opacity:0.9;">Enough for 1 hour off-peak!</p>
+                    <p style="margin:0 0 8px; font-family:Montserrat, Arial, sans-serif; font-size:14px; letter-spacing:1px; text-transform:uppercase; color:#F4F1EB; opacity:0.85;">Your Account Credit</p>
+                    <p style="margin:0; font-family:Montserrat, Arial Black, Arial, sans-serif; font-weight:bold; font-size:52px; color:#5F6F52;">$${CREDIT_AMOUNT}.00</p>
+                    <p style="margin:8px 0 0; font-family:Montserrat, Arial, sans-serif; font-size:14px; color:#F4F1EB; opacity:0.85;">A full hour off-peak, on us.</p>
                   </td>
                 </tr>
               </table>
-              <p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">
-                This credit has been automatically added to your account and will be applied at checkout. No code needed!
+              <p style="margin:18px 0 0; font-family:Montserrat, Arial, sans-serif; font-size:16px; line-height:1.6; color:#1C1F24; text-align:center;">
+                The credit is already on your account and applies automatically at checkout \u2014 no code needed. Book any bay, any time, and swing away.
               </p>
   `;
 }

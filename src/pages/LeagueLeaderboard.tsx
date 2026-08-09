@@ -30,8 +30,10 @@ function ExemptBadge() {
           </span>
         </TooltipTrigger>
         <TooltipContent className="max-w-xs">
-          Exempt — still setting their true handicap ({TRUE_HCP_ROUNDS} rounds).
-          They take part but aren't eligible for prizes or monthly points yet.
+          Exempt — still on their onboarding handicap for their first{" "}
+          {TRUE_HCP_ROUNDS} rounds. They take part but aren't eligible for
+          prizes or monthly points until their official UF handicap applies.
+
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

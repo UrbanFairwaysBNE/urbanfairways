@@ -1418,6 +1418,11 @@ export type Database = {
       }
       local_comp_settings: {
         Row: {
+          comp_day: number
+          comp_duration_hours: number
+          comp_enabled: boolean
+          comp_end_time: string
+          comp_start_time: string
           created_at: string
           default_entry_fee: number
           default_format: string
@@ -1426,6 +1431,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          comp_day?: number
+          comp_duration_hours?: number
+          comp_enabled?: boolean
+          comp_end_time?: string
+          comp_start_time?: string
           created_at?: string
           default_entry_fee?: number
           default_format?: string
@@ -1434,6 +1444,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          comp_day?: number
+          comp_duration_hours?: number
+          comp_enabled?: boolean
+          comp_end_time?: string
+          comp_start_time?: string
           created_at?: string
           default_entry_fee?: number
           default_format?: string

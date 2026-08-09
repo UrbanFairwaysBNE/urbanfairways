@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useOperatingHours } from "@/hooks/useOperatingHours";
+import { useLocalCompSettings, timeToMinutes, formatTimeLabel, DAY_NAMES } from "@/hooks/useLocalCompSettings";
 import { format, isToday } from "date-fns";
 import { CalendarIcon, Clock, Trophy, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -29,21 +30,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-// Wednesday Ambrose comp window (Brisbane time): 5:00pm, 7:00pm
+// Weekly comp window is admin-configured in Local Comp settings (Brisbane time).
 // Customers selecting a slot in this window are prompted to confirm comp entry.
-const COMP_DAY = 3; // Wednesday
-const COMP_START_MIN = 17 * 60; // 5:00pm
-const COMP_END_MIN = 20 * 60;   // 8:00pm
-const COMP_LOCKED_DURATION = 2;
 const COMP_LOCKED_PLAYERS = 2;
-
-const isInCompWindow = (date: Date | undefined, time: string | undefined) => {
-  if (!date || !time) return false;
-  if (date.getDay() !== COMP_DAY) return false;
-  const [h, m] = time.split(":").map(Number);
-  const mins = h * 60 + m;
-  return mins >= COMP_START_MIN && mins < COMP_END_MIN;
-};
 
 interface DateTimePickerProps {
   selectedDate: Date | undefined;
@@ -135,6 +124,21 @@ export function DateTimePicker({
   const [compLocked, setCompLocked] = useState(false);
   const [pendingCompTime, setPendingCompTime] = useState<string | null>(null);
   const { getForDate } = useOperatingHours();
+  const { settings: compSettings, compEnabled } = useLocalCompSettings();
+
+  const compDay = compSettings?.comp_day ?? 3;
+  const compStartMin = timeToMinutes(compSettings?.comp_start_time ?? "17:00");
+  const compEndMin = timeToMinutes(compSettings?.comp_end_time ?? "20:00");
+  const compDuration = Number(compSettings?.comp_duration_hours ?? 2);
+
+  const isInCompWindow = (date: Date | undefined, time: string | undefined) => {
+    if (!compEnabled) return false;
+    if (!date || !time) return false;
+    if (date.getDay() !== compDay) return false;
+    const [h, m] = time.split(":").map(Number);
+    const mins = h * 60 + m;
+    return mins >= compStartMin && mins <= compEndMin;
+  };
 
   // Per-date operating window
   const dayHours = useMemo(
@@ -180,7 +184,7 @@ export function DateTimePicker({
     // Keep the user's chosen 5,7pm tee-off time, lock duration + players
     if (pendingCompTime) onTimeChange(pendingCompTime);
     setPendingCompTime(null);
-    onDurationChange(COMP_LOCKED_DURATION);
+    onDurationChange(compDuration);
     onPlayersChange(COMP_LOCKED_PLAYERS);
   };
 
@@ -222,7 +226,7 @@ export function DateTimePicker({
 
       // When comp-locked, only show 5:00,7:00pm tee-off slots
       if (compLocked) {
-        if (startMinutes < COMP_START_MIN || startMinutes > COMP_END_MIN) return false;
+        if (startMinutes < compStartMin || startMinutes > compEndMin) return false;
       }
 
       // If today, filter out past times
@@ -280,8 +284,10 @@ export function DateTimePicker({
           <div className="flex items-center gap-2 rounded-md border border-primary/30 bg-primary/10 p-3 text-sm">
             <Trophy className="h-4 w-4 text-primary" />
             <div className="flex-1">
-              <p className="font-medium text-foreground">Wednesday Ambrose Comp</p>
-              <p className="text-xs text-muted-foreground">Tee off 5pm, 8pm • 2 hours • 2 players</p>
+              <p className="font-medium text-foreground">{DAY_NAMES[compDay]} Ambrose Comp</p>
+              <p className="text-xs text-muted-foreground">
+                Tee off {formatTimeLabel(compSettings?.comp_start_time ?? "17:00")}–{formatTimeLabel(compSettings?.comp_end_time ?? "20:00")} • {compDuration} hours • 2 players
+              </p>
             </div>
             <Button
               variant="ghost"
@@ -366,18 +372,20 @@ export function DateTimePicker({
         </Select>
       </div>
 
-      {/* Wednesday Ambrose Comp prompt */}
+      {/* Weekly Ambrose Comp prompt */}
       <AlertDialog open={compPromptOpen} onOpenChange={setCompPromptOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <Trophy className="h-5 w-5 text-primary" />
-              Playing in the Wednesday Ambrose Comp?
+              Playing in the {DAY_NAMES[compDay]} Ambrose Comp?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Our weekly 2-Man Ambrose comp tees off Wednesdays from 5pm, 8pm.
+              Our weekly 2-Man Ambrose comp tees off {DAY_NAMES[compDay]}s from{" "}
+              {formatTimeLabel(compSettings?.comp_start_time ?? "17:00")} to{" "}
+              {formatTimeLabel(compSettings?.comp_end_time ?? "20:00")}.
               You can tee off at your chosen time, we'll lock your booking to
-              a 2-hour session for 2 players.
+              a {compDuration}-hour session for 2 players.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

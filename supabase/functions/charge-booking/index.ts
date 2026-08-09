@@ -2,6 +2,19 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "npm:stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { getTenant, tenantBookingUrl } from "../_shared/tenant.ts";
+import { loadTiers, calculateTierHourlyRate } from "../_shared/tiers.ts";
+
+// Off-peak: Mon-Fri 5:30am-4:00pm, Sat-Sun 5:30am-10:00am. Everything else is peak.
+function isPeakTime(dateStr: string, startTime: string): boolean {
+  const date = new Date(dateStr + "T00:00:00");
+  const dayOfWeek = date.getDay();
+  const [h, m] = startTime.split(":").map(Number);
+  const minutes = h * 60 + (m || 0);
+  const weekend = dayOfWeek === 0 || dayOfWeek === 6;
+  const start = 5 * 60 + 30;
+  const end = weekend ? 10 * 60 : 16 * 60;
+  return !(minutes >= start && minutes < end);
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -51,9 +64,10 @@ serve(async (req) => {
     // block this charge to prevent double-charging on accidental double-clicks.
     const { data: currentBooking } = await supabaseClient
       .from("bookings")
-      .select("id, bay_id, booking_date, start_time, status")
+      .select("id, bay_id, booking_date, start_time, duration_hours, pack_hours_used, status")
       .eq("id", bookingId)
       .maybeSingle();
+
 
     if (currentBooking) {
       const since = new Date(Date.now() - 90 * 1000).toISOString();
@@ -81,7 +95,90 @@ serve(async (req) => {
       }
     }
 
+    // ── Server-authoritative price ceiling ──
+    // Never trust the amount from the browser. Recompute the session cost from
+    // `pricing_config` for this booking's date/time/duration and the user's tier,
+    // subtract prepaid pack hours and any credit the client just consumed, and
+    // charge the lower of (client amount, server amount).
+    let chargeAmount = Number(amount);
+    if (currentBooking) {
+      try {
+        const { data: profile } = await supabaseClient
+          .from("profiles")
+          .select("membership_tier, custom_hourly_rate")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        const tiers = await loadTiers(supabaseClient);
+        const hours = Number(currentBooking.duration_hours) || 0;
+        const [sh, sm] = String(currentBooking.start_time).split(":").map(Number);
+
+        let gross = 0;
+        for (let i = 0; i < hours; i++) {
+          const slot = `${String(sh + i).padStart(2, "0")}:${String(sm || 0).padStart(2, "0")}`;
+          gross += calculateTierHourlyRate(
+            tiers,
+            profile?.membership_tier,
+            isPeakTime(currentBooking.booking_date, slot),
+            profile?.custom_hourly_rate ?? null,
+          );
+        }
+
+        const packHours = Number(currentBooking.pack_hours_used) || 0;
+        const packDiscount = hours > 0 ? (gross / hours) * Math.min(packHours, hours) : 0;
+
+        // Credit consumed for this booking in the last 10 minutes
+        const creditSince = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+        const { data: creditTx } = await supabaseClient
+          .from("deposit_transactions")
+          .select("amount, transaction_type, created_at")
+          .eq("user_id", user.id)
+          .in("transaction_type", ["booking", "booking_partial"])
+          .gte("created_at", creditSince);
+        const creditUsed = (creditTx ?? []).reduce(
+          (sum: number, t: any) => sum + Math.max(0, -Number(t.amount || 0)),
+          0,
+        );
+
+        const serverAmount = Math.max(
+          0,
+          Math.round((gross - packDiscount - creditUsed) * 100) / 100,
+        );
+
+        if (serverAmount < chargeAmount) {
+          logStep("Client amount exceeded server price, clamping", {
+            clientAmount: chargeAmount,
+            serverAmount,
+            gross,
+            packDiscount,
+            creditUsed,
+          });
+          chargeAmount = serverAmount;
+        } else if (serverAmount > chargeAmount) {
+          logStep("Client amount below server price (allowed)", {
+            clientAmount: chargeAmount,
+            serverAmount,
+          });
+        }
+      } catch (priceErr) {
+        logStep("Price verification skipped", { error: String(priceErr) });
+      }
+    }
+
+    if (chargeAmount <= 0) {
+      await supabaseClient
+        .from("bookings")
+        .update({ status: "confirmed", payment_method: "credit" })
+        .eq("id", bookingId);
+      return new Response(JSON.stringify({ success: true, amountCharged: 0 }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+
+
 
     // Check if customer exists in Stripe
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
@@ -131,7 +228,7 @@ serve(async (req) => {
 
       // Charge using the new payment method
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(amount * 100),
+        amount: Math.round(chargeAmount * 100),
         currency: "aud",
         customer: customerId,
         payment_method: paymentMethodId,
@@ -207,7 +304,7 @@ serve(async (req) => {
                 name: "Bay Booking",
                 description: description || "Golf simulator bay booking",
               },
-              unit_amount: Math.round(amount * 100),
+              unit_amount: Math.round(chargeAmount * 100),
             },
             quantity: 1,
           },
@@ -269,7 +366,7 @@ serve(async (req) => {
                 name: "Bay Booking",
                 description: description || "Golf simulator bay booking",
               },
-              unit_amount: Math.round(amount * 100),
+              unit_amount: Math.round(chargeAmount * 100),
             },
             quantity: 1,
           },
@@ -306,7 +403,7 @@ serve(async (req) => {
     });
 
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(amount * 100), // Convert to cents
+      amount: Math.round(chargeAmount * 100), // Convert to cents
       currency: "aud",
       customer: customerId,
       payment_method: paymentMethod.id,

@@ -413,6 +413,72 @@ export default function AdminSettings() {
     setTemplateSubject(template.subject || "");
   };
 
+  const renderTemplateRow = (template: EmailTemplateDB) => (
+    <div
+      key={template.id}
+      className={`w-full border rounded-lg p-3 transition-colors ${template.is_active ? 'hover:bg-muted/50' : 'opacity-60 bg-muted/20'}`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h4 className="font-medium text-sm truncate">{template.name}</h4>
+            {!template.is_active && (
+              <Badge variant="outline" className="text-muted-foreground text-xs">Disabled</Badge>
+            )}
+            {template.html_content ? (
+              <Badge variant="default" className="bg-green-600 text-xs">Custom</Badge>
+            ) : (
+              <Badge variant="secondary" className="text-xs">Default</Badge>
+            )}
+          </div>
+          {template.description && (
+            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{template.description}</p>
+          )}
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              setPreviewHtml(template.html_content || "<p>No custom template set. Using default template.</p>");
+              setPreviewOpen(true);
+            }}
+            disabled={!template.html_content}
+            className="h-8 w-8"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => openTemplateEditor(template)}
+            className="h-8 w-8"
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={template.is_active ? "default" : "outline"}
+            size="sm"
+            onClick={() => toggleTemplateActive(template)}
+            className={template.is_active ? "bg-green-600 hover:bg-green-700 h-8" : "h-8"}
+          >
+            {template.is_active ? "On" : "Off"}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTemplateToDelete(template)}
+            className="h-8 w-8"
+          >
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
+
+
   const toggleTemplateActive = async (template: EmailTemplateDB) => {
     try {
       const { error } = await supabase

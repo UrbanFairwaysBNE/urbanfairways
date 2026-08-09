@@ -71,6 +71,10 @@ behaviour caused customers to lose their settings.
 simulator binary cannot survive shutdown. On close/F10 the GSPro config files are reset to
 fix a single-monitor window-position bug.
 
+ProTee Labs settings and the UF Lab CSV are stored under the logged-in user's `%APPDATA%` /
+`%LOCALAPPDATA%`. No Windows username is hardcoded; if a PC uses a non-standard install or
+user profile location, the admin configures the override path in the Bay Controller UI.
+
 ## Display handling
 
 90-second warm-up delays, 3 positioning retries, `Win+Shift+Arrow` fallback, and no active

@@ -372,18 +372,20 @@ export function DateTimePicker({
         </Select>
       </div>
 
-      {/* Wednesday Ambrose Comp prompt */}
+      {/* Weekly Ambrose Comp prompt */}
       <AlertDialog open={compPromptOpen} onOpenChange={setCompPromptOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <Trophy className="h-5 w-5 text-primary" />
-              Playing in the Wednesday Ambrose Comp?
+              Playing in the {DAY_NAMES[compDay]} Ambrose Comp?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Our weekly 2-Man Ambrose comp tees off Wednesdays from 5pm, 8pm.
+              Our weekly 2-Man Ambrose comp tees off {DAY_NAMES[compDay]}s from{" "}
+              {formatTimeLabel(compSettings?.comp_start_time ?? "17:00")} to{" "}
+              {formatTimeLabel(compSettings?.comp_end_time ?? "20:00")}.
               You can tee off at your chosen time, we'll lock your booking to
-              a 2-hour session for 2 players.
+              a {compDuration}-hour session for 2 players.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

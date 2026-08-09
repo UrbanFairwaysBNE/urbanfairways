@@ -28,6 +28,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { compEnabled } = useLocalCompSettings();
   const [membershipTier, setMembershipTier] = useState<MembershipTier>("casual");
   const [membershipOnHold, setMembershipOnHold] = useState(false);
   const [hasSgtAccount, setHasSgtAccount] = useState(false);

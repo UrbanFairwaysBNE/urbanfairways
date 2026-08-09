@@ -29,21 +29,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-// Wednesday Ambrose comp window (Brisbane time): 5:00pm, 7:00pm
+// Weekly comp window is admin-configured in Local Comp settings (Brisbane time).
 // Customers selecting a slot in this window are prompted to confirm comp entry.
-const COMP_DAY = 3; // Wednesday
-const COMP_START_MIN = 17 * 60; // 5:00pm
-const COMP_END_MIN = 20 * 60;   // 8:00pm
-const COMP_LOCKED_DURATION = 2;
 const COMP_LOCKED_PLAYERS = 2;
-
-const isInCompWindow = (date: Date | undefined, time: string | undefined) => {
-  if (!date || !time) return false;
-  if (date.getDay() !== COMP_DAY) return false;
-  const [h, m] = time.split(":").map(Number);
-  const mins = h * 60 + m;
-  return mins >= COMP_START_MIN && mins < COMP_END_MIN;
-};
 
 interface DateTimePickerProps {
   selectedDate: Date | undefined;

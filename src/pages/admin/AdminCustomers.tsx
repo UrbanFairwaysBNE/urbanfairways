@@ -178,6 +178,11 @@ export default function AdminCustomers() {
   const [corporateName, setCorporateName] = useState("");
   const [isSavingCorporate, setIsSavingCorporate] = useState(false);
 
+  // Remove corporate account state
+  const [removeCorpCustomer, setRemoveCorpCustomer] = useState<Customer | null>(null);
+  const [removeCorpHours, setRemoveCorpHours] = useState(0);
+  const [isRemovingCorporate, setIsRemovingCorporate] = useState(false);
+
   // Custom billing state
   const [isTogglingCustomBilling, setIsTogglingCustomBilling] = useState(false);
   
@@ -1371,15 +1376,25 @@ export default function AdminCustomers() {
                               <Shield className="h-4 w-4 mr-2" />
                               Make Admin
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setCorporateCustomer(customer);
-                                setCorporateName("");
-                              }}
-                            >
-                              <Building2 className="h-4 w-4 mr-2" />
-                              Make Corporate
-                            </DropdownMenuItem>
+                            {corporateMap[customer.user_id]?.role === "owner" ? (
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                onClick={() => openRemoveCorporate(customer)}
+                              >
+                                <Building2 className="h-4 w-4 mr-2" />
+                                Remove Corporate Account
+                              </DropdownMenuItem>
+                            ) : (
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setCorporateCustomer(customer);
+                                  setCorporateName("");
+                                }}
+                              >
+                                <Building2 className="h-4 w-4 mr-2" />
+                                Make Corporate
+                              </DropdownMenuItem>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -1575,40 +1590,6 @@ export default function AdminCustomers() {
 
                 <hr className="border-border" />
 
-                {/* Custom Billing Toggle */}
-                <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <FileText className="h-5 w-5 text-amber-600 shrink-0" />
-                    <div>
-                      <div className="text-sm font-medium">Custom Billing</div>
-                      <div className="text-xs text-muted-foreground">
-                        When enabled, Stripe won't auto-change their tier
-                      </div>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={selectedCustomer.custom_billing || false}
-                    onCheckedChange={() => toggleCustomBilling(selectedCustomer)}
-                    disabled={isTogglingCustomBilling}
-                  />
-                </div>
-
-                {/* Staff Toggle */}
-                <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Shield className="h-5 w-5 text-blue-600 shrink-0" />
-                    <div>
-                      <div className="text-sm font-medium">Staff Account</div>
-                      <div className="text-xs text-muted-foreground">
-                        Free play during off-peak hours
-                      </div>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={selectedCustomer.custom_segment === "staff"}
-                    onCheckedChange={() => toggleStaffSegment(selectedCustomer)}
-                  />
-                </div>
 
                 {/* Hold Membership Toggle - only show for non-casual customers */}
                 {selectedCustomer.membership_tier && selectedCustomer.membership_tier !== "casual" && (

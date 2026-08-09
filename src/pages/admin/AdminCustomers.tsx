@@ -656,6 +656,7 @@ export default function AdminCustomers() {
       });
       setCorporateCustomer(null);
       setCorporateName("");
+      fetchCustomers();
     } catch (e) {
       toast({
         title: "Could not save",

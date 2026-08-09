@@ -667,6 +667,74 @@ export default function AdminCustomers() {
     }
   };
 
+  /** Open the remove-corporate confirmation, checking for unused prepaid hours first. */
+  const openRemoveCorporate = async (customer: Customer) => {
+    setRemoveCorpCustomer(customer);
+    setRemoveCorpHours(0);
+    const { data } = await supabase
+      .from("pack_lots")
+      .select("hours_remaining")
+      .eq("user_id", customer.user_id)
+      .eq("status", "active");
+    const hours = (data || []).reduce((sum: number, l: any) => sum + Number(l.hours_remaining || 0), 0);
+    setRemoveCorpHours(hours);
+  };
+
+  /** Demote a corporate owner: revoke staff links, deactivate the account, void unused hours. */
+  const confirmRemoveCorporate = async () => {
+    if (!removeCorpCustomer) return;
+    setIsRemovingCorporate(true);
+    try {
+      const { data: accounts, error: accErr } = await supabase
+        .from("corporate_accounts")
+        .select("id")
+        .eq("owner_user_id", removeCorpCustomer.user_id);
+      if (accErr) throw accErr;
+
+      const ids = (accounts || []).map((a: any) => a.id);
+      if (ids.length > 0) {
+        const { error: staffErr } = await supabase
+          .from("corporate_staff")
+          .update({ status: "revoked", user_id: null })
+          .in("corporate_id", ids);
+        if (staffErr) throw staffErr;
+
+        const { error: deactErr } = await supabase
+          .from("corporate_accounts")
+          .update({ is_active: false })
+          .in("id", ids);
+        if (deactErr) throw deactErr;
+      }
+
+      if (removeCorpHours > 0) {
+        const { error: lotErr } = await supabase
+          .from("pack_lots")
+          .update({ status: "expired", hours_remaining: 0 })
+          .eq("user_id", removeCorpCustomer.user_id)
+          .eq("status", "active");
+        if (lotErr) throw lotErr;
+      }
+
+      toast({
+        title: "Corporate account removed",
+        description: `${removeCorpCustomer.first_name} ${removeCorpCustomer.last_name} is now a standard customer.`,
+        duration: 4000,
+      });
+      setRemoveCorpCustomer(null);
+      fetchCustomers();
+    } catch (e) {
+      toast({
+        title: "Could not remove",
+        description: e instanceof Error ? e.message : "Unknown error",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRemovingCorporate(false);
+    }
+  };
+
+
+
   const toggleAdminRole = async (customer: Customer) => {
     setIsTogglingAdmin(true);
     

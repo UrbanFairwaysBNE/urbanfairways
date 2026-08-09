@@ -2,6 +2,8 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { Resend } from "npm:resend@2.0.0";
 import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
+import { escapeHtml, loadGiftTemplate, personalMessageBlock } from "../_shared/gift-card-email.ts";
+
 import { tenantHubUrl } from "../_shared/tenant.ts";
 import { getTenant } from "../_shared/tenant.ts";
 
@@ -112,28 +114,38 @@ serve(async (req: Request): Promise<Response> => {
 
     const results: any[] = [];
 
+    const messageBlock = personalMessage
+      ? personalMessageBlock(personalMessage, senderName)
+      : `<p style="margin:0 0 14px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">From <strong>${escapeHtml(senderName)}</strong></p>`;
+
+    const tags: Record<string, string> = {
+      "{recipient_name}": escapeHtml(recipientName),
+      "{sender_name}": escapeHtml(senderName),
+      "{amount}": `$${amount.toFixed(2)}`,
+      "{redemption_code}": escapeHtml(redemptionCode || ""),
+      "{personal_message}": personalMessage ? escapeHtml(personalMessage) : "",
+      "{personal_message_block}": messageBlock,
+      "{venue_name}": escapeHtml(tenant.venue_name),
+      "{signup_url}": SIGNUP_URL,
+    };
+
     // ── Email to RECIPIENT ──
     if (deliveryMethod === "email_recipient" || deliveryMethod === "both") {
-      const subject = autoApplied
-        ? `${senderName} just gifted you $${amount.toFixed(2)} of ${tenant.venue_name} credit!`
-        : `${senderName} sent you a $${amount.toFixed(2)} ${tenant.venue_name} gift!`;
+      const templateKey = autoApplied ? "gift_card_recipient_applied" : "gift_card_recipient_signup";
+      const tpl = await loadGiftTemplate(supabase, templateKey, tags);
 
-      const heading = autoApplied ? "You've Been Gifted!" : "You've Been Gifted!";
+      if (tpl && !tpl.active) {
+        console.log(`[issue-gift-card] Template ${templateKey} disabled, skipping recipient email`);
+        results.push({ to: "recipient", skipped: "template_disabled" });
+      } else {
+        const subject = tpl?.subject ||
+          (autoApplied
+            ? `${senderName} just gifted you $${amount.toFixed(2)} of ${tenant.venue_name} credit!`
+            : `${senderName} sent you a $${amount.toFixed(2)} ${tenant.venue_name} gift!`);
 
-      const messageBlock = personalMessage
-        ? `
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:18px 0; border-left:4px solid #5F6F52;">
-          <tr>
-            <td style="padding:18px 22px; font-family:Manrope, Arial, sans-serif; font-size:15px; line-height:1.6; color:#2F3134; font-style:italic;">
-              "${escapeHtml(personalMessage)}"
-              <div style="margin-top:10px; font-style:normal; font-size:13px; color:#2F3134; opacity:0.7;">— ${escapeHtml(senderName)}</div>
-            </td>
-          </tr>
-        </table>
-        `
-        : `<p style="margin:0 0 14px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">From <strong>${escapeHtml(senderName)}</strong></p>`;
+        const heading = "You've Been Gifted!";
 
-      const amountBlock = `
+        const amountBlock = `
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#2F3134; border-radius:12px; margin:18px 0;">
           <tr>
             <td style="padding:30px; text-align:center;">
@@ -144,39 +156,47 @@ serve(async (req: Request): Promise<Response> => {
         </table>
       `;
 
-      const intro = autoApplied
-        ? `<p style="margin:0 0 14px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">Hi ${escapeHtml(recipientName)}, great news — <strong>${escapeHtml(senderName)}</strong> has gifted you ${tenant.venue_name} credit, and we've already added it to your account.</p>`
-        : `<p style="margin:0 0 14px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">Hi ${escapeHtml(recipientName)}, <strong>${escapeHtml(senderName)}</strong> wants you to enjoy a session at ${tenant.venue_name} on them.</p>`;
+        const intro = autoApplied
+          ? `<p style="margin:0 0 14px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">Hi ${escapeHtml(recipientName)}, great news — <strong>${escapeHtml(senderName)}</strong> has gifted you ${tenant.venue_name} credit, and we've already added it to your account.</p>`
+          : `<p style="margin:0 0 14px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">Hi ${escapeHtml(recipientName)}, <strong>${escapeHtml(senderName)}</strong> wants you to enjoy a session at ${tenant.venue_name} on them.</p>`;
 
-      const footer = autoApplied
-        ? `<p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:15px; line-height:1.6; color:#2F3134; text-align:center;">Book a bay and your credit will apply automatically at checkout.</p>`
-        : `<p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:15px; line-height:1.6; color:#2F3134; text-align:center;">Create your free account using <strong>this email address</strong> and your credit applies automatically.</p>`;
+        const closing = autoApplied
+          ? `<p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:15px; line-height:1.6; color:#2F3134; text-align:center;">Book a bay and your credit will apply automatically at checkout.</p>`
+          : `<p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:15px; line-height:1.6; color:#2F3134; text-align:center;">Create your free account using <strong>this email address</strong> and your credit applies automatically.</p>`;
 
-      const body = intro + messageBlock + amountBlock + footer;
+        const body = tpl?.body ?? (intro + messageBlock + amountBlock + closing);
 
-      const html = await renderBrandedEmail(supabase, heading, body, {
-        text: autoApplied ? "Book a Bay" : "Activate Your Gift",
-        url: autoApplied ? tenantHubUrl(tenant, "/booking") : SIGNUP_URL,
-      });
-
-      try {
-        const r = await resend.emails.send({
-          from: `${tenant.venue_name} <${tenant.sender_email}>`,
-          to: [recipientEmail],
-          subject,
-          html,
+        const html = await renderBrandedEmail(supabase, heading, body, {
+          text: autoApplied ? "Book a Bay" : "Activate Your Gift",
+          url: autoApplied ? tenantHubUrl(tenant, "/booking") : SIGNUP_URL,
         });
-        console.log(`[issue-gift-card] Recipient email sent:`, r);
-        results.push({ to: "recipient", email_id: r.data?.id });
-      } catch (e) {
-        console.error(`[issue-gift-card] Recipient email failed:`, e);
-        results.push({ to: "recipient", error: String(e) });
+
+        try {
+          const r = await resend.emails.send({
+            from: `${tenant.venue_name} <${tenant.sender_email}>`,
+            to: [recipientEmail],
+            subject,
+            html,
+          });
+          console.log(`[issue-gift-card] Recipient email sent:`, r);
+          results.push({ to: "recipient", email_id: r.data?.id });
+        } catch (e) {
+          console.error(`[issue-gift-card] Recipient email failed:`, e);
+          results.push({ to: "recipient", error: String(e) });
+        }
       }
     }
 
+
     // ── Printable email to SENDER ──
     if ((deliveryMethod === "print_to_sender" || deliveryMethod === "both") && senderEmail) {
-      const subject = `Your printable gift card for ${recipientName} — $${amount.toFixed(2)}`;
+      const printTpl = await loadGiftTemplate(supabase, "gift_card_printable", tags);
+      if (printTpl && !printTpl.active) {
+        console.log("[issue-gift-card] Printable template disabled, skipping sender email");
+        results.push({ to: "sender_printable", skipped: "template_disabled" });
+      } else {
+      const subject = printTpl?.subject ||
+        `Your printable gift card for ${recipientName} — $${amount.toFixed(2)}`;
 
       const printableCard = `
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0;">
@@ -209,7 +229,7 @@ serve(async (req: Request): Promise<Response> => {
         </table>
       `;
 
-      const body = `
+      const fallbackBody = `
         <p style="margin:0 0 14px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">Your gift card is ready! Print this email (or just the card below) and give it to <strong>${escapeHtml(recipientName)}</strong>.</p>
         ${printableCard}
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:22px 0 0; border:1px solid rgba(47,49,52,0.15);">
@@ -227,7 +247,10 @@ serve(async (req: Request): Promise<Response> => {
         </table>
       `;
 
+      const body = printTpl?.body ?? fallbackBody;
+
       const html = await renderBrandedEmail(supabase, "Your Printable Gift Card", body);
+
 
       try {
         const r = await resend.emails.send({
@@ -241,6 +264,7 @@ serve(async (req: Request): Promise<Response> => {
       } catch (e) {
         console.error(`[issue-gift-card] Sender printable email failed:`, e);
         results.push({ to: "sender_printable", error: String(e) });
+      }
       }
     }
 
@@ -265,11 +289,3 @@ serve(async (req: Request): Promise<Response> => {
   }
 });
 
-function escapeHtml(s: string): string {
-  return String(s)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}

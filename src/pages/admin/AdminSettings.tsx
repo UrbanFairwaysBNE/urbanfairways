@@ -182,7 +182,32 @@ const TEMPLATE_TAGS: Record<string, { tag: string; description: string }[]> = {
     { tag: "{monthly_cap}", description: "Monthly hour cap, blank if unlimited" },
     { tag: "{cap_line}", description: "Ready-made sentence about their monthly hour allowance" },
   ],
+  gift_card_recipient_applied: GIFT_CARD_TAGS(),
+  gift_card_recipient_signup: GIFT_CARD_TAGS(),
+  gift_card_printable: GIFT_CARD_TAGS(),
+  gift_card_admin_issued: GIFT_CARD_TAGS(),
 };
+
+const GIFT_CARD_KEYS = [
+  "gift_card_recipient_applied",
+  "gift_card_recipient_signup",
+  "gift_card_printable",
+  "gift_card_admin_issued",
+];
+
+function GIFT_CARD_TAGS() {
+  return [
+    { tag: "{recipient_name}", description: "Name of the person receiving the gift card" },
+    { tag: "{sender_name}", description: "Name of the purchaser (or the venue for staff-issued cards)" },
+    { tag: "{amount}", description: "Gift card value (e.g. $100.00)" },
+    { tag: "{redemption_code}", description: "Gift card redemption code (e.g. UF-A2B4C6)" },
+    { tag: "{personal_message}", description: "The purchaser's message, plain text" },
+    { tag: "{personal_message_block}", description: "The purchaser's message pre-styled in a quote card" },
+    { tag: "{venue_name}", description: "Venue name" },
+    { tag: "{signup_url}", description: "Link to create an account / sign in" },
+  ];
+}
+
 
 
 interface EmailTemplateDB {
@@ -387,6 +412,72 @@ export default function AdminSettings() {
     setTemplateHtml(template.html_content || "");
     setTemplateSubject(template.subject || "");
   };
+
+  const renderTemplateRow = (template: EmailTemplateDB) => (
+    <div
+      key={template.id}
+      className={`w-full border rounded-lg p-3 transition-colors ${template.is_active ? 'hover:bg-muted/50' : 'opacity-60 bg-muted/20'}`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h4 className="font-medium text-sm truncate">{template.name}</h4>
+            {!template.is_active && (
+              <Badge variant="outline" className="text-muted-foreground text-xs">Disabled</Badge>
+            )}
+            {template.html_content ? (
+              <Badge variant="default" className="bg-green-600 text-xs">Custom</Badge>
+            ) : (
+              <Badge variant="secondary" className="text-xs">Default</Badge>
+            )}
+          </div>
+          {template.description && (
+            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{template.description}</p>
+          )}
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              setPreviewHtml(template.html_content || "<p>No custom template set. Using default template.</p>");
+              setPreviewOpen(true);
+            }}
+            disabled={!template.html_content}
+            className="h-8 w-8"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => openTemplateEditor(template)}
+            className="h-8 w-8"
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={template.is_active ? "default" : "outline"}
+            size="sm"
+            onClick={() => toggleTemplateActive(template)}
+            className={template.is_active ? "bg-green-600 hover:bg-green-700 h-8" : "h-8"}
+          >
+            {template.is_active ? "On" : "Off"}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTemplateToDelete(template)}
+            className="h-8 w-8"
+          >
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
+
 
   const toggleTemplateActive = async (template: EmailTemplateDB) => {
     try {
@@ -1383,78 +1474,38 @@ export default function AdminSettings() {
             <CollapsibleSection title="Email Templates" description="Body content only — the shared header & footer above are applied automatically">
               <Card>
                 <CardContent className="space-y-4 pt-6">
-
-
-
                   {isLoadingTemplates ? (
                     <Skeleton className="h-32" />
-                  ) : emailTemplates.length === 0 ? (
+                  ) : emailTemplates.filter((t) => !GIFT_CARD_KEYS.includes(t.template_key)).length === 0 ? (
                     <p className="text-sm text-muted-foreground">No templates found.</p>
                   ) : (
-                    emailTemplates.map((template) => (
-                      <div
-                        key={template.id}
-                        className={`w-full border rounded-lg p-3 transition-colors ${template.is_active ? 'hover:bg-muted/50' : 'opacity-60 bg-muted/20'}`}
-                      >
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <h4 className="font-medium text-sm truncate">{template.name}</h4>
-                              {!template.is_active && (
-                                <Badge variant="outline" className="text-muted-foreground text-xs">Disabled</Badge>
-                              )}
-                              {template.html_content ? (
-                                <Badge variant="default" className="bg-green-600 text-xs">Custom</Badge>
-                              ) : (
-                                <Badge variant="secondary" className="text-xs">Default</Badge>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1 shrink-0">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => {
-                                setPreviewHtml(template.html_content || "<p>No custom template set. Using default template.</p>");
-                                setPreviewOpen(true);
-                              }}
-                              disabled={!template.html_content}
-                              className="h-8 w-8"
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => openTemplateEditor(template)}
-                              className="h-8 w-8"
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant={template.is_active ? "default" : "outline"}
-                              size="sm"
-                              onClick={() => toggleTemplateActive(template)}
-                              className={template.is_active ? "bg-green-600 hover:bg-green-700 h-8" : "h-8"}
-                            >
-                              {template.is_active ? "On" : "Off"}
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => setTemplateToDelete(template)}
-                              className="h-8 w-8"
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ))
+                    emailTemplates
+                      .filter((t) => !GIFT_CARD_KEYS.includes(t.template_key))
+                      .map((template) => renderTemplateRow(template))
                   )}
                 </CardContent>
               </Card>
             </CollapsibleSection>
+
+            <CollapsibleSection
+              title="Gift Card Emails"
+              description="The emails sent through the gift card flow — separate from the manual Credit Added notification"
+            >
+              <Card>
+                <CardContent className="space-y-4 pt-6">
+                  {isLoadingTemplates ? (
+                    <Skeleton className="h-32" />
+                  ) : emailTemplates.filter((t) => GIFT_CARD_KEYS.includes(t.template_key)).length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No gift card templates found.</p>
+                  ) : (
+                    emailTemplates
+                      .filter((t) => GIFT_CARD_KEYS.includes(t.template_key))
+                      .map((template) => renderTemplateRow(template))
+                  )}
+                </CardContent>
+              </Card>
+            </CollapsibleSection>
+
 
 
             <CollapsibleSection

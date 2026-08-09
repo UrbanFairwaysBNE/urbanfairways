@@ -3253,9 +3253,8 @@ ipcMain.handle('clear-auto-paste', async () => {
 // Protee Labs config path.
 // NEVER hardcode a Windows username here — bay PCs differ per venue.
 // Resolution order: explicit admin-configured path -> %APPDATA% of the
-// logged-in user -> legacy Birdies path (only if it actually exists).
-const LEGACY_PROTEE_CONFIG_PATH = 'C:\\Users\\Golf Sim\\AppData\\Roaming\\ProTeeUnited\\Configs\\Config';
-
+// logged-in user. No legacy fallbacks; if the auto path doesn't exist,
+// the admin must set the path in the Bay Controller UI.
 function getDefaultProteeConfigPath() {
   const roaming = process.env.APPDATA
     || path.join(require('os').homedir(), 'AppData', 'Roaming');
@@ -3266,12 +3265,7 @@ function getProteeConfigPath() {
   if (baselineConfig.proteeConfigPath && baselineConfig.proteeConfigPath.trim() !== '') {
     return baselineConfig.proteeConfigPath;
   }
-  const auto = getDefaultProteeConfigPath();
-  try {
-    if (fs.existsSync(auto)) return auto;
-    if (fs.existsSync(LEGACY_PROTEE_CONFIG_PATH)) return LEGACY_PROTEE_CONFIG_PATH;
-  } catch { /* noop */ }
-  return auto;
+  return getDefaultProteeConfigPath();
 }
 
 // State for baseline settings

@@ -1,3 +1,4 @@
+import { HIGHLIGHTS_ENABLED } from "@/config/features";
 import * as React from "react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";

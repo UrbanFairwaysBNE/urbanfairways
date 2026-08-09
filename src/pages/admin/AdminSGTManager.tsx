@@ -24,7 +24,8 @@ export default function AdminSGTManager() {
   // Handle URL tab parameter (for email links)
   useEffect(() => {
     const tabParam = searchParams.get("tab");
-    if (tabParam && ["dashboard", "onboarding", "members", "tournaments", "winners", "highlights"].includes(tabParam)) {
+    const allowedTabs = ["dashboard", "onboarding", "members", "tournaments", "winners", ...(HIGHLIGHTS_ENABLED ? ["highlights"] : [])];
+    if (tabParam && allowedTabs.includes(tabParam)) {
       setActiveTab(tabParam);
       // Clean up URL after reading
       searchParams.delete("tab");

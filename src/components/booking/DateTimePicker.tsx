@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useOperatingHours } from "@/hooks/useOperatingHours";
+import { useLocalCompSettings, timeToMinutes, formatTimeLabel, DAY_NAMES } from "@/hooks/useLocalCompSettings";
 import { format, isToday } from "date-fns";
 import { CalendarIcon, Clock, Trophy, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";

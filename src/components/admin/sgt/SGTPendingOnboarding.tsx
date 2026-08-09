@@ -194,8 +194,7 @@ export function SGTPendingOnboarding() {
         <AlertDescription>
           New league members appear here until you set their initial handicap. Once set,
           they're automatically added to all active tours and registered for open tournaments.
-          Their onboarding handicap is locked for the first 6 rounds (~3 weeks), after which
-          {`the ${tenant.venue_name} Custom HCP auto-recalculates weekly using the best 3 of their last 6 rounds.`}
+          {` Their onboarding handicap applies for their first 4 completed rounds — they show as (E) on leaderboards and can't win prizes or monthly points during that time. From round 5 the ${tenant.venue_name} Custom HCP applies, auto-recalculating weekly using the best 3 of their last 6 rounds.`}
         </AlertDescription>
       </Alert>
 

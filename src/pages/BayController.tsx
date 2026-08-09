@@ -15,6 +15,8 @@ import { format, addMinutes, isBefore, isAfter, parseISO } from "date-fns";
 import { restoreUserGsproSettings, saveUserGsproSettings, uploadRangeCsv } from "@/lib/range-sync";
 import { PlugDiagnostics } from "@/components/bay-controller/PlugDiagnostics";
 import { AppRestoreSettings } from "@/components/bay-controller/AppRestoreSettings";
+import { ControllerPasswordSettings } from "@/components/bay-controller/ControllerPasswordSettings";
+import { verifyControllerPassword } from "@/lib/bay-controller-password";
 
 interface Booking {
   id: string;
@@ -99,7 +101,6 @@ import "@/types/electron.d";
 import { useBayControllerLogger } from "@/hooks/useBayControllerLogger";
 import { useTenant, hubUrl } from "@/config/tenant";
 
-const CORRECT_PASSWORD = "Holeinone1";
 const FALLBACK_VERSION = "1.0.7";
 
 // Debug log for Electron builds
@@ -365,8 +366,8 @@ export default function BayController() {
     }
   };
 
-  const handleKioskUnlock = () => {
-    if (kioskUnlockPassword === CORRECT_PASSWORD) {
+  const handleKioskUnlock = async () => {
+    if (await verifyControllerPassword(kioskUnlockPassword)) {
       toggleKiosk(false);
       setKioskUnlockOpen(false);
       setKioskUnlockPassword("");
@@ -777,10 +778,10 @@ export default function BayController() {
   }, []);
 
   // Handle password submission
-  const handlePasswordSubmit = (e: React.FormEvent) => {
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("[BayController] Password form submitted");
-    if (password === CORRECT_PASSWORD) {
+    if (await verifyControllerPassword(password)) {
       console.log("[BayController] Password correct, authenticating...");
       setIsAuthenticated(true);
       setPasswordError("");
@@ -799,7 +800,7 @@ export default function BayController() {
   // Handle quit password submission
   const handleQuitPasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (quitPassword === CORRECT_PASSWORD) {
+    if (await verifyControllerPassword(quitPassword)) {
       setQuitPasswordError("");
       // Confirm quit to main process - this will exit the app
       await window.electronAPI?.confirmQuit();
@@ -4364,6 +4365,10 @@ export default function BayController() {
         </CollapsibleSettingsCard>
 
         {/* App Restore Settings - Collapsible */}
+        <CollapsibleSettingsCard title="Controller Password" icon={<Lock className="w-5 h-5" />} defaultOpen={false}>
+          <ControllerPasswordSettings />
+        </CollapsibleSettingsCard>
+
         <CollapsibleSettingsCard title="App Restore" icon={<FileText className="w-5 h-5" />} defaultOpen={false}>
           <AppRestoreSettings isElectron={isElectron} />
         </CollapsibleSettingsCard>

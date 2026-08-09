@@ -260,10 +260,10 @@ const App = () => {
             <Route path="/compete" element={<EmbedCompete />} />
             <Route path="/compete/leaderboard" element={<EmbedLeaderboard />} />
             <Route path="/compete/local-comp-leaderboard" element={<EmbedLocalCompLeaderboard />} />
-            <Route path="/comp" element={<CompHub />} />
-            <Route path="/comp/find-partner" element={<CompFindPartner />} />
-            <Route path="/comp/register-team" element={<CompRegisterTeam />} />
-            <Route path="/comp/leaderboard" element={<CompLeaderboard />} />
+            <Route path="/comp" element={<CompGate><CompHub /></CompGate>} />
+            <Route path="/comp/find-partner" element={<CompGate><CompFindPartner /></CompGate>} />
+            <Route path="/comp/register-team" element={<CompGate><CompRegisterTeam /></CompGate>} />
+            <Route path="/comp/leaderboard" element={<CompGate><CompLeaderboard /></CompGate>} />
             <Route path="/embed/local-comp-leaderboard" element={<EmbedLocalCompLeaderboard />} />
             <Route path="/gift" element={<Gift />} />
             <Route path="/swing-lab" element={<SwingLab />} />

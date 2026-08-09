@@ -21,6 +21,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { format } from "date-fns";
 import { CourseSelector } from "@/components/admin/sgt/CourseSelector";
 import { HubHighlightsToggle } from "./HubHighlightsToggle";
+import { CompActiveToggle } from "./CompActiveToggle";
 import { CompCommentaryDialog } from "./CompCommentaryDialog";
 
 

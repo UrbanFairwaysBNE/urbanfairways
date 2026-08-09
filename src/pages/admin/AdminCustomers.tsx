@@ -1474,6 +1474,49 @@ export default function AdminCustomers() {
           )}
         </div>
 
+        {/* Remove Corporate Dialog */}
+        <Dialog
+          open={!!removeCorpCustomer}
+          onOpenChange={(o) => !o && setRemoveCorpCustomer(null)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Remove corporate account</DialogTitle>
+              <DialogDescription>
+                {removeCorpCustomer
+                  ? `${removeCorpCustomer.first_name} ${removeCorpCustomer.last_name} will become a standard customer and every staff member linked to their company will lose access to the shared wallet.`
+                  : ""}
+              </DialogDescription>
+            </DialogHeader>
+            {removeCorpHours > 0 && (
+              <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm">
+                This company still has <strong>{removeCorpHours} unused prepaid hour{removeCorpHours === 1 ? "" : "s"}</strong>.
+                Continuing will delete those credits permanently.
+              </div>
+            )}
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setRemoveCorpCustomer(null)}
+                disabled={isRemovingCorporate}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={confirmRemoveCorporate}
+                disabled={isRemovingCorporate}
+              >
+                {isRemovingCorporate
+                  ? "Removing..."
+                  : removeCorpHours > 0
+                    ? "Remove & delete credits"
+                    : "Remove corporate"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         {/* Make Corporate Dialog */}
         <Dialog
           open={!!corporateCustomer}

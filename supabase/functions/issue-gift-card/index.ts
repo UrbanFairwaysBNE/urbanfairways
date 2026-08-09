@@ -188,7 +188,13 @@ serve(async (req: Request): Promise<Response> => {
 
     // ── Printable email to SENDER ──
     if ((deliveryMethod === "print_to_sender" || deliveryMethod === "both") && senderEmail) {
-      const subject = `Your printable gift card for ${recipientName} — $${amount.toFixed(2)}`;
+      const printTpl = await loadGiftTemplate(supabase, "gift_card_printable", tags);
+      if (printTpl && !printTpl.active) {
+        console.log("[issue-gift-card] Printable template disabled, skipping sender email");
+        results.push({ to: "sender_printable", skipped: "template_disabled" });
+      } else {
+      const subject = printTpl?.subject ||
+        `Your printable gift card for ${recipientName} — $${amount.toFixed(2)}`;
 
       const printableCard = `
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0;">
@@ -221,7 +227,7 @@ serve(async (req: Request): Promise<Response> => {
         </table>
       `;
 
-      const body = `
+      const fallbackBody = `
         <p style="margin:0 0 14px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">Your gift card is ready! Print this email (or just the card below) and give it to <strong>${escapeHtml(recipientName)}</strong>.</p>
         ${printableCard}
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF; border-radius:12px; margin:22px 0 0; border:1px solid rgba(47,49,52,0.15);">
@@ -239,7 +245,10 @@ serve(async (req: Request): Promise<Response> => {
         </table>
       `;
 
+      const body = printTpl?.body ?? fallbackBody;
+
       const html = await renderBrandedEmail(supabase, "Your Printable Gift Card", body);
+
 
       try {
         const r = await resend.emails.send({

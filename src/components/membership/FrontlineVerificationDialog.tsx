@@ -27,7 +27,8 @@ interface Props {
 
 /**
  * Shown before subscribing to a tier flagged `requires_verification`.
- * The customer picks their sector; we email the venue so it can be confirmed.
+ * The customer picks their sector; we email the venue for a follow-up check only —
+ * access is granted immediately with no approval step.
  */
 export function FrontlineVerificationDialog({ open, tierName, onOpenChange, onConfirm }: Props) {
   const [sector, setSector] = useState<string>("");
@@ -43,8 +44,8 @@ export function FrontlineVerificationDialog({ open, tierName, onOpenChange, onCo
             {tierName} Eligibility
           </DialogTitle>
           <DialogDescription className="text-center">
-            This membership is for Emergency Services, Defence and Healthcare workers. Let us know
-            which applies to you and we'll be in touch to confirm.
+            This membership is for Emergency Services, Defence and Healthcare workers. Just let us
+            know which applies to you — your membership starts straight away.
           </DialogDescription>
         </DialogHeader>
 

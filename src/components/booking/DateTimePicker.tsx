@@ -284,8 +284,10 @@ export function DateTimePicker({
           <div className="flex items-center gap-2 rounded-md border border-primary/30 bg-primary/10 p-3 text-sm">
             <Trophy className="h-4 w-4 text-primary" />
             <div className="flex-1">
-              <p className="font-medium text-foreground">Wednesday Ambrose Comp</p>
-              <p className="text-xs text-muted-foreground">Tee off 5pm, 8pm • 2 hours • 2 players</p>
+              <p className="font-medium text-foreground">{DAY_NAMES[compDay]} Ambrose Comp</p>
+              <p className="text-xs text-muted-foreground">
+                Tee off {formatTimeLabel(compSettings?.comp_start_time ?? "17:00")}–{formatTimeLabel(compSettings?.comp_end_time ?? "20:00")} • {compDuration} hours • 2 players
+              </p>
             </div>
             <Button
               variant="ghost"

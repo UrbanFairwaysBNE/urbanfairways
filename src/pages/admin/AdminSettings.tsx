@@ -182,7 +182,32 @@ const TEMPLATE_TAGS: Record<string, { tag: string; description: string }[]> = {
     { tag: "{monthly_cap}", description: "Monthly hour cap, blank if unlimited" },
     { tag: "{cap_line}", description: "Ready-made sentence about their monthly hour allowance" },
   ],
+  gift_card_recipient_applied: GIFT_CARD_TAGS(),
+  gift_card_recipient_signup: GIFT_CARD_TAGS(),
+  gift_card_printable: GIFT_CARD_TAGS(),
+  gift_card_admin_issued: GIFT_CARD_TAGS(),
 };
+
+const GIFT_CARD_KEYS = [
+  "gift_card_recipient_applied",
+  "gift_card_recipient_signup",
+  "gift_card_printable",
+  "gift_card_admin_issued",
+];
+
+function GIFT_CARD_TAGS() {
+  return [
+    { tag: "{recipient_name}", description: "Name of the person receiving the gift card" },
+    { tag: "{sender_name}", description: "Name of the purchaser (or the venue for staff-issued cards)" },
+    { tag: "{amount}", description: "Gift card value (e.g. $100.00)" },
+    { tag: "{redemption_code}", description: "Gift card redemption code (e.g. UF-A2B4C6)" },
+    { tag: "{personal_message}", description: "The purchaser's message, plain text" },
+    { tag: "{personal_message_block}", description: "The purchaser's message pre-styled in a quote card" },
+    { tag: "{venue_name}", description: "Venue name" },
+    { tag: "{signup_url}", description: "Link to create an account / sign in" },
+  ];
+}
+
 
 
 interface EmailTemplateDB {

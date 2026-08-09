@@ -68,10 +68,10 @@ export function CompActiveToggle() {
             </div>
             <div>
               <Label htmlFor="comp-active-toggle" className="text-base font-semibold cursor-pointer">
-                Weekly Comp Active
+                Ambrose Weekly Comp
               </Label>
               <p className="text-sm text-muted-foreground mt-0.5">
-                When off, the comp prompt is removed from the booking flow and the Weekly Comp
+                When off, the Ambrose comp prompt is removed from the booking flow and the Weekly Comp
                 section is locked for customers.
               </p>
             </div>

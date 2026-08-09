@@ -184,7 +184,7 @@ export function DateTimePicker({
     // Keep the user's chosen 5,7pm tee-off time, lock duration + players
     if (pendingCompTime) onTimeChange(pendingCompTime);
     setPendingCompTime(null);
-    onDurationChange(COMP_LOCKED_DURATION);
+    onDurationChange(compDuration);
     onPlayersChange(COMP_LOCKED_PLAYERS);
   };
 
@@ -226,7 +226,7 @@ export function DateTimePicker({
 
       // When comp-locked, only show 5:00,7:00pm tee-off slots
       if (compLocked) {
-        if (startMinutes < COMP_START_MIN || startMinutes > COMP_END_MIN) return false;
+        if (startMinutes < compStartMin || startMinutes > compEndMin) return false;
       }
 
       // If today, filter out past times

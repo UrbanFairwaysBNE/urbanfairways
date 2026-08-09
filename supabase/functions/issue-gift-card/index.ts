@@ -263,6 +263,7 @@ serve(async (req: Request): Promise<Response> => {
         console.error(`[issue-gift-card] Sender printable email failed:`, e);
         results.push({ to: "sender_printable", error: String(e) });
       }
+      }
     }
 
     // If not auto-applied, mark status as pending (i.e. issued, awaiting redemption)
@@ -286,11 +287,3 @@ serve(async (req: Request): Promise<Response> => {
   }
 });
 
-function escapeHtml(s: string): string {
-  return String(s)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}

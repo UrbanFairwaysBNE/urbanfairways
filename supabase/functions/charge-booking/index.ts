@@ -2,6 +2,19 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "npm:stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { getTenant, tenantBookingUrl } from "../_shared/tenant.ts";
+import { loadTiers, calculateTierHourlyRate } from "../_shared/tiers.ts";
+
+// Off-peak: Mon-Fri 5:30am-4:00pm, Sat-Sun 5:30am-10:00am. Everything else is peak.
+function isPeakTime(dateStr: string, startTime: string): boolean {
+  const date = new Date(dateStr + "T00:00:00");
+  const dayOfWeek = date.getDay();
+  const [h, m] = startTime.split(":").map(Number);
+  const minutes = h * 60 + (m || 0);
+  const weekend = dayOfWeek === 0 || dayOfWeek === 6;
+  const start = 5 * 60 + 30;
+  const end = weekend ? 10 * 60 : 16 * 60;
+  return !(minutes >= start && minutes < end);
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -215,7 +228,7 @@ serve(async (req) => {
 
       // Charge using the new payment method
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(amount * 100),
+        amount: Math.round(chargeAmount * 100),
         currency: "aud",
         customer: customerId,
         payment_method: paymentMethodId,
@@ -390,7 +403,7 @@ serve(async (req) => {
     });
 
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(amount * 100), // Convert to cents
+      amount: Math.round(chargeAmount * 100), // Convert to cents
       currency: "aud",
       customer: customerId,
       payment_method: paymentMethod.id,

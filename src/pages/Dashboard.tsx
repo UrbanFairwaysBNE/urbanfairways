@@ -326,17 +326,19 @@ const Dashboard = () => {
             </button>
 
             {/* Weekly Comp */}
-            <button
-              onClick={() => navigate("/comp")}
-              className="bg-card rounded-xl p-4 shadow-sm border border-primary/30 hover:border-primary/60 hover:shadow-md transition-all text-left active:scale-[0.98]"
-            >
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
-                  <Users className="h-5 w-5 text-primary" />
+            {compEnabled && (
+              <button
+                onClick={() => navigate("/comp")}
+                className="bg-card rounded-xl p-4 shadow-sm border border-primary/30 hover:border-primary/60 hover:shadow-md transition-all text-left active:scale-[0.98]"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
+                    <Users className="h-5 w-5 text-primary" />
+                  </div>
+                  <h2 className="font-semibold text-base">Weekly Comp</h2>
                 </div>
-                <h2 className="font-semibold text-base">Weekly Comp</h2>
-              </div>
-            </button>
+              </button>
+            )}
 
             {/* What's On */}
             <button

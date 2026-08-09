@@ -213,8 +213,9 @@ export function SGTLeagueMembers() {
             <div className="space-y-1 flex-1 min-w-[240px]">
               <div className="flex items-center gap-2">
                 <Label htmlFor="hcp-mode-toggle" className="text-base font-semibold">
-                  {useCustomEnabled ? `Use ${tenant.venue_name} Custom HCP` : "Use SGT Combo HCP"}
+                  {`Use ${tenant.venue_name} Custom HCP (best ${BEST_ROUNDS} of ${WINDOW_ROUNDS})`}
                 </Label>
+
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
@@ -238,9 +239,10 @@ export function SGTLeagueMembers() {
               </div>
               <p className="text-sm text-muted-foreground">
                 {useCustomEnabled
-                  ? `Best ${BEST_ROUNDS} of the last ${WINDOW_ROUNDS} rounds. New members locked to their onboarding HCP for their first ${ROUNDS_REQUIRED} rounds.`
-                  : "All players will use SGT's combo handicap during auto-registration."}
+                  ? `ON — best ${BEST_ROUNDS} of the last ${WINDOW_ROUNDS} rounds. New members locked to their onboarding HCP for their first ${ROUNDS_REQUIRED} rounds.`
+                  : "OFF — players currently use SGT's combo handicap during auto-registration. Turn on to use our own handicapping system."}
               </p>
+
             </div>
             <Switch
               id="hcp-mode-toggle"

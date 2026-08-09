@@ -26,6 +26,7 @@ const LeagueRounds = lazy(() => import("./pages/LeagueRounds"));
 const LeagueLeaderboard = lazy(() => import("./pages/LeagueLeaderboard"));
 const LeagueProfile = lazy(() => import("./pages/LeagueProfile"));
 const LeagueRegister = lazy(() => import("./pages/LeagueRegister"));
+import { HIGHLIGHTS_ENABLED } from "@/config/features";
 const LeagueHighlights = lazy(() => import("./pages/LeagueHighlights"));
 const LeagueHighlightExports = lazy(() => import("./pages/LeagueHighlightExports"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -236,8 +237,8 @@ const App = () => {
             <Route path="/league/leaderboard" element={<LeagueLeaderboard />} />
             <Route path="/league/profile" element={<LeagueProfile />} />
             <Route path="/league/register" element={<LeagueRegister />} />
-            <Route path="/league/highlights" element={<LeagueHighlights />} />
-            <Route path="/league/highlights/:sessionId" element={<LeagueHighlightExports />} />
+            {HIGHLIGHTS_ENABLED && <Route path="/league/highlights" element={<LeagueHighlights />} />}
+            {HIGHLIGHTS_ENABLED && <Route path="/league/highlights/:sessionId" element={<LeagueHighlightExports />} />}
             <Route path="/reset-password" element={<ResetPassword />} />
             
             <Route path="/embed/leaderboard" element={<EmbedLeaderboard />} />
@@ -302,9 +303,9 @@ const App = () => {
             <Route path="/admin/customer-import" element={<AdminCustomerImport />} />
             <Route path="/admin/sgt" element={<AdminSGTManager />} />
             <Route path="/admin/local-comps" element={<AdminLocalComps />} />
-            <Route path="/admin/highlights/exports" element={<AdminAllHighlightExports />} />
-            <Route path="/admin/highlights/:sessionId/exports" element={<AdminHighlightExports />} />
-            <Route path="/admin/highlights/:sessionId/review" element={<AdminHighlightReview />} />
+            {HIGHLIGHTS_ENABLED && <Route path="/admin/highlights/exports" element={<AdminAllHighlightExports />} />}
+            {HIGHLIGHTS_ENABLED && <Route path="/admin/highlights/:sessionId/exports" element={<AdminHighlightExports />} />}
+            {HIGHLIGHTS_ENABLED && <Route path="/admin/highlights/:sessionId/review" element={<AdminHighlightReview />} />}
             <Route path="/embed/tv-local-comp" element={<EmbedTVLocalComp />} />
             <Route path="/embed/compete" element={<EmbedCompete />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

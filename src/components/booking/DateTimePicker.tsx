@@ -123,6 +123,21 @@ export function DateTimePicker({
   const [compLocked, setCompLocked] = useState(false);
   const [pendingCompTime, setPendingCompTime] = useState<string | null>(null);
   const { getForDate } = useOperatingHours();
+  const { settings: compSettings, compEnabled } = useLocalCompSettings();
+
+  const compDay = compSettings?.comp_day ?? 3;
+  const compStartMin = timeToMinutes(compSettings?.comp_start_time ?? "17:00");
+  const compEndMin = timeToMinutes(compSettings?.comp_end_time ?? "20:00");
+  const compDuration = Number(compSettings?.comp_duration_hours ?? 2);
+
+  const isInCompWindow = (date: Date | undefined, time: string | undefined) => {
+    if (!compEnabled) return false;
+    if (!date || !time) return false;
+    if (date.getDay() !== compDay) return false;
+    const [h, m] = time.split(":").map(Number);
+    const mins = h * 60 + m;
+    return mins >= compStartMin && mins <= compEndMin;
+  };
 
   // Per-date operating window
   const dayHours = useMemo(

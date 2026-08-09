@@ -2,6 +2,8 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { Resend } from "npm:resend@2.0.0";
 import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
+import { escapeHtml, loadGiftTemplate, personalMessageBlock } from "../_shared/gift-card-email.ts";
+
 import { tenantHubUrl } from "../_shared/tenant.ts";
 import { getTenant } from "../_shared/tenant.ts";
 

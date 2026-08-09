@@ -88,9 +88,15 @@ export function PrepaidPacksCard() {
                         : "Buy simulator time up front and use it any day, any time."}
                   </CardDescription>
                 </div>
+                {balance > 0 && (
+                  <Badge variant="secondary" className="shrink-0 whitespace-nowrap">
+                    {formatHours(balance)} hrs
+                  </Badge>
+                )}
                 <ChevronDown
                   className={`h-5 w-5 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`}
                 />
+
               </div>
             </CardHeader>
           </CollapsibleTrigger>

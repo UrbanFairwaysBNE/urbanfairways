@@ -222,7 +222,7 @@ export default function AdminTimetable() {
     setBookings(prev => prev.map(b => b.id === selectedBooking.id ? { ...b, notes: next } : b));
     toast({
       title: hasTag ? "Removed from Comp" : "Added to Comp",
-      description: hasTag ? "Booking will no longer be recorded." : "Session will auto-record if Hub Highlights is on.",
+      description: hasTag ? "Booking will no longer be recorded." : "Booking tagged for the weekly comp.",
     });
   };
 

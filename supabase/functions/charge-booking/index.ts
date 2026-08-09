@@ -51,9 +51,10 @@ serve(async (req) => {
     // block this charge to prevent double-charging on accidental double-clicks.
     const { data: currentBooking } = await supabaseClient
       .from("bookings")
-      .select("id, bay_id, booking_date, start_time, status")
+      .select("id, bay_id, booking_date, start_time, duration_hours, pack_hours_used, status")
       .eq("id", bookingId)
       .maybeSingle();
+
 
     if (currentBooking) {
       const since = new Date(Date.now() - 90 * 1000).toISOString();

@@ -9,6 +9,8 @@ import { SGTLeagueMembers } from "@/components/admin/sgt/SGTLeagueMembers";
 import { SGTTournaments } from "@/components/admin/sgt/SGTTournaments";
 import { SGTWinners } from "@/components/admin/sgt/SGTWinners";
 import { LeagueHighlights } from "@/components/admin/LeagueHighlights";
+import { HIGHLIGHTS_ENABLED } from "@/config/features";
+
 import { SGTSettingsDialog } from "@/components/admin/sgt/SGTSettingsDialog";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard, UserPlus, Users, Calendar, Award, Video, Settings } from "lucide-react";
@@ -87,10 +89,13 @@ export default function AdminSGTManager() {
               <Award className="h-4 w-4" />
               <span className="hidden sm:inline">Winners</span>
             </TabsTrigger>
-            <TabsTrigger value="highlights" className="gap-2">
-              <Video className="h-4 w-4" />
-              <span className="hidden sm:inline">Highlights</span>
-            </TabsTrigger>
+            {HIGHLIGHTS_ENABLED && (
+              <TabsTrigger value="highlights" className="gap-2">
+                <Video className="h-4 w-4" />
+                <span className="hidden sm:inline">Highlights</span>
+              </TabsTrigger>
+            )}
+
           </TabsList>
 
           <TabsContent value="dashboard" className="mt-6">
@@ -113,9 +118,12 @@ export default function AdminSGTManager() {
             <SGTWinners />
           </TabsContent>
 
-          <TabsContent value="highlights" className="mt-6">
-            <LeagueHighlights />
-          </TabsContent>
+          {HIGHLIGHTS_ENABLED && (
+            <TabsContent value="highlights" className="mt-6">
+              <LeagueHighlights />
+            </TabsContent>
+          )}
+
         </Tabs>
       </div>
     </AdminLayout>

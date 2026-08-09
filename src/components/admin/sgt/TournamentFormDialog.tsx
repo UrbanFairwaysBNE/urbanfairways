@@ -740,6 +740,9 @@ export function TournamentFormDialog({
                             <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus className="pointer-events-auto" />
                           </PopoverContent>
                         </Popover>
+                        <FormDescription className="text-xs">
+                          Pick one day before your intended Brisbane start date. SGT's backend timezone shifts the displayed date forward by one day.
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -767,6 +770,9 @@ export function TournamentFormDialog({
                             <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus className="pointer-events-auto" />
                           </PopoverContent>
                         </Popover>
+                        <FormDescription className="text-xs">
+                          The same one-day offset applies, but auto-close runs Monday 6am Brisbane regardless of the date shown in SGT.
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}

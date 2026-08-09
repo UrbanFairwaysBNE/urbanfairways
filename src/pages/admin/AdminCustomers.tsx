@@ -1616,7 +1616,7 @@ export default function AdminCustomers() {
                   ) : (
                   <TooltipProvider delayDuration={150}>
                     <Tooltip>
-                      <TooltipTrigger asChild>
+                      <TooltipTrigger asChild onFocus={(e) => e.preventDefault()}>
                         <Button
                           variant="ghost"
                           size="icon"

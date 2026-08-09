@@ -82,7 +82,90 @@ serve(async (req) => {
       }
     }
 
+    // ── Server-authoritative price ceiling ──
+    // Never trust the amount from the browser. Recompute the session cost from
+    // `pricing_config` for this booking's date/time/duration and the user's tier,
+    // subtract prepaid pack hours and any credit the client just consumed, and
+    // charge the lower of (client amount, server amount).
+    let chargeAmount = Number(amount);
+    if (currentBooking) {
+      try {
+        const { data: profile } = await supabaseClient
+          .from("profiles")
+          .select("membership_tier, custom_hourly_rate")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        const tiers = await loadTiers(supabaseClient);
+        const hours = Number(currentBooking.duration_hours) || 0;
+        const [sh, sm] = String(currentBooking.start_time).split(":").map(Number);
+
+        let gross = 0;
+        for (let i = 0; i < hours; i++) {
+          const slot = `${String(sh + i).padStart(2, "0")}:${String(sm || 0).padStart(2, "0")}`;
+          gross += calculateTierHourlyRate(
+            tiers,
+            profile?.membership_tier,
+            isPeakTime(currentBooking.booking_date, slot),
+            profile?.custom_hourly_rate ?? null,
+          );
+        }
+
+        const packHours = Number(currentBooking.pack_hours_used) || 0;
+        const packDiscount = hours > 0 ? (gross / hours) * Math.min(packHours, hours) : 0;
+
+        // Credit consumed for this booking in the last 10 minutes
+        const creditSince = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+        const { data: creditTx } = await supabaseClient
+          .from("deposit_transactions")
+          .select("amount, transaction_type, created_at")
+          .eq("user_id", user.id)
+          .in("transaction_type", ["booking", "booking_partial"])
+          .gte("created_at", creditSince);
+        const creditUsed = (creditTx ?? []).reduce(
+          (sum: number, t: any) => sum + Math.max(0, -Number(t.amount || 0)),
+          0,
+        );
+
+        const serverAmount = Math.max(
+          0,
+          Math.round((gross - packDiscount - creditUsed) * 100) / 100,
+        );
+
+        if (serverAmount < chargeAmount) {
+          logStep("Client amount exceeded server price, clamping", {
+            clientAmount: chargeAmount,
+            serverAmount,
+            gross,
+            packDiscount,
+            creditUsed,
+          });
+          chargeAmount = serverAmount;
+        } else if (serverAmount > chargeAmount) {
+          logStep("Client amount below server price (allowed)", {
+            clientAmount: chargeAmount,
+            serverAmount,
+          });
+        }
+      } catch (priceErr) {
+        logStep("Price verification skipped", { error: String(priceErr) });
+      }
+    }
+
+    if (chargeAmount <= 0) {
+      await supabaseClient
+        .from("bookings")
+        .update({ status: "confirmed", payment_method: "credit" })
+        .eq("id", bookingId);
+      return new Response(JSON.stringify({ success: true, amountCharged: 0 }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+
+
 
     // Check if customer exists in Stripe
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });

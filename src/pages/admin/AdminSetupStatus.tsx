@@ -300,7 +300,7 @@ export default function AdminSetupStatus() {
             fixLabel: "SGT Manager",
             fixTo: "/admin/sgt",
           },
-          {
+          ...(HIGHLIGHTS_ENABLED ? [{
             label: "Recordings & highlights (Cloudflare Stream)",
             detail: has("CLOUDFLARE_ACCOUNT_ID") && has("CLOUDFLARE_STREAM_API_TOKEN")
               ? "Cloudflare Stream is configured"
@@ -312,7 +312,8 @@ export default function AdminSetupStatus() {
             optional: true,
             fixLabel: "Highlights",
             fixTo: "/admin/highlights/exports",
-          },
+          }] : []),
+
           {
             label: "Door access (Tuya)",
             detail: door?.enabled

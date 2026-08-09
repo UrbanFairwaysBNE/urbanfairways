@@ -213,8 +213,9 @@ export function SGTLeagueMembers() {
             <div className="space-y-1 flex-1 min-w-[240px]">
               <div className="flex items-center gap-2">
                 <Label htmlFor="hcp-mode-toggle" className="text-base font-semibold">
-                  {useCustomEnabled ? `Use ${tenant.venue_name} Custom HCP` : "Use SGT Combo HCP"}
+                  {`Use ${tenant.venue_name} Custom HCP (best ${BEST_ROUNDS} of ${WINDOW_ROUNDS})`}
                 </Label>
+
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>

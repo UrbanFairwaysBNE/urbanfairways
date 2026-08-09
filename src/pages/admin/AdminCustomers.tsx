@@ -178,6 +178,11 @@ export default function AdminCustomers() {
   const [corporateName, setCorporateName] = useState("");
   const [isSavingCorporate, setIsSavingCorporate] = useState(false);
 
+  // Remove corporate account state
+  const [removeCorpCustomer, setRemoveCorpCustomer] = useState<Customer | null>(null);
+  const [removeCorpHours, setRemoveCorpHours] = useState(0);
+  const [isRemovingCorporate, setIsRemovingCorporate] = useState(false);
+
   // Custom billing state
   const [isTogglingCustomBilling, setIsTogglingCustomBilling] = useState(false);
   
@@ -651,6 +656,7 @@ export default function AdminCustomers() {
       });
       setCorporateCustomer(null);
       setCorporateName("");
+      fetchCustomers();
     } catch (e) {
       toast({
         title: "Could not save",
@@ -661,6 +667,74 @@ export default function AdminCustomers() {
       setIsSavingCorporate(false);
     }
   };
+
+  /** Open the remove-corporate confirmation, checking for unused prepaid hours first. */
+  const openRemoveCorporate = async (customer: Customer) => {
+    setRemoveCorpCustomer(customer);
+    setRemoveCorpHours(0);
+    const { data } = await supabase
+      .from("pack_lots")
+      .select("hours_remaining")
+      .eq("user_id", customer.user_id)
+      .eq("status", "active");
+    const hours = (data || []).reduce((sum: number, l: any) => sum + Number(l.hours_remaining || 0), 0);
+    setRemoveCorpHours(hours);
+  };
+
+  /** Demote a corporate owner: revoke staff links, deactivate the account, void unused hours. */
+  const confirmRemoveCorporate = async () => {
+    if (!removeCorpCustomer) return;
+    setIsRemovingCorporate(true);
+    try {
+      const { data: accounts, error: accErr } = await supabase
+        .from("corporate_accounts")
+        .select("id")
+        .eq("owner_user_id", removeCorpCustomer.user_id);
+      if (accErr) throw accErr;
+
+      const ids = (accounts || []).map((a: any) => a.id);
+      if (ids.length > 0) {
+        const { error: staffErr } = await supabase
+          .from("corporate_staff")
+          .update({ status: "revoked", user_id: null })
+          .in("corporate_id", ids);
+        if (staffErr) throw staffErr;
+
+        const { error: deactErr } = await supabase
+          .from("corporate_accounts")
+          .update({ is_active: false })
+          .in("id", ids);
+        if (deactErr) throw deactErr;
+      }
+
+      if (removeCorpHours > 0) {
+        const { error: lotErr } = await supabase
+          .from("pack_lots")
+          .update({ status: "expired", hours_remaining: 0 })
+          .eq("user_id", removeCorpCustomer.user_id)
+          .eq("status", "active");
+        if (lotErr) throw lotErr;
+      }
+
+      toast({
+        title: "Corporate account removed",
+        description: `${removeCorpCustomer.first_name} ${removeCorpCustomer.last_name} is now a standard customer.`,
+        duration: 4000,
+      });
+      setRemoveCorpCustomer(null);
+      fetchCustomers();
+    } catch (e) {
+      toast({
+        title: "Could not remove",
+        description: e instanceof Error ? e.message : "Unknown error",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRemovingCorporate(false);
+    }
+  };
+
+
 
   const toggleAdminRole = async (customer: Customer) => {
     setIsTogglingAdmin(true);
@@ -1371,15 +1445,25 @@ export default function AdminCustomers() {
                               <Shield className="h-4 w-4 mr-2" />
                               Make Admin
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setCorporateCustomer(customer);
-                                setCorporateName("");
-                              }}
-                            >
-                              <Building2 className="h-4 w-4 mr-2" />
-                              Make Corporate
-                            </DropdownMenuItem>
+                            {corporateMap[customer.user_id]?.role === "owner" ? (
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                onClick={() => openRemoveCorporate(customer)}
+                              >
+                                <Building2 className="h-4 w-4 mr-2" />
+                                Remove Corporate Account
+                              </DropdownMenuItem>
+                            ) : (
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setCorporateCustomer(customer);
+                                  setCorporateName("");
+                                }}
+                              >
+                                <Building2 className="h-4 w-4 mr-2" />
+                                Make Corporate
+                              </DropdownMenuItem>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -1390,6 +1474,49 @@ export default function AdminCustomers() {
             </Table>
           )}
         </div>
+
+        {/* Remove Corporate Dialog */}
+        <Dialog
+          open={!!removeCorpCustomer}
+          onOpenChange={(o) => !o && setRemoveCorpCustomer(null)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Remove corporate account</DialogTitle>
+              <DialogDescription>
+                {removeCorpCustomer
+                  ? `${removeCorpCustomer.first_name} ${removeCorpCustomer.last_name} will become a standard customer and every staff member linked to their company will lose access to the shared wallet.`
+                  : ""}
+              </DialogDescription>
+            </DialogHeader>
+            {removeCorpHours > 0 && (
+              <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm">
+                This company still has <strong>{removeCorpHours} unused prepaid hour{removeCorpHours === 1 ? "" : "s"}</strong>.
+                Continuing will delete those credits permanently.
+              </div>
+            )}
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setRemoveCorpCustomer(null)}
+                disabled={isRemovingCorporate}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={confirmRemoveCorporate}
+                disabled={isRemovingCorporate}
+              >
+                {isRemovingCorporate
+                  ? "Removing..."
+                  : removeCorpHours > 0
+                    ? "Remove & delete credits"
+                    : "Remove corporate"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Make Corporate Dialog */}
         <Dialog
@@ -1575,40 +1702,6 @@ export default function AdminCustomers() {
 
                 <hr className="border-border" />
 
-                {/* Custom Billing Toggle */}
-                <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <FileText className="h-5 w-5 text-amber-600 shrink-0" />
-                    <div>
-                      <div className="text-sm font-medium">Custom Billing</div>
-                      <div className="text-xs text-muted-foreground">
-                        When enabled, Stripe won't auto-change their tier
-                      </div>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={selectedCustomer.custom_billing || false}
-                    onCheckedChange={() => toggleCustomBilling(selectedCustomer)}
-                    disabled={isTogglingCustomBilling}
-                  />
-                </div>
-
-                {/* Staff Toggle */}
-                <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Shield className="h-5 w-5 text-blue-600 shrink-0" />
-                    <div>
-                      <div className="text-sm font-medium">Staff Account</div>
-                      <div className="text-xs text-muted-foreground">
-                        Free play during off-peak hours
-                      </div>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={selectedCustomer.custom_segment === "staff"}
-                    onCheckedChange={() => toggleStaffSegment(selectedCustomer)}
-                  />
-                </div>
 
                 {/* Hold Membership Toggle - only show for non-casual customers */}
                 {selectedCustomer.membership_tier && selectedCustomer.membership_tier !== "casual" && (

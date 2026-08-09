@@ -48,8 +48,30 @@ serve(async (req: Request): Promise<Response> => {
     const amount = Number(card.amount);
     const recipientEmail = String(card.recipient_email).toLowerCase().trim();
     const recipientName = card.recipient_name || "there";
+    const personalMessage = card.personal_message || null;
 
-    const subject = `You've been issued a $${amount.toFixed(2)} ${tenant.venue_name} gift card`;
+    const tags: Record<string, string> = {
+      "{recipient_name}": escapeHtml(recipientName),
+      "{sender_name}": escapeHtml(tenant.venue_name),
+      "{amount}": `$${amount.toFixed(2)}`,
+      "{redemption_code}": escapeHtml(card.redemption_code || ""),
+      "{personal_message}": personalMessage ? escapeHtml(personalMessage) : "",
+      "{personal_message_block}": personalMessageBlock(personalMessage, tenant.venue_name),
+      "{venue_name}": escapeHtml(tenant.venue_name),
+      "{signup_url}": SIGNUP_URL,
+    };
+
+    const tpl = await loadGiftTemplate(supabase, "gift_card_admin_issued", tags);
+    if (tpl && !tpl.active) {
+      console.log("[issue-admin-gift-card] Template disabled, skipping email");
+      return new Response(JSON.stringify({ success: true, skipped: "template_disabled" }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const subject = tpl?.subject ||
+      `You've been issued a $${amount.toFixed(2)} ${tenant.venue_name} gift card`;
     const heading = "You've Been Issued a Gift Card";
 
     const amountBlock = `
@@ -65,9 +87,11 @@ serve(async (req: Request): Promise<Response> => {
 
     const intro = `<p style="margin:0 0 14px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.6; color:#2F3134; text-align:center;">Hi ${escapeHtml(recipientName)}, ${tenant.venue_name} has issued you a gift card to enjoy a session with us.</p>`;
 
-    const footer = `<p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:15px; line-height:1.6; color:#2F3134; text-align:center;">Create your free account using <strong>this email address</strong> and your credit applies automatically at checkout.</p>`;
+    const closing = `<p style="margin:18px 0 0; font-family:Manrope, Arial, sans-serif; font-size:15px; line-height:1.6; color:#2F3134; text-align:center;">Create your free account using <strong>this email address</strong> and your credit applies automatically at checkout.</p>`;
 
-    const html = await renderBrandedEmail(supabase, heading, intro + amountBlock + footer, {
+    const body = tpl?.body ?? (intro + amountBlock + closing);
+
+    const html = await renderBrandedEmail(supabase, heading, body, {
       text: "Activate Your Gift",
       url: SIGNUP_URL,
     });
@@ -98,11 +122,3 @@ serve(async (req: Request): Promise<Response> => {
   }
 });
 
-function escapeHtml(s: string): string {
-  return String(s)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}

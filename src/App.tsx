@@ -9,6 +9,7 @@ import { Capacitor } from "@capacitor/core";
 import { App as CapacitorApp } from "@capacitor/app";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import ScrollToTop from "@/components/ScrollToTop";
+import { CompGate } from "@/components/compete/CompGate";
 import { loadTenantSnapshot } from "@/config/tenant";
 
 

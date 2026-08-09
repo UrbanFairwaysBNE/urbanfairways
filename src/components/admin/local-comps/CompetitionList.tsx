@@ -21,6 +21,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { format } from "date-fns";
 import { CourseSelector } from "@/components/admin/sgt/CourseSelector";
 import { HubHighlightsToggle } from "./HubHighlightsToggle";
+import { HIGHLIGHTS_ENABLED } from "@/config/features";
+
 import { CompActiveToggle } from "./CompActiveToggle";
 import { CompCommentaryDialog } from "./CompCommentaryDialog";
 
@@ -192,7 +194,7 @@ export function CompetitionList() {
   return (
     <div className="space-y-6">
       <CompActiveToggle />
-      <HubHighlightsToggle />
+      {HIGHLIGHTS_ENABLED && <HubHighlightsToggle />}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Competitions</h2>
         <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) resetForm(); }}>

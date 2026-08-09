@@ -15,6 +15,8 @@ import {
   Film,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { HIGHLIGHTS_ENABLED } from "@/config/features";
+
 
 interface LeagueLayoutProps {
   children: ReactNode;
@@ -24,9 +26,13 @@ const navItems = [
   { path: "/league", label: "Dashboard", icon: LayoutDashboard },
   { path: "/league/rounds", label: "Rounds", icon: History },
   { path: "/league/leaderboard", label: "Leaderboard", icon: Trophy },
-  { path: "/league/highlights", label: "Highlights", icon: Film },
+  ...(HIGHLIGHTS_ENABLED
+    ? [{ path: "/league/highlights", label: "Highlights", icon: Film }]
+    : []),
   { path: "/league/profile", label: "Profile & Stats", icon: User },
 ];
+
+
 
 export function LeagueLayout({ children }: LeagueLayoutProps) {
   const { tenant } = useTenant();

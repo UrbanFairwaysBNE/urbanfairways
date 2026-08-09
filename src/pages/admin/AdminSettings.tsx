@@ -1,3 +1,4 @@
+import { HIGHLIGHTS_ENABLED } from "@/config/features";
 import * as React from "react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -958,10 +959,11 @@ export default function AdminSettings() {
 
 
             {/* Bay Management */}
-            <CollapsibleSection title="Bay Management" description="Control bay availability, League Highlights recording, and per-bay OBS device settings.">
+            <CollapsibleSection title="Bay Management" description="Control bay availability and per-bay device settings.">
               <Card>
                 <CardContent className="space-y-6 pt-6">
                   {/* League Highlights global settings */}
+                  {HIGHLIGHTS_ENABLED && (
                   <div className="p-4 border rounded-lg bg-muted/20 space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
@@ -987,6 +989,8 @@ export default function AdminSettings() {
                       </p>
                     )}
                   </div>
+                  )}
+
 
                   {isLoadingBays ? (
                     <div className="space-y-3">

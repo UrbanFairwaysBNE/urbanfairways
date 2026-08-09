@@ -464,10 +464,12 @@ export default function LeagueLeaderboard() {
 
               <div className="px-4 py-2 border-b border-border bg-muted/20 font-inter text-xs text-muted-foreground">
                 <span className="font-bold text-foreground">E</span> = Exempt — new
-                players are still setting their true handicap over their first{" "}
+                players stay on their onboarding handicap for their first{" "}
                 {TRUE_HCP_ROUNDS} rounds. They play, but aren't eligible for prizes
-                or monthly points until week three.
+                or monthly points until their official UF handicap kicks in (round{" "}
+                {TRUE_HCP_ROUNDS + 1}).
               </div>
+
 
 
 

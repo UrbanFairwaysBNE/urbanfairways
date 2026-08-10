@@ -2108,6 +2108,14 @@ ipcMain.handle('discover-plugs', async (event, { email, password, subnets } = {}
   return await discoverTapoPlugs(email, password, subnets);
 });
 
+// Identify a single plug at a known IP (manual entry -> MAC binding)
+ipcMain.handle('identify-plug', async (event, { email, password, ip } = {}) => {
+  console.log(`Identifying TAPO plug at ${ip}...`);
+  return await identifyTapoPlug(email, password, ip);
+});
+
+
+
 // Diagnose a plug - runs the --diagnose command for detailed debugging
 ipcMain.handle('diagnose-plug', async (event, { email, password, ip }) => {
   console.log(`Diagnosing plug at ${ip}...`);

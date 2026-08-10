@@ -40,7 +40,7 @@ import { PricingRatesSettings } from "@/components/admin/PricingRatesSettings";
 import { POSCategoriesSettings } from "@/components/admin/POSCategoriesSettings";
 
 
-import { ActivityLog } from "@/components/admin/ActivityLog";
+
 import VenueDetailsSection from "@/components/admin/VenueDetailsSection";
 import { TableServiceSettings } from "@/components/admin/TableServiceSettings";
 import { DailyHoursEditor } from "@/components/admin/DailyHoursEditor";
@@ -1041,10 +1041,6 @@ export default function AdminSettings() {
               <VenueDetailsSection />
             </CollapsibleSection>
 
-            {/* Activity Log */}
-            <CollapsibleSection title="Activity Log" description="Recent authentication events and user activity">
-              <ActivityLog />
-            </CollapsibleSection>
 
 
 

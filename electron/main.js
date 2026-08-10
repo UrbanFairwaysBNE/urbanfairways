@@ -991,6 +991,54 @@ async function discoverTapoPlugs(email, password, subnets) {
   });
 }
 
+// Identify a single plug at a known IP so a manually entered plug still gets
+// bound to its MAC address (and therefore survives DHCP drift).
+async function identifyTapoPlug(email, password, ip) {
+  const { spawn } = require('child_process');
+  const path = require('path');
+  const fs = require('fs');
+
+  return new Promise((resolve) => {
+    if (!email || !password) {
+      resolve({ success: false, error: 'TAPO credentials not configured' });
+      return;
+    }
+    if (!ip) {
+      resolve({ success: false, error: 'No IP address provided' });
+      return;
+    }
+
+    const possiblePaths = [
+      path.join(__dirname, 'tapo_control.exe'),
+      path.join(process.resourcesPath || '', 'tapo_control.exe'),
+      path.join(app.getAppPath(), 'tapo_control.exe'),
+    ];
+    const exePath = possiblePaths.find(p => {
+      try { fs.accessSync(p); return true; } catch { return false; }
+    });
+    if (!exePath) {
+      resolve({ success: false, error: 'tapo_control.exe not found. Please reinstall the Bay Controller app.' });
+      return;
+    }
+
+    const proc = spawn(exePath, ['--identify', email.trim(), password.trim(), String(ip).trim()], { shell: false, windowsHide: true });
+    let stdout = '';
+    let stderr = '';
+    proc.stdout.on('data', d => { stdout += d.toString(); });
+    proc.stderr.on('data', d => { stderr += d.toString(); });
+    proc.on('error', err => resolve({ success: false, error: `Failed to run identify: ${err.message}` }));
+    proc.on('close', (code) => {
+      try {
+        resolve(JSON.parse(stdout.trim()));
+      } catch {
+        resolve({ success: false, error: stderr || stdout || `Identify exited with code ${code}` });
+      }
+    });
+  });
+}
+
+
+
 
 // =====================================================
 // APP AUTOMATION - PowerShell-based window management

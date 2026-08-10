@@ -249,7 +249,10 @@ export default function BayController() {
   // State for manual plug entry
   const [newPlugName, setNewPlugName] = useState("");
   const [newPlugIp, setNewPlugIp] = useState("");
-  const [newPlugType, setNewPlugType] = useState<'monitor' | 'projector'>('monitor');
+  const [newPlugMac, setNewPlugMac] = useState("");
+  const [newPlugType, setNewPlugType] = useState<'monitor' | 'projector' | undefined>(undefined);
+  const [isIdentifyingPlug, setIsIdentifyingPlug] = useState(false);
+
   
   // Debug log state for in-app viewing
   const [debugLogs, setDebugLogs] = useState<{ time: string; message: string; type: 'info' | 'error' | 'success' }[]>([]);

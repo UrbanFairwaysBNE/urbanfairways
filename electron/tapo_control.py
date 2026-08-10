@@ -618,10 +618,21 @@ async def list_help():
             "control": "tapo_control.exe <email> <password> <ip> <on|off|status> [mac]",
             "discover": "tapo_control.exe --discover <email> <password> [subnet,subnet]",
             "resolve": "tapo_control.exe --resolve <email> <password> <mac>",
+            "identify": "tapo_control.exe --identify <email> <password> <ip>",
             "scan": "tapo_control.exe --scan <email> <password>  (legacy slow sweep)",
             "diagnose": "tapo_control.exe --diagnose <email> <password> <ip>"
         }
     }
+
+
+async def identify_ip(email: str, password: str, ip: str) -> Optional[Dict[str, Any]]:
+    """Authenticate to a single known IP and return its identity (MAC etc).
+    Used by the manual-entry fallback so a hand-typed IP still gets bound to
+    its MAC address and survives DHCP drift."""
+    from tapo import ApiClient
+    client = ApiClient(email, password)
+    return await identify(client, ip)
+
 
 def main():
     if len(sys.argv) < 2:
@@ -639,6 +650,22 @@ def main():
         print(json.dumps(result))
         return
 
+    # Identify a single plug at a known IP (manual entry -> MAC binding)
+    if sys.argv[1] == "--identify":
+        if len(sys.argv) < 5:
+            print(json.dumps({"success": False, "error": "Usage: --identify <email> <password> <ip>"}))
+            return
+        try:
+            found = asyncio.run(identify_ip(sys.argv[2], sys.argv[3], sys.argv[4]))
+        except Exception as e:
+            print(json.dumps({"success": False, "error": str(e)}))
+            return
+        if found:
+            print(json.dumps({"success": True, "plug": found}))
+        else:
+            print(json.dumps({"success": False, "error": f"No Tapo plug answered at {sys.argv[4]}"}))
+        return
+
     # Resolve a plug's current IP from its MAC address
     if sys.argv[1] == "--resolve":
         if len(sys.argv) < 5:
@@ -650,6 +677,7 @@ def main():
         else:
             print(json.dumps({"success": False, "error": f"No plug with MAC {sys.argv[4]} found on the network"}))
         return
+
 
     # Handle --scan command
     if sys.argv[1] == "--scan":

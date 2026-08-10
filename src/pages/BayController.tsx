@@ -2655,39 +2655,80 @@ export default function BayController() {
   }, [isElectron, selectedBay, appVersion, addLog, bayLogger]);
 
 
-  // Add a plug manually
-  const addPlugManually = () => {
+  // Add a plug manually.
+  // The IP is only a starting hint: we authenticate to it once and store the
+  // burned-in MAC as the plug's identity, so DHCP drift is handled the same way
+  // as a plug found by Search. A MAC can also be typed in directly.
+  const addPlugManually = async () => {
     if (!newPlugName.trim() || !newPlugIp.trim()) {
       toast.error("Please enter both plug name and IP address");
       return;
     }
-    
+
     // Validate IP format
     const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
     if (!ipRegex.test(newPlugIp.trim())) {
       toast.error("Please enter a valid IP address (e.g., 192.168.1.100)");
       return;
     }
-    
+
+    const typedMac = newPlugMac.trim();
+    if (typedMac && !/^([0-9a-fA-F]{2}[:-]?){5}[0-9a-fA-F]{2}$/.test(typedMac)) {
+      toast.error("MAC address looks invalid (e.g., 7C-F1-7E-20-CE-1B)");
+      return;
+    }
+
     const newPlug: TapoPlug = {
       id: `manual-${Date.now()}`,
       name: newPlugName.trim(),
       ip: newPlugIp.trim(),
       isOn: false,
-      type: newPlugType
+      mac: typedMac || undefined,
+      type: newPlugType,
     };
-    
+
+    // If no MAC was typed, look it up from the plug itself so the binding is
+    // MAC-based and survives a lease change.
+    if (!typedMac && isElectron && window.electronAPI?.identifyPlug && tapoEmail && tapoPassword) {
+      setIsIdentifyingPlug(true);
+      try {
+        const res = await window.electronAPI.identifyPlug(tapoEmail, tapoPassword, newPlug.ip);
+        if (res?.success && res.plug) {
+          newPlug.mac = res.plug.mac;
+          newPlug.nickname = res.plug.nickname;
+          newPlug.model = res.plug.model;
+          newPlug.firmware = res.plug.firmware;
+          newPlug.firmwareRisk = res.plug.firmware_risk;
+          newPlug.deviceId = res.plug.device_id;
+          newPlug.isOn = !!res.plug.isOn;
+          if (res.plug.mac_key) newPlug.id = res.plug.mac_key;
+        } else {
+          toast.warning(
+            `Couldn't reach a plug at ${newPlug.ip} to read its MAC — added by IP only, so it won't survive an IP change.`,
+          );
+        }
+      } catch {
+        toast.warning("MAC lookup failed — plug added by IP only.");
+      } finally {
+        setIsIdentifyingPlug(false);
+      }
+    }
+
     setDiscoveredPlugs(prev => {
-      const updated = [...prev, newPlug];
+      const updated = [...prev.filter(p => p.id !== newPlug.id), newPlug];
       // Save to localStorage immediately
       localStorage.setItem("bayController_discoveredPlugs", JSON.stringify(updated));
       return updated;
     });
     setNewPlugName("");
     setNewPlugIp("");
-    setNewPlugType('monitor');
-    toast.success(`Added ${newPlugType} plug: ${newPlug.name}`);
+    setNewPlugMac("");
+    setNewPlugType(undefined);
+    toast.success(
+      newPlug.mac ? `Added ${newPlug.name} — bound to MAC ${newPlug.mac}` : `Added ${newPlug.name} (IP only)`,
+    );
   };
+
 
   // Delete a plug from discovered plugs
   const handleDeletePlug = (plugId: string) => {

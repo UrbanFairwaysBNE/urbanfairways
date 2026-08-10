@@ -4094,6 +4094,18 @@ export default function BayController() {
                     )}
                   </div>
                   <div className="flex items-center gap-2">
+                    <Select
+                      value={plug.type}
+                      onValueChange={(value) => setPlugType(plug.id, value as 'monitor' | 'projector')}
+                    >
+                      <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Device type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="monitor">Monitor</SelectItem>
+                        <SelectItem value="projector">Projector</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <Select onValueChange={(value) => assignPlugToBay(plug, parseInt(value))}>
                       <SelectTrigger className="w-32">
                         <SelectValue placeholder="Add to Bay" />
@@ -4104,6 +4116,7 @@ export default function BayController() {
                         ))}
                       </SelectContent>
                     </Select>
+
                     <Button
                       variant="ghost"
                       size="icon"

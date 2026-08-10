@@ -39,7 +39,8 @@ interface TapoPlug {
   ip: string;
   isOn: boolean;
   deviceId?: string;
-  type: 'monitor' | 'projector';
+  /** Set by the operator — never inferred from the plug nickname. */
+  type?: 'monitor' | 'projector';
   /** Burned-in MAC address — the stable identity used to re-find the plug
    *  after a DHCP lease change. IP is only a cached hint. */
   mac?: string;
@@ -1356,7 +1357,7 @@ export default function BayController() {
             toast.error(`Failed to turn ${action} ${plug.name}: ${result.error}`);
           } else {
             toast.success(`Turned ${action.toUpperCase()}: ${plug.name}`);
-            newStatus[plug.type] = action === 'on';
+            newStatus[plug.type ?? 'monitor'] = action === 'on';
           }
         } catch (error) {
           console.error(`Failed to turn ${action} ${plug.name}:`, error);
@@ -2763,7 +2764,9 @@ export default function BayController() {
               firmwareRisk: d.firmware_risk,
               isOn: !!d.isOn,
               deviceId: d.device_id,
-              type: 'monitor',
+              // No assumption about what the plug powers — the operator picks
+              // Monitor or Projector when assigning it to a bay.
+              type: undefined,
             });
           }
         }
@@ -2789,7 +2792,7 @@ export default function BayController() {
       const risky = found.filter(d => d.firmware_risk);
       toast.success(`Found ${found.length} plug(s) — ${added} new, ${updated} IP change(s) fixed`);
       if (risky.length > 0) {
-        toast.warning(`${risky.length} plug(s) on firmware 1.4.x — local control may be blocked. Do not install these in a bay.`);
+        toast.warning(`${risky.length} plug(s) on firmware 1.4.5+ — local control likely blocked. Do not install these in a bay.`);
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Plug search failed");
@@ -2923,7 +2926,7 @@ export default function BayController() {
         } else {
           if (showToast) toast.success(`Turned ON: ${plug.name}`);
           bayLogger.logPlugControl('on', plug.name, isManual, activeBooking?.id);
-          newStatusUpdated[plug.type] = true;
+          newStatusUpdated[plug.type ?? 'monitor'] = true;
         }
       }
       
@@ -3080,7 +3083,7 @@ export default function BayController() {
           if (showToast) toast.error(`Failed to turn off ${plug.name}: ${error}`);
           bayLogger.logError(`Failed to turn off plug: ${plug.name}`, error, activeBooking?.id);
           // Keep as on if failed
-          newStatusUpdated[plug.type] = true;
+          newStatusUpdated[plug.type ?? 'monitor'] = true;
         } else {
           if (showToast) toast.success(`Turned OFF: ${plug.name}`);
           bayLogger.logPlugControl('off', plug.name, isManual, activeBooking?.id);
@@ -3931,14 +3934,14 @@ export default function BayController() {
                   <div>
                     <div className="flex items-center gap-2">
                       <p className="font-medium">{plug.name}</p>
-                      <Badge variant="outline" className="text-xs capitalize">{plug.type}</Badge>
+                      {plug.type && <Badge variant="outline" className="text-xs capitalize">{plug.type}</Badge>}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {plug.ip}{plug.mac ? ` · ${plug.mac}` : " · no MAC (manual)"}
                       {plug.firmware ? ` · fw ${plug.firmware}` : ""}
                     </p>
                     {plug.firmwareRisk && (
-                      <p className="text-xs text-destructive">Firmware 1.4.x — local control may be blocked</p>
+                      <p className="text-xs text-destructive">Firmware 1.4.5+ — local control likely blocked</p>
                     )}
                   </div>
                   <Button 
@@ -4021,14 +4024,14 @@ export default function BayController() {
                   <div>
                     <div className="flex items-center gap-2">
                       <p className="font-medium">{plug.name}</p>
-                      <Badge variant="outline" className="text-xs capitalize">{plug.type}</Badge>
+                      {plug.type && <Badge variant="outline" className="text-xs capitalize">{plug.type}</Badge>}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {plug.ip}{plug.mac ? ` · ${plug.mac}` : " · no MAC (manual)"}
                       {plug.firmware ? ` · fw ${plug.firmware}` : ""}
                     </p>
                     {plug.firmwareRisk && (
-                      <p className="text-xs text-destructive">Firmware 1.4.x — local control may be blocked</p>
+                      <p className="text-xs text-destructive">Firmware 1.4.5+ — local control likely blocked</p>
                     )}
                   </div>
                   <div className="flex items-center gap-2">

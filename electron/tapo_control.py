@@ -125,11 +125,25 @@ def normalize_mac(mac: Optional[str]) -> str:
 
 
 def firmware_risk(fw: Optional[str]) -> bool:
-    """Firmware 1.4.x introduced TP-Link's new TPAP encryption which the
-    local `tapo` library cannot yet speak. Flag it so it never reaches a bay."""
+    """TP-Link's TPAP encryption (which the local `tapo` library cannot speak)
+    landed in the 1.4.5 P110 builds. 1.4.0-1.4.4 are confirmed working locally,
+    so only flag 1.4.5 and above (and any 1.5+)."""
     if not fw:
         return False
-    return str(fw).strip().startswith("1.4")
+    raw = str(fw).strip().split(" ")[0]  # e.g. "1.4.0 Build 20241121 Rel..."
+    parts = []
+    for chunk in raw.split("."):
+        digits = "".join(ch for ch in chunk if ch.isdigit())
+        parts.append(int(digits) if digits else 0)
+    while len(parts) < 3:
+        parts.append(0)
+    major, minor, patch = parts[0], parts[1], parts[2]
+    if major > 1:
+        return True
+    if major == 1 and minor > 4:
+        return True
+    return major == 1 and minor == 4 and patch >= 5
+
 
 
 def local_subnet_prefix() -> Optional[str]:

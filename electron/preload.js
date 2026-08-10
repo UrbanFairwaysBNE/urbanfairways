@@ -19,6 +19,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Discover all Tapo plugs on the network (nickname + MAC + model + firmware)
   discoverPlugs: (email, password, subnets) =>
     ipcRenderer.invoke('discover-plugs', { email, password, subnets }),
+
+  // Identify one plug at a known IP so manual entries get MAC-bound too
+  identifyPlug: (email, password, ip) =>
+    ipcRenderer.invoke('identify-plug', { email, password, ip }),
+
+
   
   // Diagnose a plug (detailed connection debugging)
   diagnosePlug: (email, password, ip) => 

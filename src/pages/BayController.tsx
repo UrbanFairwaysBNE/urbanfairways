@@ -39,7 +39,8 @@ interface TapoPlug {
   ip: string;
   isOn: boolean;
   deviceId?: string;
-  type: 'monitor' | 'projector';
+  /** Set by the operator — never inferred from the plug nickname. */
+  type?: 'monitor' | 'projector';
   /** Burned-in MAC address — the stable identity used to re-find the plug
    *  after a DHCP lease change. IP is only a cached hint. */
   mac?: string;
@@ -248,7 +249,10 @@ export default function BayController() {
   // State for manual plug entry
   const [newPlugName, setNewPlugName] = useState("");
   const [newPlugIp, setNewPlugIp] = useState("");
-  const [newPlugType, setNewPlugType] = useState<'monitor' | 'projector'>('monitor');
+  const [newPlugMac, setNewPlugMac] = useState("");
+  const [newPlugType, setNewPlugType] = useState<'monitor' | 'projector' | undefined>(undefined);
+  const [isIdentifyingPlug, setIsIdentifyingPlug] = useState(false);
+
   
   // Debug log state for in-app viewing
   const [debugLogs, setDebugLogs] = useState<{ time: string; message: string; type: 'info' | 'error' | 'success' }[]>([]);
@@ -1356,7 +1360,7 @@ export default function BayController() {
             toast.error(`Failed to turn ${action} ${plug.name}: ${result.error}`);
           } else {
             toast.success(`Turned ${action.toUpperCase()}: ${plug.name}`);
-            newStatus[plug.type] = action === 'on';
+            newStatus[plug.type ?? 'monitor'] = action === 'on';
           }
         } catch (error) {
           console.error(`Failed to turn ${action} ${plug.name}:`, error);
@@ -2654,39 +2658,80 @@ export default function BayController() {
   }, [isElectron, selectedBay, appVersion, addLog, bayLogger]);
 
 
-  // Add a plug manually
-  const addPlugManually = () => {
+  // Add a plug manually.
+  // The IP is only a starting hint: we authenticate to it once and store the
+  // burned-in MAC as the plug's identity, so DHCP drift is handled the same way
+  // as a plug found by Search. A MAC can also be typed in directly.
+  const addPlugManually = async () => {
     if (!newPlugName.trim() || !newPlugIp.trim()) {
       toast.error("Please enter both plug name and IP address");
       return;
     }
-    
+
     // Validate IP format
     const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
     if (!ipRegex.test(newPlugIp.trim())) {
       toast.error("Please enter a valid IP address (e.g., 192.168.1.100)");
       return;
     }
-    
+
+    const typedMac = newPlugMac.trim();
+    if (typedMac && !/^([0-9a-fA-F]{2}[:-]?){5}[0-9a-fA-F]{2}$/.test(typedMac)) {
+      toast.error("MAC address looks invalid (e.g., 7C-F1-7E-20-CE-1B)");
+      return;
+    }
+
     const newPlug: TapoPlug = {
       id: `manual-${Date.now()}`,
       name: newPlugName.trim(),
       ip: newPlugIp.trim(),
       isOn: false,
-      type: newPlugType
+      mac: typedMac || undefined,
+      type: newPlugType,
     };
-    
+
+    // If no MAC was typed, look it up from the plug itself so the binding is
+    // MAC-based and survives a lease change.
+    if (!typedMac && isElectron && window.electronAPI?.identifyPlug && tapoEmail && tapoPassword) {
+      setIsIdentifyingPlug(true);
+      try {
+        const res = await window.electronAPI.identifyPlug(tapoEmail, tapoPassword, newPlug.ip);
+        if (res?.success && res.plug) {
+          newPlug.mac = res.plug.mac;
+          newPlug.nickname = res.plug.nickname;
+          newPlug.model = res.plug.model;
+          newPlug.firmware = res.plug.firmware;
+          newPlug.firmwareRisk = res.plug.firmware_risk;
+          newPlug.deviceId = res.plug.device_id;
+          newPlug.isOn = !!res.plug.isOn;
+          if (res.plug.mac_key) newPlug.id = res.plug.mac_key;
+        } else {
+          toast.warning(
+            `Couldn't reach a plug at ${newPlug.ip} to read its MAC — added by IP only, so it won't survive an IP change.`,
+          );
+        }
+      } catch {
+        toast.warning("MAC lookup failed — plug added by IP only.");
+      } finally {
+        setIsIdentifyingPlug(false);
+      }
+    }
+
     setDiscoveredPlugs(prev => {
-      const updated = [...prev, newPlug];
+      const updated = [...prev.filter(p => p.id !== newPlug.id), newPlug];
       // Save to localStorage immediately
       localStorage.setItem("bayController_discoveredPlugs", JSON.stringify(updated));
       return updated;
     });
     setNewPlugName("");
     setNewPlugIp("");
-    setNewPlugType('monitor');
-    toast.success(`Added ${newPlugType} plug: ${newPlug.name}`);
+    setNewPlugMac("");
+    setNewPlugType(undefined);
+    toast.success(
+      newPlug.mac ? `Added ${newPlug.name} — bound to MAC ${newPlug.mac}` : `Added ${newPlug.name} (IP only)`,
+    );
   };
+
 
   // Delete a plug from discovered plugs
   const handleDeletePlug = (plugId: string) => {
@@ -2763,7 +2808,9 @@ export default function BayController() {
               firmwareRisk: d.firmware_risk,
               isOn: !!d.isOn,
               deviceId: d.device_id,
-              type: 'monitor',
+              // No assumption about what the plug powers — the operator picks
+              // Monitor or Projector when assigning it to a bay.
+              type: undefined,
             });
           }
         }
@@ -2789,7 +2836,7 @@ export default function BayController() {
       const risky = found.filter(d => d.firmware_risk);
       toast.success(`Found ${found.length} plug(s) — ${added} new, ${updated} IP change(s) fixed`);
       if (risky.length > 0) {
-        toast.warning(`${risky.length} plug(s) on firmware 1.4.x — local control may be blocked. Do not install these in a bay.`);
+        toast.warning(`${risky.length} plug(s) on firmware 1.4.5+ — local control likely blocked. Do not install these in a bay.`);
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Plug search failed");
@@ -2923,7 +2970,7 @@ export default function BayController() {
         } else {
           if (showToast) toast.success(`Turned ON: ${plug.name}`);
           bayLogger.logPlugControl('on', plug.name, isManual, activeBooking?.id);
-          newStatusUpdated[plug.type] = true;
+          newStatusUpdated[plug.type ?? 'monitor'] = true;
         }
       }
       
@@ -3080,7 +3127,7 @@ export default function BayController() {
           if (showToast) toast.error(`Failed to turn off ${plug.name}: ${error}`);
           bayLogger.logError(`Failed to turn off plug: ${plug.name}`, error, activeBooking?.id);
           // Keep as on if failed
-          newStatusUpdated[plug.type] = true;
+          newStatusUpdated[plug.type ?? 'monitor'] = true;
         } else {
           if (showToast) toast.success(`Turned OFF: ${plug.name}`);
           bayLogger.logPlugControl('off', plug.name, isManual, activeBooking?.id);
@@ -3118,8 +3165,22 @@ export default function BayController() {
     }
   };
 
+  // Operator tags a discovered plug as monitor or projector — never inferred
+  const setPlugType = (plugId: string, type: 'monitor' | 'projector') => {
+    setDiscoveredPlugs(prev => {
+      const updated = prev.map(p => (p.id === plugId ? { ...p, type } : p));
+      localStorage.setItem("bayController_discoveredPlugs", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   const assignPlugToBay = (plug: TapoPlug, bayNumber: number) => {
+    if (!plug.type) {
+      toast.error("Choose Monitor or Projector for this plug first");
+      return;
+    }
     setBayPlugAssignments(prev => {
+
       const existing = prev.find(a => a.bayNumber === bayNumber);
       if (existing) {
         // Add plug to existing bay assignment if not already there
@@ -3931,14 +3992,14 @@ export default function BayController() {
                   <div>
                     <div className="flex items-center gap-2">
                       <p className="font-medium">{plug.name}</p>
-                      <Badge variant="outline" className="text-xs capitalize">{plug.type}</Badge>
+                      {plug.type && <Badge variant="outline" className="text-xs capitalize">{plug.type}</Badge>}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {plug.ip}{plug.mac ? ` · ${plug.mac}` : " · no MAC (manual)"}
                       {plug.firmware ? ` · fw ${plug.firmware}` : ""}
                     </p>
                     {plug.firmwareRisk && (
-                      <p className="text-xs text-destructive">Firmware 1.4.x — local control may be blocked</p>
+                      <p className="text-xs text-destructive">Firmware 1.4.5+ — local control likely blocked</p>
                     )}
                   </div>
                   <Button 
@@ -3975,23 +4036,31 @@ export default function BayController() {
           {/* Manual plug entry */}
           <div className="space-y-3 p-3 bg-muted/50 rounded-lg border border-dashed">
             <p className="text-xs text-muted-foreground">
-              Manual fallback: find plug IPs in your router admin page or TAPO mobile app (Device Settings → Device Info)
+              Manual fallback: enter the plug's <strong>current</strong> IP (router admin page or TAPO app →
+              Device Settings → Device Info). The controller reads the plug's MAC address once and binds to
+              that, so a later DHCP change is handled automatically. Add the MAC yourself only if the plug
+              isn't reachable right now.
             </p>
 
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <Input
                 placeholder="Name (e.g., Bay 1)"
                 value={newPlugName}
                 onChange={(e) => setNewPlugName(e.target.value)}
               />
               <Input
-                placeholder="IP (e.g., 192.168.5.141)"
+                placeholder="Current IP (e.g., 192.168.5.141)"
                 value={newPlugIp}
                 onChange={(e) => setNewPlugIp(e.target.value)}
               />
+              <Input
+                placeholder="MAC (optional, auto-detected)"
+                value={newPlugMac}
+                onChange={(e) => setNewPlugMac(e.target.value)}
+              />
               <Select value={newPlugType} onValueChange={(v) => setNewPlugType(v as 'monitor' | 'projector')}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Device type" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="monitor">Monitor</SelectItem>
@@ -3999,10 +4068,17 @@ export default function BayController() {
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={addPlugManually} size="sm" variant="outline" className="w-full">
-              Add Plug
+            <Button
+              onClick={addPlugManually}
+              size="sm"
+              variant="outline"
+              className="w-full"
+              disabled={isIdentifyingPlug}
+            >
+              {isIdentifyingPlug ? "Reading MAC from plug..." : "Add Plug"}
             </Button>
           </div>
+
 
           <div className="flex items-center gap-4">
             <div className="flex-1">
@@ -4021,17 +4097,29 @@ export default function BayController() {
                   <div>
                     <div className="flex items-center gap-2">
                       <p className="font-medium">{plug.name}</p>
-                      <Badge variant="outline" className="text-xs capitalize">{plug.type}</Badge>
+                      {plug.type && <Badge variant="outline" className="text-xs capitalize">{plug.type}</Badge>}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {plug.ip}{plug.mac ? ` · ${plug.mac}` : " · no MAC (manual)"}
                       {plug.firmware ? ` · fw ${plug.firmware}` : ""}
                     </p>
                     {plug.firmwareRisk && (
-                      <p className="text-xs text-destructive">Firmware 1.4.x — local control may be blocked</p>
+                      <p className="text-xs text-destructive">Firmware 1.4.5+ — local control likely blocked</p>
                     )}
                   </div>
                   <div className="flex items-center gap-2">
+                    <Select
+                      value={plug.type}
+                      onValueChange={(value) => setPlugType(plug.id, value as 'monitor' | 'projector')}
+                    >
+                      <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Device type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="monitor">Monitor</SelectItem>
+                        <SelectItem value="projector">Projector</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <Select onValueChange={(value) => assignPlugToBay(plug, parseInt(value))}>
                       <SelectTrigger className="w-32">
                         <SelectValue placeholder="Add to Bay" />
@@ -4042,6 +4130,7 @@ export default function BayController() {
                         ))}
                       </SelectContent>
                     </Select>
+
                     <Button
                       variant="ghost"
                       size="icon"

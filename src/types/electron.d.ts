@@ -34,6 +34,23 @@ declare global {
           firmware_risk?: boolean;
         }>;
       }>;
+      identifyPlug: (email: string, password: string, ip: string) => Promise<{
+        success: boolean;
+        error?: string;
+        plug?: {
+          ip: string;
+          mac?: string;
+          mac_key?: string;
+          nickname?: string;
+          model?: string;
+          firmware?: string;
+          hardware?: string;
+          device_id?: string;
+          isOn?: boolean;
+          firmware_risk?: boolean;
+        };
+      }>;
+
       diagnosePlug: (email: string, password: string, ip: string) => Promise<{
         success: boolean;
         ip: string;

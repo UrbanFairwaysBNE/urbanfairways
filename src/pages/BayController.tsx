@@ -3165,8 +3165,22 @@ export default function BayController() {
     }
   };
 
+  // Operator tags a discovered plug as monitor or projector — never inferred
+  const setPlugType = (plugId: string, type: 'monitor' | 'projector') => {
+    setDiscoveredPlugs(prev => {
+      const updated = prev.map(p => (p.id === plugId ? { ...p, type } : p));
+      localStorage.setItem("bayController_discoveredPlugs", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   const assignPlugToBay = (plug: TapoPlug, bayNumber: number) => {
+    if (!plug.type) {
+      toast.error("Choose Monitor or Projector for this plug first");
+      return;
+    }
     setBayPlugAssignments(prev => {
+
       const existing = prev.find(a => a.bayNumber === bayNumber);
       if (existing) {
         // Add plug to existing bay assignment if not already there

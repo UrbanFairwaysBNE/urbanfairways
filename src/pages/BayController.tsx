@@ -4022,23 +4022,31 @@ export default function BayController() {
           {/* Manual plug entry */}
           <div className="space-y-3 p-3 bg-muted/50 rounded-lg border border-dashed">
             <p className="text-xs text-muted-foreground">
-              Manual fallback: find plug IPs in your router admin page or TAPO mobile app (Device Settings → Device Info)
+              Manual fallback: enter the plug's <strong>current</strong> IP (router admin page or TAPO app →
+              Device Settings → Device Info). The controller reads the plug's MAC address once and binds to
+              that, so a later DHCP change is handled automatically. Add the MAC yourself only if the plug
+              isn't reachable right now.
             </p>
 
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <Input
                 placeholder="Name (e.g., Bay 1)"
                 value={newPlugName}
                 onChange={(e) => setNewPlugName(e.target.value)}
               />
               <Input
-                placeholder="IP (e.g., 192.168.5.141)"
+                placeholder="Current IP (e.g., 192.168.5.141)"
                 value={newPlugIp}
                 onChange={(e) => setNewPlugIp(e.target.value)}
               />
+              <Input
+                placeholder="MAC (optional, auto-detected)"
+                value={newPlugMac}
+                onChange={(e) => setNewPlugMac(e.target.value)}
+              />
               <Select value={newPlugType} onValueChange={(v) => setNewPlugType(v as 'monitor' | 'projector')}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Device type" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="monitor">Monitor</SelectItem>
@@ -4046,10 +4054,17 @@ export default function BayController() {
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={addPlugManually} size="sm" variant="outline" className="w-full">
-              Add Plug
+            <Button
+              onClick={addPlugManually}
+              size="sm"
+              variant="outline"
+              className="w-full"
+              disabled={isIdentifyingPlug}
+            >
+              {isIdentifyingPlug ? "Reading MAC from plug..." : "Add Plug"}
             </Button>
           </div>
+
 
           <div className="flex items-center gap-4">
             <div className="flex-1">

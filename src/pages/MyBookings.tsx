@@ -184,9 +184,13 @@ const MyBookings = () => {
   const upcomingBookings = bookings.filter(
     (b) => b.status === "confirmed" && !isBookingPast(b.booking_date, b.end_time)
   );
-  const pastBookings = bookings.filter(
-    (b) => b.status !== "confirmed" || isBookingPast(b.booking_date, b.end_time)
-  );
+  const pastBookings = bookings
+    .filter((b) => b.status !== "confirmed" || isBookingPast(b.booking_date, b.end_time))
+    .sort((a, b) => {
+      const aDate = new Date(`${a.booking_date}T${a.start_time}`).getTime();
+      const bDate = new Date(`${b.booking_date}T${b.start_time}`).getTime();
+      return bDate - aDate; // most recent first
+    });
 
   // Show sign-in form as soon as we know there's no user — don't wait on the
   // bookings fetch (which never runs when signed out). Only show the spinner

@@ -33,6 +33,10 @@
       {
         "from": "tapo_control.exe",
         "to": "tapo_control.exe"
+      },
+      {
+        "from": "watchdog.bat",
+        "to": "watchdog.bat"
       }
     ],
     "publish": {
@@ -51,6 +55,7 @@
       "createStartMenuShortcut": true,
       "runAfterFinish": true,
       "shortcutName": "UF Bay Controller",
+      "include": "installer.nsh",
       "artifactName": "UFBayController-Setup-${version}.${ext}"
     }
   },

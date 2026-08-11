@@ -1,58 +1,33 @@
 @echo off
 REM ============================================================
-REM Bay Controller Watchdog
+REM UF Bay Controller Watchdog (single-check)
 REM ============================================================
-REM This script monitors the Bay Controller process and restarts
-REM it automatically if it crashes or closes unexpectedly.
+REM Run by the "UF Bay Controller Watchdog" scheduled task, which
+REM the installer creates automatically (every 1 minute).
+REM Each run performs ONE check: if the controller process is not
+REM running, it starts it. No loop - Task Scheduler handles repeat.
 REM
-REM SETUP (Windows Task Scheduler):
-REM   1. Open Task Scheduler (taskschd.msc)
-REM   2. Create Basic Task > Name: "Bay Controller Watchdog"
-REM   3. Trigger: "When the computer starts" (or "At log on")
-REM   4. Action: Start a program
-REM      - Program: C:\path\to\watchdog.bat
-REM   5. Check "Run with highest privileges"
-REM   6. In Properties > Settings:
-REM      - Uncheck "Stop the task if it runs longer than"
-REM      - Check "If the task fails, restart every: 1 minute"
-REM
-REM The script checks every 30 seconds if the Bay Controller
-REM process is running. If not, it restarts it.
+REM Manual setup (only if the task was removed):
+REM   schtasks /Create /F /SC MINUTE /MO 1 ^
+REM     /TN "UF Bay Controller Watchdog" ^
+REM     /TR "\"C:\path\to\watchdog.bat\"" /RL HIGHEST
 REM ============================================================
 
-REM --- Configuration ---
-REM Update this path to match your installation
-set "APP_PATH=%LOCALAPPDATA%\Programs\UF Bay Controller\UF Bay Controller.exe"
 set "PROCESS_NAME=UF Bay Controller.exe"
-set "CHECK_INTERVAL=30"
+set "APP_PATH=%LOCALAPPDATA%\Programs\UF Bay Controller\UF Bay Controller.exe"
+if not exist "%APP_PATH%" set "APP_PATH=%ProgramFiles%\UF Bay Controller\UF Bay Controller.exe"
 
-REM Log file for watchdog activity
-set "LOG_FILE=%LOCALAPPDATA%\uf-bay-controller\watchdog.log"
-if not exist "%LOCALAPPDATA%\uf-bay-controller" mkdir "%LOCALAPPDATA%\uf-bay-controller"
+set "LOG_DIR=%LOCALAPPDATA%\uf-bay-controller"
+if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
+set "LOG_FILE=%LOG_DIR%\watchdog.log"
 
-echo [%date% %time%] Watchdog started. Monitoring: %PROCESS_NAME% >> "%LOG_FILE%"
-
-:loop
-REM Check if process is running
 tasklist /FI "IMAGENAME eq %PROCESS_NAME%" 2>NUL | find /I "%PROCESS_NAME%" >NUL
+if %ERRORLEVEL% EQU 0 goto :eof
 
-if %ERRORLEVEL% NEQ 0 (
-    echo [%date% %time%] Process not found. Restarting... >> "%LOG_FILE%"
-    
-    REM Start the application
-    start "" "%APP_PATH%"
-    
-    if %ERRORLEVEL% EQU 0 (
-        echo [%date% %time%] Successfully restarted Bay Controller. >> "%LOG_FILE%"
-    ) else (
-        echo [%date% %time%] ERROR: Failed to start Bay Controller. >> "%LOG_FILE%"
-    )
-    
-    REM Wait a bit longer after restart to let it initialize
-    timeout /t 10 /nobreak >NUL
+echo [%date% %time%] Process not found. Restarting: "%APP_PATH%" >> "%LOG_FILE%"
+if not exist "%APP_PATH%" (
+    echo [%date% %time%] ERROR: Executable not found at "%APP_PATH%" >> "%LOG_FILE%"
+    goto :eof
 )
-
-REM Wait before next check
-timeout /t %CHECK_INTERVAL% /nobreak >NUL
-
-goto loop
+start "" "%APP_PATH%"
+echo [%date% %time%] Restart command issued. >> "%LOG_FILE%"

@@ -474,17 +474,36 @@ const CATEGORIES: TestCategory[] = [
 
 const STORAGE_KEY = "uf-testing-schedule-v1";
 
+/**
+ * Items already proven end to end on this project (11 Aug 2026: live $55 peak
+ * Apple Pay booking, saved card, webhook, confirmation email, then cancel +
+ * Stripe refund). Pre-ticked on load; can still be unticked manually.
+ */
+const VERIFIED: string[] = [
+  "cfg-stripe-mode",
+  "cfg-webhook",
+  "cas-peak",
+  "cas-savedcard",
+  "chg-cancel",
+  "com-unstaffed",
+  "com-firsttime",
+];
+
 export function TestingSchedule() {
   const [done, setDone] = useState<Record<string, boolean>>({});
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
+    let stored: Record<string, boolean> = {};
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setDone(JSON.parse(raw));
+      if (raw) stored = JSON.parse(raw);
     } catch {
       /* ignore corrupt state */
     }
+    const seeded: Record<string, boolean> = {};
+    for (const id of VERIFIED) if (stored[id] === undefined) seeded[id] = true;
+    setDone({ ...stored, ...seeded });
     setLoaded(true);
   }, []);
 

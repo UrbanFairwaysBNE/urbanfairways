@@ -189,6 +189,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         {children}
       </main>
 
+      <AdminBusyOverlay />
     </div>
   );
 }

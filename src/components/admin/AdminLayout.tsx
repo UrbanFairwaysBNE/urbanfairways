@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import venueLogo from "@/assets/venue-logo.png";
 import { AdminOrderNotifications } from "./AdminOrderNotifications";
+import { AdminBusyOverlay } from "./AdminBusyOverlay";
 import { useTenant } from "@/config/tenant";
 
 
@@ -188,6 +189,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         {children}
       </main>
 
+      <AdminBusyOverlay />
     </div>
   );
 }

@@ -30,6 +30,7 @@ const BrandLoader = ({ size = 96, label, fullscreen = false, className = "" }: B
         <style>{`
           @keyframes uf-trace { 0% { stroke-dashoffset: 1; } 42% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: 0; } }
           @keyframes uf-fill { 0%, 18% { fill-opacity: 0; } 46%, 100% { fill-opacity: 1; } }
+          @keyframes uf-ball { 0%, 45% { opacity: 0; transform: scale(0); } 52%, 100% { opacity: 1; transform: scale(1); } }
           .uf-loader .uf-path {
             stroke-width: 40;
             stroke-linecap: round;
@@ -41,11 +42,18 @@ const BrandLoader = ({ size = 96, label, fullscreen = false, className = "" }: B
               uf-trace 2.4s cubic-bezier(0.65, 0, 0.35, 1) infinite,
               uf-fill 2.4s ease-out infinite;
           }
+          .uf-loader .uf-ball {
+            transform-origin: 1547.25px 702.76px;
+            opacity: 0;
+            animation: uf-ball 2.4s ease-out infinite;
+          }
           @media (prefers-reduced-motion: reduce) {
-            .uf-loader .uf-path {
+            .uf-loader .uf-path, .uf-loader .uf-ball {
               animation: none;
               stroke-dashoffset: 0;
               fill-opacity: 1;
+              opacity: 1;
+              transform: none;
             }
           }
         `}</style>
@@ -65,6 +73,15 @@ const BrandLoader = ({ size = 96, label, fullscreen = false, className = "" }: B
             />
           );
         })}
+        {/* Small golf ball at the end of the F letter */}
+        <circle
+          cx="1547.25"
+          cy="702.76"
+          r="54.75"
+          fill="#5F6F52"
+          className="uf-ball"
+          style={{ animationDelay: "0.3s" }}
+        />
       </svg>
       {label ? <span className="text-sm text-muted-foreground">{label}</span> : null}
     </div>

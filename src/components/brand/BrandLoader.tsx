@@ -73,6 +73,15 @@ const BrandLoader = ({ size = 96, label, fullscreen = false, className = "" }: B
             />
           );
         })}
+        {/* Small golf ball at the end of the F letter */}
+        <circle
+          cx="1547.25"
+          cy="702.76"
+          r="54.75"
+          fill="#5F6F52"
+          className="uf-ball"
+          style={{ animationDelay: "0.3s" }}
+        />
       </svg>
       {label ? <span className="text-sm text-muted-foreground">{label}</span> : null}
     </div>

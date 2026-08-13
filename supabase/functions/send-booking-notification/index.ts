@@ -715,7 +715,7 @@ serve(async (req) => {
     const emailResponse = await resend.emails.send({
       from: `${tenant.venue_name} <${tenant.sender_email}>`,
       to: [profile.email],
-      subject: isLesson ? `${subject} (lesson with ${clientFullName})` : subject,
+      subject,
       html: htmlContent,
       ...(icsAttachment ? { attachments: icsAttachment } : {}),
     });

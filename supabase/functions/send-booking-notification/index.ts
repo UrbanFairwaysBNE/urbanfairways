@@ -463,8 +463,15 @@ serve(async (req) => {
       year: "numeric",
     });
 
+    // Lesson participants (used by the lesson template tags below)
+    const coachName = `${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim() || "Your coach";
+    const clientFullName = lessonClient
+      ? `${lessonClient.first_name ?? ""} ${lessonClient.last_name ?? ""}`.trim() || "your client"
+      : "";
+
     // Template replacement tags (shared by email + SMS)
     const templateTags: Record<string, string> = {
+
       '{first_name}': profile.first_name || '',
       '{last_name}': profile.last_name || '',
       '{email}': profile.email || '',

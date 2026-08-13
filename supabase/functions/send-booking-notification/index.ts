@@ -775,49 +775,81 @@ serve(async (req) => {
               ? "Lesson Rescheduled"
               : "Lesson Confirmed";
 
-        const clientBody = `
-          <p style="margin:0 0 16px 0;">Hi ${lessonClient.first_name || "there"},</p>
-          <p style="margin:0 0 16px 0;">
-            ${
+        const clientKey =
+          notification_type === "cancellation"
+            ? "lesson_cancellation_client"
+            : notification_type === "reschedule"
+              ? "lesson_reschedule_client"
+              : "lesson_confirmation_client";
+
+        // Client-facing tags: {first_name} etc. refer to the student, not the coach.
+        const clientTags: Record<string, string> = {
+          ...templateTags,
+          '{first_name}': lessonClient.first_name || '',
+          '{last_name}': lessonClient.last_name || '',
+          '{email}': lessonClient.email || '',
+        };
+
+        const { data: clientTpl } = await supabaseClient
+          .from("email_templates")
+          .select("subject, html_content, is_active")
+          .eq("template_key", clientKey)
+          .maybeSingle();
+
+        if (clientTpl && (clientTpl as any).is_active === false) {
+          logStep("Lesson client email template disabled, skipping", { clientKey });
+        } else {
+          const fallbackBody = `
+            <p style="margin:0 0 16px 0;">Hi ${lessonClient.first_name || "there"},</p>
+            <p style="margin:0 0 16px 0;">${
               notification_type === "cancellation"
                 ? `Your golf lesson with ${coachName} has been cancelled.`
                 : `Your golf lesson with ${coachName} is ${notification_type === "reschedule" ? "now" : "booked"} for:`
-            }
-          </p>
-          <p style="margin:0 0 16px 0; font-size:16px;">
-            <strong>${bookingDate}</strong><br />
-            ${startTime12hr} – ${endTime12hr}<br />
-            ${bayName}
-          </p>
-          ${
-            notification_type === "cancellation"
-              ? ""
-              : `<p style="margin:0 0 16px 0;">Your coach has booked and paid for the bay — just arrive a few minutes early.</p>`
-          }
-        `;
+            }</p>
+            <p style="margin:0 0 16px 0; font-size:16px;">
+              <strong>${bookingDate}</strong><br />${startTime12hr} - ${endTime12hr}<br />${bayName}
+            </p>
+          `;
 
-        const clientHtml = await renderBrandedEmail(supabaseClient, heading, clientBody, {
-          text: "View at " + tenant.venue_name,
-          url: tenantBookingUrl(tenant, "/my-bookings"),
-        });
+          const clientBody = (clientTpl as any)?.html_content
+            ? replaceTemplateTags((clientTpl as any).html_content, clientTags)
+            : fallbackBody;
 
-        await resend.emails.send({
-          from: `${tenant.venue_name} <${tenant.sender_email}>`,
-          to: [lessonClient.email],
-          subject: `${heading} - ${shortDate} ${startTime12hr}`,
-          html: clientHtml,
-          ...(icsAttachment ? { attachments: icsAttachment } : {}),
-        });
-        logStep("Lesson client email sent", { to: lessonClient.email });
+          const clientSubject = replaceTemplateTags(
+            (clientTpl as any)?.subject || `${heading} - ${shortDate} ${startTime12hr}`,
+            clientTags,
+          );
+
+          const clientHtml = await renderBrandedEmail(supabaseClient, heading, clientBody, {
+            text: "View My Bookings",
+            url: tenantBookingUrl(tenant, "/my-bookings"),
+          });
+
+          await resend.emails.send({
+            from: `${tenant.venue_name} <${tenant.sender_email}>`,
+            to: [lessonClient.email],
+            subject: clientSubject,
+            html: clientHtml,
+            ...(icsAttachment ? { attachments: icsAttachment } : {}),
+          });
+          logStep("Lesson client email sent", { to: lessonClient.email, clientKey });
+        }
 
         if (lessonClient.phone) {
-          const clientSms =
-            notification_type === "cancellation"
-              ? `${tenant.venue_name}: your lesson with ${coachName} on ${shortDate} at ${startTime12hr} has been cancelled.`
-              : `${tenant.venue_name}: lesson with ${coachName} ${shortDate} ${startTime12hr}-${endTime12hr}, ${bayName}. See you there!`;
-          const clientSmsResult = await sendSMS(lessonClient.phone, clientSms, tenant.venue_name);
-          logStep("Lesson client SMS result", clientSmsResult);
+          const clientTagsSms: Record<string, string> = {
+            ...templateTags,
+            '{first_name}': lessonClient.first_name || '',
+            '{last_name}': lessonClient.last_name || '',
+          };
+          const clientSms = await renderSmsTemplate(clientKey, clientTagsSms);
+          if (clientSms && clientSms.trim().length > 0) {
+            const clientSmsResult = await sendSMS(lessonClient.phone, clientSms, tenant.venue_name);
+            logStep("Lesson client SMS result", clientSmsResult);
+          } else {
+            logStep("Lesson client SMS template disabled, skipping");
+          }
         }
+
       } catch (lessonErr: any) {
         logStep("Lesson client notification failed (non-blocking)", { error: lessonErr.message });
       }

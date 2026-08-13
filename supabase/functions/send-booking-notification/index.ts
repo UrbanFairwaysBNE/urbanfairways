@@ -650,9 +650,17 @@ serve(async (req) => {
       });
     }
 
+    const toBase64 = (s: string) => {
+      const bytes = new TextEncoder().encode(s);
+      let bin = "";
+      for (const b of bytes) bin += String.fromCharCode(b);
+      return btoa(bin);
+    };
+
     const icsAttachment = lessonIcs
-      ? [{ filename: "lesson.ics", content: btoa(lessonIcs) }]
+      ? [{ filename: "lesson.ics", content: toBase64(lessonIcs) }]
       : undefined;
+
 
     // Send email
     const emailResponse = await resend.emails.send({

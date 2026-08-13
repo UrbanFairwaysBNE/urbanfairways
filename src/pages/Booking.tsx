@@ -178,17 +178,7 @@ export default function Booking() {
     }
   }, [selectedDate, selectedTime, selectedDuration]);
 
-  // Always default to spending available credit first.
-  useEffect(() => {
-    if (depositBalance <= 0 || sessionTotal <= 0) return;
-    if (depositBalance >= sessionTotal) {
-      setSelectedPaymentMethod("balance");
-      setUsePartialBalance(false);
-    } else {
-      setSelectedPaymentMethod("card");
-      setUsePartialBalance(true);
-    }
-  }, [depositBalance, sessionTotal]);
+
 
 
   const handleDateChange = (date: Date | undefined) => {

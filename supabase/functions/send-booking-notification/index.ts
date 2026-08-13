@@ -683,10 +683,7 @@ serve(async (req) => {
     }
 
     // Lesson calendar invite (attached to both coach and client emails)
-    const coachName = `${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim() || "Your coach";
-    const clientFullName = lessonClient
-      ? `${lessonClient.first_name ?? ""} ${lessonClient.last_name ?? ""}`.trim() || "your client"
-      : "";
+
     let lessonIcs: string | null = null;
     if (isLesson && notification_type !== "cancellation") {
       lessonIcs = buildLessonIcs({

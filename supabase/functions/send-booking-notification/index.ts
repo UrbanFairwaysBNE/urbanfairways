@@ -855,11 +855,16 @@ serve(async (req) => {
       }
     }
 
-    // Send SMS for confirmations and reschedules (not cancellations)
+    // Send SMS for confirmations and reschedules (not cancellations).
+    // Lessons also text the coach on cancellation, since they own the booking.
     let smsResult: { success: boolean; response?: string; error?: string } = { success: false, error: "SMS not sent" };
     let gateSmsResult: { success: boolean; response?: string; error?: string } | null = null;
-    
-    if ((notification_type === "confirmation" || notification_type === "reschedule") && profile.phone) {
+
+    if (
+      (notification_type === "confirmation" || notification_type === "reschedule" || isLesson) &&
+      profile.phone
+    ) {
+
       // Send main booking SMS (skip silently if template was disabled in admin)
       if (smsMessage && smsMessage.trim().length > 0) {
         smsResult = await sendSMS(profile.phone, smsMessage, tenant.venue_name);

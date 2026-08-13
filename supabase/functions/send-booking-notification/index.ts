@@ -489,7 +489,10 @@ serve(async (req) => {
       '{end_time_24}': endTime,
       '{staffed_status}': staffedStatus,
       '{refund_amount}': '', // Will be populated if refund occurred
+      '{coach_name}': coachName,
+      '{client_name}': clientFullName,
     };
+
 
     // Helper to render an SMS template from the sms_templates table.
     // Returns null when the template is missing or disabled (skip send).

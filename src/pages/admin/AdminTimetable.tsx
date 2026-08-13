@@ -45,7 +45,9 @@ import {
   CircleDollarSign,
   AlertCircle,
   ShoppingCart,
-  MessageSquare
+  MessageSquare,
+  Loader2
+
 } from "lucide-react";
 import { AddBookingDialog } from "@/components/admin/AddBookingDialog";
 import { Checkbox } from "@/components/ui/checkbox";

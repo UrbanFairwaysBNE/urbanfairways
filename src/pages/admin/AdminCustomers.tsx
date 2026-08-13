@@ -52,6 +52,7 @@ import {
   Filter, 
   MoreVertical, 
   Building2,
+  GraduationCap,
   Mail, 
   Phone, 
   User, 
@@ -184,6 +185,7 @@ export default function AdminCustomers() {
   const [removeCorpCustomer, setRemoveCorpCustomer] = useState<Customer | null>(null);
   const [removeCorpHours, setRemoveCorpHours] = useState(0);
   const [isRemovingCorporate, setIsRemovingCorporate] = useState(false);
+  const [togglingCoachId, setTogglingCoachId] = useState<string | null>(null);
 
   // Custom billing state
   const [isTogglingCustomBilling, setIsTogglingCustomBilling] = useState(false);
@@ -619,6 +621,29 @@ export default function AdminCustomers() {
     setSelectedCustomers(new Set());
     fetchCustomers();
     setIsDeleting(false);
+  };
+
+  /** Toggle a customer's coach status. Coaches can book lessons for clients. */
+  const toggleCoach = async (customer: Customer) => {
+    setTogglingCoachId(customer.user_id);
+    const next = !customer.is_coach;
+    const { error } = await supabase
+      .from("profiles")
+      .update({ is_coach: next } as any)
+      .eq("user_id", customer.user_id);
+
+    if (error) {
+      toast({ title: "Could not update coach status", description: error.message, variant: "destructive" });
+    } else {
+      toast({
+        title: next ? "Coach added" : "Coach removed",
+        description: `${customer.first_name} ${customer.last_name} ${next ? "can now book lessons for clients." : "is no longer a coach."}`,
+      });
+      setCustomers((prev) =>
+        prev.map((c) => (c.user_id === customer.user_id ? { ...c, is_coach: next } : c)),
+      );
+    }
+    setTogglingCoachId(null);
   };
 
   // Toggle admin role for a customer

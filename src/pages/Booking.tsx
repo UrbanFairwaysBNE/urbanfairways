@@ -29,6 +29,8 @@ import { useTenant } from "@/config/tenant";
 import { usePricing } from "@/hooks/usePricing";
 import { hasSingleBayPeakLimit, isOffPeakOnlyTier } from "@/lib/tier-config";
 
+import LessonClientPicker, { LessonClient, clientName } from "@/components/booking/LessonClientPicker";
+
 const PENDING_BOOKING_KEY = "bb:pendingBookingId";
 
 export default function Booking() {
@@ -45,6 +47,7 @@ export default function Booking() {
     userMembershipTier,
     actualMembershipTier,
     isPaymentLimbo,
+    isCoach,
     depositBalance,
     packHoursBalance,
 
@@ -76,6 +79,10 @@ export default function Booking() {
   const [pendingBookingId, setPendingBookingId] = useState<string | null>(null);
   const [playingComp, setPlayingComp] = useState(false);
   const [showMembershipIssueDialog, setShowMembershipIssueDialog] = useState(false);
+
+  // Coach "Book a Lesson" mode: one player, booked on behalf of a client.
+  const lessonMode = searchParams.get("mode") === "lesson" && isCoach;
+  const [lessonClient, setLessonClient] = useState<LessonClient | null>(null);
 
   const COMP_NOTE = "[COMP] Wednesday Ambrose";
 
@@ -243,11 +250,13 @@ export default function Booking() {
           duration_hours: selectedDuration,
           hourly_rate: currentHourlyRate,
           total_price: totalPrice,
-          player_count: selectedPlayers,
+          player_count: lessonMode ? 1 : selectedPlayers,
           payment_method: "pending",
           status: "pending",
           notes: playingComp ? COMP_NOTE : null,
-        })
+          booking_type: lessonMode && lessonClient ? "lesson" : "bay",
+          client_user_id: lessonMode && lessonClient ? lessonClient.user_id : null,
+        } as any)
         .select()
         .single();
       
@@ -450,12 +459,13 @@ export default function Booking() {
         selectedDate, 
         selectedTime, 
         selectedDuration, 
-        selectedPlayers, 
+        lessonMode ? 1 : selectedPlayers, 
         paymentMethod,
         undefined, // No new payment method ID - we use saved card
         partialAmount,
         playingComp ? COMP_NOTE : undefined,
-        packHoursToApply
+        packHoursToApply,
+        lessonMode && lessonClient ? { clientUserId: lessonClient.user_id } : undefined
       );
       
       // If charge-booking returned a checkout URL (no saved card), redirect there
@@ -519,11 +529,13 @@ export default function Booking() {
         selectedDate,
         selectedTime,
         selectedDuration,
-        selectedPlayers,
+        lessonMode ? 1 : selectedPlayers,
         "balance", // Pay entirely with balance
         undefined,
         undefined,
-        playingComp ? COMP_NOTE : undefined
+        playingComp ? COMP_NOTE : undefined,
+        undefined,
+        lessonMode && lessonClient ? { clientUserId: lessonClient.user_id } : undefined
       );
 
       const totalPrice = sessionTotal;
@@ -581,7 +593,8 @@ export default function Booking() {
       : 0;
   const amountAfterHours = Math.max(0, Math.round((sessionTotal - packDiscount) * 100) / 100);
 
-  const canConfirm = selectedDate && selectedTime && selectedBayId;
+  const canConfirm =
+    selectedDate && selectedTime && selectedBayId && (!lessonMode || !!lessonClient);
 
 
 
@@ -598,7 +611,9 @@ export default function Booking() {
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <h1 className="font-display text-base sm:text-2xl tracking-wide">BOOK A BAY</h1>
+            <h1 className="font-display text-base sm:text-2xl tracking-wide">
+              {lessonMode ? "BOOK A LESSON" : "BOOK A BAY"}
+            </h1>
           </div>
           <img 
             src={venueLogo} 
@@ -697,7 +712,8 @@ export default function Booking() {
               selectedDuration={selectedDuration}
               durations={availableDurations}
 
-              selectedPlayers={selectedPlayers}
+              selectedPlayers={lessonMode ? 1 : selectedPlayers}
+              hidePlayers={lessonMode}
               onDateChange={handleDateChange}
               onTimeChange={handleTimeChange}
               onDurationChange={handleDurationChange}

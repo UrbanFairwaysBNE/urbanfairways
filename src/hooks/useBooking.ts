@@ -407,10 +407,15 @@ export function useBooking() {
     date?: Date,
     startTime?: string
   ): number => {
-    // Custom hourly rate overrides everything
-    if (customHourlyRate !== null) {
-      return customHourlyRate;
+    // Custom hourly rate overrides everything (peak/off-peak aware)
+    if (customHourlyRate !== null || customHourlyRatePeak !== null) {
+      const peakSlot = date && startTime
+        ? isPeakTime(date, startTime, isPublicHolidayDate(date))
+        : true;
+      const custom = resolveCustomRate(customHourlyRate, customHourlyRatePeak, peakSlot);
+      if (custom !== null) return custom;
     }
+
     
     // If no date/time provided, return the base tier rate
     if (!date || !startTime) {

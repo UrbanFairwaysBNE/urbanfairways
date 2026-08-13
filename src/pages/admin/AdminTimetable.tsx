@@ -634,70 +634,80 @@ export default function AdminTimetable() {
 
   const cancelBooking = async () => {
     if (!selectedBooking) return;
-    
+
+    const booking = selectedBooking;
+    const withRefund = refundCustomer && !!booking.stripe_payment_intent_id;
+    const notify = sendCancellationNotification;
+
+    // Optimistic: close immediately and grey the slot out so staff never
+    // sit on an unresponsive dialog (refunds/emails can take several seconds).
     setIsCancelling(true);
+    setBookings(prev => prev.map(b => (b.id === booking.id ? { ...b, status: "cancelled" } : b)));
+    setShowCancelDialog(false);
+    setSelectedBooking(null);
+    setIsCancelling(false);
 
-    try {
-      if (refundCustomer && selectedBooking.stripe_payment_intent_id) {
-        // Call refund edge function
-        const { data, error } = await supabase.functions.invoke("refund-booking", {
-          body: {
-            booking_id: selectedBooking.id,
-            send_notification: sendCancellationNotification,
-          },
-        });
+    toast({
+      title: "Cancelling booking…",
+      description: withRefund
+        ? "Processing the refund in the background."
+        : notify
+        ? "Notifying the customer in the background."
+        : "Updating the booking.",
+      duration: 3000,
+    });
 
-        if (error) throw error;
+    // Background work — confirmation (or failure) arrives via toast.
+    (async () => {
+      try {
+        if (withRefund) {
+          const { data, error } = await supabase.functions.invoke("refund-booking", {
+            body: { booking_id: booking.id, send_notification: notify },
+          });
+          if (error) throw error;
 
-        toast({
-          title: "Booking cancelled",
-          description: data.refund 
-            ? `Booking cancelled and $${(data.refund.amount / 100).toFixed(2)} refunded.`
-            : "Booking cancelled successfully.",
-          duration: 4000,
-        });
-      } else {
-        // Just cancel without refund
-        const { error: updateError } = await supabase
-          .from("bookings")
-          .update({ status: "cancelled" })
-          .eq("id", selectedBooking.id);
+          toast({
+            title: "Booking cancelled",
+            description: data?.refund
+              ? `Booking cancelled and $${(data.refund.amount / 100).toFixed(2)} refunded.`
+              : "Booking cancelled successfully.",
+            duration: 4000,
+          });
+        } else {
+          const { error: updateError } = await supabase
+            .from("bookings")
+            .update({ status: "cancelled" })
+            .eq("id", booking.id);
 
-        if (updateError) throw updateError;
+          if (updateError) throw updateError;
 
-        // Send notification if requested
-        if (sendCancellationNotification) {
-          await supabase.functions.invoke("send-booking-notification", {
-            body: {
-              booking_id: selectedBooking.id,
-              notification_type: "cancellation",
-            },
+          if (notify) {
+            await supabase.functions.invoke("send-booking-notification", {
+              body: { booking_id: booking.id, notification_type: "cancellation" },
+            });
+          }
+
+          toast({
+            title: "Booking cancelled",
+            description: notify
+              ? "Booking cancelled and customer notified."
+              : "Booking cancelled successfully.",
+            duration: 4000,
           });
         }
-
+      } catch (error: any) {
         toast({
-          title: "Booking cancelled",
-          description: sendCancellationNotification 
-            ? "Booking cancelled and customer notified."
-            : "Booking cancelled successfully.",
-          duration: 4000,
+          title: "Error",
+          description: error.message || "Failed to cancel booking.",
+          variant: "destructive",
+          duration: 6000,
         });
+      } finally {
+        fetchBookings();
       }
-
-      setShowCancelDialog(false);
-      setSelectedBooking(null);
-      fetchBookings();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to cancel booking.",
-        variant: "destructive",
-        duration: 4000,
-      });
-    }
-
-    setIsCancelling(false);
+    })();
   };
+
 
   if (authLoading) {
     return (

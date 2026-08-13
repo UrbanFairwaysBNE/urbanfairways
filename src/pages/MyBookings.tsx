@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Calendar, Clock, MapPin, X, RefreshCw, Plus } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, MapPin, X, RefreshCw, Plus, GraduationCap } from "lucide-react";
 import { format, parseISO, isPast, isToday } from "date-fns";
 import { toast } from "sonner";
 import venueLogo from "@/assets/venue-logo.png";

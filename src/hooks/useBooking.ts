@@ -851,11 +851,13 @@ export function useBooking() {
         hourly_rate: actualHourlyRate,
         total_price: totalPrice,
         pack_hours_used: packHoursUsed,
-        player_count: playerCount,
+        player_count: lesson ? 1 : playerCount,
         payment_method: settledPaymentMethod,
         status: shouldAutoConfirm ? "confirmed" : "pending",
         notes: notes ?? null,
-      })
+        booking_type: lesson ? "lesson" : "bay",
+        client_user_id: lesson?.clientUserId ?? null,
+      } as any)
       .select()
       .single();
 

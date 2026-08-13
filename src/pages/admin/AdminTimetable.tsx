@@ -1359,7 +1359,14 @@ export default function AdminTimetable() {
                     onClick={saveBookingChanges}
                     disabled={isSaving}
                   >
-                    {isSaving ? "Saving..." : "Save Changes"}
+                    {isSaving ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" /> Saving…
+                      </span>
+                    ) : (
+                      "Save Changes"
+                    )}
+
                   </Button>
                 </div>
               </div>

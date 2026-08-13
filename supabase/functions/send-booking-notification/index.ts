@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
-import { getTenant, tenantHubUrl, tenantBookingUrl } from "../_shared/tenant.ts";
+import { getTenant, tenantHubUrl, tenantBookingUrl, tenantAddress } from "../_shared/tenant.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -644,7 +644,7 @@ serve(async (req) => {
         endTime,
         summary: `Golf lesson with ${coachName} — ${tenant.venue_name}`,
         description: `${bayName} · ${startTime12hr} - ${endTime12hr}`,
-        location: tenant.address || tenant.venue_name,
+        location: tenantAddress(tenant) || tenant.venue_name,
         organiserEmail: tenant.sender_email,
         organiserName: tenant.venue_name,
       });

@@ -1447,6 +1447,13 @@ export default function AdminCustomers() {
                               <Shield className="h-4 w-4 mr-2" />
                               Make Admin
                             </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => toggleCoach(customer)}
+                              disabled={togglingCoachId === customer.user_id}
+                            >
+                              <GraduationCap className="h-4 w-4 mr-2" />
+                              {customer.is_coach ? "Remove Coach" : "Make Coach"}
+                            </DropdownMenuItem>
                             {corporateMap[customer.user_id]?.role === "owner" ? (
                               <DropdownMenuItem
                                 className="text-destructive focus:text-destructive"

@@ -504,7 +504,10 @@ serve(async (req) => {
 
     // Helper to render an SMS template from the sms_templates table.
     // Returns null when the template is missing or disabled (skip send).
-    const renderSmsTemplate = async (templateKey: string): Promise<string | null> => {
+    const renderSmsTemplate = async (
+      templateKey: string,
+      tags: Record<string, string> = templateTags,
+    ): Promise<string | null> => {
       const { data: tpl } = await supabaseClient
         .from("sms_templates")
         .select("message, is_active")
@@ -512,7 +515,7 @@ serve(async (req) => {
         .maybeSingle();
       if (!tpl || !(tpl as any).is_active || !(tpl as any).message) return null;
       let out = (tpl as any).message as string;
-      for (const [tag, value] of Object.entries(templateTags)) {
+      for (const [tag, value] of Object.entries(tags)) {
         out = out.split(tag).join(value);
       }
       return out;
@@ -523,10 +526,41 @@ serve(async (req) => {
     let htmlContent: string;
     let smsMessage: string;
 
+    if (isLesson) {
+      // Coach-facing lesson email + SMS, both fully editable in Settings.
+      const heading =
+        notification_type === "cancellation"
+          ? "Lesson Cancelled"
+          : notification_type === "reschedule"
+            ? "Lesson Rescheduled"
+            : "Lesson Booked";
 
+      subject = replaceTemplateTags(
+        emailTemplate?.subject || `${heading} - ${clientFullName}`,
+        templateTags,
+      );
 
+      const fallbackBody = `
+        <p style="margin:0 0 16px 0;">Hi ${profile.first_name || "there"},</p>
+        <p style="margin:0 0 16px 0;">Your lesson with <strong>${clientFullName}</strong> ${
+          notification_type === "cancellation" ? "has been cancelled." : "is confirmed for:"
+        }</p>
+        <p style="margin:0 0 16px 0; font-size:16px;"><strong>${bookingDate}</strong><br />${startTime12hr} - ${endTime12hr}<br />${bayName}</p>
+      `;
 
-    if (notification_type === "confirmation" || notification_type === "reschedule") {
+      const bodyContent = emailTemplate?.html_content
+        ? replaceTemplateTags(emailTemplate.html_content, templateTags)
+        : fallbackBody;
+
+      htmlContent = await renderBrandedEmail(supabaseClient, heading, bodyContent, {
+        text: "View My Bookings",
+        url: tenantHubUrl(tenant, "/my-bookings"),
+      });
+
+      smsMessage = (await renderSmsTemplate(templateKey)) ?? "";
+      logStep("Lesson coach email prepared", { templateKey });
+    } else if (notification_type === "confirmation" || notification_type === "reschedule") {
+
       // Use custom subject if available
       const isReschedule = notification_type === "reschedule";
       subject = isReschedule 

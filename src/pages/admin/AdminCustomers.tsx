@@ -90,6 +90,8 @@ interface Customer {
   phone: string | null;
   membership_tier: string;
   custom_hourly_rate: number | null;
+  custom_hourly_rate_peak?: number | null;
+  is_coach?: boolean;
   deposit_balance: number;
   created_at: string;
   booking_count?: number;

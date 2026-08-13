@@ -42,16 +42,17 @@ export const AdminBusyOverlay = () => {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-background/70 backdrop-blur-[2px] animate-fade-in"
+      className="fixed bottom-4 right-4 z-[100] pointer-events-none animate-fade-in"
       role="status"
       aria-live="polite"
     >
-      <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-card px-8 py-6 shadow-lg">
-        <BrandLoader size={64} />
+      <div className="flex items-center gap-3 rounded-full border border-border bg-card px-4 py-2 shadow-lg">
+        <BrandLoader size={28} />
         <span className="text-sm text-muted-foreground">Working…</span>
       </div>
     </div>
   );
+
 };
 
 export default AdminBusyOverlay;

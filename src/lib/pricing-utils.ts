@@ -81,6 +81,27 @@ export function isOffPeakTime(date: Date, startTime: string, isPublicHoliday = f
   return !isPeakTime(date, startTime, isPublicHoliday);
 }
 
+/**
+ * Resolve a customer's custom rate override for a given slot.
+ * `custom_hourly_rate` is the off-peak/base override, `custom_hourly_rate_peak`
+ * the optional peak override. When only the base rate is set it applies to all
+ * hours (backwards compatible with single-rate overrides).
+ * Returns null when the customer has no override.
+ */
+export function resolveCustomRate(
+  customRate: number | null | undefined,
+  customPeakRate: number | null | undefined,
+  isPeak: boolean,
+): number | null {
+  if (isPeak && customPeakRate !== null && customPeakRate !== undefined) {
+    return Number(customPeakRate);
+  }
+  if (customRate !== null && customRate !== undefined) return Number(customRate);
+  if (customPeakRate !== null && customPeakRate !== undefined) return Number(customPeakRate);
+  return null;
+}
+
+
 
 /** Add a (possibly fractional) number of hours to a HH:MM time string. */
 export function addDurationToTime(startTime: string, durationHours: number): string {

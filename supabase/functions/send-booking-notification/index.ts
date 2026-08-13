@@ -875,7 +875,7 @@ serve(async (req) => {
       }
 
       // Send second SMS for boom gate access if needed (only at dark hours)
-      if (needsBoomGate && smsResult.success) {
+      if (needsBoomGate && smsResult.success && notification_type !== "cancellation") {
         const gateMessage = await renderSmsTemplate("boom_gate_access");
         if (gateMessage && gateMessage.trim().length > 0) {
           gateSmsResult = await sendSMS(profile.phone, gateMessage, tenant.venue_name);

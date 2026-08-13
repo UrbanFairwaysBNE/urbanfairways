@@ -317,15 +317,23 @@ serve(async (req) => {
     // Fetch custom email template.
     // First-time bookings during unstaffed hours use their own dedicated template
     // that admins edit directly in the Notifications settings.
-    const templateKey =
-      notification_type === "confirmation"
+    // Lessons have their own coach-facing templates, edited in the Lesson
+    // Notifications section of Settings.
+    const templateKey = isLesson
+      ? (notification_type === "confirmation"
+          ? "lesson_confirmation_coach"
+          : notification_type === "reschedule"
+            ? "lesson_reschedule_coach"
+            : "lesson_cancellation_coach")
+      : notification_type === "confirmation"
         ? (isFirstTimeUnstaffed ? "booking_confirmation_first_unstaffed" : "booking_confirmation")
         : "booking_cancellation";
     const { data: emailTemplate, error: templateError } = await supabaseClient
       .from("email_templates")
       .select("*")
       .eq("template_key", templateKey)
-      .single();
+      .maybeSingle();
+
     
     if (templateError) {
       logStep("Template fetch error (using default)", { error: templateError.message });

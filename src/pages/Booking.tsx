@@ -701,9 +701,26 @@ export default function Booking() {
             </div>
           </div>
         )}
+        {lessonMode && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-display text-xl">Who is the lesson for?</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <LessonClientPicker value={lessonClient} onChange={setLessonClient} />
+              <p className="text-xs text-muted-foreground">
+                The bay is booked and paid for under your account. Both you and the client
+                get a confirmation with a calendar invite.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardHeader>
-            <CardTitle className="font-display text-xl">When would you like to play?</CardTitle>
+            <CardTitle className="font-display text-xl">
+              {lessonMode ? "When is the lesson?" : "When would you like to play?"}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <DateTimePicker

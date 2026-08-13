@@ -1585,51 +1585,49 @@ export default function AdminSettings() {
               <EmailLayoutEditor />
             </CollapsibleSection>
 
-            {(() => {
-              const grouped = new Set(TEMPLATE_GROUPS.flatMap((g) => g.keys));
-              const ungrouped = emailTemplates.filter((t) => !grouped.has(t.template_key));
-              const groups = [
-                ...TEMPLATE_GROUPS.map((g) => ({
-                  ...g,
-                  items: g.keys
-                    .map((k) => emailTemplates.find((t) => t.template_key === k))
-                    .filter(Boolean) as EmailTemplateDB[],
-                })),
-                ...(ungrouped.length
-                  ? [{ title: "Other", description: "Templates not in a category", keys: [], items: ungrouped }]
-                  : []),
-              ].filter((g) => g.items.length > 0);
+            <CollapsibleSection
+              title="Email Templates"
+              description="Body content only — the shared header & footer are applied automatically"
+            >
+              <div className="space-y-3">
+                {(() => {
+                  const grouped = new Set(TEMPLATE_GROUPS.flatMap((g) => g.keys));
+                  const ungrouped = emailTemplates.filter((t) => !grouped.has(t.template_key));
+                  const groups = [
+                    ...TEMPLATE_GROUPS.map((g) => ({
+                      ...g,
+                      items: g.keys
+                        .map((k) => emailTemplates.find((t) => t.template_key === k))
+                        .filter(Boolean) as EmailTemplateDB[],
+                    })),
+                    ...(ungrouped.length
+                      ? [{ title: "Other", description: "Templates not in a category", keys: [], items: ungrouped }]
+                      : []),
+                  ].filter((g) => g.items.length > 0);
 
-              if (isLoadingTemplates) {
-                return (
-                  <CollapsibleSection title="Email Templates" description="Body content only — the shared header & footer are applied automatically">
-                    <Skeleton className="h-32" />
-                  </CollapsibleSection>
-                );
-              }
+                  if (isLoadingTemplates) return <Skeleton className="h-32" />;
 
-              if (groups.length === 0) {
-                return (
-                  <CollapsibleSection title="Email Templates" description="Body content only — the shared header & footer are applied automatically">
-                    <p className="text-sm text-muted-foreground">No templates found.</p>
-                  </CollapsibleSection>
-                );
-              }
+                  if (groups.length === 0) {
+                    return <p className="text-sm text-muted-foreground">No templates found.</p>;
+                  }
 
-              return groups.map((group) => (
-                <CollapsibleSection
-                  key={group.title}
-                  title={`${group.title} Emails`}
-                  description={`${group.description} · ${group.items.length} template${group.items.length === 1 ? "" : "s"}`}
-                >
-                  <Card>
-                    <CardContent className="space-y-4 pt-6">
-                      {group.items.map((template) => renderTemplateRow(template))}
-                    </CardContent>
-                  </Card>
-                </CollapsibleSection>
-              ));
-            })()}
+                  return groups.map((group) => (
+                    <CollapsibleSection
+                      key={group.title}
+                      title={group.title}
+                      description={`${group.description} · ${group.items.length} template${group.items.length === 1 ? "" : "s"}`}
+                    >
+                      <Card>
+                        <CardContent className="space-y-4 pt-6">
+                          {group.items.map((template) => renderTemplateRow(template))}
+                        </CardContent>
+                      </Card>
+                    </CollapsibleSection>
+                  ));
+                })()}
+              </div>
+            </CollapsibleSection>
+
 
 
 

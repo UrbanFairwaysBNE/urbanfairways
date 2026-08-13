@@ -1585,39 +1585,52 @@ export default function AdminSettings() {
               <EmailLayoutEditor />
             </CollapsibleSection>
 
-            <CollapsibleSection title="Email Templates" description="Body content only — the shared header & footer above are applied automatically">
-              <Card>
-                <CardContent className="space-y-4 pt-6">
-                  {isLoadingTemplates ? (
-                    <Skeleton className="h-32" />
-                  ) : emailTemplates.filter((t) => !GIFT_CARD_KEYS.includes(t.template_key)).length === 0 ? (
-                    <p className="text-sm text-muted-foreground">No templates found.</p>
-                  ) : (
-                    emailTemplates
-                      .filter((t) => !GIFT_CARD_KEYS.includes(t.template_key))
-                      .map((template) => renderTemplateRow(template))
-                  )}
-                </CardContent>
-              </Card>
-            </CollapsibleSection>
+            {(() => {
+              const grouped = new Set(TEMPLATE_GROUPS.flatMap((g) => g.keys));
+              const ungrouped = emailTemplates.filter((t) => !grouped.has(t.template_key));
+              const groups = [
+                ...TEMPLATE_GROUPS.map((g) => ({
+                  ...g,
+                  items: g.keys
+                    .map((k) => emailTemplates.find((t) => t.template_key === k))
+                    .filter(Boolean) as EmailTemplateDB[],
+                })),
+                ...(ungrouped.length
+                  ? [{ title: "Other", description: "Templates not in a category", keys: [], items: ungrouped }]
+                  : []),
+              ].filter((g) => g.items.length > 0);
 
-            <CollapsibleSection
-              title="Gift Card Emails"
-              description="The emails sent through the gift card flow — separate from the manual Credit Added notification"
-            >
-              <Card>
-                <CardContent className="space-y-4 pt-6">
-                  {isLoadingTemplates ? (
+              if (isLoadingTemplates) {
+                return (
+                  <CollapsibleSection title="Email Templates" description="Body content only — the shared header & footer are applied automatically">
                     <Skeleton className="h-32" />
-                  ) : emailTemplates.filter((t) => GIFT_CARD_KEYS.includes(t.template_key)).length === 0 ? (
-                    <p className="text-sm text-muted-foreground">No gift card templates found.</p>
-                  ) : (
-                    emailTemplates
-                      .filter((t) => GIFT_CARD_KEYS.includes(t.template_key))
-                      .map((template) => renderTemplateRow(template))
-                  )}
-                </CardContent>
-              </Card>
+                  </CollapsibleSection>
+                );
+              }
+
+              if (groups.length === 0) {
+                return (
+                  <CollapsibleSection title="Email Templates" description="Body content only — the shared header & footer are applied automatically">
+                    <p className="text-sm text-muted-foreground">No templates found.</p>
+                  </CollapsibleSection>
+                );
+              }
+
+              return groups.map((group) => (
+                <CollapsibleSection
+                  key={group.title}
+                  title={`${group.title} Emails`}
+                  description={`${group.description} · ${group.items.length} template${group.items.length === 1 ? "" : "s"}`}
+                >
+                  <Card>
+                    <CardContent className="space-y-4 pt-6">
+                      {group.items.map((template) => renderTemplateRow(template))}
+                    </CardContent>
+                  </Card>
+                </CollapsibleSection>
+              ));
+            })()}
+
             </CollapsibleSection>
 
 

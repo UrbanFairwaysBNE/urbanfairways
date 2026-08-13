@@ -138,6 +138,8 @@ const fetchUserProfile = async () => {
     paymentFailedAt,
     isPaymentLimbo: !!paymentFailedAt,
     customHourlyRate: data?.custom_hourly_rate ?? null,
+    customHourlyRatePeak: (data as any)?.custom_hourly_rate_peak ?? null,
+    isCoach: !!(data as any)?.is_coach,
     depositBalance: Number(data?.deposit_balance) || 0,
     packHoursBalance: Number(packHours) || 0,
     customSegment: data?.custom_segment ?? null,

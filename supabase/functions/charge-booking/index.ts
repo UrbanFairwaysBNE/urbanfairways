@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "npm:stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { getTenant, tenantBookingUrl } from "../_shared/tenant.ts";
-import { loadTiers, calculateTierHourlyRate } from "../_shared/tiers.ts";
+import { loadTiers, calculateTierHourlyRate, resolveCustomRate } from "../_shared/tiers.ts";
 
 // Off-peak: Mon-Fri 5:30am-4:00pm, Sat-Sun 5:30am-10:00am. Everything else is peak.
 function isPeakTime(dateStr: string, startTime: string): boolean {

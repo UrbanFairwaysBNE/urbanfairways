@@ -186,7 +186,35 @@ const TEMPLATE_TAGS: Record<string, { tag: string; description: string }[]> = {
   gift_card_recipient_signup: GIFT_CARD_TAGS(),
   gift_card_printable: GIFT_CARD_TAGS(),
   gift_card_admin_issued: GIFT_CARD_TAGS(),
+  lesson_confirmation_coach: LESSON_TAGS("coach"),
+  lesson_reschedule_coach: LESSON_TAGS("coach"),
+  lesson_cancellation_coach: LESSON_TAGS("coach"),
+  lesson_confirmation_client: LESSON_TAGS("client"),
+  lesson_reschedule_client: LESSON_TAGS("client"),
+  lesson_cancellation_client: LESSON_TAGS("client"),
 };
+
+function LESSON_TAGS(audience: "coach" | "client") {
+  return [
+    {
+      tag: "{first_name}",
+      description: audience === "coach" ? "Coach's first name" : "Student's first name",
+    },
+    {
+      tag: "{last_name}",
+      description: audience === "coach" ? "Coach's last name" : "Student's last name",
+    },
+    { tag: "{coach_name}", description: "Full name of the coach taking the lesson" },
+    { tag: "{client_name}", description: "Full name of the student" },
+    { tag: "{booking_date}", description: "Lesson date (e.g. Thursday, 14 August 2026)" },
+    { tag: "{short_date}", description: "Short lesson date (e.g. Thu 14 Aug)" },
+    { tag: "{start_time}", description: "Start time (e.g. 10:00 AM)" },
+    { tag: "{end_time}", description: "End time (e.g. 11:00 AM)" },
+    { tag: "{bay_name}", description: "Bay the lesson is booked in" },
+    { tag: "{duration}", description: "Lesson length in hours" },
+    { tag: "{door_code}", description: "Door access code for the day" },
+  ];
+}
 
 const GIFT_CARD_KEYS = [
   "gift_card_recipient_applied",
@@ -194,6 +222,72 @@ const GIFT_CARD_KEYS = [
   "gift_card_printable",
   "gift_card_admin_issued",
 ];
+
+// Grouping for the (long) template list in Settings → Notifications
+const TEMPLATE_GROUPS: { title: string; description: string; keys: string[] }[] = [
+  {
+    title: "Bookings",
+    description: "Confirmations and cancellations for standard bay bookings",
+    keys: ["booking_confirmation", "booking_confirmation_first_unstaffed", "booking_cancellation"],
+  },
+  {
+    title: "Lessons",
+    description: "Coaching lesson emails — separate wording for the coach and the student",
+    keys: [
+      "lesson_confirmation_coach",
+      "lesson_reschedule_coach",
+      "lesson_cancellation_coach",
+      "lesson_confirmation_client",
+      "lesson_reschedule_client",
+      "lesson_cancellation_client",
+    ],
+  },
+  {
+    title: "Memberships & Billing",
+    description: "Membership lifecycle and payment issues",
+    keys: [
+      "membership_activated",
+      "membership_cancelled",
+      "membership_on_hold",
+      "membership_payment_failed",
+      "frontline_verification",
+    ],
+  },
+  {
+    title: "Prepaid Packs & Corporate",
+    description: "Pack purchases, redemptions and company account invites",
+    keys: ["pack_purchase", "pack_redeemed", "corporate_pack_purchase", "corporate_staff_invite"],
+  },
+  {
+    title: "Credit & Gift Cards",
+    description: "Manual credit, loyalty rewards and the gift card flow",
+    keys: [
+      "credit_added",
+      "loyalty_credit",
+      "gift_card_issued",
+      "gift_card_recipient_applied",
+      "gift_card_recipient_signup",
+      "gift_card_printable",
+      "gift_card_admin_issued",
+    ],
+  },
+  {
+    title: "League",
+    description: "UF League welcome and weekly results",
+    keys: ["league_welcome", "league_weekly_winner"],
+  },
+  {
+    title: "Marketing & Lifecycle",
+    description: "Welcome email and automated campaigns",
+    keys: ["welcome", "first_session_promo"],
+  },
+  {
+    title: "Admin Alerts",
+    description: "Internal notifications sent to staff",
+    keys: ["watched_customer_alert"],
+  },
+];
+
 
 function GIFT_CARD_TAGS() {
   return [
@@ -1491,40 +1585,53 @@ export default function AdminSettings() {
               <EmailLayoutEditor />
             </CollapsibleSection>
 
-            <CollapsibleSection title="Email Templates" description="Body content only — the shared header & footer above are applied automatically">
-              <Card>
-                <CardContent className="space-y-4 pt-6">
-                  {isLoadingTemplates ? (
-                    <Skeleton className="h-32" />
-                  ) : emailTemplates.filter((t) => !GIFT_CARD_KEYS.includes(t.template_key)).length === 0 ? (
-                    <p className="text-sm text-muted-foreground">No templates found.</p>
-                  ) : (
-                    emailTemplates
-                      .filter((t) => !GIFT_CARD_KEYS.includes(t.template_key))
-                      .map((template) => renderTemplateRow(template))
-                  )}
-                </CardContent>
-              </Card>
-            </CollapsibleSection>
+            {(() => {
+              const grouped = new Set(TEMPLATE_GROUPS.flatMap((g) => g.keys));
+              const ungrouped = emailTemplates.filter((t) => !grouped.has(t.template_key));
+              const groups = [
+                ...TEMPLATE_GROUPS.map((g) => ({
+                  ...g,
+                  items: g.keys
+                    .map((k) => emailTemplates.find((t) => t.template_key === k))
+                    .filter(Boolean) as EmailTemplateDB[],
+                })),
+                ...(ungrouped.length
+                  ? [{ title: "Other", description: "Templates not in a category", keys: [], items: ungrouped }]
+                  : []),
+              ].filter((g) => g.items.length > 0);
 
-            <CollapsibleSection
-              title="Gift Card Emails"
-              description="The emails sent through the gift card flow — separate from the manual Credit Added notification"
-            >
-              <Card>
-                <CardContent className="space-y-4 pt-6">
-                  {isLoadingTemplates ? (
+              if (isLoadingTemplates) {
+                return (
+                  <CollapsibleSection title="Email Templates" description="Body content only — the shared header & footer are applied automatically">
                     <Skeleton className="h-32" />
-                  ) : emailTemplates.filter((t) => GIFT_CARD_KEYS.includes(t.template_key)).length === 0 ? (
-                    <p className="text-sm text-muted-foreground">No gift card templates found.</p>
-                  ) : (
-                    emailTemplates
-                      .filter((t) => GIFT_CARD_KEYS.includes(t.template_key))
-                      .map((template) => renderTemplateRow(template))
-                  )}
-                </CardContent>
-              </Card>
-            </CollapsibleSection>
+                  </CollapsibleSection>
+                );
+              }
+
+              if (groups.length === 0) {
+                return (
+                  <CollapsibleSection title="Email Templates" description="Body content only — the shared header & footer are applied automatically">
+                    <p className="text-sm text-muted-foreground">No templates found.</p>
+                  </CollapsibleSection>
+                );
+              }
+
+              return groups.map((group) => (
+                <CollapsibleSection
+                  key={group.title}
+                  title={`${group.title} Emails`}
+                  description={`${group.description} · ${group.items.length} template${group.items.length === 1 ? "" : "s"}`}
+                >
+                  <Card>
+                    <CardContent className="space-y-4 pt-6">
+                      {group.items.map((template) => renderTemplateRow(template))}
+                    </CardContent>
+                  </Card>
+                </CollapsibleSection>
+              ));
+            })()}
+
+
 
 
 

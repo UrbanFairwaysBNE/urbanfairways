@@ -105,3 +105,21 @@ export function calculateTierHourlyRate(
 
   return Number(tier.hourly_rate);
 }
+
+/**
+ * Resolve a customer's custom rate override for a slot.
+ * `custom_hourly_rate` is the off-peak/base override; `custom_hourly_rate_peak`
+ * is the optional peak override. A single base rate applies to all hours.
+ */
+export function resolveCustomRate(
+  customRate: number | null | undefined,
+  customPeakRate: number | null | undefined,
+  isPeak: boolean,
+): number | null {
+  if (isPeak && customPeakRate !== null && customPeakRate !== undefined && Number(customPeakRate) > 0) {
+    return Number(customPeakRate);
+  }
+  if (customRate !== null && customRate !== undefined && Number(customRate) > 0) return Number(customRate);
+  if (customPeakRate !== null && customPeakRate !== undefined && Number(customPeakRate) > 0) return Number(customPeakRate);
+  return null;
+}

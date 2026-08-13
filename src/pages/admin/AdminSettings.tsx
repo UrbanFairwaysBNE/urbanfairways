@@ -186,7 +186,35 @@ const TEMPLATE_TAGS: Record<string, { tag: string; description: string }[]> = {
   gift_card_recipient_signup: GIFT_CARD_TAGS(),
   gift_card_printable: GIFT_CARD_TAGS(),
   gift_card_admin_issued: GIFT_CARD_TAGS(),
+  lesson_confirmation_coach: LESSON_TAGS("coach"),
+  lesson_reschedule_coach: LESSON_TAGS("coach"),
+  lesson_cancellation_coach: LESSON_TAGS("coach"),
+  lesson_confirmation_client: LESSON_TAGS("client"),
+  lesson_reschedule_client: LESSON_TAGS("client"),
+  lesson_cancellation_client: LESSON_TAGS("client"),
 };
+
+function LESSON_TAGS(audience: "coach" | "client") {
+  return [
+    {
+      tag: "{first_name}",
+      description: audience === "coach" ? "Coach's first name" : "Student's first name",
+    },
+    {
+      tag: "{last_name}",
+      description: audience === "coach" ? "Coach's last name" : "Student's last name",
+    },
+    { tag: "{coach_name}", description: "Full name of the coach taking the lesson" },
+    { tag: "{client_name}", description: "Full name of the student" },
+    { tag: "{booking_date}", description: "Lesson date (e.g. Thursday, 14 August 2026)" },
+    { tag: "{short_date}", description: "Short lesson date (e.g. Thu 14 Aug)" },
+    { tag: "{start_time}", description: "Start time (e.g. 10:00 AM)" },
+    { tag: "{end_time}", description: "End time (e.g. 11:00 AM)" },
+    { tag: "{bay_name}", description: "Bay the lesson is booked in" },
+    { tag: "{duration}", description: "Lesson length in hours" },
+    { tag: "{door_code}", description: "Door access code for the day" },
+  ];
+}
 
 const GIFT_CARD_KEYS = [
   "gift_card_recipient_applied",
@@ -194,6 +222,72 @@ const GIFT_CARD_KEYS = [
   "gift_card_printable",
   "gift_card_admin_issued",
 ];
+
+// Grouping for the (long) template list in Settings → Notifications
+const TEMPLATE_GROUPS: { title: string; description: string; keys: string[] }[] = [
+  {
+    title: "Bookings",
+    description: "Confirmations and cancellations for standard bay bookings",
+    keys: ["booking_confirmation", "booking_confirmation_first_unstaffed", "booking_cancellation"],
+  },
+  {
+    title: "Lessons",
+    description: "Coaching lesson emails — separate wording for the coach and the student",
+    keys: [
+      "lesson_confirmation_coach",
+      "lesson_reschedule_coach",
+      "lesson_cancellation_coach",
+      "lesson_confirmation_client",
+      "lesson_reschedule_client",
+      "lesson_cancellation_client",
+    ],
+  },
+  {
+    title: "Memberships & Billing",
+    description: "Membership lifecycle and payment issues",
+    keys: [
+      "membership_activated",
+      "membership_cancelled",
+      "membership_on_hold",
+      "membership_payment_failed",
+      "frontline_verification",
+    ],
+  },
+  {
+    title: "Prepaid Packs & Corporate",
+    description: "Pack purchases, redemptions and company account invites",
+    keys: ["pack_purchase", "pack_redeemed", "corporate_pack_purchase", "corporate_staff_invite"],
+  },
+  {
+    title: "Credit & Gift Cards",
+    description: "Manual credit, loyalty rewards and the gift card flow",
+    keys: [
+      "credit_added",
+      "loyalty_credit",
+      "gift_card_issued",
+      "gift_card_recipient_applied",
+      "gift_card_recipient_signup",
+      "gift_card_printable",
+      "gift_card_admin_issued",
+    ],
+  },
+  {
+    title: "League",
+    description: "UF League welcome and weekly results",
+    keys: ["league_welcome", "league_weekly_winner"],
+  },
+  {
+    title: "Marketing & Lifecycle",
+    description: "Welcome email and automated campaigns",
+    keys: ["welcome", "first_session_promo"],
+  },
+  {
+    title: "Admin Alerts",
+    description: "Internal notifications sent to staff",
+    keys: ["watched_customer_alert"],
+  },
+];
+
 
 function GIFT_CARD_TAGS() {
   return [

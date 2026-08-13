@@ -178,6 +178,9 @@ export default function Booking() {
     }
   }, [selectedDate, selectedTime, selectedDuration]);
 
+
+
+
   const handleDateChange = (date: Date | undefined) => {
     setSelectedDate(date);
     setSelectedBayId(undefined);
@@ -592,6 +595,23 @@ export default function Booking() {
       ? Math.round(packHoursToApply * (sessionTotal / selectedDuration) * 100) / 100
       : 0;
   const amountAfterHours = Math.max(0, Math.round((sessionTotal - packDiscount) * 100) / 100);
+
+  // Always default to spending available credit first.
+  useEffect(() => {
+    if (depositBalance <= 0 || amountAfterHours <= 0) {
+      setUsePartialBalance(false);
+      return;
+    }
+    if (depositBalance >= amountAfterHours) {
+      setSelectedPaymentMethod("balance");
+      setUsePartialBalance(false);
+    } else {
+      setSelectedPaymentMethod("card");
+      setUsePartialBalance(true);
+    }
+  }, [depositBalance, amountAfterHours]);
+
+
 
   const canConfirm =
     selectedDate && selectedTime && selectedBayId && (!lessonMode || !!lessonClient);

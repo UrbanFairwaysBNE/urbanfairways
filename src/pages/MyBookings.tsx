@@ -486,6 +486,12 @@ const MyBookings = () => {
                           <MapPin className="h-4 w-4" />
                           Bay {booking.bay_number}
                           {booking.bay_name && ` - ${booking.bay_name}`}
+                          {booking.isLessonAsClient && (
+                            <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                              <GraduationCap className="h-3 w-3" />
+                              Lesson
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
                           <span className="flex items-center gap-1">
@@ -497,12 +503,21 @@ const MyBookings = () => {
                             {formatTime(booking.start_time)} - {formatTime(booking.end_time)}
                           </span>
                         </div>
-                        <div className="text-sm">
-                          <span className="font-medium">${booking.total_price.toFixed(2)}</span>
-                          <span className="text-muted-foreground">
+                        {booking.isLessonAsClient ? (
+                          <div className="text-sm text-muted-foreground">
+                            Coaching lesson with{" "}
+                            <span className="font-medium text-foreground">{booking.coach_name}</span>
                             {" "}• {booking.duration_hours} hour{booking.duration_hours > 1 ? "s" : ""}
-                          </span>
-                        </div>
+                          </div>
+                        ) : (
+                          <div className="text-sm">
+                            <span className="font-medium">${booking.total_price.toFixed(2)}</span>
+                            <span className="text-muted-foreground">
+                              {" "}• {booking.duration_hours} hour{booking.duration_hours > 1 ? "s" : ""}
+                            </span>
+                          </div>
+                        )}
+
                         {booking.status === "cancelled" && (booking as any).cancellation_reason && (
                           <p className="text-xs text-destructive/80 mt-1 italic">
                             {(booking as any).cancellation_reason}

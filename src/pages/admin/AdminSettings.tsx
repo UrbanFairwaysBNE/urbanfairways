@@ -535,13 +535,20 @@ export default function AdminSettings() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => {
-              setPreviewHtml(template.html_content || "<p>No custom template set. Using default template.</p>");
+            onClick={async () => {
+              setPreviewHtml("");
               setPreviewOpen(true);
+              const body = template.html_content || "<p>No custom template set. Using default template.</p>";
+              try {
+                setPreviewHtml(await renderTemplatePreview(template.subject || template.name, body));
+              } catch {
+                setPreviewHtml(body);
+              }
             }}
             disabled={!template.html_content}
             className="h-8 w-8"
           >
+
             <Eye className="h-4 w-4" />
           </Button>
           <Button

@@ -675,10 +675,16 @@ export function useBooking() {
     // CRITICAL: Fresh database check for multi-bay restriction
     // This prevents race conditions when users book multiple bays quickly
     let actualHourlyRate: number;
-    
-    if (customHourlyRate !== null) {
+
+    const customRateForSlot = resolveCustomRate(
+      customHourlyRate,
+      customHourlyRatePeak,
+      isPeakSlot(date, startTime),
+    );
+
+    if (customRateForSlot !== null) {
       // Custom rate always takes priority
-      actualHourlyRate = customHourlyRate;
+      actualHourlyRate = customRateForSlot;
     } else if (hasSingleBayPeakLimit(tierPricing, userMembershipTier) && isPeakSlot(date, startTime)) {
       // For single-bay-limited tiers during peak: check for overlapping bookings in DB (not cached state)
       const { data: existingBookings } = await supabase

@@ -95,6 +95,7 @@ const MyBookings = () => {
         .from("bookings")
         .select(`
           id,
+          user_id,
           booking_date,
           start_time,
           end_time,
@@ -105,21 +106,56 @@ const MyBookings = () => {
           bay_id,
           payment_method,
           stripe_payment_intent_id,
+          booking_type,
+          client_user_id,
           bays (name, bay_number)
         `)
-        .eq("user_id", user.id)
+        // Own bookings, plus coaching lessons a coach booked for this user
+        .or(`user_id.eq.${user.id},client_user_id.eq.${user.id}`)
         .order("booking_date", { ascending: true })
         .order("start_time", { ascending: true });
 
       if (error) throw error;
 
-      const formattedBookings = (data || []).map((booking: any) => ({
-        ...booking,
-        bay_name: booking.bays?.name,
-        bay_number: booking.bays?.bay_number,
-        payment_method: booking.payment_method,
-        stripe_payment_intent_id: booking.stripe_payment_intent_id,
-      }));
+      const rows = data || [];
+
+      // Look up coach names for any lessons booked for this user
+      const coachIds = Array.from(
+        new Set(
+          rows
+            .filter((b: any) => b.client_user_id === user.id && b.user_id !== user.id)
+            .map((b: any) => b.user_id as string)
+        )
+      );
+      const coachNames = new Map<string, string>();
+      if (coachIds.length > 0) {
+        const { data: coaches } = await supabase
+          .from("profiles")
+          .select("user_id, first_name, last_name")
+          .in("user_id", coachIds);
+        (coaches || []).forEach((c: any) => {
+          coachNames.set(
+            c.user_id,
+            `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() || "Your coach"
+          );
+        });
+      }
+
+      const formattedBookings = rows.map((booking: any) => {
+        const isLessonAsClient =
+          booking.client_user_id === user.id && booking.user_id !== user.id;
+        return {
+          ...booking,
+          bay_name: booking.bays?.name,
+          bay_number: booking.bays?.bay_number,
+          payment_method: booking.payment_method,
+          stripe_payment_intent_id: booking.stripe_payment_intent_id,
+          isLessonAsClient,
+          coach_name: isLessonAsClient
+            ? coachNames.get(booking.user_id) || "Your coach"
+            : undefined,
+        };
+      });
 
       setBookings(formattedBookings);
     } catch (error) {
@@ -129,6 +165,7 @@ const MyBookings = () => {
       setIsLoading(false);
     }
   };
+
 
   const handleCancelBooking = async (bookingId: string) => {
     setCancellingId(bookingId);

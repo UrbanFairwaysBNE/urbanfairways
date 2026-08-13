@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import {
   calculateHourlyRate,
   isPeakTime,
+  resolveCustomRate,
   isOffPeakTime,
   defaultPeakRate,
   formatLocalDateKey,

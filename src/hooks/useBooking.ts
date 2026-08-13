@@ -959,6 +959,7 @@ export function useBooking() {
     isLoading,
     userMembershipTier,
     actualMembershipTier,
+    isCoach,
     isPaymentLimbo,
     depositBalance,
     packHoursBalance,

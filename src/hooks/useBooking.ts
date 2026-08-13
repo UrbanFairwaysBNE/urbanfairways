@@ -219,6 +219,8 @@ export function useBooking() {
   const actualMembershipTier = userProfile?.actualMembershipTier || userMembershipTier;
   const isPaymentLimbo = !!userProfile?.isPaymentLimbo;
   const customHourlyRate = userProfile?.customHourlyRate ?? null;
+  const customHourlyRatePeak = userProfile?.customHourlyRatePeak ?? null;
+  const isCoach = !!userProfile?.isCoach;
   const depositBalance = userProfile?.depositBalance || 0;
   const packHoursBalance = userProfile?.packHoursBalance || 0;
 

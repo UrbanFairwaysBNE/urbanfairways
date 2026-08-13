@@ -37,7 +37,14 @@ interface Booking {
   bay_number?: number;
   payment_method?: string;
   stripe_payment_intent_id?: string;
+  booking_type?: string | null;
+  client_user_id?: string | null;
+  user_id?: string;
+  /** True when this is a coaching lesson booked FOR the signed-in user by their coach */
+  isLessonAsClient?: boolean;
+  coach_name?: string;
 }
+
 
 const MyBookings = () => {
   const { tenant } = useTenant();

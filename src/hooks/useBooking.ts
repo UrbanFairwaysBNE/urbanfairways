@@ -201,12 +201,16 @@ export function useBooking() {
   });
 
 
-  // User data - cached for 5 minutes
+  // User data — always refetched on entry: the credit balance is money-sensitive,
+  // so a stale cache must never hide available credit at checkout.
   const { data: userProfile } = useQuery({
     queryKey: QUERY_KEYS.USER_PROFILE(),
     queryFn: fetchUserProfile,
-    staleTime: STALE_TIMES.SEMI_STATIC,
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
+
 
   // Saved card - cached for 5 minutes
   const { data: savedCard, isLoading: isLoadingSavedCard, refetch: refetchSavedCard } = useQuery({

@@ -921,6 +921,14 @@ export default function AdminTimetable() {
                                       C
                                     </span>
                                   )}
+                                  {(booking as any).booking_type === "lesson" && (
+                                    <span
+                                      title="Coaching lesson"
+                                      className="inline-flex shrink-0 items-center justify-center w-3.5 h-3.5 rounded-full bg-accent text-accent-foreground text-[8px] font-bold leading-none ring-1 ring-accent-foreground/30"
+                                    >
+                                      L
+                                    </span>
+                                  )}
                                   <span className="truncate">
                                     {booking.status === 'pending' 
                                       ? `${booking.profile?.first_name || 'Processing'} ${booking.profile?.last_name || '...'}` 

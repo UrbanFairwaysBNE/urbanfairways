@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
-import { loadTiers, calculateTierHourlyRate, TierRow } from "../_shared/tiers.ts";
+import { loadTiers, calculateTierHourlyRate, resolveCustomRate, TierRow } from "../_shared/tiers.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -115,7 +115,7 @@ serve(async (req) => {
     // Fetch user's profile for membership tier and balance
     const { data: profile, error: profileError } = await supabaseAdmin
       .from("profiles")
-      .select("membership_tier, custom_hourly_rate, deposit_balance")
+      .select("membership_tier, custom_hourly_rate, custom_hourly_rate_peak, deposit_balance")
       .eq("user_id", user.id)
       .single();
 
@@ -144,7 +144,11 @@ serve(async (req) => {
       new_date,
       new_start_time,
       tiers,
-      profile.custom_hourly_rate
+      resolveCustomRate(
+        profile.custom_hourly_rate,
+        (profile as any).custom_hourly_rate_peak ?? null,
+        isPeakTime(new_date, new_start_time),
+      )
     );
 
     const newTotalPrice = newHourlyRate * booking.duration_hours;

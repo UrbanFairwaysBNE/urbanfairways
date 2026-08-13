@@ -244,6 +244,7 @@ interface CustomerProfile {
   email: string;
   membership_tier: string;
   custom_hourly_rate: number | null;
+  custom_hourly_rate_peak?: number | null;
 }
 
 interface Bay {
@@ -346,6 +347,7 @@ export default function AdminSettings() {
   const [customerSearch, setCustomerSearch] = useState("");
   const [selectedPricingCustomer, setSelectedPricingCustomer] = useState<CustomerProfile | null>(null);
   const [newCustomRate, setNewCustomRate] = useState("");
+  const [newCustomPeakRate, setNewCustomPeakRate] = useState("");
   const [isSavingRate, setIsSavingRate] = useState(false);
 
   // Bay Management
@@ -808,12 +810,12 @@ export default function AdminSettings() {
     setIsLoadingCustomers(true);
     const { data, error } = await supabase
       .from("profiles")
-      .select("id, user_id, first_name, last_name, email, membership_tier, custom_hourly_rate")
+      .select("id, user_id, first_name, last_name, email, membership_tier, custom_hourly_rate, custom_hourly_rate_peak")
       .order("last_name");
 
     if (!error && data) {
       setCustomers(data);
-      setCustomersWithPricing(data.filter((c: CustomerProfile) => c.custom_hourly_rate !== null));
+      setCustomersWithPricing(data.filter((c: CustomerProfile) => c.custom_hourly_rate !== null || c.custom_hourly_rate_peak != null));
     }
     setIsLoadingCustomers(false);
   };
@@ -824,16 +826,17 @@ export default function AdminSettings() {
     setIsSavingRate(true);
     try {
       const rate = newCustomRate ? parseFloat(newCustomRate) : null;
-      
+      const peakRate = newCustomPeakRate ? parseFloat(newCustomPeakRate) : null;
+
       const { error } = await supabase
         .from("profiles")
-        .update({ custom_hourly_rate: rate })
+        .update({ custom_hourly_rate: rate, custom_hourly_rate_peak: peakRate } as any)
         .eq("id", selectedPricingCustomer.id);
 
       if (error) throw error;
 
       toast({
-        title: rate ? "Custom rate set" : "Custom rate removed",
+        title: rate || peakRate ? "Custom rate set" : "Custom rate removed",
         description: rate 
           ? `${selectedPricingCustomer.first_name} ${selectedPricingCustomer.last_name} now has a custom rate of $${rate}/hr.`
           : `${selectedPricingCustomer.first_name} ${selectedPricingCustomer.last_name} will use their tier rate.`,
@@ -842,6 +845,7 @@ export default function AdminSettings() {
 
       setSelectedPricingCustomer(null);
       setNewCustomRate("");
+      setNewCustomPeakRate("");
       fetchCustomers();
     } catch (error: any) {
       toast({
@@ -857,7 +861,7 @@ export default function AdminSettings() {
   const removeCustomRate = async (customer: CustomerProfile) => {
     const { error } = await supabase
       .from("profiles")
-      .update({ custom_hourly_rate: null })
+      .update({ custom_hourly_rate: null, custom_hourly_rate_peak: null } as any)
       .eq("id", customer.id);
 
     if (!error) {
@@ -1322,7 +1326,11 @@ export default function AdminSettings() {
                               <Badge className="ml-2 text-xs" variant="secondary">{customer.membership_tier}</Badge>
                             </div>
                             <div className="flex items-center gap-2">
-                              <span className="font-bold text-primary">${customer.custom_hourly_rate}/hr</span>
+                              <span className="font-bold text-primary">
+                                {customer.custom_hourly_rate != null && `$${customer.custom_hourly_rate}/hr off-peak`}
+                                {customer.custom_hourly_rate != null && customer.custom_hourly_rate_peak != null && " · "}
+                                {customer.custom_hourly_rate_peak != null && `$${customer.custom_hourly_rate_peak}/hr peak`}
+                              </span>
                               <Button variant="ghost" size="icon" onClick={() => removeCustomRate(customer)}>
                                 <X className="h-4 w-4" />
                               </Button>
@@ -1348,6 +1356,7 @@ export default function AdminSettings() {
                             onClick={() => {
                               setSelectedPricingCustomer(customer);
                               setNewCustomRate(customer.custom_hourly_rate?.toString() || "");
+                              setNewCustomPeakRate(customer.custom_hourly_rate_peak?.toString() || "");
                               setCustomerSearch("");
                             }}
                             className="w-full p-2 text-left text-sm hover:bg-muted/50 flex items-center justify-between border-b last:border-b-0"
@@ -1366,21 +1375,36 @@ export default function AdminSettings() {
                         <span className="font-medium">{selectedPricingCustomer.first_name} {selectedPricingCustomer.last_name}</span>
                         <Button variant="ghost" size="sm" onClick={() => setSelectedPricingCustomer(null)}>Cancel</Button>
                       </div>
-                      <div className="flex gap-2">
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          placeholder="Custom hourly rate"
-                          value={newCustomRate}
-                          onChange={(e) => setNewCustomRate(e.target.value)}
-                          className="flex-1"
-                        />
-                        <Button onClick={saveCustomRate} disabled={isSavingRate}>
-                          {isSavingRate ? "Saving..." : "Save Rate"}
-                        </Button>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <div className="space-y-1">
+                          <Label className="text-xs">Off-peak rate ($/hr)</Label>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="Off-peak rate"
+                            value={newCustomRate}
+                            onChange={(e) => setNewCustomRate(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Peak rate ($/hr)</Label>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="Peak rate"
+                            value={newCustomPeakRate}
+                            onChange={(e) => setNewCustomPeakRate(e.target.value)}
+                          />
+                        </div>
                       </div>
-                      <p className="text-xs text-muted-foreground">Leave empty to remove custom rate and use tier pricing</p>
+                      <Button onClick={saveCustomRate} disabled={isSavingRate} className="w-full">
+                        {isSavingRate ? "Saving..." : "Save Rates"}
+                      </Button>
+                      <p className="text-xs text-muted-foreground">
+                        Leave both empty to remove the override and use tier pricing. If only the off-peak rate is set it applies at all hours.
+                      </p>
                     </div>
                   )}
                 </CardContent>

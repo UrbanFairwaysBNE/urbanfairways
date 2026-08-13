@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import {
   calculateHourlyRate,
   isPeakTime,
+  resolveCustomRate,
   isOffPeakTime,
   defaultPeakRate,
   formatLocalDateKey,
@@ -118,7 +119,7 @@ const fetchUserProfile = async () => {
 
   const { data } = await supabase
     .from("profiles")
-    .select("membership_tier, custom_hourly_rate, deposit_balance, custom_segment, payment_failed_at")
+    .select("membership_tier, custom_hourly_rate, custom_hourly_rate_peak, is_coach, deposit_balance, custom_segment, payment_failed_at")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -138,6 +139,8 @@ const fetchUserProfile = async () => {
     paymentFailedAt,
     isPaymentLimbo: !!paymentFailedAt,
     customHourlyRate: data?.custom_hourly_rate ?? null,
+    customHourlyRatePeak: (data as any)?.custom_hourly_rate_peak ?? null,
+    isCoach: !!(data as any)?.is_coach,
     depositBalance: Number(data?.deposit_balance) || 0,
     packHoursBalance: Number(packHours) || 0,
     customSegment: data?.custom_segment ?? null,
@@ -217,6 +220,8 @@ export function useBooking() {
   const actualMembershipTier = userProfile?.actualMembershipTier || userMembershipTier;
   const isPaymentLimbo = !!userProfile?.isPaymentLimbo;
   const customHourlyRate = userProfile?.customHourlyRate ?? null;
+  const customHourlyRatePeak = userProfile?.customHourlyRatePeak ?? null;
+  const isCoach = !!userProfile?.isCoach;
   const depositBalance = userProfile?.depositBalance || 0;
   const packHoursBalance = userProfile?.packHoursBalance || 0;
 
@@ -403,10 +408,15 @@ export function useBooking() {
     date?: Date,
     startTime?: string
   ): number => {
-    // Custom hourly rate overrides everything
-    if (customHourlyRate !== null) {
-      return customHourlyRate;
+    // Custom hourly rate overrides everything (peak/off-peak aware)
+    if (customHourlyRate !== null || customHourlyRatePeak !== null) {
+      const peakSlot = date && startTime
+        ? isPeakTime(date, startTime, isPublicHolidayDate(date))
+        : true;
+      const custom = resolveCustomRate(customHourlyRate, customHourlyRatePeak, peakSlot);
+      if (custom !== null) return custom;
     }
+
     
     // If no date/time provided, return the base tier rate
     if (!date || !startTime) {
@@ -624,7 +634,11 @@ export function useBooking() {
     partialBalanceAmount?: number,
     notes?: string,
     /** Prepaid pack hours to spend on this session (capped at balance and duration) */
-    packHoursToUse?: number
+    packHoursToUse?: number,
+    /** Coach lesson: the client this session is being booked for */
+    lesson?: { clientUserId: string }
+
+
 
   ): Promise<{ booking: any; requiresCheckout?: boolean; checkoutUrl?: string }> => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -661,10 +675,16 @@ export function useBooking() {
     // CRITICAL: Fresh database check for multi-bay restriction
     // This prevents race conditions when users book multiple bays quickly
     let actualHourlyRate: number;
-    
-    if (customHourlyRate !== null) {
+
+    const customRateForSlot = resolveCustomRate(
+      customHourlyRate,
+      customHourlyRatePeak,
+      isPeakSlot(date, startTime),
+    );
+
+    if (customRateForSlot !== null) {
       // Custom rate always takes priority
-      actualHourlyRate = customHourlyRate;
+      actualHourlyRate = customRateForSlot;
     } else if (hasSingleBayPeakLimit(tierPricing, userMembershipTier) && isPeakSlot(date, startTime)) {
       // For single-bay-limited tiers during peak: check for overlapping bookings in DB (not cached state)
       const { data: existingBookings } = await supabase
@@ -831,11 +851,13 @@ export function useBooking() {
         hourly_rate: actualHourlyRate,
         total_price: totalPrice,
         pack_hours_used: packHoursUsed,
-        player_count: playerCount,
+        player_count: lesson ? 1 : playerCount,
         payment_method: settledPaymentMethod,
         status: shouldAutoConfirm ? "confirmed" : "pending",
         notes: notes ?? null,
-      })
+        booking_type: lesson ? "lesson" : "bay",
+        client_user_id: lesson?.clientUserId ?? null,
+      } as any)
       .select()
       .single();
 
@@ -937,6 +959,7 @@ export function useBooking() {
     isLoading,
     userMembershipTier,
     actualMembershipTier,
+    isCoach,
     isPaymentLimbo,
     depositBalance,
     packHoursBalance,

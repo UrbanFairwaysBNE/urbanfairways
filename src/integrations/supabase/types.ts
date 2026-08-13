@@ -519,7 +519,9 @@ export type Database = {
         Row: {
           bay_id: string
           booking_date: string
+          booking_type: string
           cancellation_reason: string | null
+          client_user_id: string | null
           created_at: string
           duration_hours: number
           end_time: string
@@ -539,7 +541,9 @@ export type Database = {
         Insert: {
           bay_id: string
           booking_date: string
+          booking_type?: string
           cancellation_reason?: string | null
+          client_user_id?: string | null
           created_at?: string
           duration_hours: number
           end_time: string
@@ -559,7 +563,9 @@ export type Database = {
         Update: {
           bay_id?: string
           booking_date?: string
+          booking_type?: string
           cancellation_reason?: string | null
+          client_user_id?: string | null
           created_at?: string
           duration_hours?: number
           end_time?: string
@@ -2304,6 +2310,7 @@ export type Database = {
           created_at: string
           custom_billing: boolean
           custom_hourly_rate: number | null
+          custom_hourly_rate_peak: number | null
           custom_segment: string | null
           deposit_balance: number
           display_name: string | null
@@ -2311,6 +2318,7 @@ export type Database = {
           first_name: string
           first_session_promo_sent: string | null
           id: string
+          is_coach: boolean
           last_name: string
           marketing_opt_out: boolean | null
           membership_on_hold: boolean
@@ -2331,6 +2339,7 @@ export type Database = {
           created_at?: string
           custom_billing?: boolean
           custom_hourly_rate?: number | null
+          custom_hourly_rate_peak?: number | null
           custom_segment?: string | null
           deposit_balance?: number
           display_name?: string | null
@@ -2338,6 +2347,7 @@ export type Database = {
           first_name: string
           first_session_promo_sent?: string | null
           id?: string
+          is_coach?: boolean
           last_name: string
           marketing_opt_out?: boolean | null
           membership_on_hold?: boolean
@@ -2358,6 +2368,7 @@ export type Database = {
           created_at?: string
           custom_billing?: boolean
           custom_hourly_rate?: number | null
+          custom_hourly_rate_peak?: number | null
           custom_segment?: string | null
           deposit_balance?: number
           display_name?: string | null
@@ -2365,6 +2376,7 @@ export type Database = {
           first_name?: string
           first_session_promo_sent?: string | null
           id?: string
+          is_coach?: boolean
           last_name?: string
           marketing_opt_out?: boolean | null
           membership_on_hold?: boolean

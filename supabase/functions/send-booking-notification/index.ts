@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
-import { getTenant, tenantHubUrl, tenantBookingUrl } from "../_shared/tenant.ts";
+import { getTenant, tenantHubUrl, tenantBookingUrl, tenantAddress } from "../_shared/tenant.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -79,6 +79,50 @@ const formatPhoneForSMS = (phone: string | null): string | null => {
   }
   
   return cleaned;
+};
+
+/**
+ * Build an RFC 5545 calendar invite for a lesson.
+ * Brisbane is AEST (UTC+10) year-round, so local times convert by subtracting 10h.
+ */
+const buildLessonIcs = (opts: {
+  uid: string;
+  date: string;       // YYYY-MM-DD (Brisbane)
+  startTime: string;  // HH:MM (Brisbane)
+  endTime: string;    // HH:MM (Brisbane)
+  summary: string;
+  description: string;
+  location: string;
+  organiserEmail: string;
+  organiserName: string;
+}): string => {
+  const toUtcStamp = (time: string) => {
+    const [h, m] = time.split(":").map(Number);
+    const local = new Date(`${opts.date}T00:00:00Z`);
+    local.setUTCHours(h - 10, m, 0, 0); // Brisbane -> UTC
+    return local.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+  };
+  const esc = (v: string) => v.replace(/\\/g, "\\\\").replace(/[,;]/g, (c) => "\\" + c).replace(/\n/g, "\\n");
+
+  return [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Urban Fairways//Lesson//EN",
+    "CALSCALE:GREGORIAN",
+    "METHOD:REQUEST",
+    "BEGIN:VEVENT",
+    `UID:${opts.uid}`,
+    `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").split(".")[0]}Z`,
+    `DTSTART:${toUtcStamp(opts.startTime)}`,
+    `DTEND:${toUtcStamp(opts.endTime)}`,
+    `SUMMARY:${esc(opts.summary)}`,
+    `DESCRIPTION:${esc(opts.description)}`,
+    `LOCATION:${esc(opts.location)}`,
+    `ORGANIZER;CN=${esc(opts.organiserName)}:mailto:${opts.organiserEmail}`,
+    "STATUS:CONFIRMED",
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
 };
 
 // Send SMS via SMS Broadcast API
@@ -220,6 +264,19 @@ serve(async (req) => {
       throw new Error(`Failed to fetch profile: ${profileError?.message}`);
     }
     logStep("Profile fetched", { email: profile.email, phone: profile.phone });
+
+    // Coach lessons: the session belongs to a client as well as the booking coach
+    const isLesson = (booking as any).booking_type === "lesson" && !!(booking as any).client_user_id;
+    let lessonClient: any = null;
+    if (isLesson) {
+      const { data: clientProfile } = await supabaseClient
+        .from("profiles")
+        .select("first_name, last_name, email, phone")
+        .eq("user_id", (booking as any).client_user_id)
+        .maybeSingle();
+      lessonClient = clientProfile ?? null;
+      logStep("Lesson client fetched", { hasClient: !!lessonClient });
+    }
 
     // Determine whether the booking start falls inside a staffed window.
     // Used for the {staffed_status} merge tag in all booking emails/SMS,
@@ -573,12 +630,37 @@ serve(async (req) => {
       subject = replaceTemplateTags(subject, templateTags);
     }
 
+    // Lesson calendar invite (attached to both coach and client emails)
+    const coachName = `${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim() || "Your coach";
+    const clientFullName = lessonClient
+      ? `${lessonClient.first_name ?? ""} ${lessonClient.last_name ?? ""}`.trim() || "your client"
+      : "";
+    let lessonIcs: string | null = null;
+    if (isLesson && notification_type !== "cancellation") {
+      lessonIcs = buildLessonIcs({
+        uid: `lesson-${booking.id}@${tenant.venue_name.replace(/\s+/g, "").toLowerCase()}`,
+        date: booking.booking_date,
+        startTime,
+        endTime,
+        summary: `Golf lesson with ${coachName} — ${tenant.venue_name}`,
+        description: `${bayName} · ${startTime12hr} - ${endTime12hr}`,
+        location: tenantAddress(tenant) || tenant.venue_name,
+        organiserEmail: tenant.sender_email,
+        organiserName: tenant.venue_name,
+      });
+    }
+
+    const icsAttachment = lessonIcs
+      ? [{ filename: "lesson.ics", content: btoa(lessonIcs) }]
+      : undefined;
+
     // Send email
     const emailResponse = await resend.emails.send({
       from: `${tenant.venue_name} <${tenant.sender_email}>`,
       to: [profile.email],
-      subject: subject,
+      subject: isLesson ? `${subject} (lesson with ${clientFullName})` : subject,
       html: htmlContent,
+      ...(icsAttachment ? { attachments: icsAttachment } : {}),
     });
 
     logStep("Email sent successfully", { emailResponse });
@@ -625,6 +707,64 @@ serve(async (req) => {
       }
     }
 
+
+    // ── Lesson: notify the client as well as the coach ──
+    if (isLesson && lessonClient?.email) {
+      try {
+        const heading =
+          notification_type === "cancellation"
+            ? "Lesson Cancelled"
+            : notification_type === "reschedule"
+              ? "Lesson Rescheduled"
+              : "Lesson Confirmed";
+
+        const clientBody = `
+          <p style="margin:0 0 16px 0;">Hi ${lessonClient.first_name || "there"},</p>
+          <p style="margin:0 0 16px 0;">
+            ${
+              notification_type === "cancellation"
+                ? `Your golf lesson with ${coachName} has been cancelled.`
+                : `Your golf lesson with ${coachName} is ${notification_type === "reschedule" ? "now" : "booked"} for:`
+            }
+          </p>
+          <p style="margin:0 0 16px 0; font-size:16px;">
+            <strong>${bookingDate}</strong><br />
+            ${startTime12hr} – ${endTime12hr}<br />
+            ${bayName}
+          </p>
+          ${
+            notification_type === "cancellation"
+              ? ""
+              : `<p style="margin:0 0 16px 0;">Your coach has booked and paid for the bay — just arrive a few minutes early.</p>`
+          }
+        `;
+
+        const clientHtml = await renderBrandedEmail(supabaseClient, heading, clientBody, {
+          text: "View at " + tenant.venue_name,
+          url: tenantBookingUrl(tenant, "/my-bookings"),
+        });
+
+        await resend.emails.send({
+          from: `${tenant.venue_name} <${tenant.sender_email}>`,
+          to: [lessonClient.email],
+          subject: `${heading} - ${shortDate} ${startTime12hr}`,
+          html: clientHtml,
+          ...(icsAttachment ? { attachments: icsAttachment } : {}),
+        });
+        logStep("Lesson client email sent", { to: lessonClient.email });
+
+        if (lessonClient.phone) {
+          const clientSms =
+            notification_type === "cancellation"
+              ? `${tenant.venue_name}: your lesson with ${coachName} on ${shortDate} at ${startTime12hr} has been cancelled.`
+              : `${tenant.venue_name}: lesson with ${coachName} ${shortDate} ${startTime12hr}-${endTime12hr}, ${bayName}. See you there!`;
+          const clientSmsResult = await sendSMS(lessonClient.phone, clientSms, tenant.venue_name);
+          logStep("Lesson client SMS result", clientSmsResult);
+        }
+      } catch (lessonErr: any) {
+        logStep("Lesson client notification failed (non-blocking)", { error: lessonErr.message });
+      }
+    }
 
     // Send SMS for confirmations and reschedules (not cancellations)
     let smsResult: { success: boolean; response?: string; error?: string } = { success: false, error: "SMS not sent" };

@@ -52,6 +52,7 @@ import {
   Filter, 
   MoreVertical, 
   Building2,
+  GraduationCap,
   Mail, 
   Phone, 
   User, 
@@ -90,6 +91,8 @@ interface Customer {
   phone: string | null;
   membership_tier: string;
   custom_hourly_rate: number | null;
+  custom_hourly_rate_peak?: number | null;
+  is_coach?: boolean;
   deposit_balance: number;
   created_at: string;
   booking_count?: number;
@@ -182,6 +185,7 @@ export default function AdminCustomers() {
   const [removeCorpCustomer, setRemoveCorpCustomer] = useState<Customer | null>(null);
   const [removeCorpHours, setRemoveCorpHours] = useState(0);
   const [isRemovingCorporate, setIsRemovingCorporate] = useState(false);
+  const [togglingCoachId, setTogglingCoachId] = useState<string | null>(null);
 
   // Custom billing state
   const [isTogglingCustomBilling, setIsTogglingCustomBilling] = useState(false);
@@ -617,6 +621,29 @@ export default function AdminCustomers() {
     setSelectedCustomers(new Set());
     fetchCustomers();
     setIsDeleting(false);
+  };
+
+  /** Toggle a customer's coach status. Coaches can book lessons for clients. */
+  const toggleCoach = async (customer: Customer) => {
+    setTogglingCoachId(customer.user_id);
+    const next = !customer.is_coach;
+    const { error } = await supabase
+      .from("profiles")
+      .update({ is_coach: next } as any)
+      .eq("user_id", customer.user_id);
+
+    if (error) {
+      toast({ title: "Could not update coach status", description: error.message, variant: "destructive" });
+    } else {
+      toast({
+        title: next ? "Coach added" : "Coach removed",
+        description: `${customer.first_name} ${customer.last_name} ${next ? "can now book lessons for clients." : "is no longer a coach."}`,
+      });
+      setCustomers((prev) =>
+        prev.map((c) => (c.user_id === customer.user_id ? { ...c, is_coach: next } : c)),
+      );
+    }
+    setTogglingCoachId(null);
   };
 
   // Toggle admin role for a customer
@@ -1444,6 +1471,13 @@ export default function AdminCustomers() {
                             >
                               <Shield className="h-4 w-4 mr-2" />
                               Make Admin
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => toggleCoach(customer)}
+                              disabled={togglingCoachId === customer.user_id}
+                            >
+                              <GraduationCap className="h-4 w-4 mr-2" />
+                              {customer.is_coach ? "Remove Coach" : "Make Coach"}
                             </DropdownMenuItem>
                             {corporateMap[customer.user_id]?.role === "owner" ? (
                               <DropdownMenuItem

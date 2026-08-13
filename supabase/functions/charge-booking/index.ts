@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "npm:stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { getTenant, tenantBookingUrl } from "../_shared/tenant.ts";
-import { loadTiers, calculateTierHourlyRate } from "../_shared/tiers.ts";
+import { loadTiers, calculateTierHourlyRate, resolveCustomRate } from "../_shared/tiers.ts";
 
 // Off-peak: Mon-Fri 5:30am-4:00pm, Sat-Sun 5:30am-10:00am. Everything else is peak.
 function isPeakTime(dateStr: string, startTime: string): boolean {
@@ -105,7 +105,7 @@ serve(async (req) => {
       try {
         const { data: profile } = await supabaseClient
           .from("profiles")
-          .select("membership_tier, custom_hourly_rate")
+          .select("membership_tier, custom_hourly_rate, custom_hourly_rate_peak")
           .eq("user_id", user.id)
           .maybeSingle();
 
@@ -116,11 +116,16 @@ serve(async (req) => {
         let gross = 0;
         for (let i = 0; i < hours; i++) {
           const slot = `${String(sh + i).padStart(2, "0")}:${String(sm || 0).padStart(2, "0")}`;
+          const peakSlot = isPeakTime(currentBooking.booking_date, slot);
           gross += calculateTierHourlyRate(
             tiers,
             profile?.membership_tier,
-            isPeakTime(currentBooking.booking_date, slot),
-            profile?.custom_hourly_rate ?? null,
+            peakSlot,
+            resolveCustomRate(
+              profile?.custom_hourly_rate ?? null,
+              (profile as any)?.custom_hourly_rate_peak ?? null,
+              peakSlot,
+            ),
           );
         }
 

@@ -47,6 +47,8 @@ interface DateTimePickerProps {
   onDurationChange: (duration: number) => void;
   onPlayersChange: (players: number) => void;
   onCompChange?: (playingComp: boolean) => void;
+  /** Lessons are always one-to-one, so the players selector is hidden. */
+  hidePlayers?: boolean;
 }
 
 const OPENING_HOUR = 5;  // 5am
@@ -118,6 +120,7 @@ export function DateTimePicker({
   onDurationChange,
   onPlayersChange,
   onCompChange,
+  hidePlayers = false,
 }: DateTimePickerProps) {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [compPromptOpen, setCompPromptOpen] = useState(false);
@@ -352,7 +355,7 @@ export function DateTimePicker({
       </div>
 
       {/* Players Selector */}
-      <div className="space-y-2">
+      <div className={cn("space-y-2", hidePlayers && "hidden")}>
         <label className="text-sm font-medium text-foreground">Number of Players</label>
         <Select
           value={selectedPlayers.toString()}

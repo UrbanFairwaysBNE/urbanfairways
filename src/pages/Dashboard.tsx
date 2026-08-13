@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
-import { LogOut, Calendar, Settings, ClipboardList, Trophy, Lock, Users, Info, Megaphone, Plus, Trash2, CalendarDays } from "lucide-react";
+import { LogOut, Calendar, Settings, ClipboardList, Trophy, Lock, Users, Info, Megaphone, Plus, Trash2, CalendarDays, GraduationCap } from "lucide-react";
 import venueLogo from "@/assets/venue-logo.png";
 import { useTenant } from "@/config/tenant";
 import { usePricing } from "@/hooks/usePricing";
@@ -50,6 +50,7 @@ const Dashboard = () => {
   }, [isAuthenticated, isLoading, navigate]);
 
   const [isStaff, setIsStaff] = useState(false);
+  const [isCoach, setIsCoach] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -60,6 +61,7 @@ const Dashboard = () => {
         setMembershipOnHold(false);
         setHasSgtAccount(false);
         setIsStaff(false);
+        setIsCoach(false);
         setIsAdmin(false);
         setAccountAccessLoading(false);
         return;
@@ -71,7 +73,7 @@ const Dashboard = () => {
         const [profileResult, adminResult] = await Promise.all([
           supabase
             .from("profiles")
-            .select("membership_tier, sgt_user_id, membership_on_hold, custom_segment")
+            .select("membership_tier, sgt_user_id, membership_on_hold, custom_segment, is_coach")
             .eq("user_id", user.id)
             .maybeSingle(),
           supabase.rpc('has_role', {
@@ -87,6 +89,7 @@ const Dashboard = () => {
         setMembershipOnHold(!!profile?.membership_on_hold);
         setHasSgtAccount(!!profile?.sgt_user_id);
         setIsStaff((profile as any)?.custom_segment === "staff");
+        setIsCoach(!!(profile as any)?.is_coach);
         setIsAdmin(!!adminResult.data);
       } catch (error) {
         if (!cancelled) {
@@ -255,6 +258,21 @@ const Dashboard = () => {
                     <Calendar className="h-5 w-5 text-accent" />
                   </div>
                   <h2 className="font-semibold text-base">Book a Bay</h2>
+                </div>
+              </button>
+            )}
+
+            {/* Book a Lesson (coaches only) */}
+            {isCoach && (
+              <button
+                onClick={() => navigate("/booking?mode=lesson")}
+                className="bg-card rounded-xl p-4 shadow-sm border border-border hover:border-accent/50 hover:shadow-md transition-all text-left active:scale-[0.98]"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                    <GraduationCap className="h-5 w-5 text-accent" />
+                  </div>
+                  <h2 className="font-semibold text-base">Book a Lesson</h2>
                 </div>
               </button>
             )}

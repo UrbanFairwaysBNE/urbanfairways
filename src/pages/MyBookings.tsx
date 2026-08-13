@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Calendar, Clock, MapPin, X, RefreshCw, Plus } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, MapPin, X, RefreshCw, Plus, GraduationCap } from "lucide-react";
 import { format, parseISO, isPast, isToday } from "date-fns";
 import { toast } from "sonner";
 import venueLogo from "@/assets/venue-logo.png";
@@ -37,7 +37,14 @@ interface Booking {
   bay_number?: number;
   payment_method?: string;
   stripe_payment_intent_id?: string;
+  booking_type?: string | null;
+  client_user_id?: string | null;
+  user_id?: string;
+  /** True when this is a coaching lesson booked FOR the signed-in user by their coach */
+  isLessonAsClient?: boolean;
+  coach_name?: string;
 }
+
 
 const MyBookings = () => {
   const { tenant } = useTenant();
@@ -70,8 +77,9 @@ const MyBookings = () => {
     const targetId = searchParams.get("extend");
     if (!targetId || bookings.length === 0) return;
     const target = bookings.find((b) => b.id === targetId);
-    if (target) {
+    if (target && !target.isLessonAsClient) {
       setExtendBooking(target);
+
       // Clear the param so it doesn't re-trigger on state changes
       const next = new URLSearchParams(searchParams);
       next.delete("extend");
@@ -88,6 +96,7 @@ const MyBookings = () => {
         .from("bookings")
         .select(`
           id,
+          user_id,
           booking_date,
           start_time,
           end_time,
@@ -98,21 +107,56 @@ const MyBookings = () => {
           bay_id,
           payment_method,
           stripe_payment_intent_id,
+          booking_type,
+          client_user_id,
           bays (name, bay_number)
         `)
-        .eq("user_id", user.id)
+        // Own bookings, plus coaching lessons a coach booked for this user
+        .or(`user_id.eq.${user.id},client_user_id.eq.${user.id}`)
         .order("booking_date", { ascending: true })
         .order("start_time", { ascending: true });
 
       if (error) throw error;
 
-      const formattedBookings = (data || []).map((booking: any) => ({
-        ...booking,
-        bay_name: booking.bays?.name,
-        bay_number: booking.bays?.bay_number,
-        payment_method: booking.payment_method,
-        stripe_payment_intent_id: booking.stripe_payment_intent_id,
-      }));
+      const rows = data || [];
+
+      // Look up coach names for any lessons booked for this user
+      const coachIds = Array.from(
+        new Set(
+          rows
+            .filter((b: any) => b.client_user_id === user.id && b.user_id !== user.id)
+            .map((b: any) => b.user_id as string)
+        )
+      );
+      const coachNames = new Map<string, string>();
+      if (coachIds.length > 0) {
+        const { data: coaches } = await supabase
+          .from("profiles")
+          .select("user_id, first_name, last_name")
+          .in("user_id", coachIds);
+        (coaches || []).forEach((c: any) => {
+          coachNames.set(
+            c.user_id,
+            `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() || "Your coach"
+          );
+        });
+      }
+
+      const formattedBookings = rows.map((booking: any) => {
+        const isLessonAsClient =
+          booking.client_user_id === user.id && booking.user_id !== user.id;
+        return {
+          ...booking,
+          bay_name: booking.bays?.name,
+          bay_number: booking.bays?.bay_number,
+          payment_method: booking.payment_method,
+          stripe_payment_intent_id: booking.stripe_payment_intent_id,
+          isLessonAsClient,
+          coach_name: isLessonAsClient
+            ? coachNames.get(booking.user_id) || "Your coach"
+            : undefined,
+        };
+      });
 
       setBookings(formattedBookings);
     } catch (error) {
@@ -122,6 +166,7 @@ const MyBookings = () => {
       setIsLoading(false);
     }
   };
+
 
   const handleCancelBooking = async (bookingId: string) => {
     setCancellingId(bookingId);
@@ -285,6 +330,12 @@ const MyBookings = () => {
                           <MapPin className="h-4 w-4" />
                           Bay {booking.bay_number}
                           {booking.bay_name && ` - ${booking.bay_name}`}
+                          {booking.isLessonAsClient && (
+                            <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                              <GraduationCap className="h-3 w-3" />
+                              Lesson
+                            </span>
+                          )}
                           {bIsActive && (
                             <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-accent/15 px-2 py-0.5 text-xs font-medium text-accent">
                               <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
@@ -302,14 +353,27 @@ const MyBookings = () => {
                             {formatTime(booking.start_time)} - {formatTime(booking.end_time)}
                           </span>
                         </div>
-                        <div className="text-sm">
-                          <span className="font-medium">${booking.total_price.toFixed(2)}</span>
-                          <span className="text-muted-foreground">
+                        {booking.isLessonAsClient ? (
+                          <div className="text-sm text-muted-foreground">
+                            Coaching lesson with{" "}
+                            <span className="font-medium text-foreground">{booking.coach_name}</span>
                             {" "}• {booking.duration_hours} hour{booking.duration_hours > 1 ? "s" : ""}
-                          </span>
-                        </div>
+                          </div>
+                        ) : (
+                          <div className="text-sm">
+                            <span className="font-medium">${booking.total_price.toFixed(2)}</span>
+                            <span className="text-muted-foreground">
+                              {" "}• {booking.duration_hours} hour{booking.duration_hours > 1 ? "s" : ""}
+                            </span>
+                          </div>
+                        )}
                       </div>
-                      {(() => {
+                      {booking.isLessonAsClient ? (
+                        <p className="text-xs text-muted-foreground sm:max-w-[200px] sm:text-right">
+                          Your coach manages this booking — contact them to change or cancel it.
+                        </p>
+                      ) : (() => {
+
                         // Booking times are stored as Brisbane local (AEST, UTC+10, no DST).
                         const startMs = Date.parse(`${booking.booking_date}T${booking.start_time}+10:00`);
                         const endMs = Date.parse(`${booking.booking_date}T${booking.end_time}+10:00`);
@@ -423,6 +487,12 @@ const MyBookings = () => {
                           <MapPin className="h-4 w-4" />
                           Bay {booking.bay_number}
                           {booking.bay_name && ` - ${booking.bay_name}`}
+                          {booking.isLessonAsClient && (
+                            <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                              <GraduationCap className="h-3 w-3" />
+                              Lesson
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
                           <span className="flex items-center gap-1">
@@ -434,12 +504,21 @@ const MyBookings = () => {
                             {formatTime(booking.start_time)} - {formatTime(booking.end_time)}
                           </span>
                         </div>
-                        <div className="text-sm">
-                          <span className="font-medium">${booking.total_price.toFixed(2)}</span>
-                          <span className="text-muted-foreground">
+                        {booking.isLessonAsClient ? (
+                          <div className="text-sm text-muted-foreground">
+                            Coaching lesson with{" "}
+                            <span className="font-medium text-foreground">{booking.coach_name}</span>
                             {" "}• {booking.duration_hours} hour{booking.duration_hours > 1 ? "s" : ""}
-                          </span>
-                        </div>
+                          </div>
+                        ) : (
+                          <div className="text-sm">
+                            <span className="font-medium">${booking.total_price.toFixed(2)}</span>
+                            <span className="text-muted-foreground">
+                              {" "}• {booking.duration_hours} hour{booking.duration_hours > 1 ? "s" : ""}
+                            </span>
+                          </div>
+                        )}
+
                         {booking.status === "cancelled" && (booking as any).cancellation_reason && (
                           <p className="text-xs text-destructive/80 mt-1 italic">
                             {(booking as any).cancellation_reason}

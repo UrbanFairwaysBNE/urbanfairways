@@ -77,8 +77,9 @@ const MyBookings = () => {
     const targetId = searchParams.get("extend");
     if (!targetId || bookings.length === 0) return;
     const target = bookings.find((b) => b.id === targetId);
-    if (target) {
+    if (target && !target.isLessonAsClient) {
       setExtendBooking(target);
+
       // Clear the param so it doesn't re-trigger on state changes
       const next = new URLSearchParams(searchParams);
       next.delete("extend");

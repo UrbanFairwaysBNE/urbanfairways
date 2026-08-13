@@ -115,7 +115,7 @@ serve(async (req) => {
     // Fetch user's profile for membership tier and balance
     const { data: profile, error: profileError } = await supabaseAdmin
       .from("profiles")
-      .select("membership_tier, custom_hourly_rate, deposit_balance")
+      .select("membership_tier, custom_hourly_rate, custom_hourly_rate_peak, deposit_balance")
       .eq("user_id", user.id)
       .single();
 
@@ -144,7 +144,11 @@ serve(async (req) => {
       new_date,
       new_start_time,
       tiers,
-      profile.custom_hourly_rate
+      resolveCustomRate(
+        profile.custom_hourly_rate,
+        (profile as any).custom_hourly_rate_peak ?? null,
+        isPeakTime(new_date, new_start_time),
+      )
     );
 
     const newTotalPrice = newHourlyRate * booking.duration_hours;

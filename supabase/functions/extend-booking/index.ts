@@ -28,8 +28,15 @@ function calculateHourlyRate(
   startTime: string,
   tiers: TierRow[],
   customHourlyRate: number | null,
+  customHourlyRatePeak: number | null = null,
 ): number {
-  return calculateTierHourlyRate(tiers, tier, isPeakTime(dateStr, startTime), customHourlyRate);
+  const peak = isPeakTime(dateStr, startTime);
+  return calculateTierHourlyRate(
+    tiers,
+    tier,
+    peak,
+    resolveCustomRate(customHourlyRate, customHourlyRatePeak, peak),
+  );
 }
 
 // Sum the cost of `hours` hourly slots starting at startTime on dateStr,
@@ -41,13 +48,14 @@ function calculateExtensionCost(
   hours: number,
   tiers: TierRow[],
   customHourlyRate: number | null,
+  customHourlyRatePeak: number | null = null,
 ): number {
   const [h, m] = startTime.split(":").map(Number);
   let total = 0;
   for (let i = 0; i < hours; i++) {
     const slotHour = h + i;
     const slot = `${slotHour.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
-    total += calculateHourlyRate(tier, dateStr, slot, tiers, customHourlyRate);
+    total += calculateHourlyRate(tier, dateStr, slot, tiers, customHourlyRate, customHourlyRatePeak);
   }
   return total;
 }
@@ -158,7 +166,7 @@ serve(async (req) => {
     // Fetch profile & pricing
     const { data: profile, error: pErr } = await supabaseAdmin
       .from("profiles")
-      .select("membership_tier, custom_hourly_rate, deposit_balance, email")
+      .select("membership_tier, custom_hourly_rate, custom_hourly_rate_peak, deposit_balance, email")
       .eq("user_id", user.id)
       .single();
     if (pErr || !profile) throw new Error("Could not fetch profile");
@@ -172,6 +180,7 @@ serve(async (req) => {
       additional_hours,
       tiers,
       profile.custom_hourly_rate,
+      (profile as any).custom_hourly_rate_peak ?? null,
     );
 
     const currentBalance = parseFloat(String(profile.deposit_balance || 0)) || 0;

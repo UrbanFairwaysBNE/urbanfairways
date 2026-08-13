@@ -105,7 +105,7 @@ serve(async (req) => {
       try {
         const { data: profile } = await supabaseClient
           .from("profiles")
-          .select("membership_tier, custom_hourly_rate")
+          .select("membership_tier, custom_hourly_rate, custom_hourly_rate_peak")
           .eq("user_id", user.id)
           .maybeSingle();
 
@@ -116,11 +116,16 @@ serve(async (req) => {
         let gross = 0;
         for (let i = 0; i < hours; i++) {
           const slot = `${String(sh + i).padStart(2, "0")}:${String(sm || 0).padStart(2, "0")}`;
+          const peakSlot = isPeakTime(currentBooking.booking_date, slot);
           gross += calculateTierHourlyRate(
             tiers,
             profile?.membership_tier,
-            isPeakTime(currentBooking.booking_date, slot),
-            profile?.custom_hourly_rate ?? null,
+            peakSlot,
+            resolveCustomRate(
+              profile?.custom_hourly_rate ?? null,
+              (profile as any)?.custom_hourly_rate_peak ?? null,
+              peakSlot,
+            ),
           );
         }
 

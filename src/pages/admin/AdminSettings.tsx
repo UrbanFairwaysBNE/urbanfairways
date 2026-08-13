@@ -50,6 +50,8 @@ import { DoorAccessSection } from "@/components/admin/DoorAccessSection";
 
 import { EmailLayoutEditor } from "@/components/admin/EmailLayoutEditor";
 import { EmailPreviewFrame } from "@/components/admin/EmailPreviewFrame";
+import { renderTemplatePreview } from "@/lib/email-preview";
+
 import { format } from "date-fns";
 
 // Template types and their available placeholder tags

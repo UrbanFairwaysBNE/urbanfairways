@@ -280,9 +280,16 @@ serve(async (req) => {
           user_id: userId.toString(),
         });
 
-        // Also remove from our local database
+        // Also remove from our local database. Tour rows must go too, otherwise
+        // the member keeps showing in League Members and the daily job tries to
+        // re-register a player who is no longer in the club.
         await adminClient
           .from("sgt_members")
+          .delete()
+          .eq("user_id", userId);
+
+        await adminClient
+          .from("sgt_tour_members")
           .delete()
           .eq("user_id", userId);
 

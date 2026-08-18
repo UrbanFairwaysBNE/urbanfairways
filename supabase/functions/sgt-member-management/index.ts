@@ -280,9 +280,16 @@ serve(async (req) => {
           user_id: userId.toString(),
         });
 
-        // Also remove from our local database
+        // Also remove from our local database. Tour rows must go too, otherwise
+        // the member keeps showing in League Members and the daily job tries to
+        // re-register a player who is no longer in the club.
         await adminClient
           .from("sgt_members")
+          .delete()
+          .eq("user_id", userId);
+
+        await adminClient
+          .from("sgt_tour_members")
           .delete()
           .eq("user_id", userId);
 
@@ -840,32 +847,29 @@ serve(async (req) => {
             .maybeSingle();
 
           if (tourSettings?.auto_register_tournaments) {
-            console.log(`[SGT-MEMBER-MGMT] Auto-registering tour members to tournament ${response.tournamentId}...`);
-            
-            // Get all tour members
-            const { data: tourMembers } = await adminClient
-              .from("sgt_tour_members")
-              .select("user_id, user_name")
-              .eq("tour_id", tourId);
-
-            if (tourMembers && tourMembers.length > 0) {
-              let registered = 0;
-              let errors = 0;
-
-              for (const member of tourMembers) {
-                try {
-                  await sgtRequest(clubUrl, "/tournaments/add-member", "POST", {
-                    user_id: member.user_id.toString(),
-                    tournament_id: response.tournamentId.toString(),
-                  });
-                  registered++;
-                } catch (regError) {
-                  errors++;
-                  console.error(`[SGT-MEMBER-MGMT] Failed to register ${member.user_name}:`, regError);
-                }
-              }
-
-              console.log(`[SGT-MEMBER-MGMT] Auto-registration complete: ${registered} registered, ${errors} errors`);
+            // Delegate to sgt-tournament-auto-register: it is the only path that
+            // applies each player's custom handicap (useCustomCap/customCap) and
+            // skips players already registered. A raw /tournaments/add-member
+            // call would enter everyone on SGT's combo handicap instead.
+            console.log(`[SGT-MEMBER-MGMT] Delegating auto-registration for tournament ${response.tournamentId} to sgt-tournament-auto-register...`);
+            try {
+              const regRes = await fetch(
+                `${Deno.env.get("SUPABASE_URL")}/functions/v1/sgt-tournament-auto-register`,
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+                  },
+                  body: JSON.stringify({
+                    tournament_id: response.tournamentId,
+                    tour_id: tourId,
+                  }),
+                },
+              );
+              console.log(`[SGT-MEMBER-MGMT] Auto-registration responded ${regRes.status}`);
+            } catch (regError) {
+              console.error("[SGT-MEMBER-MGMT] Auto-registration call failed:", regError);
             }
           }
         }
@@ -1145,28 +1149,6 @@ serve(async (req) => {
         break;
       }
 
-      case "close-tournament": {
-        // Close a tournament and assess tour standings points
-        const { tournamentId, assessPoints = true } = params;
-        if (!tournamentId) throw new Error("tournamentId is required");
-
-        console.log(`[SGT-MEMBER-MGMT] Closing tournament ${tournamentId} with assess_points=${assessPoints ? 1 : 0}`);
-        
-        const response = await sgtRequest(clubUrl, "/tournaments/close", "POST", {
-          tournamentId: tournamentId.toString(),
-          assess_points: assessPoints ? "1" : "0",
-        });
-
-        // Update local database status
-        await adminClient
-          .from("sgt_tournaments")
-          .update({ status: "Completed", updated_at: new Date().toISOString() })
-          .eq("tournament_id", tournamentId);
-
-        console.log(`[SGT-MEMBER-MGMT] Tournament ${tournamentId} closed successfully`);
-        result = { success: true, response };
-        break;
-      }
 
       default:
         throw new Error(`Unknown action: ${action}`);

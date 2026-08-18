@@ -167,6 +167,7 @@ export function SGTRegistrations() {
             tour_id: tour.tour_id,
             user_name: memberInfo?.user_name || null,
             custom_hcp: customHcp,
+            onboarding_hcp: customHcp,
             updated_at: new Date().toISOString(),
           }, {
             onConflict: "user_id,tour_id",

@@ -582,6 +582,11 @@ export function TournamentFormDialog({
 
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      // SGT answers 200 with success:false + feedback when it rejects a payload
+      // (bad dates, unknown course, duplicate name) — treat that as a failure.
+      if (data?.success === false) {
+        throw new Error(data.feedback || "SGT rejected the tournament");
+      }
 
       toast({
         title: isEditing ? "Tournament updated" : "Tournament created",

@@ -199,28 +199,8 @@ export function SGTDashboard() {
     }
   };
 
-  const handleRecalculateMonthly = async () => {
-    setRecalculating(true);
-    try {
-      const { error } = await supabase.functions.invoke("sgt-calculate-monthly-standings", {
-        body: {},
-      });
-      if (error) throw error;
-      toast({
-        title: "Monthly standings updated",
-        description: "Monthly leaderboard has been recalculated.",
-      });
-      queryClient.invalidateQueries({ queryKey: ["sgt-monthly-standings"] });
-    } catch (error) {
-      toast({
-        title: "Recalculation failed",
-        description: error instanceof Error ? error.message : "Unknown error",
-        variant: "destructive",
-      });
-    } finally {
-      setRecalculating(false);
-    }
-  };
+
+
 
   const stats = [
     {

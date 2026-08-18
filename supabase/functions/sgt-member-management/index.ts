@@ -1142,28 +1142,6 @@ serve(async (req) => {
         break;
       }
 
-      case "close-tournament": {
-        // Close a tournament and assess tour standings points
-        const { tournamentId, assessPoints = true } = params;
-        if (!tournamentId) throw new Error("tournamentId is required");
-
-        console.log(`[SGT-MEMBER-MGMT] Closing tournament ${tournamentId} with assess_points=${assessPoints ? 1 : 0}`);
-        
-        const response = await sgtRequest(clubUrl, "/tournaments/close", "POST", {
-          tournamentId: tournamentId.toString(),
-          assess_points: assessPoints ? "1" : "0",
-        });
-
-        // Update local database status
-        await adminClient
-          .from("sgt_tournaments")
-          .update({ status: "Completed", updated_at: new Date().toISOString() })
-          .eq("tournament_id", tournamentId);
-
-        console.log(`[SGT-MEMBER-MGMT] Tournament ${tournamentId} closed successfully`);
-        result = { success: true, response };
-        break;
-      }
 
       default:
         throw new Error(`Unknown action: ${action}`);

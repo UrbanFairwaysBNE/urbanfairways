@@ -41,11 +41,23 @@ export const smsProvider = (): "sinch" | "sms_broadcast" | null => {
   return null;
 };
 
+/**
+ * Alphanumeric sender IDs are limited to 11 characters (carrier rule, enforced by
+ * both SMS Broadcast and Sinch). Override with the SMS_SENDER_ID secret; otherwise
+ * strip spaces/punctuation from the venue name and truncate.
+ */
+export const normaliseSenderId = (name: string): string => {
+  const override = Deno.env.get("SMS_SENDER_ID");
+  const raw = (override || name || "Notify").replace(/[^A-Za-z0-9]/g, "");
+  return (raw || "Notify").slice(0, 11);
+};
+
 const sendViaSinch = async (to: string, message: string, from: string): Promise<SmsResult> => {
   const servicePlanId = Deno.env.get("SINCH_SERVICE_PLAN_ID")!;
   const token = Deno.env.get("SINCH_API_TOKEN")!;
   const region = (Deno.env.get("SINCH_REGION") || "au").toLowerCase();
   const sender = Deno.env.get("SINCH_FROM") || from;
+
 
   const url = `https://${region}.sms.api.sinch.com/xms/v1/${servicePlanId}/batches`;
   const res = await fetch(url, {
@@ -96,10 +108,13 @@ export const sendSMS = async (
   const to = formatPhoneForSMS(phone);
   if (!to) return { success: false, error: "Invalid phone number", provider };
 
+  const sender = normaliseSenderId(senderName);
+
   try {
     return provider === "sinch"
-      ? await sendViaSinch(to, message, senderName)
-      : await sendViaSmsBroadcast(to, message, senderName);
+      ? await sendViaSinch(to, message, sender)
+      : await sendViaSmsBroadcast(to, message, sender);
+
   } catch (e) {
     const err = (e as Error).message;
     log("SMS send error", { error: err });

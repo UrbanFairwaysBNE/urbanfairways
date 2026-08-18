@@ -78,14 +78,21 @@ const sendViaSinch = async (to: string, message: string, from: string): Promise<
   return { success: true, response: text, phone: to, provider: "sinch" };
 };
 
-const sendViaSmsBroadcast = async (to: string, message: string, from: string): Promise<SmsResult> => {
+const sendViaSmsBroadcast = async (to: string, message: string, _from: string): Promise<SmsResult> => {
   const params = new URLSearchParams({
     username: Deno.env.get("SMS_BROADCAST_USERNAME")!,
     password: Deno.env.get("SMS_BROADCAST_PASSWORD")!,
     to,
-    from,
     message,
   });
+
+  // SMS Broadcast can accept an API request and later reject an unapproved
+  // alphanumeric source address at carrier delivery. Only send `from` when a
+  // dedicated numeric source/virtual mobile number has been configured;
+  // otherwise let SMS Broadcast select its supported shared source.
+  const dedicatedSource = Deno.env.get("SMS_BROADCAST_FROM")?.replace(/\D/g, "");
+  if (dedicatedSource) params.set("from", dedicatedSource);
+
   const res = await fetch(`https://api.smsbroadcast.com.au/api-adv.php?${params.toString()}`);
   const text = await res.text();
   log("SMS Broadcast response", text);

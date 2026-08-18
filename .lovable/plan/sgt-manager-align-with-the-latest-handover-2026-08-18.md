@@ -7,12 +7,13 @@ I compared the handover file against this project. The core stack (19 `sgt-*` fu
 1. **No SGT scheduled jobs exist at all.** The database currently has only three cron jobs (door codes, pack expiry, promo email). None of the league jobs from the handover are scheduled — no API key refresh, no 4-hourly sync, no auto-register, no handicap recalc, no cleanup, no winner reminders. Right now nothing SGT-related runs automatically.
 2. **Nicknames are not implemented.** `sgt_tour_members.nickname` does not exist, and there is no `useSgtNicknames` hook, so leaderboards, embeds and TV boards can only show SGT usernames.
 3. **Pending Onboarding cannot be dismissed.** `profiles.sgt_onboarding_dismissed_at` / `_by` do not exist, so a pending player reappears in the queue forever.
-4. **`sgt_user_id` is not unique.** It has a plain index only, so two profiles could claim the same SGT account — the exact collision the handover warns about.
+4. `**sgt_user_id` is not unique.** It has a plain index only, so two profiles could claim the same SGT account — the exact collision the handover warns about.
 5. **Editing a handicap does not re-register the player.** The Members tab writes `custom_hcp` but never de-registers/re-registers for the live tour and tournament, so SGT keeps the old number for the rest of the week.
 
 ## Proposed work
 
 **Database**
+
 - Add `nickname` to `sgt_tour_members`; add `sgt_onboarding_dismissed_at` / `sgt_onboarding_dismissed_by` to `profiles`.
 - Replace the plain `sgt_user_id` index with a unique partial index (nulls allowed), after checking for existing duplicates.
 - Add the `local_comp_first_timer_flags(p_competition_id)` function (debut pairing + net-vs-par flag) used by the Ambrose recap.
@@ -22,6 +23,7 @@ I compared the handover file against this project. The core stack (19 `sgt-*` fu
 API key refresh 04:00, eligible sync 05:00, regular sync every 4h, course sync 06:00, tournament auto-register 06:00, handicap recalc Mon 06:00, cleanup 1st at 03:00, weekly winner reminder Mon 09:00, monthly reminder 1st at 10:00. Highlight pollers stay off while highlights are disabled.
 
 **Behaviour**
+
 - Members tab: saving a handicap triggers de-register + re-register via `sgt-auto-register`, with a toast, so SGT holds the new number immediately.
 - Hold the welcome/onboarding email until an admin sets `custom_hcp` — never send a "Combo (auto)" handicap.
 - Pending Onboarding: add a Dismiss action writing the new dismissal columns and filter dismissed players out of the queue.
@@ -33,4 +35,14 @@ The handover says players are exempt for **3** rounds. This project deliberately
 
 ## Out of scope
 
-Video highlights (`HIGHLIGHTS_ENABLED` is off here) and the Ambrose GSPro screenshot OCR functions (`ingest-comp-scorecard`, `parse-comp-scorecard`) are in the handover but not in this project. Say the word and I'll add either.
+Video highlights (`HIGHLIGHTS_ENABLED` is off here) and the Ambrose GSPro screenshot OCR functions (`ingest-comp-scorecard`, `parse-comp-scorecard`) are in the handover but not in this project. Say the word and I'll add either.  
+  
+Comments:  
+Do not add highlgihts, not in this project  
+We allow their true handicap to be set at 3 rounds, but they are exempt from their first 4 rounds. 
+
+HERE IS THE API SPEC: [https://simulatorgolftour.com/public/club-admin-help/api.yaml](https://simulatorgolftour.com/public/club-admin-help/api.yaml)  
+  
+We already built robust cron jobs and logic into the preious project, so that should be replicated with the only changes being the SGT CLub we use, (we provde the lgin details in teh SGT Manager settings, and that should then be used across the API calls etc
+
+&nbsp;

@@ -32,6 +32,7 @@ interface LeagueMember {
   hcp_index: number | null;
   custom_hcp: number | null;
   onboarding_hcp: number | null;
+  nickname: string | null;
   rounds_played: number;
 }
 
@@ -46,6 +47,8 @@ export function SGTLeagueMembers() {
   const [searchQuery, setSearchQuery] = useState("");
   const [editingMemberId, setEditingMemberId] = useState<number | null>(null);
   const [editHandicapValue, setEditHandicapValue] = useState<string>("");
+  const [editingNicknameId, setEditingNicknameId] = useState<number | null>(null);
+  const [editNicknameValue, setEditNicknameValue] = useState<string>("");
 
   // Global handicap settings
   const { data: settings } = useQuery({
@@ -88,7 +91,7 @@ export function SGTLeagueMembers() {
     queryFn: async () => {
       const { data: tourMembers, error: tmError } = await supabase
         .from("sgt_tour_members")
-        .select("user_id, user_name, hcp_index, custom_hcp, onboarding_hcp");
+        .select("user_id, user_name, hcp_index, custom_hcp, onboarding_hcp, nickname");
 
       if (tmError) throw tmError;
 
@@ -121,6 +124,7 @@ export function SGTLeagueMembers() {
             hcp_index: tm.hcp_index,
             custom_hcp: tm.custom_hcp,
             onboarding_hcp: tm.onboarding_hcp,
+            nickname: tm.nickname ?? null,
             rounds_played: roundCounts.get(tm.user_id) || 0,
           });
         }
@@ -147,13 +151,18 @@ export function SGTLeagueMembers() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["sgt-league-members"] });
+      // Re-register on SGT so the new handicap applies to open tournaments.
+      // Fire-and-forget: SGT calls are slow and the UI shouldn't block on them.
+      supabase.functions
+        .invoke("sgt-auto-register", { body: { sgt_user_id: data.userId } })
+        .catch((e) => console.error("[SGT] re-register failed", e));
       setEditingMemberId(null);
       setEditHandicapValue("");
       toast({
         title: "Handicap updated",
-        description: data.customHcp !== null
+        description: (data.customHcp !== null
           ? `Custom handicap set to ${data.customHcp.toFixed(1)}`
-          : "Custom handicap cleared",
+          : "Custom handicap cleared") + " — re-registering on SGT in the background.",
       });
     },
     onError: (error) => {
@@ -164,6 +173,41 @@ export function SGTLeagueMembers() {
       });
     },
   });
+
+  const updateNicknameMutation = useMutation({
+    mutationFn: async ({ userId, nickname }: { userId: number; nickname: string | null }) => {
+      const { error } = await supabase
+        .from("sgt_tour_members")
+        .update({ nickname, updated_at: new Date().toISOString() })
+        .eq("user_id", userId);
+      if (error) throw error;
+      return { userId, nickname };
+    },
+    onSuccess: ({ nickname }) => {
+      queryClient.invalidateQueries({ queryKey: ["sgt-league-members"] });
+      queryClient.invalidateQueries({ queryKey: ["sgt-nicknames"] });
+      setEditingNicknameId(null);
+      setEditNicknameValue("");
+      toast({
+        title: nickname ? "Nickname saved" : "Nickname cleared",
+        description: nickname
+          ? `Leaderboards will show "${nickname}".`
+          : "Leaderboards will show the SGT username.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to save nickname",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSaveNickname = (userId: number) => {
+    const value = editNicknameValue.trim();
+    updateNicknameMutation.mutate({ userId, nickname: value === "" ? null : value.slice(0, 40) });
+  };
 
   const handleSaveHcp = (userId: number) => {
     const value = editHandicapValue.trim();
@@ -196,6 +240,7 @@ export function SGTLeagueMembers() {
   const filteredMembers = members?.filter(m => {
     const query = searchQuery.toLowerCase();
     return m.user_name?.toLowerCase().includes(query) ||
+      m.nickname?.toLowerCase().includes(query) ||
       m.email?.toLowerCase().includes(query);
   });
 
@@ -294,6 +339,7 @@ export function SGTLeagueMembers() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
+                    <TableHead>Nickname</TableHead>
                     <TableHead className="text-center">SGT ID</TableHead>
                     <TableHead className="text-center">Combo HCP</TableHead>
                     <TableHead className="text-center">Custom HCP</TableHead>
@@ -316,6 +362,53 @@ export function SGTLeagueMembers() {
                               <p className="text-xs text-muted-foreground">{member.email}</p>
                             )}
                           </div>
+                        </TableCell>
+                        <TableCell>
+                          {editingNicknameId === member.user_id ? (
+                            <div className="flex items-center gap-1">
+                              <Input
+                                value={editNicknameValue}
+                                onChange={(e) => setEditNicknameValue(e.target.value)}
+                                className="w-36 h-8"
+                                placeholder="Display name"
+                                maxLength={40}
+                                autoFocus
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") handleSaveNickname(member.user_id);
+                                  if (e.key === "Escape") {
+                                    setEditingNicknameId(null);
+                                    setEditNicknameValue("");
+                                  }
+                                }}
+                              />
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleSaveNickname(member.user_id)}
+                                disabled={updateNicknameMutation.isPending}
+                              >
+                                {updateNicknameMutation.isPending ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Check className="h-4 w-4 text-primary" />
+                                )}
+                              </Button>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              className="flex items-center gap-1.5 text-left hover:underline"
+                              onClick={() => {
+                                setEditingNicknameId(member.user_id);
+                                setEditNicknameValue(member.nickname ?? "");
+                              }}
+                            >
+                              <span className={member.nickname ? "font-medium" : "text-muted-foreground"}>
+                                {member.nickname || "Add nickname"}
+                              </span>
+                              <Pencil className="h-3 w-3 text-muted-foreground" />
+                            </button>
+                          )}
                         </TableCell>
                         <TableCell className="text-center">
                           <Badge variant="outline">{member.user_id}</Badge>

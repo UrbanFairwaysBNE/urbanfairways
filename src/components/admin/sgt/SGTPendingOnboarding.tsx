@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { UserPlus, Check, Loader2, AlertCircle } from "lucide-react";
+import { UserPlus, Check, Loader2, AlertCircle, EyeOff, Undo2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -36,6 +36,7 @@ interface PendingMember {
   email: string;
   display_name: string | null;
   created_at: string;
+  sgt_onboarding_dismissed_at: string | null;
 }
 
 export function SGTPendingOnboarding() {
@@ -44,6 +45,7 @@ export function SGTPendingOnboarding() {
   const queryClient = useQueryClient();
   const [onboardingMemberId, setOnboardingMemberId] = useState<number | null>(null);
   const [handicapValue, setHandicapValue] = useState<string>("");
+  const [showDismissed, setShowDismissed] = useState(false);
 
   // Fetch pending members (have sgt_user_id but NOT in any sgt_tour_members)
   const { data: pendingMembers, isLoading } = useQuery({
@@ -52,7 +54,7 @@ export function SGTPendingOnboarding() {
       // Get all profiles with sgt_user_id
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
-        .select("user_id, sgt_user_id, first_name, last_name, email, display_name, created_at")
+        .select("user_id, sgt_user_id, first_name, last_name, email, display_name, created_at, sgt_onboarding_dismissed_at")
         .not("sgt_user_id", "is", null)
         .order("created_at", { ascending: false });
 
@@ -88,6 +90,38 @@ export function SGTPendingOnboarding() {
       );
 
       return pending as PendingMember[];
+    },
+  });
+
+  // Dismiss / restore a pending member so the queue only shows real work
+  const dismissMutation = useMutation({
+    mutationFn: async ({ userId, dismiss }: { userId: string; dismiss: boolean }) => {
+      const { data: auth } = await supabase.auth.getUser();
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          sgt_onboarding_dismissed_at: dismiss ? new Date().toISOString() : null,
+          sgt_onboarding_dismissed_by: dismiss ? auth.user?.id ?? null : null,
+        })
+        .eq("user_id", userId);
+      if (error) throw error;
+      return dismiss;
+    },
+    onSuccess: (dismiss) => {
+      queryClient.invalidateQueries({ queryKey: ["sgt-pending-members"] });
+      toast({
+        title: dismiss ? "Removed from queue" : "Restored to queue",
+        description: dismiss
+          ? "They can still be onboarded later from the dismissed list."
+          : "They're back in the awaiting-handicap list.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to update queue",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
     },
   });
 
@@ -185,6 +219,10 @@ export function SGTPendingOnboarding() {
     onboardMutation.mutate({ sgtUserId, customHcp: hcp });
   };
 
+  const activePending = (pendingMembers ?? []).filter((m) => !m.sgt_onboarding_dismissed_at);
+  const dismissedPending = (pendingMembers ?? []).filter((m) => m.sgt_onboarding_dismissed_at);
+  const visibleMembers = showDismissed ? dismissedPending : activePending;
+
   return (
     <div className="space-y-6">
       {/* Info Alert */}
@@ -206,11 +244,18 @@ export function SGTPendingOnboarding() {
               <UserPlus className="h-5 w-5 text-amber-500" />
               <CardTitle>Awaiting Handicap</CardTitle>
             </div>
-            {pendingMembers && pendingMembers.length > 0 && (
-              <Badge variant="secondary" className="bg-amber-100 text-amber-800">
-                {pendingMembers.length} pending
-              </Badge>
-            )}
+            <div className="flex items-center gap-2">
+              {activePending.length > 0 && (
+                <Badge variant="secondary" className="bg-amber-100 text-amber-800">
+                  {activePending.length} pending
+                </Badge>
+              )}
+              {dismissedPending.length > 0 && (
+                <Button size="sm" variant="ghost" onClick={() => setShowDismissed((v) => !v)}>
+                  {showDismissed ? "Back to pending" : `Dismissed (${dismissedPending.length})`}
+                </Button>
+              )}
+            </div>
           </div>
           <CardDescription>
             Set an initial handicap to activate these members in the league
@@ -221,7 +266,7 @@ export function SGTPendingOnboarding() {
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
-          ) : pendingMembers && pendingMembers.length > 0 ? (
+          ) : visibleMembers.length > 0 ? (
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
@@ -230,11 +275,11 @@ export function SGTPendingOnboarding() {
                     <TableHead>Email</TableHead>
                     <TableHead className="text-center">SGT ID</TableHead>
                     <TableHead className="text-center w-32">Handicap</TableHead>
-                    <TableHead className="text-center w-24">Action</TableHead>
+                    <TableHead className="text-center w-36">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {pendingMembers.map((member) => (
+                  {visibleMembers.map((member) => (
                     <TableRow key={member.sgt_user_id}>
                       <TableCell className="font-medium">
                         {member.display_name || `${member.first_name} ${member.last_name}`}
@@ -291,16 +336,46 @@ export function SGTPendingOnboarding() {
                             </Tooltip>
                           </TooltipProvider>
                         ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setOnboardingMemberId(member.sgt_user_id);
-                              setHandicapValue("");
-                            }}
-                          >
-                            Set HCP
-                          </Button>
+                          <div className="flex items-center justify-center gap-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setOnboardingMemberId(member.sgt_user_id);
+                                setHandicapValue("");
+                              }}
+                            >
+                              Set HCP
+                            </Button>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() =>
+                                      dismissMutation.mutate({
+                                        userId: member.user_id,
+                                        dismiss: !member.sgt_onboarding_dismissed_at,
+                                      })
+                                    }
+                                    disabled={dismissMutation.isPending}
+                                  >
+                                    {member.sgt_onboarding_dismissed_at ? (
+                                      <Undo2 className="h-4 w-4" />
+                                    ) : (
+                                      <EyeOff className="h-4 w-4" />
+                                    )}
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  {member.sgt_onboarding_dismissed_at
+                                    ? "Restore to pending"
+                                    : "Dismiss from queue"}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
                         )}
                       </TableCell>
                     </TableRow>
@@ -311,8 +386,12 @@ export function SGTPendingOnboarding() {
           ) : (
             <div className="text-center py-8 text-muted-foreground">
               <UserPlus className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>No pending members</p>
-              <p className="text-sm">All registered members have been onboarded</p>
+              <p>{showDismissed ? "No dismissed members" : "No pending members"}</p>
+              <p className="text-sm">
+                {showDismissed
+                  ? "Nothing has been removed from the queue"
+                  : "All registered members have been onboarded"}
+              </p>
             </div>
           )}
         </CardContent>

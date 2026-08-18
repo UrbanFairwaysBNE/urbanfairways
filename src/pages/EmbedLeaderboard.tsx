@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSGTTournamentStandings } from "@/hooks/useSGTEmbedData";
 import { useActiveTourData } from "@/hooks/useActiveTourData";
 import { supabase } from "@/integrations/supabase/client";
+import { useSgtNicknames } from "@/hooks/useSgtNicknames";
 import venueMark from "@/assets/venue-logo-mark-dark.png";
 import { useIframeAutoResize } from "@/hooks/useIframeAutoResize";
 import { useTenant } from "@/config/tenant";
@@ -33,6 +34,7 @@ interface MonthlyStanding {
 }
 
 export default function EmbedLeaderboard() {
+  const { nick } = useSgtNicknames();
   const { tenant } = useTenant();
   useIframeAutoResize();
   const { activeTour, currentTournament, tournaments, isLoading: dataLoading } = useActiveTourData();
@@ -251,7 +253,7 @@ export default function EmbedLeaderboard() {
 
                       <div className="col-span-4">
                         <p className="font-semibold text-[hsl(218,13%,13%)] truncate">
-                          {standing.player_name}
+                          {nick(standing.player_name)}
                         </p>
                       </div>
 
@@ -382,7 +384,7 @@ export default function EmbedLeaderboard() {
 
                     <div className="col-span-3">
                       <p className="font-semibold text-[hsl(218,13%,13%)] text-xs sm:text-base truncate">
-                        {result.playerName}
+                        {nick(result.playerName)}
                       </p>
                       <p className="hidden sm:block text-xs text-[hsl(128,20%,40%)]">
                         HCP: {result.hcp ?? "-"}

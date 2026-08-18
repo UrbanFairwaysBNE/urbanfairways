@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Trophy, Medal, Award, Flame, Calendar, Target, ChevronRight, ChevronDown, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useSgtNicknames } from "@/hooks/useSgtNicknames";
 import { useActiveTourData } from "@/hooks/useActiveTourData";
 import { useSGTTournamentStandings } from "@/hooks/useSGTEmbedData";
 import { cn } from "@/lib/utils";
@@ -53,6 +54,7 @@ const getScoreTextColor = (s: string) => {
 };
 
 export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean } = {}) {
+  const { nick } = useSgtNicknames();
   const { tenant } = useTenant();
   useIframeAutoResize();
   const { activeTour, currentTournament, previousTournament, isLoading: tourLoading } = useActiveTourData();
@@ -332,7 +334,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
                           </div>
                           <div className="col-span-5 sm:col-span-4 min-w-0">
                             <p className="font-semibold text-sm sm:text-base truncate" style={{ color: GREEN }}>
-                              {r.playerName}
+                              {nick(r.playerName)}
                             </p>
                             <p className="text-[11px]" style={{ color: MUTED }}>HCP {r.hcp ?? "-"}</p>
                           </div>
@@ -426,7 +428,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-sm truncate" style={{ color: GREEN }}>
-                              {s.player_name}
+                              {nick(s.player_name)}
                             </p>
                             <p className="text-[11px]" style={{ color: MUTED }}>{s.tournaments_played} played</p>
                           </div>

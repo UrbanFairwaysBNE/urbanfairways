@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useSgtNicknames } from "@/hooks/useSgtNicknames";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Accordion,
@@ -111,6 +112,7 @@ function StatTable({
   suffix?: string;
   limit?: number;
 }) {
+  const { nick } = useSgtNicknames();
   if (!rows || rows.length === 0) {
     return <p className="text-xs text-muted-foreground">No data yet.</p>;
   }
@@ -128,7 +130,7 @@ function StatTable({
         {rows.slice(0, limit).map((r, i) => (
           <TableRow key={`${r.user_name}-${i}`}>
             <TableCell className="text-muted-foreground">{i + 1}</TableCell>
-            <TableCell className="font-medium">{r.user_name}</TableCell>
+            <TableCell className="font-medium">{nick(r.user_name)}</TableCell>
             <TableCell className="text-right text-muted-foreground">
               {r.numrounds ?? "-"}
             </TableCell>
@@ -150,6 +152,7 @@ interface Props {
 }
 
 export function TournamentStatsView({ tournamentId, isCompleted, enabled = true }: Props) {
+  const { nick } = useSgtNicknames();
   const { data, isLoading, error } = useQuery({
     queryKey: ["sgt-tournament-stats", tournamentId],
     queryFn: async () => {
@@ -251,7 +254,7 @@ export function TournamentStatsView({ tournamentId, isCompleted, enabled = true 
           <Card className="mb-3 border-primary/40">
             <CardContent className="pt-4">
               <p className="text-xs uppercase text-muted-foreground">Tournament NTP Winner</p>
-              <p className="text-lg font-bold">{overallCtp.user_name}</p>
+              <p className="text-lg font-bold">{nick(overallCtp.user_name)}</p>
               <p className="text-sm text-muted-foreground">
                 {overallCtp.distance.toFixed(2)} ft · Round {overallCtp.round}, Hole {overallCtp.hole}
               </p>
@@ -277,7 +280,7 @@ export function TournamentStatsView({ tournamentId, isCompleted, enabled = true 
                           </div>
                           {winner && (
                             <p className="text-sm mb-2">
-                              🏆 <span className="font-medium">{winner.user_name}</span> ·{" "}
+                              🏆 <span className="font-medium">{nick(winner.user_name)}</span> ·{" "}
                               {winner.distanceToPin.toFixed(2)} ft
                             </p>
                           )}
@@ -285,7 +288,7 @@ export function TournamentStatsView({ tournamentId, isCompleted, enabled = true 
                             {(info.ctps || []).slice(1, 5).map((c, i) => (
                               <div key={i} className="flex justify-between text-xs text-muted-foreground">
                                 <span>
-                                  {i + 2}. {c.user_name}
+                                  {i + 2}. {nick(c.user_name)}
                                 </span>
                                 <span className="font-mono">{c.distanceToPin.toFixed(2)} ft</span>
                               </div>

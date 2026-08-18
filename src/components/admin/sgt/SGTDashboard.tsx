@@ -18,7 +18,6 @@ export function SGTDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [syncing, setSyncing] = useState(false);
-  const [recalculating, setRecalculating] = useState(false);
   const [showTourDialog, setShowTourDialog] = useState(false);
   const [showTournamentDialog, setShowTournamentDialog] = useState(false);
 

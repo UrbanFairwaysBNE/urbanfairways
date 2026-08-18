@@ -3,6 +3,8 @@ import { Resend } from "npm:resend@2.0.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
 import { getTenant, tenantHubUrl, tenantBookingUrl, tenantAddress } from "../_shared/tenant.ts";
+import { sendSMS as sharedSendSMS } from "../_shared/sms.ts";
+
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 

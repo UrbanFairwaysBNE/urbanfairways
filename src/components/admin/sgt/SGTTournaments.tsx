@@ -139,6 +139,9 @@ export function SGTTournaments() {
 
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      if (data?.success === false) {
+        throw new Error(data.feedback || "SGT rejected the close request");
+      }
 
       toast({
         title: "Tournament closed",

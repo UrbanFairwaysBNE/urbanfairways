@@ -284,10 +284,6 @@ export function SGTDashboard() {
             <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
             {syncing ? "Syncing..." : "Sync Data"}
           </Button>
-          <Button onClick={handleRecalculateMonthly} disabled={recalculating} variant="outline" className="gap-2">
-            <Trophy className={`h-4 w-4 ${recalculating ? "animate-spin" : ""}`} />
-            {recalculating ? "Calculating..." : "Recalc Monthly"}
-          </Button>
         </div>
       </div>
 

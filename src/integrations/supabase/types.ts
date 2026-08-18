@@ -2326,6 +2326,8 @@ export type Database = {
           payment_failed_at: string | null
           phone: string | null
           referral_source: string | null
+          sgt_onboarding_dismissed_at: string | null
+          sgt_onboarding_dismissed_by: string | null
           sgt_user_id: number | null
           terms_accepted_at: string | null
           terms_version_accepted: string | null
@@ -2355,6 +2357,8 @@ export type Database = {
           payment_failed_at?: string | null
           phone?: string | null
           referral_source?: string | null
+          sgt_onboarding_dismissed_at?: string | null
+          sgt_onboarding_dismissed_by?: string | null
           sgt_user_id?: number | null
           terms_accepted_at?: string | null
           terms_version_accepted?: string | null
@@ -2384,6 +2388,8 @@ export type Database = {
           payment_failed_at?: string | null
           phone?: string | null
           referral_source?: string | null
+          sgt_onboarding_dismissed_at?: string | null
+          sgt_onboarding_dismissed_by?: string | null
           sgt_user_id?: number | null
           terms_accepted_at?: string | null
           terms_version_accepted?: string | null
@@ -3214,6 +3220,7 @@ export type Database = {
           custom_hcp: number | null
           hcp_index: number | null
           id: string
+          nickname: string | null
           onboarding_hcp: number | null
           tour_id: number
           updated_at: string
@@ -3225,6 +3232,7 @@ export type Database = {
           custom_hcp?: number | null
           hcp_index?: number | null
           id?: string
+          nickname?: string | null
           onboarding_hcp?: number | null
           tour_id: number
           updated_at?: string
@@ -3236,6 +3244,7 @@ export type Database = {
           custom_hcp?: number | null
           hcp_index?: number | null
           id?: string
+          nickname?: string | null
           onboarding_hcp?: number | null
           tour_id?: number
           updated_at?: string
@@ -3806,6 +3815,20 @@ export type Database = {
       }
       is_corporate_owner: { Args: { _user_id: string }; Returns: boolean }
       is_paying_member: { Args: { _user_id: string }; Returns: boolean }
+      local_comp_first_timer_flags: {
+        Args: { p_competition_id: string }
+        Returns: {
+          beat_par: boolean
+          debut_pairing: boolean
+          net_score: number
+          player1_first_timer: boolean
+          player1_name: string
+          player2_first_timer: boolean
+          player2_name: string
+          team_id: string
+          team_name: string
+        }[]
+      }
       pack_hours_balance: { Args: { _user_id: string }; Returns: number }
       pack_wallet_owner: { Args: { _user_id: string }; Returns: string }
       redeem_pack_code: { Args: { _code: string }; Returns: Json }

@@ -108,10 +108,13 @@ export const sendSMS = async (
   const to = formatPhoneForSMS(phone);
   if (!to) return { success: false, error: "Invalid phone number", provider };
 
+  const sender = normaliseSenderId(senderName);
+
   try {
     return provider === "sinch"
-      ? await sendViaSinch(to, message, senderName)
-      : await sendViaSmsBroadcast(to, message, senderName);
+      ? await sendViaSinch(to, message, sender)
+      : await sendViaSmsBroadcast(to, message, sender);
+
   } catch (e) {
     const err = (e as Error).message;
     log("SMS send error", { error: err });

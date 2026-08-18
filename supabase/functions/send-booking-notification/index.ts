@@ -125,48 +125,10 @@ const buildLessonIcs = (opts: {
   ].join("\r\n");
 };
 
-// Send SMS via SMS Broadcast API
-const sendSMS = async (phone: string, message: string, senderName = "Notification"): Promise<{ success: boolean; response?: string; error?: string }> => {
-  const username = Deno.env.get("SMS_BROADCAST_USERNAME");
-  const password = Deno.env.get("SMS_BROADCAST_PASSWORD");
-  
-  if (!username || !password) {
-    logStep("SMS Broadcast credentials not configured");
-    return { success: false, error: "SMS credentials not configured" };
-  }
-  
-  const formattedPhone = formatPhoneForSMS(phone);
-  if (!formattedPhone) {
-    return { success: false, error: "Invalid phone number" };
-  }
-  
-  try {
-    const params = new URLSearchParams({
-      username,
-      password,
-      to: formattedPhone,
-      from: senderName,
-      message: message,
-    });
-    
-    const response = await fetch(`https://api.smsbroadcast.com.au/api-adv.php?${params.toString()}`, {
-      method: "GET",
-    });
-    
-    const responseText = await response.text();
-    logStep("SMS Broadcast response", { response: responseText });
-    
-    // Parse response - format is "OK:614xxxxxxxx:reference" or "ERROR:message"
-    if (responseText.startsWith("OK:")) {
-      return { success: true, response: responseText };
-    } else {
-      return { success: false, error: responseText };
-    }
-  } catch (error: any) {
-    logStep("SMS send error", { error: error.message });
-    return { success: false, error: error.message };
-  }
-};
+// Send SMS via the shared provider (Sinch, falling back to legacy SMS Broadcast)
+const sendSMS = async (phone: string, message: string, senderName = "Notification") =>
+  await sharedSendSMS(phone, message, senderName);
+
 
 // Replace template tags with actual values
 const replaceTemplateTags = (template: string, tags: Record<string, string>): string => {

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Trophy, Medal, Award, Flame, Calendar, Target, ChevronRight, ChevronDown, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useSgtNicknames } from "@/hooks/useSgtNicknames";
 import { useActiveTourData } from "@/hooks/useActiveTourData";
 import { useSGTTournamentStandings } from "@/hooks/useSGTEmbedData";
 import { cn } from "@/lib/utils";
@@ -53,6 +54,7 @@ const getScoreTextColor = (s: string) => {
 };
 
 export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean } = {}) {
+  const { nick } = useSgtNicknames();
   const { tenant } = useTenant();
   useIframeAutoResize();
   const { activeTour, currentTournament, previousTournament, isLoading: tourLoading } = useActiveTourData();
@@ -322,7 +324,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
                     </div>
                     <div className="divide-y" style={{ borderColor: BORDER }}>
                       {weeklyStandings.slice(0, 8).map((r) => (
-                        <div key={nick(r.playerName)} className="grid grid-cols-12 gap-2 py-3 items-center">
+                        <div key={r.playerName} className="grid grid-cols-12 gap-2 py-3 items-center">
                           <div className="col-span-1 flex items-center gap-1">
                             {positionIcon(r.position) || (
                               <span className="font-bold text-sm" style={{ color: r.position <= 3 ? GREEN : MUTED }}>

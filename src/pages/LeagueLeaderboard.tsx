@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
+import { useSgtNicknames } from "@/hooks/useSgtNicknames";
 import { getCurrentBlockLabel } from "@/lib/league-block";
 import { TournamentStatsView } from "@/components/sgt/TournamentStatsView";
 import { useExemptPlayers, TRUE_HCP_ROUNDS } from "@/hooks/useExemptPlayers";
@@ -56,6 +57,7 @@ interface MonthlyStanding {
 }
 
 export default function LeagueLeaderboard() {
+  const { nick } = useSgtNicknames();
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState<string>("");
@@ -499,7 +501,7 @@ export default function LeagueLeaderboard() {
 
                   return (
                     <div
-                      key={nick(result.playerName)}
+                      key={result.playerName}
                       className={cn(
                         "grid grid-cols-12 gap-4 px-4 py-4 items-center transition-colors",
                         isCurrentPlayer && "bg-secondary/10 border-l-4 border-secondary",

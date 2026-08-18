@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSGTTournamentStandings } from "@/hooks/useSGTEmbedData";
 import { useActiveTourData } from "@/hooks/useActiveTourData";
 import { supabase } from "@/integrations/supabase/client";
+import { useSgtNicknames } from "@/hooks/useSgtNicknames";
 import venueMark from "@/assets/venue-logo-mark-dark.png";
 import { useIframeAutoResize } from "@/hooks/useIframeAutoResize";
 import { useTenant } from "@/config/tenant";
@@ -33,6 +34,7 @@ interface MonthlyStanding {
 }
 
 export default function EmbedLeaderboard() {
+  const { nick } = useSgtNicknames();
   const { tenant } = useTenant();
   useIframeAutoResize();
   const { activeTour, currentTournament, tournaments, isLoading: dataLoading } = useActiveTourData();
@@ -367,7 +369,7 @@ export default function EmbedLeaderboard() {
               <div className="divide-y divide-[hsl(128,20%,85%)]">
                 {tournamentStandings.map((result) => (
                   <div
-                    key={nick(result.playerName)}
+                    key={result.playerName}
                     className="grid grid-cols-12 gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 items-center hover:bg-[hsl(40,29%,97%)] transition-colors"
                   >
                     <div className="col-span-1 flex items-center justify-center gap-0.5 sm:gap-1">

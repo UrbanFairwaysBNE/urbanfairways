@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { getTenant } from "../_shared/tenant.ts";
+import { sendSMS } from "../_shared/sms.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,35 +12,6 @@ const CAMPAIGN_KEY = "byo_2026_05_30";
 const log = (s: string, d?: unknown) =>
   console.log(`[BYO-ALERT] ${s}${d ? " " + JSON.stringify(d) : ""}`);
 
-const formatPhoneForSMS = (phone: string | null): string | null => {
-  if (!phone) return null;
-  let c = phone.replace(/\D/g, "");
-  if (c.startsWith("0")) c = "61" + c.slice(1);
-  else if (c.startsWith("+61")) c = c.slice(1);
-  else if (!c.startsWith("61") && c.length === 9) c = "61" + c;
-  if (c.length !== 11 || !c.startsWith("614")) return null;
-  return c;
-};
-
-const sendSMS = async (phone: string, message: string, senderName: string) => {
-  const username = Deno.env.get("SMS_BROADCAST_USERNAME");
-  const password = Deno.env.get("SMS_BROADCAST_PASSWORD");
-  if (!username || !password) return { success: false, error: "no creds" };
-  const formatted = formatPhoneForSMS(phone);
-  if (!formatted) return { success: false, error: "bad phone" };
-  const params = new URLSearchParams({
-    username, password, to: formatted, from: senderName, message,
-  });
-  try {
-    const r = await fetch(`https://api.smsbroadcast.com.au/api-adv.php?${params.toString()}`);
-    const txt = await r.text();
-    return txt.startsWith("OK:")
-      ? { success: true, response: txt, phone: formatted }
-      : { success: false, error: txt, phone: formatted };
-  } catch (e) {
-    return { success: false, error: (e as Error).message, phone: formatted };
-  }
-};
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });

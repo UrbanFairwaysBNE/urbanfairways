@@ -18,7 +18,6 @@ export function SGTDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [syncing, setSyncing] = useState(false);
-  const [recalculating, setRecalculating] = useState(false);
   const [showTourDialog, setShowTourDialog] = useState(false);
   const [showTournamentDialog, setShowTournamentDialog] = useState(false);
 
@@ -199,28 +198,8 @@ export function SGTDashboard() {
     }
   };
 
-  const handleRecalculateMonthly = async () => {
-    setRecalculating(true);
-    try {
-      const { error } = await supabase.functions.invoke("sgt-calculate-monthly-standings", {
-        body: {},
-      });
-      if (error) throw error;
-      toast({
-        title: "Monthly standings updated",
-        description: "Monthly leaderboard has been recalculated.",
-      });
-      queryClient.invalidateQueries({ queryKey: ["sgt-monthly-standings"] });
-    } catch (error) {
-      toast({
-        title: "Recalculation failed",
-        description: error instanceof Error ? error.message : "Unknown error",
-        variant: "destructive",
-      });
-    } finally {
-      setRecalculating(false);
-    }
-  };
+
+
 
   const stats = [
     {
@@ -283,10 +262,6 @@ export function SGTDashboard() {
           <Button onClick={handleSync} disabled={syncing} variant="outline" className="gap-2">
             <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
             {syncing ? "Syncing..." : "Sync Data"}
-          </Button>
-          <Button onClick={handleRecalculateMonthly} disabled={recalculating} variant="outline" className="gap-2">
-            <Trophy className={`h-4 w-4 ${recalculating ? "animate-spin" : ""}`} />
-            {recalculating ? "Calculating..." : "Recalc Monthly"}
           </Button>
         </div>
       </div>

@@ -251,7 +251,7 @@ export default function EmbedLeaderboard() {
 
                       <div className="col-span-4">
                         <p className="font-semibold text-[hsl(218,13%,13%)] truncate">
-                          {standing.player_name}
+                          {nick(standing.player_name)}
                         </p>
                       </div>
 
@@ -367,7 +367,7 @@ export default function EmbedLeaderboard() {
               <div className="divide-y divide-[hsl(128,20%,85%)]">
                 {tournamentStandings.map((result) => (
                   <div
-                    key={result.playerName}
+                    key={nick(result.playerName)}
                     className="grid grid-cols-12 gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 items-center hover:bg-[hsl(40,29%,97%)] transition-colors"
                   >
                     <div className="col-span-1 flex items-center justify-center gap-0.5 sm:gap-1">
@@ -382,7 +382,7 @@ export default function EmbedLeaderboard() {
 
                     <div className="col-span-3">
                       <p className="font-semibold text-[hsl(218,13%,13%)] text-xs sm:text-base truncate">
-                        {result.playerName}
+                        {nick(result.playerName)}
                       </p>
                       <p className="hidden sm:block text-xs text-[hsl(128,20%,40%)]">
                         HCP: {result.hcp ?? "-"}

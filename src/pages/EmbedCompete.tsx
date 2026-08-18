@@ -322,7 +322,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
                     </div>
                     <div className="divide-y" style={{ borderColor: BORDER }}>
                       {weeklyStandings.slice(0, 8).map((r) => (
-                        <div key={r.playerName} className="grid grid-cols-12 gap-2 py-3 items-center">
+                        <div key={nick(r.playerName)} className="grid grid-cols-12 gap-2 py-3 items-center">
                           <div className="col-span-1 flex items-center gap-1">
                             {positionIcon(r.position) || (
                               <span className="font-bold text-sm" style={{ color: r.position <= 3 ? GREEN : MUTED }}>
@@ -332,7 +332,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
                           </div>
                           <div className="col-span-5 sm:col-span-4 min-w-0">
                             <p className="font-semibold text-sm sm:text-base truncate" style={{ color: GREEN }}>
-                              {r.playerName}
+                              {nick(r.playerName)}
                             </p>
                             <p className="text-[11px]" style={{ color: MUTED }}>HCP {r.hcp ?? "-"}</p>
                           </div>
@@ -426,7 +426,7 @@ export default function EmbedCompete({ hideHero = false }: { hideHero?: boolean 
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-sm truncate" style={{ color: GREEN }}>
-                              {s.player_name}
+                              {nick(s.player_name)}
                             </p>
                             <p className="text-[11px]" style={{ color: MUTED }}>{s.tournaments_played} played</p>
                           </div>

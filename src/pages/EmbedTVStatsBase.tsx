@@ -112,6 +112,7 @@ function MiniTable({
 
 
 export default function EmbedTVStats({ variant }: { variant: "current" | "previous" }) {
+  const { nick } = useSgtNicknames();
   const { tenant } = useTenant();
   const { currentTournament, previousTournament, isLoading: tourLoading } = useActiveTourData();
   const tournament = variant === "current" ? currentTournament : previousTournament;

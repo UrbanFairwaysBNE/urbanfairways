@@ -177,24 +177,30 @@ function GiftContent() {
         <Card className="p-6 md:p-8 bg-white border-[#1C1F24]/15 space-y-7">
           {/* Amount */}
           <div>
-            <Label className="text-[#1C1F24] font-semibold mb-3 block">Gift Amount</Label>
+            <Label className="text-[#1C1F24] font-semibold mb-2 block">Gift Amount</Label>
+            <p className="text-[#1C1F24]/60 text-sm mb-3">
+              Sold in hours of bay time at ${hourlyRate}/hour.
+            </p>
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-3">
-              {PRESET_AMOUNTS.map((a) => (
+              {HOUR_OPTIONS.map((h, i) => (
                 <button
-                  key={a}
+                  key={h}
                   type="button"
                   onClick={() => {
-                    setAmount(a);
+                    setHours(h);
                     setCustomAmount("");
                   }}
                   className={cn(
-                    "py-3 rounded-lg border-2 font-semibold transition-all",
-                    amount === a && !customAmount
+                    "py-3 rounded-lg border-2 font-semibold transition-all leading-tight",
+                    hours === h && !customAmount
                       ? "border-[#5F6F52] bg-[#5F6F52] text-white"
                       : "border-[#1C1F24]/20 text-[#1C1F24] hover:border-[#5F6F52]/50"
                   )}
                 >
-                  ${a}
+                  <span className="block">${presetAmounts[i]}</span>
+                  <span className="block text-[11px] font-medium opacity-75">
+                    {h} {h === 1 ? "hour" : "hours"}
+                  </span>
                 </button>
               ))}
             </div>
@@ -213,6 +219,7 @@ function GiftContent() {
                 />
               </div>
             </div>
+
           </div>
 
           {/* Delivery method */}

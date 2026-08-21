@@ -149,6 +149,14 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
     );
   }, [profile, pricingConfig, booking, selectedHours]);
 
+  // Tiers with flat extension pricing (e.g. Casual) ignore peak/off-peak.
+  const hasFlatExtendPricing = useMemo(() => {
+    if (!profile || profile.custom_segment === "staff") return false;
+    return (
+      findTier(pricingConfig, profile.membership_tier)?.extend_60min_price != null
+    );
+  }, [profile, pricingConfig]);
+
   const isPeak = useMemo(() => {
     return isPeakTime(
       new Date(booking.booking_date + "T00:00:00"),

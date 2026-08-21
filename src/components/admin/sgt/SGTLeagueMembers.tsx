@@ -9,7 +9,43 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useTenant } from "@/config/tenant";
 import { useToast } from "@/hooks/use-toast";
-import { Users, Search, Pencil, Check, X, Loader2, Info, Lock } from "lucide-react";
+import {
+  Users,
+  Search,
+  Pencil,
+  Check,
+  X,
+  Loader2,
+  Info,
+  Lock,
+  MoreHorizontal,
+  Tag,
+  UserMinus,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,

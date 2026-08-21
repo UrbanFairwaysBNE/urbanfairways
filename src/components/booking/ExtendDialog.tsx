@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Clock, Plus } from "lucide-react";
-import { calculateHourlyRate, isPeakTime } from "@/lib/pricing-utils";
+import { calculateExtensionCost, isPeakTime, addDurationToTime } from "@/lib/pricing-utils";
 import { TierConfig, TIER_SELECT, normaliseTier } from "@/lib/tier-config";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";

@@ -515,13 +515,35 @@ export function SGTLeagueMembers() {
                               </Button>
                             </div>
                           ) : (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => startEditing(member)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button size="sm" variant="ghost" aria-label="Member actions">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-52">
+                                <DropdownMenuItem onClick={() => startEditing(member)}>
+                                  <Pencil className="h-4 w-4 mr-2" />
+                                  Edit Handicap
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setNicknameMember(member);
+                                    setEditNicknameValue(member.nickname ?? "");
+                                  }}
+                                >
+                                  <Tag className="h-4 w-4 mr-2" />
+                                  Nickname
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="text-destructive focus:text-destructive"
+                                  onClick={() => setRemoveMember(member)}
+                                >
+                                  <UserMinus className="h-4 w-4 mr-2" />
+                                  Remove from Club
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           )}
                         </TableCell>
                       </TableRow>

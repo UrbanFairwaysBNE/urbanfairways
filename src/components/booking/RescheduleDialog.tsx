@@ -23,7 +23,7 @@ import { toast } from "sonner";
 import { CalendarIcon, Clock, MapPin, Loader2, ArrowUp, ArrowDown } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { calculateHourlyRate, isPeakTime, getPricingLabel } from "@/lib/pricing-utils";
+import { calculateHourlyRate, isPeakTime, getPricingLabel, resolveCustomRate } from "@/lib/pricing-utils";
 import { TierConfig, TIER_SELECT, findTier, isDefaultTier, normaliseTier } from "@/lib/tier-config";
 
 interface Booking {
@@ -48,6 +48,7 @@ interface Bay {
 interface UserProfile {
   membership_tier: string;
   custom_hourly_rate: number | null;
+  custom_hourly_rate_peak: number | null;
   deposit_balance: number;
   custom_segment: string | null;
 }
@@ -129,7 +130,7 @@ export const RescheduleDialog = ({
 
     const { data, error } = await supabase
       .from("profiles")
-      .select("membership_tier, custom_hourly_rate, deposit_balance, custom_segment")
+      .select("membership_tier, custom_hourly_rate, custom_hourly_rate_peak, deposit_balance, custom_segment")
       .eq("user_id", user.id)
       .single();
 
@@ -258,24 +259,37 @@ export const RescheduleDialog = ({
   const calculateNewPrice = (): { hourlyRate: number; totalPrice: number; isPeak: boolean } | null => {
     if (!selectedDate || !selectedTime || !userProfile) return null;
 
-    const newHourlyRate = calculateHourlyRate(
-      userProfile.membership_tier,
-      selectedDate,
-      selectedTime,
-      pricingConfig,
-      { segment: userProfile.custom_segment }
+    const isPeak = isPeakTime(selectedDate, selectedTime);
+
+    // A custom/coach rate override always wins over tier pricing (matches the server).
+    const override = resolveCustomRate(
+      userProfile.custom_hourly_rate,
+      userProfile.custom_hourly_rate_peak,
+      isPeak
     );
+
+    const newHourlyRate =
+      override ??
+      calculateHourlyRate(
+        userProfile.membership_tier,
+        selectedDate,
+        selectedTime,
+        pricingConfig,
+        { segment: userProfile.custom_segment }
+      );
 
     return {
       hourlyRate: newHourlyRate,
       totalPrice: newHourlyRate * booking.duration_hours,
-      isPeak: isPeakTime(selectedDate, selectedTime),
+      isPeak,
     };
   };
 
   const newPriceInfo = calculateNewPrice();
   const priceDifference = newPriceInfo ? newPriceInfo.totalPrice - booking.total_price : 0;
-  const hasCustomRate = userProfile?.custom_hourly_rate != null && userProfile.custom_hourly_rate > 0;
+  const hasCustomRate =
+    (userProfile?.custom_hourly_rate != null && userProfile.custom_hourly_rate > 0) ||
+    (userProfile?.custom_hourly_rate_peak != null && userProfile.custom_hourly_rate_peak > 0);
 
   const handleSubmit = async () => {
     if (!selectedDate || !selectedTime || !selectedBayId) {

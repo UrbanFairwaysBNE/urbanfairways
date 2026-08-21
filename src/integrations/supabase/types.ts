@@ -2184,6 +2184,8 @@ export type Database = {
           description: string | null
           display_name: string
           display_order: number
+          extend_30min_price: number | null
+          extend_60min_price: number | null
           features: Json
           grants_league_access: boolean
           grants_range_access: boolean
@@ -2212,6 +2214,8 @@ export type Database = {
           description?: string | null
           display_name: string
           display_order?: number
+          extend_30min_price?: number | null
+          extend_60min_price?: number | null
           features?: Json
           grants_league_access?: boolean
           grants_range_access?: boolean
@@ -2240,6 +2244,8 @@ export type Database = {
           description?: string | null
           display_name?: string
           display_order?: number
+          extend_30min_price?: number | null
+          extend_60min_price?: number | null
           features?: Json
           grants_league_access?: boolean
           grants_range_access?: boolean

@@ -370,8 +370,16 @@ const MyBookings = () => {
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-primary font-semibold">
                           <MapPin className="h-4 w-4" />
-                          Bay {booking.bay_number}
-                          {booking.bay_name && ` - ${booking.bay_name}`}
+                          {booking.isCoachBooking ? (
+                            <>
+                              {booking.client_name} - Bay {booking.bay_number}
+                            </>
+                          ) : (
+                            <>
+                              Bay {booking.bay_number}
+                              {booking.bay_name && ` - ${booking.bay_name}`}
+                            </>
+                          )}
                           {booking.isLessonAsClient && (
                             <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                               <GraduationCap className="h-3 w-3" />

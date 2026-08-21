@@ -83,8 +83,9 @@ export function SGTLeagueMembers() {
   const [searchQuery, setSearchQuery] = useState("");
   const [editingMemberId, setEditingMemberId] = useState<number | null>(null);
   const [editHandicapValue, setEditHandicapValue] = useState<string>("");
-  const [editingNicknameId, setEditingNicknameId] = useState<number | null>(null);
+  const [nicknameMember, setNicknameMember] = useState<LeagueMember | null>(null);
   const [editNicknameValue, setEditNicknameValue] = useState<string>("");
+  const [removeMember, setRemoveMember] = useState<LeagueMember | null>(null);
 
   // Global handicap settings
   const { data: settings } = useQuery({

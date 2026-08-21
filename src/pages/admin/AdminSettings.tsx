@@ -1462,11 +1462,15 @@ export default function AdminSettings() {
                               setNewCustomPeakRate(customer.custom_hourly_rate_peak?.toString() || "");
                               setCustomerSearch("");
                             }}
-                            className="w-full p-2 text-left text-sm hover:bg-muted/50 flex items-center justify-between border-b last:border-b-0"
+                            className="w-full p-2 text-left text-sm hover:bg-muted/50 flex items-center justify-between gap-2 border-b last:border-b-0"
                           >
-                            <span>{customer.first_name} {customer.last_name}</span>
-                            <Badge variant="outline" className="text-xs">{customer.membership_tier}</Badge>
+                            <span className="flex flex-col min-w-0">
+                              <span className="truncate">{customer.first_name} {customer.last_name}</span>
+                              <span className="text-xs text-muted-foreground truncate">{customer.email}</span>
+                            </span>
+                            <Badge variant="outline" className="text-xs shrink-0">{customer.membership_tier}</Badge>
                           </button>
+
                         ))}
                       </div>
                     )}

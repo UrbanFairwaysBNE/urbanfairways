@@ -156,6 +156,13 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
     );
   }, [booking]);
 
+  // Keep the selection inside what's actually available (e.g. only 30 min left).
+  useEffect(() => {
+    if (maxExtendHours > 0 && selectedHours > maxExtendHours) {
+      setSelectedHours(maxExtendHours);
+    }
+  }, [maxExtendHours, selectedHours]);
+
   const balance = profile?.deposit_balance ?? 0;
   const packHoursAvailable = Math.min(packHoursBalance, selectedHours);
   const packHoursToApply = applyPackHours ? packHoursAvailable : 0;

@@ -23,7 +23,7 @@ import { toast } from "sonner";
 import { CalendarIcon, Clock, MapPin, Loader2, ArrowUp, ArrowDown } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { calculateHourlyRate, isPeakTime, getPricingLabel } from "@/lib/pricing-utils";
+import { calculateHourlyRate, isPeakTime, getPricingLabel, resolveCustomRate } from "@/lib/pricing-utils";
 import { TierConfig, TIER_SELECT, findTier, isDefaultTier, normaliseTier } from "@/lib/tier-config";
 
 interface Booking {

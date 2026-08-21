@@ -237,18 +237,18 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
                 <Clock className="h-4 w-4" />
                 Add time
               </p>
-              <div className="grid grid-cols-3 gap-2">
-                {[1, 2, 3].map((h) => (
+              <div className="grid grid-cols-4 gap-2">
+                {[0.5, 1, 2, 3].map((h) => (
                   <Button
                     key={h}
                     type="button"
                     variant={selectedHours === h ? "default" : "outline"}
                     disabled={h > maxExtendHours}
                     onClick={() => setSelectedHours(h)}
-                    className="h-14 flex-col gap-1"
+                    className="h-14 flex-col gap-1 px-1"
                   >
-                    <span className="text-base font-semibold">+{h}hr</span>
-                    <span className="text-xs opacity-80">until {addHours(booking.end_time, h).slice(0, 5)}</span>
+                    <span className="text-sm font-semibold">+{durationLabel(h)}</span>
+                    <span className="text-[10px] opacity-80">until {addHours(booking.end_time, h)}</span>
                   </Button>
                 ))}
               </div>
@@ -256,7 +256,10 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
 
             <div className="bg-muted rounded-lg p-3 text-sm space-y-1">
               <div className="flex justify-between">
-                <span>Additional {selectedHours}hr ({isPeak ? "peak" : "off-peak"})</span>
+                <span>
+                  Additional {durationLabel(selectedHours)}
+                  {hasFlatExtendPricing ? "" : ` (${isPeak ? "peak" : "off-peak"})`}
+                </span>
                 <span className="font-semibold">${extensionCost.toFixed(2)}</span>
               </div>
               {packHoursBalance > 0 && extensionCost > 0 && (

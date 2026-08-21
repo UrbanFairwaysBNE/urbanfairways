@@ -118,43 +118,35 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
     })();
   }, [open, booking.id, booking.bay_id, booking.booking_date, booking.end_time]);
 
-  // How many whole hours can be added?
+  // How much time can be added, in 30-minute steps?
   const maxExtendHours = useMemo(() => {
     // No overall duration cap — extensions can push past the 4hr booking max
     let cap = 3;
+    const [eh, em] = booking.end_time.split(":").map(Number);
+    const endMin = eh * 60 + em;
     // next booking gap
     if (nextBookingStart) {
-      const [eh, em] = booking.end_time.split(":").map(Number);
       const [nh, nm] = nextBookingStart.split(":").map(Number);
-      const gap = (nh * 60 + nm) - (eh * 60 + em);
-      cap = Math.min(cap, Math.floor(gap / 60));
+      cap = Math.min(cap, Math.floor(((nh * 60 + nm) - endMin) / 30) / 2);
     }
     // close time gap
     if (closeTime) {
-      const [eh, em] = booking.end_time.split(":").map(Number);
       const [ch, cm] = closeTime.split(":").map(Number);
-      const gap = (ch * 60 + cm) - (eh * 60 + em);
-      cap = Math.min(cap, Math.floor(gap / 60));
+      cap = Math.min(cap, Math.floor(((ch * 60 + cm) - endMin) / 30) / 2);
     }
     return Math.max(0, Math.min(3, cap));
   }, [booking, nextBookingStart, closeTime]);
 
   const extensionCost = useMemo(() => {
     if (!profile) return 0;
-    let total = 0;
-    const [h, m] = booking.end_time.split(":").map(Number);
-    for (let i = 0; i < selectedHours; i++) {
-      const slot = `${(h + i).toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
-      const rate = calculateHourlyRate(
-        profile.membership_tier,
-        new Date(booking.booking_date + "T00:00:00"),
-        slot,
-        pricingConfig,
-        { segment: profile.custom_segment },
-      );
-      total += rate;
-    }
-    return total;
+    return calculateExtensionCost(
+      profile.membership_tier,
+      new Date(booking.booking_date + "T00:00:00"),
+      booking.end_time.slice(0, 5),
+      selectedHours,
+      pricingConfig,
+      { segment: profile.custom_segment },
+    );
   }, [profile, pricingConfig, booking, selectedHours]);
 
   const isPeak = useMemo(() => {

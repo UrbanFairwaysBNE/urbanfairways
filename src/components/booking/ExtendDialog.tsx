@@ -189,7 +189,7 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
       if (data?.error) throw new Error(data.error);
       toast.dismiss(t);
       const p = data.payment || {};
-      let msg = `Extended by ${selectedHours}hr!`;
+      let msg = `Extended by ${durationLabel(selectedHours)}!`;
       if (p.packHoursUsed) msg += ` ${p.packHoursUsed} prepaid ${p.packHoursUsed === 1 ? "hour" : "hours"} used.`;
       if (p.chargedToCard) msg += ` $${p.chargedToCard.toFixed(2)} charged to card.`;
       if (p.chargedFromBalance && !p.chargedToCard) msg += ` $${p.chargedFromBalance.toFixed(2)} from balance.`;

@@ -43,6 +43,9 @@ interface Booking {
   /** True when this is a coaching lesson booked FOR the signed-in user by their coach */
   isLessonAsClient?: boolean;
   coach_name?: string;
+  /** True when this booking was created by the signed-in coach for a client */
+  isCoachBooking?: boolean;
+  client_name?: string;
 }
 
 

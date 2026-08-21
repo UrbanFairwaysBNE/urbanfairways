@@ -16,19 +16,27 @@ import { toast } from "sonner";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { isHubHost } from "@/lib/hub-host";
 import { useTenant } from "@/config/tenant";
+import { useCasualRates } from "@/hooks/useCasualRates";
 
-const PRESET_AMOUNTS = [35, 70, 105, 175, 350];
+/** Gift amounts are whole hours of bay time at the casual peak rate. */
+const HOUR_OPTIONS = [1, 2, 3, 4, 6];
 type DeliveryMethod = "email_recipient" | "print_to_sender" | "both";
 
 
 function GiftContent() {
   const { tenant } = useTenant();
+  const { peakRate } = useCasualRates();
   const [params] = useSearchParams();
   const success = params.get("success") === "1";
   const cancelled = params.get("cancelled") === "1";
 
-  const [amount, setAmount] = useState<number>(70);
+  const hourlyRate = peakRate > 0 ? peakRate : 55;
+  const presetAmounts = HOUR_OPTIONS.map((h) => Math.round(h * hourlyRate));
+
+  const [hours, setHours] = useState<number>(2);
+  const amount = Math.round(hours * hourlyRate);
   const [customAmount, setCustomAmount] = useState<string>("");
+
   const [recipientName, setRecipientName] = useState("");
   const [recipientEmail, setRecipientEmail] = useState("");
   const [senderName, setSenderName] = useState("");

@@ -1424,10 +1424,12 @@ export default function AdminSettings() {
                       <div className="space-y-2">
                         {customersWithPricing.map((customer) => (
                           <div key={customer.id} className="flex items-center justify-between p-3 border rounded-lg">
-                            <div>
+                            <div className="min-w-0">
                               <span className="font-medium">{customer.first_name} {customer.last_name}</span>
                               <Badge className="ml-2 text-xs" variant="secondary">{customer.membership_tier}</Badge>
+                              <div className="text-xs text-muted-foreground truncate">{customer.email}</div>
                             </div>
+
                             <div className="flex items-center gap-2">
                               <span className="font-bold text-primary">
                                 {customer.custom_hourly_rate != null && `$${customer.custom_hourly_rate}/hr off-peak`}
@@ -1462,11 +1464,15 @@ export default function AdminSettings() {
                               setNewCustomPeakRate(customer.custom_hourly_rate_peak?.toString() || "");
                               setCustomerSearch("");
                             }}
-                            className="w-full p-2 text-left text-sm hover:bg-muted/50 flex items-center justify-between border-b last:border-b-0"
+                            className="w-full p-2 text-left text-sm hover:bg-muted/50 flex items-center justify-between gap-2 border-b last:border-b-0"
                           >
-                            <span>{customer.first_name} {customer.last_name}</span>
-                            <Badge variant="outline" className="text-xs">{customer.membership_tier}</Badge>
+                            <span className="flex flex-col min-w-0">
+                              <span className="truncate">{customer.first_name} {customer.last_name}</span>
+                              <span className="text-xs text-muted-foreground truncate">{customer.email}</span>
+                            </span>
+                            <Badge variant="outline" className="text-xs shrink-0">{customer.membership_tier}</Badge>
                           </button>
+
                         ))}
                       </div>
                     )}
@@ -1474,10 +1480,14 @@ export default function AdminSettings() {
 
                   {selectedPricingCustomer && (
                     <div className="p-4 border rounded-lg bg-muted/30 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium">{selectedPricingCustomer.first_name} {selectedPricingCustomer.last_name}</span>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="flex flex-col min-w-0">
+                          <span className="font-medium truncate">{selectedPricingCustomer.first_name} {selectedPricingCustomer.last_name}</span>
+                          <span className="text-xs text-muted-foreground truncate">{selectedPricingCustomer.email}</span>
+                        </span>
                         <Button variant="ghost" size="sm" onClick={() => setSelectedPricingCustomer(null)}>Cancel</Button>
                       </div>
+
                       <div className="grid gap-2 sm:grid-cols-2">
                         <div className="space-y-1">
                           <Label className="text-xs">Off-peak rate ($/hr)</Label>

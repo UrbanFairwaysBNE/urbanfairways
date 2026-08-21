@@ -421,58 +421,18 @@ export function SGTLeagueMembers() {
                       <TableRow key={member.user_id}>
                         <TableCell>
                           <div>
-                            <p className="font-medium">{member.user_name || "Unknown"}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium">{member.user_name || "Unknown"}</p>
+                              {member.nickname && (
+                                <Badge variant="secondary" className="font-normal">
+                                  {member.nickname}
+                                </Badge>
+                              )}
+                            </div>
                             {member.email && (
                               <p className="text-xs text-muted-foreground">{member.email}</p>
                             )}
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          {editingNicknameId === member.user_id ? (
-                            <div className="flex items-center gap-1">
-                              <Input
-                                value={editNicknameValue}
-                                onChange={(e) => setEditNicknameValue(e.target.value)}
-                                className="w-36 h-8"
-                                placeholder="Display name"
-                                maxLength={40}
-                                autoFocus
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter") handleSaveNickname(member.user_id);
-                                  if (e.key === "Escape") {
-                                    setEditingNicknameId(null);
-                                    setEditNicknameValue("");
-                                  }
-                                }}
-                              />
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => handleSaveNickname(member.user_id)}
-                                disabled={updateNicknameMutation.isPending}
-                              >
-                                {updateNicknameMutation.isPending ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  <Check className="h-4 w-4 text-primary" />
-                                )}
-                              </Button>
-                            </div>
-                          ) : (
-                            <button
-                              type="button"
-                              className="flex items-center gap-1.5 text-left hover:underline"
-                              onClick={() => {
-                                setEditingNicknameId(member.user_id);
-                                setEditNicknameValue(member.nickname ?? "");
-                              }}
-                            >
-                              <span className={member.nickname ? "font-medium" : "text-muted-foreground"}>
-                                {member.nickname || "Add nickname"}
-                              </span>
-                              <Pencil className="h-3 w-3 text-muted-foreground" />
-                            </button>
-                          )}
                         </TableCell>
                         <TableCell className="text-center">
                           <Badge variant="outline">{member.user_id}</Badge>

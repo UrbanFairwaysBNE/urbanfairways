@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
-import { loadTiers, calculateTierHourlyRate, resolveCustomRate, TierRow } from "../_shared/tiers.ts";
+import { loadTiers, calculateTierHourlyRate, resolveCustomRate, findTier, TierRow } from "../_shared/tiers.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -39,8 +39,17 @@ function calculateHourlyRate(
   );
 }
 
-// Sum the cost of `hours` hourly slots starting at startTime on dateStr,
-// so peak/off-peak boundaries are respected across the extension.
+// Cost of extending a session, in 30-minute increments.
+// A tier may define flat extension pricing (`extend_60min_price`, optionally
+// `extend_30min_price`) in `pricing_config` — when set it applies regardless of
+// peak/off-peak. Otherwise we sum the standard rate for each half-hour slot so
+// peak boundaries are respected across the extension.
+function addMinutes(time: string, minutes: number): string {
+  const [h, m] = time.split(":").map(Number);
+  const total = h * 60 + (m || 0) + minutes;
+  return `${Math.floor(total / 60).toString().padStart(2, "0")}:${(total % 60).toString().padStart(2, "0")}`;
+}
+
 function calculateExtensionCost(
   tier: string,
   dateStr: string,
@@ -50,14 +59,24 @@ function calculateExtensionCost(
   customHourlyRate: number | null,
   customHourlyRatePeak: number | null = null,
 ): number {
-  const [h, m] = startTime.split(":").map(Number);
-  let total = 0;
-  for (let i = 0; i < hours; i++) {
-    const slotHour = h + i;
-    const slot = `${slotHour.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
-    total += calculateHourlyRate(tier, dateStr, slot, tiers, customHourlyRate, customHourlyRatePeak);
+  const halves = Math.round(hours * 2);
+  const config = findTier(tiers, tier);
+  const flatHour = config?.extend_60min_price ?? null;
+  const hasCustomRate =
+    resolveCustomRate(customHourlyRate, customHourlyRatePeak, true) !== null ||
+    resolveCustomRate(customHourlyRate, customHourlyRatePeak, false) !== null;
+
+  if (flatHour !== null && !hasCustomRate) {
+    const flatHalf = config?.extend_30min_price ?? flatHour / 2;
+    return Math.round((Math.floor(halves / 2) * flatHour + (halves % 2) * flatHalf) * 100) / 100;
   }
-  return total;
+
+  let total = 0;
+  for (let i = 0; i < halves; i++) {
+    const slot = addMinutes(startTime, i * 30);
+    total += calculateHourlyRate(tier, dateStr, slot, tiers, customHourlyRate, customHourlyRatePeak) / 2;
+  }
+  return Math.round(total * 100) / 100;
 }
 
 serve(async (req) => {
@@ -87,8 +106,12 @@ serve(async (req) => {
     const use_pack_hours: boolean = body.use_pack_hours === true;
 
 
-    if (!booking_id || !additional_hours || additional_hours < 1 || additional_hours > 3) {
-      throw new Error("Invalid request: additional_hours must be 1, 2 or 3");
+    if (
+      !booking_id ||
+      !additional_hours ||
+      ![0.5, 1, 1.5, 2, 2.5, 3].includes(additional_hours)
+    ) {
+      throw new Error("Invalid request: additional_hours must be between 0.5 and 3, in 30-minute steps");
     }
 
     // Fetch booking
@@ -117,10 +140,8 @@ serve(async (req) => {
     const currentDuration = Number(booking.duration_hours);
     const newDuration = currentDuration + additional_hours;
 
-    // Compute new end_time
-    const [eh, em] = booking.end_time.split(":").map(Number);
-    const newEndHour = eh + additional_hours;
-    const new_end_time = `${newEndHour.toString().padStart(2, "0")}:${em.toString().padStart(2, "0")}`;
+    // Compute new end_time (30-minute precision)
+    const new_end_time = addMinutes(String(booking.end_time).slice(0, 5), Math.round(additional_hours * 60));
 
     // Operating hours check
     const dayOfWeek = new Date(booking.booking_date + "T00:00:00").getDay();
@@ -202,7 +223,7 @@ serve(async (req) => {
           _user_id: user.id,
           _hours: available,
           _booking_id: booking_id,
-          _description: `Extend booking by ${additional_hours}hr`,
+          _description: `Extend booking by ${additional_hours * 60} min`,
         });
         if (consumeErr) throw new Error(`Could not use prepaid hours: ${consumeErr.message}`);
         packHoursUsed = available;
@@ -244,7 +265,7 @@ serve(async (req) => {
           payment_method: pms.data[0].id,
           off_session: true,
           confirm: true,
-          description: `Extend booking ${booking_id} by ${additional_hours}hr`,
+          description: `Extend booking ${booking_id} by ${additional_hours * 60} min`,
           metadata: { booking_id, user_id: user.id, type: "extend_booking" },
         });
         paymentResult = {
@@ -287,7 +308,7 @@ serve(async (req) => {
           balance_before: currentBalance,
           balance_after: currentBalance - balanceUsed,
           transaction_type: "booking_payment",
-          description: `Extend booking by ${additional_hours}hr`,
+          description: `Extend booking by ${additional_hours * 60} min`,
         });
       } catch (e) {
         console.error("[EXTEND] Transaction log failed (non-blocking):", e);

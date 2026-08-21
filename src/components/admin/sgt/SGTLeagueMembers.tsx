@@ -223,7 +223,7 @@ export function SGTLeagueMembers() {
     onSuccess: ({ nickname }) => {
       queryClient.invalidateQueries({ queryKey: ["sgt-league-members"] });
       queryClient.invalidateQueries({ queryKey: ["sgt-nicknames"] });
-      setEditingNicknameId(null);
+      setNicknameMember(null);
       setEditNicknameValue("");
       toast({
         title: nickname ? "Nickname saved" : "Nickname cleared",

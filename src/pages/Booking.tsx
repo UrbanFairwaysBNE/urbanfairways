@@ -564,16 +564,6 @@ export default function Booking() {
     }
   };
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-accent" />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) return null;
-
   // Calculate rate with peak/off-peak logic and multi-bay restriction
   const rateInfo = selectedDate && selectedTime 
     ? getRateInfo(selectedDate, selectedTime, selectedDuration, selectedBayId)
@@ -610,6 +600,16 @@ export default function Booking() {
       setUsePartialBalance(true);
     }
   }, [depositBalance, amountAfterHours]);
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-accent" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) return null;
 
 
 

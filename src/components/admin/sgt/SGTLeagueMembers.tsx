@@ -9,7 +9,43 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useTenant } from "@/config/tenant";
 import { useToast } from "@/hooks/use-toast";
-import { Users, Search, Pencil, Check, X, Loader2, Info, Lock } from "lucide-react";
+import {
+  Users,
+  Search,
+  Pencil,
+  Check,
+  X,
+  Loader2,
+  Info,
+  Lock,
+  MoreHorizontal,
+  Tag,
+  UserMinus,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -47,8 +83,9 @@ export function SGTLeagueMembers() {
   const [searchQuery, setSearchQuery] = useState("");
   const [editingMemberId, setEditingMemberId] = useState<number | null>(null);
   const [editHandicapValue, setEditHandicapValue] = useState<string>("");
-  const [editingNicknameId, setEditingNicknameId] = useState<number | null>(null);
+  const [nicknameMember, setNicknameMember] = useState<LeagueMember | null>(null);
   const [editNicknameValue, setEditNicknameValue] = useState<string>("");
+  const [removeMember, setRemoveMember] = useState<LeagueMember | null>(null);
 
   // Global handicap settings
   const { data: settings } = useQuery({
@@ -186,7 +223,7 @@ export function SGTLeagueMembers() {
     onSuccess: ({ nickname }) => {
       queryClient.invalidateQueries({ queryKey: ["sgt-league-members"] });
       queryClient.invalidateQueries({ queryKey: ["sgt-nicknames"] });
-      setEditingNicknameId(null);
+      setNicknameMember(null);
       setEditNicknameValue("");
       toast({
         title: nickname ? "Nickname saved" : "Nickname cleared",
@@ -208,6 +245,34 @@ export function SGTLeagueMembers() {
     const value = editNicknameValue.trim();
     updateNicknameMutation.mutate({ userId, nickname: value === "" ? null : value.slice(0, 40) });
   };
+
+  /** Removes the player from the SGT club and clears their local league rows. */
+  const removeMemberMutation = useMutation({
+    mutationFn: async (userId: number) => {
+      const { data, error } = await supabase.functions.invoke("sgt-member-management", {
+        body: { action: "delete-member", userId },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sgt-league-members"] });
+      queryClient.invalidateQueries({ queryKey: ["sgt-members"] });
+      setRemoveMember(null);
+      toast({
+        title: "Member removed",
+        description: "They've been removed from the club and league standings.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to remove member",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleSaveHcp = (userId: number) => {
     const value = editHandicapValue.trim();
@@ -339,12 +404,11 @@ export function SGTLeagueMembers() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead>Nickname</TableHead>
                     <TableHead className="text-center">SGT ID</TableHead>
                     <TableHead className="text-center">Combo HCP</TableHead>
                     <TableHead className="text-center">Custom HCP</TableHead>
                     <TableHead className="text-center">Rounds</TableHead>
-                    <TableHead className="text-center w-24">Edit</TableHead>
+                    <TableHead className="text-center w-20">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -357,58 +421,18 @@ export function SGTLeagueMembers() {
                       <TableRow key={member.user_id}>
                         <TableCell>
                           <div>
-                            <p className="font-medium">{member.user_name || "Unknown"}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium">{member.user_name || "Unknown"}</p>
+                              {member.nickname && (
+                                <Badge variant="secondary" className="font-normal">
+                                  {member.nickname}
+                                </Badge>
+                              )}
+                            </div>
                             {member.email && (
                               <p className="text-xs text-muted-foreground">{member.email}</p>
                             )}
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          {editingNicknameId === member.user_id ? (
-                            <div className="flex items-center gap-1">
-                              <Input
-                                value={editNicknameValue}
-                                onChange={(e) => setEditNicknameValue(e.target.value)}
-                                className="w-36 h-8"
-                                placeholder="Display name"
-                                maxLength={40}
-                                autoFocus
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter") handleSaveNickname(member.user_id);
-                                  if (e.key === "Escape") {
-                                    setEditingNicknameId(null);
-                                    setEditNicknameValue("");
-                                  }
-                                }}
-                              />
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => handleSaveNickname(member.user_id)}
-                                disabled={updateNicknameMutation.isPending}
-                              >
-                                {updateNicknameMutation.isPending ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  <Check className="h-4 w-4 text-primary" />
-                                )}
-                              </Button>
-                            </div>
-                          ) : (
-                            <button
-                              type="button"
-                              className="flex items-center gap-1.5 text-left hover:underline"
-                              onClick={() => {
-                                setEditingNicknameId(member.user_id);
-                                setEditNicknameValue(member.nickname ?? "");
-                              }}
-                            >
-                              <span className={member.nickname ? "font-medium" : "text-muted-foreground"}>
-                                {member.nickname || "Add nickname"}
-                              </span>
-                              <Pencil className="h-3 w-3 text-muted-foreground" />
-                            </button>
-                          )}
                         </TableCell>
                         <TableCell className="text-center">
                           <Badge variant="outline">{member.user_id}</Badge>
@@ -491,13 +515,35 @@ export function SGTLeagueMembers() {
                               </Button>
                             </div>
                           ) : (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => startEditing(member)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button size="sm" variant="ghost" aria-label="Member actions">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-52">
+                                <DropdownMenuItem onClick={() => startEditing(member)}>
+                                  <Pencil className="h-4 w-4 mr-2" />
+                                  Edit Handicap
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setNicknameMember(member);
+                                    setEditNicknameValue(member.nickname ?? "");
+                                  }}
+                                >
+                                  <Tag className="h-4 w-4 mr-2" />
+                                  Nickname
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="text-destructive focus:text-destructive"
+                                  onClick={() => setRemoveMember(member)}
+                                >
+                                  <UserMinus className="h-4 w-4 mr-2" />
+                                  Remove from Club
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           )}
                         </TableCell>
                       </TableRow>
@@ -514,6 +560,91 @@ export function SGTLeagueMembers() {
           )}
         </CardContent>
       </Card>
+
+      {/* Nickname editor */}
+      <Dialog
+        open={nicknameMember !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setNicknameMember(null);
+            setEditNicknameValue("");
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Leaderboard nickname</DialogTitle>
+            <DialogDescription>
+              {`Shown instead of ${nicknameMember?.user_name || "their SGT username"} on leaderboards and TV boards. Leave blank to use the SGT username.`}
+            </DialogDescription>
+          </DialogHeader>
+          <Input
+            value={editNicknameValue}
+            onChange={(e) => setEditNicknameValue(e.target.value)}
+            placeholder="Display name"
+            maxLength={40}
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && nicknameMember) handleSaveNickname(nicknameMember.user_id);
+            }}
+          />
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setNicknameMember(null);
+                setEditNicknameValue("");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => nicknameMember && handleSaveNickname(nicknameMember.user_id)}
+              disabled={updateNicknameMutation.isPending}
+            >
+              {updateNicknameMutation.isPending && (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              )}
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Remove from club confirmation */}
+      <AlertDialog
+        open={removeMember !== null}
+        onOpenChange={(open) => !open && setRemoveMember(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {`Remove ${removeMember?.user_name || "this player"} from the club?`}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              They'll be removed from the SGT club and the tour, and will stop appearing in
+              League Members and weekly auto-registration. Their SGT login stays intact and they
+              can be added back later.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={removeMemberMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={removeMemberMutation.isPending}
+              onClick={(e) => {
+                e.preventDefault();
+                if (removeMember) removeMemberMutation.mutate(removeMember.user_id);
+              }}
+            >
+              {removeMemberMutation.isPending && (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              )}
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

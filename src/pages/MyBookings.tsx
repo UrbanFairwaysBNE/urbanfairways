@@ -59,6 +59,7 @@ const MyBookings = () => {
   const [rescheduleBooking, setRescheduleBooking] = useState<Booking | null>(null);
   const [extendBooking, setExtendBooking] = useState<Booking | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [isCoach, setIsCoach] = useState(false);
 
   // Note: do NOT redirect unauthenticated users away — we need to preserve the
   // URL (including ?extend=<id>) so that after they sign in inline, the extend

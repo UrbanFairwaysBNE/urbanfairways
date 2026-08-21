@@ -29,11 +29,15 @@ export interface TierConfig {
   marketing_note: string | null;
   is_highlighted: boolean;
   show_on_marketing: boolean;
+  /** Flat price for a 30-minute extension. Null = half the standard hourly rate. */
+  extend_30min_price: number | null;
+  /** Flat price per hour of extension. Null = standard peak/off-peak hourly rate. */
+  extend_60min_price: number | null;
 }
 
 /** Columns to select when loading tiers from `pricing_config`. */
 export const TIER_SELECT =
-  "id, tier, display_name, hourly_rate, off_peak_hourly_rate, weekly_subscription_price, stripe_product_id, stripe_price_id, display_order, is_subscription, description, features, restrictions, restricted_to_off_peak, grants_league_access, grants_range_access, single_bay_at_peak, is_default, requires_verification, marketing_tag, marketing_badge, marketing_note, is_highlighted, show_on_marketing";
+  "id, tier, display_name, hourly_rate, off_peak_hourly_rate, weekly_subscription_price, stripe_product_id, stripe_price_id, display_order, is_subscription, description, features, restrictions, restricted_to_off_peak, grants_league_access, grants_range_access, single_bay_at_peak, is_default, requires_verification, marketing_tag, marketing_badge, marketing_note, is_highlighted, show_on_marketing, extend_30min_price, extend_60min_price";
 
 /** Normalise a raw `pricing_config` row into a TierConfig. */
 export function normaliseTier(row: Record<string, unknown>): TierConfig {

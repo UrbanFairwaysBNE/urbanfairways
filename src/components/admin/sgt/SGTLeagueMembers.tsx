@@ -250,7 +250,7 @@ export function SGTLeagueMembers() {
   const removeMemberMutation = useMutation({
     mutationFn: async (userId: number) => {
       const { data, error } = await supabase.functions.invoke("sgt-member-management", {
-        body: { action: "delete-member", params: { userId } },
+        body: { action: "delete-member", userId },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);

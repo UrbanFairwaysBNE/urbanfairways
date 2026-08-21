@@ -246,6 +246,34 @@ export function SGTLeagueMembers() {
     updateNicknameMutation.mutate({ userId, nickname: value === "" ? null : value.slice(0, 40) });
   };
 
+  /** Removes the player from the SGT club and clears their local league rows. */
+  const removeMemberMutation = useMutation({
+    mutationFn: async (userId: number) => {
+      const { data, error } = await supabase.functions.invoke("sgt-member-management", {
+        body: { action: "delete-member", params: { userId } },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sgt-league-members"] });
+      queryClient.invalidateQueries({ queryKey: ["sgt-members"] });
+      setRemoveMember(null);
+      toast({
+        title: "Member removed",
+        description: "They've been removed from the club and league standings.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to remove member",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSaveHcp = (userId: number) => {
     const value = editHandicapValue.trim();
     if (value === "") {

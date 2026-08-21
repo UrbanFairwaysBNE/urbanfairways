@@ -15,10 +15,12 @@ export interface TierRow {
   is_default: boolean;
   requires_verification: boolean;
   display_order: number;
+  extend_30min_price: number | null;
+  extend_60min_price: number | null;
 }
 
 export const TIER_SELECT =
-  "tier, display_name, hourly_rate, weekly_subscription_price, off_peak_hourly_rate, restricted_to_off_peak, single_bay_at_peak, grants_league_access, grants_range_access, is_subscription, is_default, requires_verification, display_order";
+  "tier, display_name, hourly_rate, weekly_subscription_price, off_peak_hourly_rate, restricted_to_off_peak, single_bay_at_peak, grants_league_access, grants_range_access, is_subscription, is_default, requires_verification, display_order, extend_30min_price, extend_60min_price";
 
 /** Load every configured tier. Returns [] for a venue with no pricing yet. */
 export async function loadTiers(
@@ -41,6 +43,14 @@ export async function loadTiers(
     is_default: !!r.is_default,
     requires_verification: !!r.requires_verification,
     display_order: Number(r.display_order ?? 0),
+    extend_30min_price:
+      r.extend_30min_price === null || r.extend_30min_price === undefined
+        ? null
+        : Number(r.extend_30min_price),
+    extend_60min_price:
+      r.extend_60min_price === null || r.extend_60min_price === undefined
+        ? null
+        : Number(r.extend_60min_price),
   }));
 }
 

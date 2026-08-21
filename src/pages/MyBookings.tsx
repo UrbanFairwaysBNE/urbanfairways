@@ -96,6 +96,16 @@ const MyBookings = () => {
 
     setIsLoading(true);
     try {
+      // Determine whether the signed-in user is a coach
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("is_coach")
+        .eq("user_id", user.id)
+        .single();
+      if (profileError) throw profileError;
+      const userIsCoach = !!profile?.is_coach;
+      setIsCoach(userIsCoach);
+
       const { data, error } = await supabase
         .from("bookings")
         .select(`
@@ -146,9 +156,33 @@ const MyBookings = () => {
         });
       }
 
+      // Look up client names for any bookings created by this coach for clients
+      const clientIds = Array.from(
+        new Set(
+          rows
+            .filter((b: any) => userIsCoach && b.user_id === user.id && b.client_user_id)
+            .map((b: any) => b.client_user_id as string)
+        )
+      );
+      const clientNames = new Map<string, string>();
+      if (clientIds.length > 0) {
+        const { data: clients } = await supabase
+          .from("profiles")
+          .select("user_id, first_name, last_name")
+          .in("user_id", clientIds);
+        (clients || []).forEach((c: any) => {
+          clientNames.set(
+            c.user_id,
+            `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() || "Customer"
+          );
+        });
+      }
+
       const formattedBookings = rows.map((booking: any) => {
         const isLessonAsClient =
           booking.client_user_id === user.id && booking.user_id !== user.id;
+        const isCoachBooking =
+          userIsCoach && booking.user_id === user.id && !!booking.client_user_id;
         return {
           ...booking,
           bay_name: booking.bays?.name,
@@ -158,6 +192,10 @@ const MyBookings = () => {
           isLessonAsClient,
           coach_name: isLessonAsClient
             ? coachNames.get(booking.user_id) || "Your coach"
+            : undefined,
+          isCoachBooking,
+          client_name: isCoachBooking
+            ? clientNames.get(booking.client_user_id) || "Customer"
             : undefined,
         };
       });

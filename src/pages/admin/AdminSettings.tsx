@@ -1480,10 +1480,14 @@ export default function AdminSettings() {
 
                   {selectedPricingCustomer && (
                     <div className="p-4 border rounded-lg bg-muted/30 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium">{selectedPricingCustomer.first_name} {selectedPricingCustomer.last_name}</span>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="flex flex-col min-w-0">
+                          <span className="font-medium truncate">{selectedPricingCustomer.first_name} {selectedPricingCustomer.last_name}</span>
+                          <span className="text-xs text-muted-foreground truncate">{selectedPricingCustomer.email}</span>
+                        </span>
                         <Button variant="ghost" size="sm" onClick={() => setSelectedPricingCustomer(null)}>Cancel</Button>
                       </div>
+
                       <div className="grid gap-2 sm:grid-cols-2">
                         <div className="space-y-1">
                           <Label className="text-xs">Off-peak rate ($/hr)</Label>

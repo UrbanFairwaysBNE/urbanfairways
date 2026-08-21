@@ -11,8 +11,8 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Clock, Plus } from "lucide-react";
-import { calculateHourlyRate, isPeakTime } from "@/lib/pricing-utils";
-import { TierConfig, TIER_SELECT, normaliseTier } from "@/lib/tier-config";
+import { calculateExtensionCost, isPeakTime, addDurationToTime } from "@/lib/pricing-utils";
+import { TierConfig, TIER_SELECT, normaliseTier, findTier } from "@/lib/tier-config";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 
@@ -44,11 +44,10 @@ interface Props {
 
 
 
-const addHours = (time: string, hours: number) => {
-  const [h, m] = time.split(":").map(Number);
-  const nh = h + hours;
-  return `${nh.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
-};
+const addHours = (time: string, hours: number) => addDurationToTime(time.slice(0, 5), hours);
+
+/** "30 min", "1hr", "1.5hr" */
+const durationLabel = (h: number) => (h === 0.5 ? "30 min" : `${h}hr`);
 
 export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) => {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -119,44 +118,44 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
     })();
   }, [open, booking.id, booking.bay_id, booking.booking_date, booking.end_time]);
 
-  // How many whole hours can be added?
+  // How much time can be added, in 30-minute steps?
   const maxExtendHours = useMemo(() => {
     // No overall duration cap — extensions can push past the 4hr booking max
     let cap = 3;
+    const [eh, em] = booking.end_time.split(":").map(Number);
+    const endMin = eh * 60 + em;
     // next booking gap
     if (nextBookingStart) {
-      const [eh, em] = booking.end_time.split(":").map(Number);
       const [nh, nm] = nextBookingStart.split(":").map(Number);
-      const gap = (nh * 60 + nm) - (eh * 60 + em);
-      cap = Math.min(cap, Math.floor(gap / 60));
+      cap = Math.min(cap, Math.floor(((nh * 60 + nm) - endMin) / 30) / 2);
     }
     // close time gap
     if (closeTime) {
-      const [eh, em] = booking.end_time.split(":").map(Number);
       const [ch, cm] = closeTime.split(":").map(Number);
-      const gap = (ch * 60 + cm) - (eh * 60 + em);
-      cap = Math.min(cap, Math.floor(gap / 60));
+      cap = Math.min(cap, Math.floor(((ch * 60 + cm) - endMin) / 30) / 2);
     }
     return Math.max(0, Math.min(3, cap));
   }, [booking, nextBookingStart, closeTime]);
 
   const extensionCost = useMemo(() => {
     if (!profile) return 0;
-    let total = 0;
-    const [h, m] = booking.end_time.split(":").map(Number);
-    for (let i = 0; i < selectedHours; i++) {
-      const slot = `${(h + i).toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
-      const rate = calculateHourlyRate(
-        profile.membership_tier,
-        new Date(booking.booking_date + "T00:00:00"),
-        slot,
-        pricingConfig,
-        { segment: profile.custom_segment },
-      );
-      total += rate;
-    }
-    return total;
+    return calculateExtensionCost(
+      profile.membership_tier,
+      new Date(booking.booking_date + "T00:00:00"),
+      booking.end_time.slice(0, 5),
+      selectedHours,
+      pricingConfig,
+      { segment: profile.custom_segment },
+    );
   }, [profile, pricingConfig, booking, selectedHours]);
+
+  // Tiers with flat extension pricing (e.g. Casual) ignore peak/off-peak.
+  const hasFlatExtendPricing = useMemo(() => {
+    if (!profile || profile.custom_segment === "staff") return false;
+    return (
+      findTier(pricingConfig, profile.membership_tier)?.extend_60min_price != null
+    );
+  }, [profile, pricingConfig]);
 
   const isPeak = useMemo(() => {
     return isPeakTime(
@@ -164,6 +163,13 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
       booking.end_time,
     );
   }, [booking]);
+
+  // Keep the selection inside what's actually available (e.g. only 30 min left).
+  useEffect(() => {
+    if (maxExtendHours > 0 && selectedHours > maxExtendHours) {
+      setSelectedHours(maxExtendHours);
+    }
+  }, [maxExtendHours, selectedHours]);
 
   const balance = profile?.deposit_balance ?? 0;
   const packHoursAvailable = Math.min(packHoursBalance, selectedHours);
@@ -191,7 +197,7 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
       if (data?.error) throw new Error(data.error);
       toast.dismiss(t);
       const p = data.payment || {};
-      let msg = `Extended by ${selectedHours}hr!`;
+      let msg = `Extended by ${durationLabel(selectedHours)}!`;
       if (p.packHoursUsed) msg += ` ${p.packHoursUsed} prepaid ${p.packHoursUsed === 1 ? "hour" : "hours"} used.`;
       if (p.chargedToCard) msg += ` $${p.chargedToCard.toFixed(2)} charged to card.`;
       if (p.chargedFromBalance && !p.chargedToCard) msg += ` $${p.chargedFromBalance.toFixed(2)} from balance.`;
@@ -239,18 +245,18 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
                 <Clock className="h-4 w-4" />
                 Add time
               </p>
-              <div className="grid grid-cols-3 gap-2">
-                {[1, 2, 3].map((h) => (
+              <div className="grid grid-cols-4 gap-2">
+                {[0.5, 1, 2, 3].map((h) => (
                   <Button
                     key={h}
                     type="button"
                     variant={selectedHours === h ? "default" : "outline"}
                     disabled={h > maxExtendHours}
                     onClick={() => setSelectedHours(h)}
-                    className="h-14 flex-col gap-1"
+                    className="h-14 flex-col gap-1 px-1"
                   >
-                    <span className="text-base font-semibold">+{h}hr</span>
-                    <span className="text-xs opacity-80">until {addHours(booking.end_time, h).slice(0, 5)}</span>
+                    <span className="text-sm font-semibold">+{durationLabel(h)}</span>
+                    <span className="text-[10px] opacity-80">until {addHours(booking.end_time, h)}</span>
                   </Button>
                 ))}
               </div>
@@ -258,7 +264,10 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
 
             <div className="bg-muted rounded-lg p-3 text-sm space-y-1">
               <div className="flex justify-between">
-                <span>Additional {selectedHours}hr ({isPeak ? "peak" : "off-peak"})</span>
+                <span>
+                  Additional {durationLabel(selectedHours)}
+                  {hasFlatExtendPricing ? "" : ` (${isPeak ? "peak" : "off-peak"})`}
+                </span>
                 <span className="font-semibold">${extensionCost.toFixed(2)}</span>
               </div>
               {packHoursBalance > 0 && extensionCost > 0 && (

@@ -32,9 +32,14 @@ interface TierRow {
   requires_verification: boolean;
   display_order: number;
   stripe_price_id: string | null;
+  extend_30min_price: number | null;
+  extend_60min_price: number | null;
 }
 
-type Draft = Record<string, { weekly: string; hourly: string; offPeak: string }>;
+type Draft = Record<
+  string,
+  { weekly: string; hourly: string; offPeak: string; ext30: string; ext60: string }
+>;
 
 const num = (v: string): number | null => {
   const t = v.trim();
@@ -64,7 +69,7 @@ export const PricingRatesSettings = () => {
     const { data, error } = await supabase
       .from("pricing_config")
       .select(
-        "id,tier,display_name,hourly_rate,off_peak_hourly_rate,weekly_subscription_price,is_default,is_subscription,requires_verification,display_order,stripe_price_id",
+        "id,tier,display_name,hourly_rate,off_peak_hourly_rate,weekly_subscription_price,is_default,is_subscription,requires_verification,display_order,stripe_price_id,extend_30min_price,extend_60min_price",
       )
       .order("display_order");
     if (error) {
@@ -80,6 +85,8 @@ export const PricingRatesSettings = () => {
               weekly: str(r.weekly_subscription_price),
               hourly: str(r.hourly_rate),
               offPeak: str(r.off_peak_hourly_rate),
+              ext30: str(r.extend_30min_price),
+              ext60: str(r.extend_60min_price),
             },
           ]),
         ),
@@ -101,7 +108,9 @@ export const PricingRatesSettings = () => {
     return (
       d.weekly !== str(row.weekly_subscription_price) ||
       d.hourly !== str(row.hourly_rate) ||
-      d.offPeak !== str(row.off_peak_hourly_rate)
+      d.offPeak !== str(row.off_peak_hourly_rate) ||
+      d.ext30 !== str(row.extend_30min_price) ||
+      d.ext60 !== str(row.extend_60min_price)
     );
   };
 
@@ -163,6 +172,8 @@ export const PricingRatesSettings = () => {
         hourly_rate: hourly,
         off_peak_hourly_rate: num(d.offPeak),
         weekly_subscription_price: weekly,
+        extend_30min_price: num(d.ext30),
+        extend_60min_price: num(d.ext60),
       })
       .eq("id", row.id);
     setSavingId(null);
@@ -256,6 +267,43 @@ export const PricingRatesSettings = () => {
             />
           </div>
 
+
+          <div className="space-y-1.5 rounded-md border border-border p-3">
+            <Label className="text-sm font-medium">Extension pricing — optional</Label>
+            <p className="text-xs text-muted-foreground">
+              Flat prices used when a customer extends a live session. Leave blank to charge the
+              normal peak / off-peak hourly rate.
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2 pt-1">
+              <div className="space-y-1.5">
+                <Label htmlFor={`ext30-${row.id}`}>Extend 30 minutes ($)</Label>
+                <Input
+                  id={`ext30-${row.id}`}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputMode="decimal"
+                  value={d.ext30}
+                  onChange={(e) => setField(row.id, "ext30", e.target.value)}
+                  placeholder="Half the hourly extension price"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor={`ext60-${row.id}`}>Extend per hour ($)</Label>
+                <Input
+                  id={`ext60-${row.id}`}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputMode="decimal"
+                  value={d.ext60}
+                  onChange={(e) => setField(row.id, "ext60", e.target.value)}
+                  placeholder="Standard hourly rate"
+                />
+              </div>
+            </div>
+          </div>
+
           {weeklyChanged(row) && (
             <div className="flex gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
               <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
@@ -330,6 +378,43 @@ export const PricingRatesSettings = () => {
               <p className="text-xs text-muted-foreground">
                 Mon–Fri 5:30am–4:00pm and Sat–Sun 5:30am–10:00am.
               </p>
+            </div>
+          </div>
+
+
+          <div className="space-y-1.5 rounded-md border border-border p-3">
+            <Label className="text-sm font-medium">Extension pricing — optional</Label>
+            <p className="text-xs text-muted-foreground">
+              Flat prices used when a customer extends a live session. Leave blank to charge the
+              normal peak / off-peak hourly rate.
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2 pt-1">
+              <div className="space-y-1.5">
+                <Label htmlFor={`ext30-${row.id}`}>Extend 30 minutes ($)</Label>
+                <Input
+                  id={`ext30-${row.id}`}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputMode="decimal"
+                  value={d.ext30}
+                  onChange={(e) => setField(row.id, "ext30", e.target.value)}
+                  placeholder="Half the hourly extension price"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor={`ext60-${row.id}`}>Extend per hour ($)</Label>
+                <Input
+                  id={`ext60-${row.id}`}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputMode="decimal"
+                  value={d.ext60}
+                  onChange={(e) => setField(row.id, "ext60", e.target.value)}
+                  placeholder="Standard hourly rate"
+                />
+              </div>
             </div>
           </div>
 

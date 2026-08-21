@@ -75,6 +75,14 @@ export function normaliseTier(row: Record<string, unknown>): TierConfig {
     marketing_note: (row.marketing_note as string | null) ?? null,
     is_highlighted: !!row.is_highlighted,
     show_on_marketing: row.show_on_marketing === undefined ? true : !!row.show_on_marketing,
+    extend_30min_price:
+      row.extend_30min_price === null || row.extend_30min_price === undefined
+        ? null
+        : Number(row.extend_30min_price),
+    extend_60min_price:
+      row.extend_60min_price === null || row.extend_60min_price === undefined
+        ? null
+        : Number(row.extend_60min_price),
   };
 }
 

@@ -57,22 +57,46 @@ serve(async (req) => {
       });
     }
 
-    // Escape PostgREST `or` filter separators
-    const q = raw.replace(/[,()*]/g, " ").slice(0, 60);
+    // Split into tokens so multi-word queries like "sam m" match first name in
+    // one column and last name in another.
+    const tokens = raw
+      .replace(/[,()*%]/g, " ")
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 4)
+      .map((t) => t.slice(0, 40));
 
-    const { data, error } = await supabaseAdmin
+    let query = supabaseAdmin
       .from("profiles")
       .select("user_id, first_name, last_name, email, phone")
-      .or(`first_name.ilike.%${q}%,last_name.ilike.%${q}%,email.ilike.%${q}%`)
-      .neq("user_id", user.id)
-      .order("last_name")
-      .limit(15);
+      .neq("user_id", user.id);
+
+    // Every token must match somewhere (first name, last name, email or phone)
+    for (const t of tokens) {
+      query = query.or(
+        `first_name.ilike.%${t}%,last_name.ilike.%${t}%,email.ilike.%${t}%,phone.ilike.%${t}%`,
+      );
+    }
+
+    const { data, error } = await query.order("last_name").limit(50);
 
     if (error) throw error;
 
-    return new Response(JSON.stringify({ clients: data ?? [] }), {
+    // Rank exact "first last" matches first
+    const full = tokens.join(" ");
+    const ranked = [...(data ?? [])]
+      .sort((a, b) => {
+        const af = `${a.first_name ?? ""} ${a.last_name ?? ""}`.toLowerCase();
+        const bf = `${b.first_name ?? ""} ${b.last_name ?? ""}`.toLowerCase();
+        return (af.includes(full) ? 0 : 1) - (bf.includes(full) ? 0 : 1);
+      })
+      .slice(0, 15);
+
+    return new Response(JSON.stringify({ clients: ranked }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+
   } catch (e) {
     return new Response(JSON.stringify({ error: (e as Error).message }), {
       status: 500,

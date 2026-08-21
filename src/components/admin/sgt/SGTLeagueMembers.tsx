@@ -404,12 +404,11 @@ export function SGTLeagueMembers() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead>Nickname</TableHead>
                     <TableHead className="text-center">SGT ID</TableHead>
                     <TableHead className="text-center">Combo HCP</TableHead>
                     <TableHead className="text-center">Custom HCP</TableHead>
                     <TableHead className="text-center">Rounds</TableHead>
-                    <TableHead className="text-center w-24">Edit</TableHead>
+                    <TableHead className="text-center w-20">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

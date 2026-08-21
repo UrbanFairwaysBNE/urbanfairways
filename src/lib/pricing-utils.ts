@@ -112,6 +112,46 @@ export function addDurationToTime(startTime: string, durationHours: number): str
   return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
 }
 
+/**
+ * Price of extending a live session by `hours` (0.5 increments allowed).
+ *
+ * A tier may define flat extension pricing in `pricing_config`
+ * (`extend_60min_price`, and optionally `extend_30min_price`). When set, that
+ * price applies regardless of peak/off-peak. Tiers with no extension pricing
+ * fall back to their normal per-slot hourly rate.
+ */
+export function calculateExtensionCost(
+  tier: string,
+  date: Date,
+  fromTime: string,
+  hours: number,
+  tiers: TierConfig[],
+  options?: { segment?: string | null; isPublicHoliday?: boolean },
+): number {
+  const config = findTier(tiers, tier);
+  const flatHour = config?.extend_60min_price ?? null;
+
+  if (options?.segment !== "staff" && flatHour !== null) {
+    const flatHalf = config?.extend_30min_price ?? flatHour / 2;
+    const halves = Math.round(hours * 2);
+    const wholeHours = Math.floor(halves / 2);
+    const extraHalf = halves % 2;
+    return Math.round((wholeHours * flatHour + extraHalf * flatHalf) * 100) / 100;
+  }
+
+  let total = 0;
+  const halves = Math.round(hours * 2);
+  for (let i = 0; i < halves; i++) {
+    const slot = addDurationToTime(fromTime, i * 0.5);
+    total +=
+      calculateHourlyRate(tier, date, slot, tiers, {
+        segment: options?.segment,
+        isPublicHoliday: options?.isPublicHoliday,
+      }) / 2;
+  }
+  return Math.round(total * 100) / 100;
+}
+
 /** A flat-price deal for a fixed session length (e.g. 90 minutes for $60). */
 export interface PricingSpecial {
   id: string;

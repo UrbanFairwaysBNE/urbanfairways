@@ -44,11 +44,10 @@ interface Props {
 
 
 
-const addHours = (time: string, hours: number) => {
-  const [h, m] = time.split(":").map(Number);
-  const nh = h + hours;
-  return `${nh.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
-};
+const addHours = (time: string, hours: number) => addDurationToTime(time.slice(0, 5), hours);
+
+/** "30 min", "1hr", "1.5hr" */
+const durationLabel = (h: number) => (h === 0.5 ? "30 min" : `${h}hr`);
 
 export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) => {
   const [profile, setProfile] = useState<Profile | null>(null);

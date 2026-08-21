@@ -1424,10 +1424,12 @@ export default function AdminSettings() {
                       <div className="space-y-2">
                         {customersWithPricing.map((customer) => (
                           <div key={customer.id} className="flex items-center justify-between p-3 border rounded-lg">
-                            <div>
+                            <div className="min-w-0">
                               <span className="font-medium">{customer.first_name} {customer.last_name}</span>
                               <Badge className="ml-2 text-xs" variant="secondary">{customer.membership_tier}</Badge>
+                              <div className="text-xs text-muted-foreground truncate">{customer.email}</div>
                             </div>
+
                             <div className="flex items-center gap-2">
                               <span className="font-bold text-primary">
                                 {customer.custom_hourly_rate != null && `$${customer.custom_hourly_rate}/hr off-peak`}

@@ -560,6 +560,91 @@ export function SGTLeagueMembers() {
           )}
         </CardContent>
       </Card>
+
+      {/* Nickname editor */}
+      <Dialog
+        open={nicknameMember !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setNicknameMember(null);
+            setEditNicknameValue("");
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Leaderboard nickname</DialogTitle>
+            <DialogDescription>
+              {`Shown instead of ${nicknameMember?.user_name || "their SGT username"} on leaderboards and TV boards. Leave blank to use the SGT username.`}
+            </DialogDescription>
+          </DialogHeader>
+          <Input
+            value={editNicknameValue}
+            onChange={(e) => setEditNicknameValue(e.target.value)}
+            placeholder="Display name"
+            maxLength={40}
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && nicknameMember) handleSaveNickname(nicknameMember.user_id);
+            }}
+          />
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setNicknameMember(null);
+                setEditNicknameValue("");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => nicknameMember && handleSaveNickname(nicknameMember.user_id)}
+              disabled={updateNicknameMutation.isPending}
+            >
+              {updateNicknameMutation.isPending && (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              )}
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Remove from club confirmation */}
+      <AlertDialog
+        open={removeMember !== null}
+        onOpenChange={(open) => !open && setRemoveMember(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {`Remove ${removeMember?.user_name || "this player"} from the club?`}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              They'll be removed from the SGT club and the tour, and will stop appearing in
+              League Members and weekly auto-registration. Their SGT login stays intact and they
+              can be added back later.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={removeMemberMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={removeMemberMutation.isPending}
+              onClick={(e) => {
+                e.preventDefault();
+                if (removeMember) removeMemberMutation.mutate(removeMember.user_id);
+              }}
+            >
+              {removeMemberMutation.isPending && (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              )}
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

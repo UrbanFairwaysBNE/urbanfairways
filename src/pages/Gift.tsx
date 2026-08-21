@@ -16,19 +16,27 @@ import { toast } from "sonner";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import { isHubHost } from "@/lib/hub-host";
 import { useTenant } from "@/config/tenant";
+import { useCasualRates } from "@/hooks/useCasualRates";
 
-const PRESET_AMOUNTS = [35, 70, 105, 175, 350];
+/** Gift amounts are whole hours of bay time at the casual peak rate. */
+const HOUR_OPTIONS = [1, 2, 3, 4, 6];
 type DeliveryMethod = "email_recipient" | "print_to_sender" | "both";
 
 
 function GiftContent() {
   const { tenant } = useTenant();
+  const { peakRate } = useCasualRates();
   const [params] = useSearchParams();
   const success = params.get("success") === "1";
   const cancelled = params.get("cancelled") === "1";
 
-  const [amount, setAmount] = useState<number>(70);
+  const hourlyRate = peakRate > 0 ? peakRate : 55;
+  const presetAmounts = HOUR_OPTIONS.map((h) => Math.round(h * hourlyRate));
+
+  const [hours, setHours] = useState<number>(2);
+  const amount = Math.round(hours * hourlyRate);
   const [customAmount, setCustomAmount] = useState<string>("");
+
   const [recipientName, setRecipientName] = useState("");
   const [recipientEmail, setRecipientEmail] = useState("");
   const [senderName, setSenderName] = useState("");
@@ -169,24 +177,30 @@ function GiftContent() {
         <Card className="p-6 md:p-8 bg-white border-[#1C1F24]/15 space-y-7">
           {/* Amount */}
           <div>
-            <Label className="text-[#1C1F24] font-semibold mb-3 block">Gift Amount</Label>
+            <Label className="text-[#1C1F24] font-semibold mb-2 block">Gift Amount</Label>
+            <p className="text-[#1C1F24]/60 text-sm mb-3">
+              Sold in hours of bay time at ${hourlyRate}/hour.
+            </p>
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-3">
-              {PRESET_AMOUNTS.map((a) => (
+              {HOUR_OPTIONS.map((h, i) => (
                 <button
-                  key={a}
+                  key={h}
                   type="button"
                   onClick={() => {
-                    setAmount(a);
+                    setHours(h);
                     setCustomAmount("");
                   }}
                   className={cn(
-                    "py-3 rounded-lg border-2 font-semibold transition-all",
-                    amount === a && !customAmount
+                    "py-3 rounded-lg border-2 font-semibold transition-all leading-tight",
+                    hours === h && !customAmount
                       ? "border-[#5F6F52] bg-[#5F6F52] text-white"
                       : "border-[#1C1F24]/20 text-[#1C1F24] hover:border-[#5F6F52]/50"
                   )}
                 >
-                  ${a}
+                  <span className="block">${presetAmounts[i]}</span>
+                  <span className="block text-[11px] font-medium opacity-75">
+                    {h} {h === 1 ? "hour" : "hours"}
+                  </span>
                 </button>
               ))}
             </div>
@@ -205,6 +219,7 @@ function GiftContent() {
                 />
               </div>
             </div>
+
           </div>
 
           {/* Delivery method */}

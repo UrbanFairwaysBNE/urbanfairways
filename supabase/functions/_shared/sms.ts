@@ -86,15 +86,17 @@ const sendViaSmsBroadcast = async (to: string, message: string, from: string): P
     message,
   });
 
-  // Priority 1: dedicated numeric/virtual mobile number (e.g. +61 488 968 228).
-  // Priority 2: approved alphanumeric sender ID (e.g. UrbanFrwys). This MUST be
+  // Priority 1: approved alphanumeric sender ID (e.g. UrbanFrwys). This MUST be
   // approved by the carrier first or delivery will be rejected.
+  // Priority 2: dedicated numeric/virtual mobile number (e.g. +61 488 968 228).
   // Priority 3: let SMS Broadcast select its supported shared source.
   const numericSource = Deno.env.get("SMS_BROADCAST_FROM")?.replace(/\D/g, "");
-  if (numericSource) {
-    params.set("from", numericSource);
-  } else if (from && /^[A-Za-z0-9]+$/.test(from)) {
+  const isAlphaTag = (s: string) => /[A-Za-z]/.test(s);
+
+  if (from && isAlphaTag(from)) {
     params.set("from", from);
+  } else if (numericSource) {
+    params.set("from", numericSource);
   }
 
   const res = await fetch(`https://api.smsbroadcast.com.au/api-adv.php?${params.toString()}`);

@@ -37,6 +37,10 @@
       {
         "from": "watchdog.bat",
         "to": "watchdog.bat"
+      },
+      {
+        "from": "watchdog.vbs",
+        "to": "watchdog.vbs"
       }
     ],
     "publish": {

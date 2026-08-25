@@ -1,4 +1,6 @@
 ; Custom NSIS hooks for UF Bay Controller
+!include "LogicLib.nsh"
+
 ; Adds a shortcut to the Windows Startup folder so the controller always
 ; launches at login, independent of the app's own registry Run entry.
 

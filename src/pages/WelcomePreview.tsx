@@ -91,7 +91,7 @@ const WelcomePreview = () => {
 
         {/* Etiquette Section */}
         <div 
-          className="mt-12 mx-auto text-left px-10 py-8 rounded-2xl"
+          className="mt-12 mx-auto text-center px-10 py-8 rounded-2xl"
           style={{ 
             backgroundColor: 'rgba(31, 76, 37, 0.08)',
             border: '2px solid rgba(31, 76, 37, 0.15)',
@@ -116,7 +116,7 @@ const WelcomePreview = () => {
               "Keep the bay tidy for the next golfer",
               "Indoor Swing Syndrome is real (Google it!)"
             ].map((rule, i) => (
-              <li key={i} className="flex gap-3 items-start text-[22px]" style={{ opacity: 0.85 }}>
+              <li key={i} className="flex gap-3 items-center justify-center text-[22px]" style={{ opacity: 0.85 }}>
                 <span 
                   className="flex-shrink-0 w-[32px] h-[32px] rounded-full flex items-center justify-center text-[16px] font-semibold mt-[2px]"
                   style={{ backgroundColor: '#5f6f52', color: '#fff' }}

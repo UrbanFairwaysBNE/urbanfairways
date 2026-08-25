@@ -1760,7 +1760,7 @@ async function showWelcomeWindows(firstName) {
           40% { transform: scale(1); opacity: 1; }
         }
         .etiquette {
-          width: min(720px, calc(100vw - 80px));
+          width: min(1100px, calc(100vw - 80px));
           margin: 48px auto 0;
           background: rgba(31, 76, 37, 0.08);
           border: 2px solid rgba(31, 76, 37, 0.15);

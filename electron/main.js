@@ -334,9 +334,12 @@ function createWindow() {
     }
   });
 
+  // Always start silently in the system tray - never splash the login screen.
+  // The window is only shown when the user opens it from the tray icon.
   mainWindow.once('ready-to-show', () => {
-    mainWindow.show();
+    console.log('[Startup] Bay Controller ready - staying hidden in system tray');
   });
+
 
   // Enable DevTools shortcut (Ctrl+Shift+I or F12)
   mainWindow.webContents.on('before-input-event', (event, input) => {

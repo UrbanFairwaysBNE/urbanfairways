@@ -245,11 +245,17 @@ function recoverMainWindow(reason) {
 
   try {
     if (mainWindow && !mainWindow.isDestroyed()) {
+      // Only restore visibility if the window was actually on screen. A silent
+      // tray-only session must stay silent after a renderer recovery.
+      const wasVisible = mainWindow.isVisible();
       mainWindow.reload();
-      mainWindow.show();
-      mainWindow.focus();
+      if (wasVisible) {
+        mainWindow.show();
+        mainWindow.focus();
+      }
       return;
     }
+
   } catch (err) {
     console.error('[Resilience] Reload failed, recreating window:', err?.message || err);
     logProcessIssue('window_recovery_reload_failed', err?.stack || err?.message || String(err));

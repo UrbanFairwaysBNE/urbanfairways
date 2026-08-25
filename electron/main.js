@@ -26,14 +26,12 @@ if (!gotTheLock) {
 } else {
   // This is the primary instance - handle second-instance event
   app.on('second-instance', (event, commandLine, workingDirectory) => {
-    // Someone tried to run a second instance - focus our window instead
-    console.log('Second instance attempted - focusing existing window');
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) mainWindow.restore();
-      mainWindow.show();
-      mainWindow.focus();
-    }
+    // Someone tried to run a second instance (e.g. the watchdog or the startup
+    // shortcut firing while we are already running). Stay silent in the tray -
+    // never steal focus from the golf apps.
+    console.log('Second instance attempted - ignoring (staying in tray)');
   });
+
 }
 
 // State for auto-paste functionality

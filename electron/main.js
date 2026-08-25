@@ -26,14 +26,12 @@ if (!gotTheLock) {
 } else {
   // This is the primary instance - handle second-instance event
   app.on('second-instance', (event, commandLine, workingDirectory) => {
-    // Someone tried to run a second instance - focus our window instead
-    console.log('Second instance attempted - focusing existing window');
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) mainWindow.restore();
-      mainWindow.show();
-      mainWindow.focus();
-    }
+    // Someone tried to run a second instance (e.g. the watchdog or the startup
+    // shortcut firing while we are already running). Stay silent in the tray -
+    // never steal focus from the golf apps.
+    console.log('Second instance attempted - ignoring (staying in tray)');
   });
+
 }
 
 // State for auto-paste functionality
@@ -245,11 +243,17 @@ function recoverMainWindow(reason) {
 
   try {
     if (mainWindow && !mainWindow.isDestroyed()) {
+      // Only restore visibility if the window was actually on screen. A silent
+      // tray-only session must stay silent after a renderer recovery.
+      const wasVisible = mainWindow.isVisible();
       mainWindow.reload();
-      mainWindow.show();
-      mainWindow.focus();
+      if (wasVisible) {
+        mainWindow.show();
+        mainWindow.focus();
+      }
       return;
     }
+
   } catch (err) {
     console.error('[Resilience] Reload failed, recreating window:', err?.message || err);
     logProcessIssue('window_recovery_reload_failed', err?.stack || err?.message || String(err));
@@ -328,9 +332,12 @@ function createWindow() {
     }
   });
 
+  // Always start silently in the system tray - never splash the login screen.
+  // The window is only shown when the user opens it from the tray icon.
   mainWindow.once('ready-to-show', () => {
-    mainWindow.show();
+    console.log('[Startup] Bay Controller ready - staying hidden in system tray');
   });
+
 
   // Enable DevTools shortcut (Ctrl+Shift+I or F12)
   mainWindow.webContents.on('before-input-event', (event, input) => {

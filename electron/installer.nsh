@@ -6,8 +6,10 @@
   ; $SMSTARTUP resolves to the per-user (or all-users, for machine installs) Startup folder
   CreateShortCut "$SMSTARTUP\UF Bay Controller.lnk" "$INSTDIR\${APP_EXECUTABLE_FILENAME}"
 
-  ; Register the watchdog as a scheduled task (runs every minute, relaunches if closed)
-  nsExec::ExecToLog 'schtasks /Create /F /SC MINUTE /MO 1 /TN "UF Bay Controller Watchdog" /TR "\"$INSTDIR\resources\watchdog.bat\"" /RL HIGHEST'
+  ; Register the watchdog as a scheduled task (runs every minute, relaunches if closed).
+  ; Runs as the logged-in bay user (never a hardcoded account name) so it can show a window.
+  nsExec::ExecToLog 'schtasks /Create /F /SC MINUTE /MO 1 /TN "UF Bay Controller Watchdog" /TR "\"$INSTDIR\resources\watchdog.bat\"" /RU "%USERNAME%" /IT'
+
 !macroend
 
 !macro customUnInstall

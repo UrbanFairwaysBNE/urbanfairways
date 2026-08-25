@@ -95,7 +95,8 @@ const WelcomePreview = () => {
           style={{ 
             backgroundColor: 'rgba(31, 76, 37, 0.08)',
             border: '2px solid rgba(31, 76, 37, 0.15)',
-            maxWidth: '720px'
+            maxWidth: '1100px',
+            width: '95%'
           }}
         >
           <h3 

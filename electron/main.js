@@ -402,30 +402,35 @@ app.setLoginItemSettings({
 // =====================================================
 async function ensureWatchdogTask() {
   if (process.platform !== 'win32' || !app.isPackaged) return;
-  const TASK = 'UF Bay Controller Watchdog';
-  const batPath = path.join(process.resourcesPath, 'watchdog.bat');
+  const OLD_TASK = 'UF Bay Controller Watchdog';
+  const TASK = 'UF Bay Controller Watchdog Silent';
+  // wscript.exe has no console window; running the .bat directly makes Task
+  // Scheduler flash a console every minute and steal focus from the golf apps.
+  const vbsPath = path.join(process.resourcesPath, 'watchdog.vbs');
   try {
-    if (!fs.existsSync(batPath)) {
-      console.warn('[Watchdog] watchdog.bat not found at', batPath);
+    if (!fs.existsSync(vbsPath)) {
+      console.warn('[Watchdog] watchdog.vbs not found at', vbsPath);
       return;
     }
+    // Always remove the legacy visible-console task if it is still around.
+    try { await execAsync(`schtasks /Delete /F /TN "${OLD_TASK}"`); } catch { /* not present */ }
     try {
       const { stdout } = await execAsync(`schtasks /Query /TN "${TASK}"`);
-      if (stdout && stdout.includes('UF Bay Controller Watchdog')) {
-        console.log('[Watchdog] Scheduled task present.');
+      if (stdout && stdout.includes(TASK)) {
+        console.log('[Watchdog] Silent scheduled task present.');
         return;
       }
     } catch {
       // Task missing - fall through and create it.
     }
     const user = process.env.USERNAME || '';
-    const base = `schtasks /Create /F /SC MINUTE /MO 1 /TN "${TASK}" /TR "\\"${batPath}\\""`;
+    const base = `schtasks /Create /F /SC MINUTE /MO 1 /TN "${TASK}" /TR "wscript.exe //B //Nologo \\"${vbsPath}\\""`;
     try {
       await execAsync(user ? `${base} /RU "${user}" /IT` : base);
     } catch {
       await execAsync(base);
     }
-    console.log('[Watchdog] Scheduled task registered.');
+    console.log('[Watchdog] Silent scheduled task registered.');
   } catch (err) {
     console.warn('[Watchdog] Could not register scheduled task:', err?.message || err);
   }

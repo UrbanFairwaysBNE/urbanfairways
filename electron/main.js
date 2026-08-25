@@ -1760,13 +1760,13 @@ async function showWelcomeWindows(firstName) {
           40% { transform: scale(1); opacity: 1; }
         }
         .etiquette {
-          margin-top: 48px;
+          width: min(720px, calc(100vw - 80px));
+          margin: 48px auto 0;
           background: rgba(31, 76, 37, 0.08);
           border: 2px solid rgba(31, 76, 37, 0.15);
           border-radius: 16px;
           padding: 32px 40px;
-          max-width: 720px;
-          text-align: left;
+          text-align: center;
         }
         .etiquette h3 {
           font-family: 'Montserrat', system-ui, sans-serif;
@@ -1785,8 +1785,10 @@ async function showWelcomeWindows(firstName) {
         }
         .etiquette li {
           display: flex;
-          align-items: flex-start;
+          align-items: center;
+          justify-content: center;
           gap: 12px;
+          text-align: center;
           font-family: 'Montserrat', system-ui, sans-serif;
           font-size: 22px;
           color: #2f3134;

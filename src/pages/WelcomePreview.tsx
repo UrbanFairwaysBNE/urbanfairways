@@ -109,7 +109,7 @@ const WelcomePreview = () => {
           >
             {tenant.venue_name} Etiquette
           </h3>
-          <ol className="space-y-3" style={{ fontFamily: 'Montserrat, system-ui, sans-serif', color: '#1c1f24' }}>
+          <ol className="mx-auto space-y-3 text-center" style={{ fontFamily: 'Montserrat, system-ui, sans-serif', color: '#1c1f24' }}>
             {[
               "Use a different ball after every shot, this prevents a ball cracking on you!",
               "If you keep skying your drives, tee it down lower",

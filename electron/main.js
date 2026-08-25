@@ -393,9 +393,49 @@ app.setLoginItemSettings({
   path: app.getPath('exe')
 });
 
+// =====================================================
+// WATCHDOG TASK SELF-REGISTRATION
+// The installer registers the scheduled task, but if that ever fails
+// (bad quoting, blocked elevation, manual task deletion) the bay would
+// silently lose crash recovery. On every launch we verify the task
+// exists and re-create it as the logged-in interactive user.
+// =====================================================
+async function ensureWatchdogTask() {
+  if (process.platform !== 'win32' || !app.isPackaged) return;
+  const TASK = 'UF Bay Controller Watchdog';
+  const batPath = path.join(process.resourcesPath, 'watchdog.bat');
+  try {
+    if (!fs.existsSync(batPath)) {
+      console.warn('[Watchdog] watchdog.bat not found at', batPath);
+      return;
+    }
+    try {
+      const { stdout } = await execAsync(`schtasks /Query /TN "${TASK}"`);
+      if (stdout && stdout.includes('UF Bay Controller Watchdog')) {
+        console.log('[Watchdog] Scheduled task present.');
+        return;
+      }
+    } catch {
+      // Task missing - fall through and create it.
+    }
+    const user = process.env.USERNAME || '';
+    const base = `schtasks /Create /F /SC MINUTE /MO 1 /TN "${TASK}" /TR "\\"${batPath}\\""`;
+    try {
+      await execAsync(user ? `${base} /RU "${user}" /IT` : base);
+    } catch {
+      await execAsync(base);
+    }
+    console.log('[Watchdog] Scheduled task registered.');
+  } catch (err) {
+    console.warn('[Watchdog] Could not register scheduled task:', err?.message || err);
+  }
+}
+
 app.whenReady().then(() => {
   createWindow();
   createTray();
+  ensureWatchdogTask();
+
 
 
   // Re-apply kiosk taskbar hide when returning from lock/RDP/suspend.

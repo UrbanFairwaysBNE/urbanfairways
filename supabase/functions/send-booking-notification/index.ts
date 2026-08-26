@@ -4,6 +4,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
 import { getTenant, tenantHubUrl, tenantBookingUrl, tenantAddress } from "../_shared/tenant.ts";
 import { sendSMS as sharedSendSMS } from "../_shared/sms.ts";
+import { normaliseLanguage, localiseEmailTemplate, localiseSmsMessage } from "../_shared/i18n.ts";
 
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
@@ -299,6 +300,11 @@ serve(async (req) => {
       .maybeSingle();
 
     
+    // Recipient language: English unless the profile explicitly says 'zh'.
+    const recipientLang = normaliseLanguage((profile as any)?.preferred_language);
+    const localisedTemplate = localiseEmailTemplate(emailTemplate as any, recipientLang);
+    logStep("Recipient language", { recipientLang });
+
     if (templateError) {
       logStep("Template fetch error (using default)", { error: templateError.message });
     } else {
@@ -474,11 +480,13 @@ serve(async (req) => {
     ): Promise<string | null> => {
       const { data: tpl } = await supabaseClient
         .from("sms_templates")
-        .select("message, is_active")
+        .select("message, message_zh, is_active")
         .eq("template_key", templateKey)
         .maybeSingle();
-      if (!tpl || !(tpl as any).is_active || !(tpl as any).message) return null;
-      let out = (tpl as any).message as string;
+      if (!tpl || !(tpl as any).is_active) return null;
+      const picked = localiseSmsMessage(tpl as any, recipientLang);
+      if (!picked) return null;
+      let out = picked;
       for (const [tag, value] of Object.entries(tags)) {
         out = out.split(tag).join(value);
       }

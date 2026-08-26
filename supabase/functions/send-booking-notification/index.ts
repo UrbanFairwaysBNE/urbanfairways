@@ -508,7 +508,7 @@ serve(async (req) => {
             : "Lesson Booked";
 
       subject = replaceTemplateTags(
-        emailTemplate?.subject || `${heading} - ${clientFullName}`,
+        localisedTemplate?.subject || `${heading} - ${clientFullName}`,
         templateTags,
       );
 
@@ -520,8 +520,8 @@ serve(async (req) => {
         <p style="margin:0 0 16px 0; font-size:16px;"><strong>${bookingDate}</strong><br />${startTime12hr} - ${endTime12hr}<br />${bayName}</p>
       `;
 
-      const bodyContent = emailTemplate?.html_content
-        ? replaceTemplateTags(emailTemplate.html_content, templateTags)
+      const bodyContent = localisedTemplate?.html_content
+        ? replaceTemplateTags(localisedTemplate.html_content, templateTags)
         : fallbackBody;
 
       htmlContent = await renderBrandedEmail(supabaseClient, heading, bodyContent, {
@@ -537,7 +537,7 @@ serve(async (req) => {
       const isReschedule = notification_type === "reschedule";
       subject = isReschedule 
         ? `Booking Rescheduled - ${tenant.venue_name}`
-        : (emailTemplate?.subject || `Booking Confirmed - ${tenant.venue_name}`);
+        : (localisedTemplate?.subject || `Booking Confirmed - ${tenant.venue_name}`);
       
       // Main booking SMS — pulled from editable sms_templates table
       const smsKey = isReschedule
@@ -548,8 +548,8 @@ serve(async (req) => {
       const headingText = isReschedule ? "Booking Rescheduled!" : "Booking Confirmed!";
 
       // Check if custom template exists (only for confirmation, not reschedule)
-      if (!isReschedule && emailTemplate?.html_content) {
-        const bodyContent = replaceTemplateTags(emailTemplate.html_content, templateTags);
+      if (!isReschedule && localisedTemplate?.html_content) {
+        const bodyContent = replaceTemplateTags(localisedTemplate.html_content, templateTags);
         htmlContent = await renderBrandedEmail(supabaseClient, headingText, bodyContent, {
           text: "View My Bookings",
           url: tenantHubUrl(tenant, "/my-bookings")
@@ -608,12 +608,12 @@ serve(async (req) => {
       }
     } else if (notification_type === "cancellation") {
       // Cancellation
-      subject = emailTemplate?.subject || `Booking Cancelled - ${tenant.venue_name}`;
+      subject = localisedTemplate?.subject || `Booking Cancelled - ${tenant.venue_name}`;
       smsMessage = (await renderSmsTemplate("booking_cancellation")) ?? "";
       
       let bodyContent: string;
-      if (emailTemplate?.html_content) {
-        bodyContent = replaceTemplateTags(emailTemplate.html_content, templateTags);
+      if (localisedTemplate?.html_content) {
+        bodyContent = replaceTemplateTags(localisedTemplate.html_content, templateTags);
         logStep("Using custom email template with wrapper");
       } else {
         bodyContent = `
@@ -650,7 +650,7 @@ serve(async (req) => {
     }
 
     // Apply tag replacement to subject if custom
-    if (emailTemplate?.subject) {
+    if (localisedTemplate?.subject) {
       subject = replaceTemplateTags(subject, templateTags);
     }
 

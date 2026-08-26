@@ -1,0 +1,19 @@
+{
+  "title": "会员资格",
+  "currentPlan": "当前方案",
+  "choosePlan": "选择方案",
+  "perWeek": "／周",
+  "joinNow": "立即加入",
+  "switchPlan": "更换方案",
+  "cancelMembership": "取消会员",
+  "cancelConfirm": "确定要取消会员资格吗？",
+  "membershipCancelled": "会员已取消",
+  "membershipUpdated": "会员已更新",
+  "paymentIssue": "支付问题",
+  "paymentIssueDesc": "您上次的会员扣款未成功。请更新银行卡以保留会员权益。",
+  "updateCard": "更新银行卡",
+  "mostPopular": "最受欢迎",
+  "includedBenefits": "包含内容",
+  "prepaidPacks": "预付练习套餐",
+  "hoursRemaining": "剩余 {{hours}} 小时"
+}

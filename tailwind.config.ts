@@ -14,9 +14,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["Montserrat", "system-ui", "sans-serif"],
-        sans: ["Montserrat", "system-ui", "sans-serif"],
+        display: ["Montserrat", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", "system-ui", "sans-serif"],
+        sans: ["Montserrat", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", "system-ui", "sans-serif"],
       },
+
 
       colors: {
         border: "hsl(var(--border))",

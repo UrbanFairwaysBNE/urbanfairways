@@ -1,0 +1,19 @@
+{
+  "title": "Membership",
+  "currentPlan": "Current plan",
+  "choosePlan": "Choose a plan",
+  "perWeek": "/ week",
+  "joinNow": "Join now",
+  "switchPlan": "Switch plan",
+  "cancelMembership": "Cancel membership",
+  "cancelConfirm": "Are you sure you want to cancel your membership?",
+  "membershipCancelled": "Membership cancelled",
+  "membershipUpdated": "Membership updated",
+  "paymentIssue": "Payment issue",
+  "paymentIssueDesc": "Your last membership payment didn't go through. Update your card to keep your benefits.",
+  "updateCard": "Update card",
+  "mostPopular": "Most popular",
+  "includedBenefits": "What's included",
+  "prepaidPacks": "Prepaid Practice Packs",
+  "hoursRemaining": "{{hours}} hours remaining"
+}

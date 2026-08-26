@@ -18,10 +18,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useLocalCompSettings } from "@/hooks/useLocalCompSettings";
+import { useTranslation } from "react-i18next";
 
 type MembershipTier = string;
 
 const Dashboard = () => {
+  const { t } = useTranslation(["dashboard", "common"]);
   const { tenant } = useTenant();
   const { hasLeagueAccess: hasLeagueTierAccess, hasRangeAccess: hasRangeTierAccess } = usePricing();
   const { user, isAuthenticated, isLoading, signOut } = useAuth();
@@ -161,7 +163,7 @@ const Dashboard = () => {
       setNewEventDate("");
       setNewEventRecurring(false);
       setShowEventForm(false);
-      toast({ title: "Event added" });
+      toast({ title: t("dashboard:eventAdded") });
     },
   });
 
@@ -172,7 +174,7 @@ const Dashboard = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["whats-on-events"] });
-      toast({ title: "Event removed" });
+      toast({ title: t("dashboard:eventRemoved") });
     },
   });
 
@@ -189,14 +191,14 @@ const Dashboard = () => {
   if (isLoading || (isAuthenticated && accountAccessLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+        <div className="animate-pulse text-muted-foreground">{t("common:loading")}</div>
       </div>
     );
   }
 
   if (!isAuthenticated) return null;
 
-  const firstName = user?.user_metadata?.first_name || "Member";
+  const firstName = user?.user_metadata?.first_name || t("dashboard:defaultName");
   const hasLeagueAccess = hasLeagueTierAccess(membershipTier) || isStaff || isAdmin;
   const hasRangeAccess = hasRangeTierAccess(membershipTier) || isStaff || isAdmin;
 
@@ -213,7 +215,7 @@ const Dashboard = () => {
               className="bg-accent text-accent-foreground hover:bg-accent/90"
             >
               <Settings className="h-4 w-4 sm:hidden" />
-              <span className="hidden sm:inline">Admin</span>
+              <span className="hidden sm:inline">{t("dashboard:admin")}</span>
             </Button>
           )}
           <Button
@@ -230,7 +232,7 @@ const Dashboard = () => {
       <main className="flex-1 p-4 sm:p-6">
         <div className="container max-w-lg mx-auto">
           <h1 className="font-display text-3xl sm:text-4xl text-primary mb-5">
-            WELCOME, {firstName.toUpperCase()}
+            {t("dashboard:welcome", { name: firstName.toUpperCase() })}
           </h1>
 
           <div className="grid grid-cols-1 gap-3">
@@ -242,8 +244,8 @@ const Dashboard = () => {
                     <Calendar className="h-5 w-5 text-amber-600" />
                   </div>
                   <div className="flex-1">
-                    <h2 className="font-semibold text-base">Book a Bay</h2>
-                    <p className="text-xs text-amber-700">Membership on hold</p>
+                    <h2 className="font-semibold text-base">{t("dashboard:bookBay")}</h2>
+                    <p className="text-xs text-amber-700">{t("dashboard:membershipOnHold")}</p>
                   </div>
                   <Lock className="h-4 w-4 text-amber-500" />
                 </div>
@@ -257,7 +259,7 @@ const Dashboard = () => {
                   <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
                     <Calendar className="h-5 w-5 text-accent" />
                   </div>
-                  <h2 className="font-semibold text-base">Book a Bay</h2>
+                  <h2 className="font-semibold text-base">{t("dashboard:bookBay")}</h2>
                 </div>
               </button>
             )}
@@ -272,7 +274,7 @@ const Dashboard = () => {
                   <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
                     <GraduationCap className="h-5 w-5 text-accent" />
                   </div>
-                  <h2 className="font-semibold text-base">Book a Lesson</h2>
+                  <h2 className="font-semibold text-base">{t("dashboard:bookLesson")}</h2>
                 </div>
               </button>
             )}
@@ -286,7 +288,7 @@ const Dashboard = () => {
                 <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
                   <ClipboardList className="h-5 w-5 text-accent" />
                 </div>
-                <h2 className="font-semibold text-base">My Bookings</h2>
+                <h2 className="font-semibold text-base">{t("dashboard:myBookings")}</h2>
               </div>
             </button>
 
@@ -300,7 +302,7 @@ const Dashboard = () => {
               {!hasRangeAccess && (
                 <div className="absolute top-3 right-3 flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                   <Lock className="h-3 w-3" />
-                  <span>Members</span>
+                  <span>{t("common:members")}</span>
                 </div>
               )}
               <div className="flex items-center gap-3">
@@ -309,7 +311,7 @@ const Dashboard = () => {
                   alt="UF Lab"
                   className="h-12 w-12 rounded-full object-cover shrink-0"
                 />
-                <h2 className={`font-semibold text-base ${hasRangeAccess ? "" : "text-muted-foreground"}`}>UF Lab</h2>
+                <h2 className={`font-semibold text-base ${hasRangeAccess ? "" : "text-muted-foreground"}`}>{t("dashboard:ufLab")}</h2>
               </div>
             </button>
 
@@ -323,7 +325,7 @@ const Dashboard = () => {
               {!hasLeagueAccess && (
                 <div className="absolute top-3 right-3 flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                   <Lock className="h-3 w-3" />
-                  <span>Members</span>
+                  <span>{t("common:members")}</span>
                 </div>
               )}
               <button
@@ -331,7 +333,7 @@ const Dashboard = () => {
                 onClick={(e) => { e.stopPropagation(); setLeagueGuideOpen(true); }}
                 className="absolute top-3 right-3 h-6 w-6 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors"
                 style={!hasLeagueAccess ? { right: "5.5rem" } : {}}
-                title={`How to play your ${tenant.venue_name} League rounds`}
+                title={t("dashboard:leagueGuideTitle", { venue: tenant.venue_name })}
               >
                 <Info className="h-4 w-4 text-muted-foreground" />
               </button>
@@ -339,7 +341,7 @@ const Dashboard = () => {
                 <div className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${hasLeagueAccess ? "bg-league-primary/15" : "bg-muted"}`}>
                   <Trophy className={`h-5 w-5 ${hasLeagueAccess ? "text-league-primary-dark" : "text-muted-foreground"}`} />
                 </div>
-                <h2 className="font-semibold text-base">UF League</h2>
+                <h2 className="font-semibold text-base">{t("dashboard:ufLeague")}</h2>
               </div>
             </button>
 
@@ -353,7 +355,7 @@ const Dashboard = () => {
                   <div className="h-10 w-10 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
                     <Users className="h-5 w-5 text-primary" />
                   </div>
-                  <h2 className="font-semibold text-base">Weekly Comp</h2>
+                  <h2 className="font-semibold text-base">{t("dashboard:weeklyComp")}</h2>
                 </div>
               </button>
             )}
@@ -367,7 +369,7 @@ const Dashboard = () => {
                 <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
                   <Megaphone className="h-5 w-5 text-accent" />
                 </div>
-                <h2 className="font-semibold text-base">What's On</h2>
+                <h2 className="font-semibold text-base">{t("dashboard:whatsOn")}</h2>
               </div>
             </button>
 
@@ -380,7 +382,7 @@ const Dashboard = () => {
                 <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
                   <Settings className="h-5 w-5 text-accent" />
                 </div>
-                <h2 className="font-semibold text-base">My Account</h2>
+                <h2 className="font-semibold text-base">{t("dashboard:myAccount")}</h2>
               </div>
             </button>
 
@@ -394,7 +396,7 @@ const Dashboard = () => {
           <SheetHeader className="flex flex-row items-center justify-between pr-2">
             <SheetTitle className="flex items-center gap-2">
               <Megaphone className="h-5 w-5 text-accent" />
-              What's On
+              {t("dashboard:whatsOn")}
             </SheetTitle>
             {isAdmin && (
               <button
@@ -411,13 +413,13 @@ const Dashboard = () => {
             {isAdmin && showEventForm && (
               <div className="p-3 bg-muted/50 rounded-lg space-y-2">
                 <Input
-                  placeholder="Event title"
+                  placeholder={t("dashboard:eventTitle")}
                   value={newEventTitle}
                   onChange={(e) => setNewEventTitle(e.target.value)}
                   className="h-9 text-sm"
                 />
                 <Input
-                  placeholder="Description (optional)"
+                  placeholder={t("dashboard:eventDescription")}
                   value={newEventDesc}
                   onChange={(e) => setNewEventDesc(e.target.value)}
                   className="h-9 text-sm"
@@ -444,13 +446,13 @@ const Dashboard = () => {
                   disabled={!newEventTitle.trim() || addEvent.isPending}
                   onClick={() => addEvent.mutate()}
                 >
-                  Add Event
+                  {t("dashboard:addEvent")}
                 </Button>
               </div>
             )}
 
             {events.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-6">No upcoming events right now.</p>
+              <p className="text-sm text-muted-foreground text-center py-6">{t("dashboard:noEvents")}</p>
             ) : (
               events.map((event: any) => (
                 <div key={event.id} className="flex items-start gap-3 p-3 bg-card rounded-lg border border-border group">
@@ -463,7 +465,7 @@ const Dashboard = () => {
                       <p className="text-xs text-muted-foreground mt-0.5">{event.description}</p>
                     )}
                     {event.is_recurring ? (
-                      <p className="text-xs text-accent font-medium mt-1">Recurring</p>
+                      <p className="text-xs text-accent font-medium mt-1">{t("dashboard:recurring")}</p>
                     ) : event.event_date ? (
                       <p className="text-xs text-accent font-medium mt-1">
                         {new Date(event.event_date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" })}
@@ -491,28 +493,31 @@ const Dashboard = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Trophy className="h-5 w-5 text-league-primary-dark" />
-              {`How to play your ${tenant.venue_name} League rounds`}
+              {t("dashboard:leagueGuideTitle", { venue: tenant.venue_name })}
             </DialogTitle>
           </DialogHeader>
           <ol className="space-y-3 text-sm text-foreground list-decimal pl-5">
-            <li>Open the <span className="font-semibold">My Account</span> section of the {tenant.venue_name} app.</li>
-            <li>In <span className="font-semibold">GSPRO</span>, go to <span className="font-semibold">Players</span> and click <span className="font-semibold">Guest 1</span>. Change the information to your <span className="font-semibold">User</span> and <span className="font-semibold">UID</span> — make sure the upper and lower case of your username matches exactly.</li>
-            <li>Press <span className="font-semibold">Save &amp; Exit</span>.</li>
-            <li>Click <span className="font-semibold">Tournaments</span>. Your league rounds will show up.</li>
-            <li>Next time you book a session at {tenant.venue_name}, you'll be automatically logged in with your SGT details.</li>
+            {["leagueGuideStep1", "leagueGuideStep2", "leagueGuideStep3", "leagueGuideStep4", "leagueGuideStep5"].map((key) => (
+              <li
+                key={key}
+                dangerouslySetInnerHTML={{ __html: t(`dashboard:${key}`, { venue: tenant.venue_name }) }}
+              />
+            ))}
           </ol>
           <div className="mt-4 rounded-lg border border-brand-accent/30 bg-brand-accent/10 p-3">
-            <p className="text-xs font-semibold text-brand-accent mb-1">TOP TIP</p>
-            <p className="text-sm text-foreground">
-              If you don't complete a full round, quit while you're on the <span className="font-semibold">tee box</span> of any hole. Quitting midway through a hole can cause bugs.
-            </p>
+            <p className="text-xs font-semibold text-brand-accent mb-1">{t("dashboard:topTip")}</p>
+            <p
+              className="text-sm text-foreground"
+              dangerouslySetInnerHTML={{ __html: t("dashboard:leagueGuideTip") }}
+            />
           </div>
+
         </DialogContent>
       </Dialog>
 
       <footer className="bg-primary py-4 px-6 text-center">
         <p className="text-primary-foreground/60 text-sm">
-          © {new Date().getFullYear()} {tenant.venue_name}. All rights reserved.
+          © {new Date().getFullYear()} {tenant.venue_name}. {t("common:allRightsReserved")}
         </p>
       </footer>
     </div>

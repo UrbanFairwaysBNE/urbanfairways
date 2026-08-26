@@ -236,7 +236,7 @@ serve(async (req) => {
     if (isLesson) {
       const { data: clientProfile } = await supabaseClient
         .from("profiles")
-        .select("first_name, last_name, email, phone")
+        .select("first_name, last_name, email, phone, preferred_language")
         .eq("user_id", (booking as any).client_user_id)
         .maybeSingle();
       lessonClient = clientProfile ?? null;
@@ -762,11 +762,13 @@ serve(async (req) => {
           '{email}': lessonClient.email || '',
         };
 
-        const { data: clientTpl } = await supabaseClient
+        const { data: clientTplRaw } = await supabaseClient
           .from("email_templates")
-          .select("subject, html_content, is_active")
+          .select("subject, html_content, subject_zh, html_content_zh, is_active")
           .eq("template_key", clientKey)
           .maybeSingle();
+        const clientLang = normaliseLanguage((lessonClient as any)?.preferred_language);
+        const clientTpl = localiseEmailTemplate(clientTplRaw as any, clientLang);
 
         if (clientTpl && (clientTpl as any).is_active === false) {
           logStep("Lesson client email template disabled, skipping", { clientKey });

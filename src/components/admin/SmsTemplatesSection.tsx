@@ -24,6 +24,7 @@ interface SmsTemplate {
   name: string;
   description: string | null;
   message: string;
+  message_zh: string | null;
   is_active: boolean;
 }
 
@@ -94,6 +95,8 @@ export function SmsTemplatesSection() {
 
   const [editing, setEditing] = useState<SmsTemplate | null>(null);
   const [draftMessage, setDraftMessage] = useState("");
+  const [draftMessageZh, setDraftMessageZh] = useState("");
+  const [draftLang, setDraftLang] = useState<"en" | "zh">("en");
   const [saving, setSaving] = useState(false);
   const [copiedTag, setCopiedTag] = useState<string | null>(null);
 
@@ -134,6 +137,8 @@ export function SmsTemplatesSection() {
   const openEditor = (t: SmsTemplate) => {
     setEditing(t);
     setDraftMessage(t.message);
+    setDraftMessageZh(t.message_zh || "");
+    setDraftLang("en");
   };
 
   const saveMessage = async () => {
@@ -141,7 +146,7 @@ export function SmsTemplatesSection() {
     setSaving(true);
     const { error } = await supabase
       .from("sms_templates")
-      .update({ message: draftMessage })
+      .update({ message: draftMessage, message_zh: draftMessageZh || null })
       .eq("id", editing.id);
     setSaving(false);
     if (error) {
@@ -283,11 +288,38 @@ export function SmsTemplatesSection() {
           </DialogHeader>
           {editing && (
             <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={draftLang === "en" ? "default" : "outline"}
+                  onClick={() => setDraftLang("en")}
+                >
+                  English
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={draftLang === "zh" ? "default" : "outline"}
+                  onClick={() => setDraftLang("zh")}
+                >
+                  中文
+                </Button>
+                <span className="text-xs text-muted-foreground">
+                  {draftLang === "en"
+                    ? "Sent to everyone unless the customer has chosen Chinese."
+                    : "Only sent to customers who chose Chinese. Leave empty to use English."}
+                </span>
+              </div>
               <div className="space-y-2">
-                <Label>Message</Label>
+                <Label>Message {draftLang === "zh" && "(中文)"}</Label>
                 <Textarea
-                  value={draftMessage}
-                  onChange={(e) => setDraftMessage(e.target.value)}
+                  value={draftLang === "en" ? draftMessage : draftMessageZh}
+                  onChange={(e) =>
+                    draftLang === "en"
+                      ? setDraftMessage(e.target.value)
+                      : setDraftMessageZh(e.target.value)
+                  }
                   rows={6}
                   className="font-mono text-sm"
                 />

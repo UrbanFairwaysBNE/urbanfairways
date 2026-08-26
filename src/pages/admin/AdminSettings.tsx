@@ -313,6 +313,8 @@ interface EmailTemplateDB {
   description: string | null;
   subject: string | null;
   html_content: string | null;
+  subject_zh: string | null;
+  html_content_zh: string | null;
   is_active: boolean;
 }
 
@@ -476,6 +478,9 @@ export default function AdminSettings() {
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(true);
   const [templateHtml, setTemplateHtml] = useState("");
   const [templateSubject, setTemplateSubject] = useState("");
+  const [templateHtmlZh, setTemplateHtmlZh] = useState("");
+  const [templateSubjectZh, setTemplateSubjectZh] = useState("");
+  const [templateLang, setTemplateLang] = useState<"en" | "zh">("en");
   const [copiedTag, setCopiedTag] = useState<string | null>(null);
   const [isSavingTemplate, setIsSavingTemplate] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -509,6 +514,9 @@ export default function AdminSettings() {
     });
     setTemplateHtml(template.html_content || "");
     setTemplateSubject(template.subject || "");
+    setTemplateHtmlZh(template.html_content_zh || "");
+    setTemplateSubjectZh(template.subject_zh || "");
+    setTemplateLang("en");
   };
 
   const renderTemplateRow = (template: EmailTemplateDB) => (
@@ -620,6 +628,8 @@ export default function AdminSettings() {
         .update({
           html_content: templateHtml || null,
           subject: templateSubject || null,
+          html_content_zh: templateHtmlZh || null,
+          subject_zh: templateSubjectZh || null,
         })
         .eq("template_key", selectedTemplate.templateKey);
 
@@ -1715,22 +1725,55 @@ export default function AdminSettings() {
                   </div>
                 </div>
 
+                {/* Language toggle */}
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={templateLang === "en" ? "default" : "outline"}
+                    onClick={() => setTemplateLang("en")}
+                  >
+                    English
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={templateLang === "zh" ? "default" : "outline"}
+                    onClick={() => setTemplateLang("zh")}
+                  >
+                    中文
+                  </Button>
+                  <span className="text-xs text-muted-foreground">
+                    {templateLang === "en"
+                      ? "Sent to everyone unless the customer has chosen Chinese."
+                      : "Only sent to customers who chose Chinese. Leave empty to use English."}
+                  </span>
+                </div>
+
                 {/* Subject Line */}
                 <div className="space-y-2">
-                  <Label>Email Subject</Label>
+                  <Label>Email Subject {templateLang === "zh" && "(中文)"}</Label>
                   <Input
-                    value={templateSubject}
-                    onChange={(e) => setTemplateSubject(e.target.value)}
+                    value={templateLang === "en" ? templateSubject : templateSubjectZh}
+                    onChange={(e) =>
+                      templateLang === "en"
+                        ? setTemplateSubject(e.target.value)
+                        : setTemplateSubjectZh(e.target.value)
+                    }
                     placeholder="e.g. Your Booking Confirmation"
                   />
                 </div>
 
                 {/* HTML Editor */}
                 <div className="space-y-2">
-                  <Label>Template HTML</Label>
+                  <Label>Template HTML {templateLang === "zh" && "(中文)"}</Label>
                   <Textarea
-                    value={templateHtml}
-                    onChange={(e) => setTemplateHtml(e.target.value)}
+                    value={templateLang === "en" ? templateHtml : templateHtmlZh}
+                    onChange={(e) =>
+                      templateLang === "en"
+                        ? setTemplateHtml(e.target.value)
+                        : setTemplateHtmlZh(e.target.value)
+                    }
                     placeholder={`<h1>Hi {first_name}!</h1>\n<p>Your booking has been confirmed...</p>`}
                     className="font-mono text-sm min-h-[200px]"
                   />

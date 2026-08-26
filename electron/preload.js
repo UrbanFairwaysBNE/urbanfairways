@@ -66,7 +66,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   cancelAppSequence: () => ipcRenderer.invoke('cancel-app-sequence'),
   
   // Show welcome windows on all displays
-  showWelcomeWindows: (firstName) => ipcRenderer.invoke('show-welcome-windows', { firstName }),
+  showWelcomeWindows: (firstName, language) => ipcRenderer.invoke('show-welcome-windows', { firstName, language }),
   
   // Close all welcome windows
   closeWelcomeWindows: () => ipcRenderer.invoke('close-welcome-windows'),

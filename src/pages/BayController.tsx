@@ -28,6 +28,7 @@ interface Booking {
   status: string;
   user_id?: string;
   customer_name?: string;
+  preferred_language?: string;
   sgt_user_id?: number | null;
   sgt_username?: string | null;
   sgt_game_id?: string | null;
@@ -1935,7 +1936,7 @@ export default function BayController() {
           try {
             // Step 1: Show welcome overlay immediately (masks the screen for current customer)
             console.log(`[Changeover] Step 1: Showing welcome screen for ${firstName}`);
-            const welcomeResult = await window.electronAPI.showWelcomeWindows(firstName);
+            const welcomeResult = await window.electronAPI.showWelcomeWindows(firstName, nextBooking.preferred_language);
             console.log(`[Changeover] Welcome screen result:`, welcomeResult);
             bayLogger.sendLog('automation_decision', `[Changeover Step 1] Welcome screen shown: ${JSON.stringify(welcomeResult)}`, { bookingId: activeBooking.id });
             
@@ -2053,6 +2054,7 @@ export default function BayController() {
                     proteeDisplayLabel: appLaunchConfig.proteeDisplayLabel,
                     postLaunchDelay: 3000,
                     firstName: firstName,
+                    language: nextBooking.preferred_language,
                   });
                   
                   // Log display snapshot from electron for diagnostics
@@ -3364,7 +3366,8 @@ export default function BayController() {
         gsproDisplayLabel: appLaunchConfig.gsproDisplayLabel,
         proteeDisplayLabel: appLaunchConfig.proteeDisplayLabel,
         postLaunchDelay: 3000,
-        firstName: activeBooking?.customer_name?.split(' ')[0] || 'Guest'
+        firstName: activeBooking?.customer_name?.split(' ')[0] || 'Guest',
+        language: activeBooking?.preferred_language || 'en'
       };
       
       addLog(`GSPRO Path: ${launchConfig.gsproPath}`, 'info');

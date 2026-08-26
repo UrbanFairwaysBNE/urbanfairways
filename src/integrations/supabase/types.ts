@@ -1051,10 +1051,12 @@ export type Database = {
           created_at: string
           description: string | null
           html_content: string | null
+          html_content_zh: string | null
           id: string
           is_active: boolean
           name: string
           subject: string | null
+          subject_zh: string | null
           template_key: string
           updated_at: string
         }
@@ -1062,10 +1064,12 @@ export type Database = {
           created_at?: string
           description?: string | null
           html_content?: string | null
+          html_content_zh?: string | null
           id?: string
           is_active?: boolean
           name: string
           subject?: string | null
+          subject_zh?: string | null
           template_key: string
           updated_at?: string
         }
@@ -1073,10 +1077,12 @@ export type Database = {
           created_at?: string
           description?: string | null
           html_content?: string | null
+          html_content_zh?: string | null
           id?: string
           is_active?: boolean
           name?: string
           subject?: string | null
+          subject_zh?: string | null
           template_key?: string
           updated_at?: string
         }
@@ -3491,6 +3497,7 @@ export type Database = {
           id: string
           is_active: boolean
           message: string
+          message_zh: string | null
           name: string
           template_key: string
           updated_at: string
@@ -3501,6 +3508,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           message: string
+          message_zh?: string | null
           name: string
           template_key: string
           updated_at?: string
@@ -3511,6 +3519,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           message?: string
+          message_zh?: string | null
           name?: string
           template_key?: string
           updated_at?: string

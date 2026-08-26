@@ -4,6 +4,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
 import { getTenant, tenantHubUrl, tenantBookingUrl, tenantAddress } from "../_shared/tenant.ts";
 import { sendSMS as sharedSendSMS } from "../_shared/sms.ts";
+import { normaliseLanguage, localiseEmailTemplate, localiseSmsMessage } from "../_shared/i18n.ts";
 
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
@@ -235,7 +236,7 @@ serve(async (req) => {
     if (isLesson) {
       const { data: clientProfile } = await supabaseClient
         .from("profiles")
-        .select("first_name, last_name, email, phone")
+        .select("first_name, last_name, email, phone, preferred_language")
         .eq("user_id", (booking as any).client_user_id)
         .maybeSingle();
       lessonClient = clientProfile ?? null;
@@ -299,6 +300,11 @@ serve(async (req) => {
       .maybeSingle();
 
     
+    // Recipient language: English unless the profile explicitly says 'zh'.
+    const recipientLang = normaliseLanguage((profile as any)?.preferred_language);
+    const localisedTemplate = localiseEmailTemplate(emailTemplate as any, recipientLang);
+    logStep("Recipient language", { recipientLang });
+
     if (templateError) {
       logStep("Template fetch error (using default)", { error: templateError.message });
     } else {
@@ -474,11 +480,13 @@ serve(async (req) => {
     ): Promise<string | null> => {
       const { data: tpl } = await supabaseClient
         .from("sms_templates")
-        .select("message, is_active")
+        .select("message, message_zh, is_active")
         .eq("template_key", templateKey)
         .maybeSingle();
-      if (!tpl || !(tpl as any).is_active || !(tpl as any).message) return null;
-      let out = (tpl as any).message as string;
+      if (!tpl || !(tpl as any).is_active) return null;
+      const picked = localiseSmsMessage(tpl as any, recipientLang);
+      if (!picked) return null;
+      let out = picked;
       for (const [tag, value] of Object.entries(tags)) {
         out = out.split(tag).join(value);
       }
@@ -500,7 +508,7 @@ serve(async (req) => {
             : "Lesson Booked";
 
       subject = replaceTemplateTags(
-        emailTemplate?.subject || `${heading} - ${clientFullName}`,
+        localisedTemplate?.subject || `${heading} - ${clientFullName}`,
         templateTags,
       );
 
@@ -512,8 +520,8 @@ serve(async (req) => {
         <p style="margin:0 0 16px 0; font-size:16px;"><strong>${bookingDate}</strong><br />${startTime12hr} - ${endTime12hr}<br />${bayName}</p>
       `;
 
-      const bodyContent = emailTemplate?.html_content
-        ? replaceTemplateTags(emailTemplate.html_content, templateTags)
+      const bodyContent = localisedTemplate?.html_content
+        ? replaceTemplateTags(localisedTemplate.html_content, templateTags)
         : fallbackBody;
 
       htmlContent = await renderBrandedEmail(supabaseClient, heading, bodyContent, {
@@ -529,7 +537,7 @@ serve(async (req) => {
       const isReschedule = notification_type === "reschedule";
       subject = isReschedule 
         ? `Booking Rescheduled - ${tenant.venue_name}`
-        : (emailTemplate?.subject || `Booking Confirmed - ${tenant.venue_name}`);
+        : (localisedTemplate?.subject || `Booking Confirmed - ${tenant.venue_name}`);
       
       // Main booking SMS — pulled from editable sms_templates table
       const smsKey = isReschedule
@@ -540,8 +548,8 @@ serve(async (req) => {
       const headingText = isReschedule ? "Booking Rescheduled!" : "Booking Confirmed!";
 
       // Check if custom template exists (only for confirmation, not reschedule)
-      if (!isReschedule && emailTemplate?.html_content) {
-        const bodyContent = replaceTemplateTags(emailTemplate.html_content, templateTags);
+      if (!isReschedule && localisedTemplate?.html_content) {
+        const bodyContent = replaceTemplateTags(localisedTemplate.html_content, templateTags);
         htmlContent = await renderBrandedEmail(supabaseClient, headingText, bodyContent, {
           text: "View My Bookings",
           url: tenantHubUrl(tenant, "/my-bookings")
@@ -600,12 +608,12 @@ serve(async (req) => {
       }
     } else if (notification_type === "cancellation") {
       // Cancellation
-      subject = emailTemplate?.subject || `Booking Cancelled - ${tenant.venue_name}`;
+      subject = localisedTemplate?.subject || `Booking Cancelled - ${tenant.venue_name}`;
       smsMessage = (await renderSmsTemplate("booking_cancellation")) ?? "";
       
       let bodyContent: string;
-      if (emailTemplate?.html_content) {
-        bodyContent = replaceTemplateTags(emailTemplate.html_content, templateTags);
+      if (localisedTemplate?.html_content) {
+        bodyContent = replaceTemplateTags(localisedTemplate.html_content, templateTags);
         logStep("Using custom email template with wrapper");
       } else {
         bodyContent = `
@@ -642,7 +650,7 @@ serve(async (req) => {
     }
 
     // Apply tag replacement to subject if custom
-    if (emailTemplate?.subject) {
+    if (localisedTemplate?.subject) {
       subject = replaceTemplateTags(subject, templateTags);
     }
 
@@ -754,11 +762,13 @@ serve(async (req) => {
           '{email}': lessonClient.email || '',
         };
 
-        const { data: clientTpl } = await supabaseClient
+        const { data: clientTplRaw } = await supabaseClient
           .from("email_templates")
-          .select("subject, html_content, is_active")
+          .select("subject, html_content, subject_zh, html_content_zh, is_active")
           .eq("template_key", clientKey)
           .maybeSingle();
+        const clientLang = normaliseLanguage((lessonClient as any)?.preferred_language);
+        const clientTpl = localiseEmailTemplate(clientTplRaw as any, clientLang);
 
         if (clientTpl && (clientTpl as any).is_active === false) {
           logStep("Lesson client email template disabled, skipping", { clientKey });

@@ -1538,7 +1538,8 @@ async function runAppLaunchSequence(config) {
     proteeDisplay,     // Can be index (number) or label (string)
     gsproDisplayLabel,  // New: pass label directly for reliable targeting
     proteeDisplayLabel, // New: pass label directly for reliable targeting
-    firstName
+    firstName,
+    language
   } = config;
   
   // Prefer labels over indices for display targeting
@@ -1575,7 +1576,7 @@ async function runAppLaunchSequence(config) {
     console.log('Step 0: Showing welcome windows on all displays...');
     const customerFirstName = firstName && firstName.trim() !== '' ? firstName.trim() : 'Guest';
     console.log('Using customer name:', customerFirstName);
-    await showWelcomeWindows(customerFirstName);
+    await showWelcomeWindows(customerFirstName, language);
     results.push({ step: 'show_welcome', success: true });
     
     if (appLaunchCancelled) {
@@ -1711,9 +1712,42 @@ async function runAppLaunchSequence(config) {
   }
 }
 
+
+// Welcome window copy, localised to the booking customer's language preference.
+const WELCOME_COPY = {
+  en: {
+    greeting: (name) => `Hi ${name}!`,
+    welcome: (venue) => `Welcome to ${venue}`,
+    starting: 'Your session is starting.',
+    closing: "This window will close when you're ready to tee off!",
+    etiquetteTitle: (venue) => `${venue} Etiquette`,
+    rules: [
+      'Use a different ball after every shot, this prevents a ball cracking on you!',
+      'If you keep skying your drives, tee it down lower',
+      'Keep the bay tidy for the next golfer',
+      'Indoor Swing Syndrome is real (Google it!)',
+    ],
+  },
+  zh: {
+    greeting: (name) => `${name}，您好！`,
+    welcome: (venue) => `欢迎来到 ${venue}`,
+    starting: '您的场次即将开始。',
+    closing: '准备好开球后，本窗口将自动关闭！',
+    etiquetteTitle: (venue) => `${venue} 使用礼仪`,
+    rules: [
+      '每次击球请更换球，避免球体开裂',
+      '如果开球总是打高，请把球托放低一些',
+      '请保持打击区整洁，方便下一位球友',
+      '室内挥杆综合症是真实存在的（可以搜索了解）',
+    ],
+  },
+};
+
 // Show welcome windows on all displays
-async function showWelcomeWindows(firstName) {
-  console.log(`Showing welcome windows for: ${firstName}`);
+async function showWelcomeWindows(firstName, language) {
+  const lang = language === 'zh' ? 'zh' : 'en';
+  const T = WELCOME_COPY[lang];
+  console.log(`Showing welcome windows for: ${firstName} (${lang})`);
   
   // Close any existing welcome windows
   await closeWelcomeWindows();
@@ -1867,17 +1901,14 @@ async function showWelcomeWindows(firstName) {
     <body>
       <div class="container">
         ${logoBase64 ? `<img src="${logoBase64}" class="logo" alt="${VENUE_NAME}" />` : ''}
-        <h1>Hi ${firstName}!</h1>
-        <h2>Welcome to ${VENUE_NAME}</h2>
-        <p>Your session is starting.</p>
-        <p>This window will close when you're ready to tee off!</p>
+        <h1>${T.greeting(firstName)}</h1>
+        <h2>${T.welcome(VENUE_NAME)}</h2>
+        <p>${T.starting}</p>
+        <p>${T.closing}</p>
         <div class="etiquette">
-          <h3>${VENUE_NAME} Etiquette</h3>
+          <h3>${T.etiquetteTitle(VENUE_NAME)}</h3>
           <ol>
-            <li><span class="num">1</span><span>Use a different ball after every shot, this prevents a ball cracking on you!</span></li>
-            <li><span class="num">2</span><span>If you keep skying your drives, tee it down lower</span></li>
-            <li><span class="num">3</span><span>Keep the bay tidy for the next golfer</span></li>
-            <li><span class="num">4</span><span>Indoor Swing Syndrome is real (Google it!)</span></li>
+            ${T.rules.map((r, i) => `<li><span class="num">${i + 1}</span><span>${r}</span></li>`).join('')}
           </ol>
         </div>
         <div class="loading">
@@ -2240,8 +2271,8 @@ ipcMain.handle('list-windows', async () => {
 });
 
 // Welcome window handlers
-ipcMain.handle('show-welcome-windows', async (event, { firstName }) => {
-  return await showWelcomeWindows(firstName || 'Guest');
+ipcMain.handle('show-welcome-windows', async (event, { firstName, language }) => {
+  return await showWelcomeWindows(firstName || 'Guest', language);
 });
 
 ipcMain.handle('close-welcome-windows', async () => {

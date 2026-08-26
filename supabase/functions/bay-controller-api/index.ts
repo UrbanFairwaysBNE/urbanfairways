@@ -881,12 +881,12 @@ serve(async (req) => {
 
         // Fetch customer names and SGT info for each booking
         const userIds = [...new Set(filteredBookings.map((b: Record<string, unknown>) => b.user_id as string))];
-        let profilesMap: Record<string, { first_name: string; last_name: string; sgt_user_id: number | null }> = {};
+        let profilesMap: Record<string, { first_name: string; last_name: string; sgt_user_id: number | null; preferred_language: string }> = {};
         
         if (userIds.length > 0) {
           const { data: profiles } = await supabase
             .from("profiles")
-            .select("user_id, first_name, last_name, sgt_user_id")
+            .select("user_id, first_name, last_name, sgt_user_id, preferred_language")
             .in("user_id", userIds);
           
           if (profiles) {
@@ -894,7 +894,8 @@ serve(async (req) => {
               profilesMap[p.user_id as string] = { 
                 first_name: p.first_name as string, 
                 last_name: p.last_name as string,
-                sgt_user_id: p.sgt_user_id as number | null
+                sgt_user_id: p.sgt_user_id as number | null,
+                preferred_language: (p.preferred_language as string) === "zh" ? "zh" : "en"
               };
             });
           }
@@ -941,6 +942,7 @@ serve(async (req) => {
             sgt_user_id: profile?.sgt_user_id || null,
             sgt_username: sgtMember?.user_name || null,
             sgt_game_id: sgtMember?.user_game_id || null,
+            preferred_language: profile?.preferred_language || 'en',
           };
         });
 

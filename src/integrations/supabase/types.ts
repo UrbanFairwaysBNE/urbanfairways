@@ -2331,6 +2331,7 @@ export type Database = {
           membership_tier: string
           payment_failed_at: string | null
           phone: string | null
+          preferred_language: string
           referral_source: string | null
           sgt_onboarding_dismissed_at: string | null
           sgt_onboarding_dismissed_by: string | null
@@ -2362,6 +2363,7 @@ export type Database = {
           membership_tier?: string
           payment_failed_at?: string | null
           phone?: string | null
+          preferred_language?: string
           referral_source?: string | null
           sgt_onboarding_dismissed_at?: string | null
           sgt_onboarding_dismissed_by?: string | null
@@ -2393,6 +2395,7 @@ export type Database = {
           membership_tier?: string
           payment_failed_at?: string | null
           phone?: string | null
+          preferred_language?: string
           referral_source?: string | null
           sgt_onboarding_dismissed_at?: string | null
           sgt_onboarding_dismissed_by?: string | null

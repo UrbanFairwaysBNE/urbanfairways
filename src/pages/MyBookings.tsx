@@ -8,6 +8,7 @@ import { format, parseISO, isPast, isToday } from "date-fns";
 import { toast } from "sonner";
 import venueLogo from "@/assets/venue-logo.png";
 import { useTenant } from "@/config/tenant";
+import { useTranslation } from "react-i18next";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,6 +51,7 @@ interface Booking {
 
 
 const MyBookings = () => {
+  const { t } = useTranslation(["booking", "common"]);
   const { tenant } = useTenant();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -203,7 +205,7 @@ const MyBookings = () => {
       setBookings(formattedBookings);
     } catch (error) {
       console.error("Error fetching bookings:", error);
-      toast.error("Failed to load bookings");
+      toast.error(t("booking:loadFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -214,7 +216,7 @@ const MyBookings = () => {
     setCancellingId(bookingId);
     
     // Show immediate feedback
-    toast.loading("Processing cancellation...", { id: `cancel-${bookingId}` });
+    toast.loading(t("booking:cancelling"), { id: `cancel-${bookingId}` });
     
     try {
       const { data, error } = await supabase.functions.invoke("cancel-booking", {
@@ -229,19 +231,19 @@ const MyBookings = () => {
       
       if (data?.refund) {
         if (data.refund.type === "balance") {
-          toast.success(`Booking cancelled. $${data.refund.amount.toFixed(2)} refunded to your deposit balance.`);
+          toast.success(t("booking:cancelledRefundBalance", { amount: data.refund.amount.toFixed(2) }));
         } else {
-          toast.success("Booking cancelled. Refund is being processed to your card.");
+          toast.success(t("booking:cancelledRefundCard"));
         }
       } else {
-        toast.success("Booking cancelled successfully");
+        toast.success(t("booking:cancelledSuccess"));
       }
       
       fetchBookings();
     } catch (error) {
       console.error("Error cancelling booking:", error);
       toast.dismiss(`cancel-${bookingId}`);
-      toast.error(error instanceof Error ? error.message : "Failed to cancel booking");
+      toast.error(error instanceof Error ? error.message : t("booking:cancelFailed"));
     } finally {
       setCancellingId(null);
     }
@@ -306,7 +308,7 @@ const MyBookings = () => {
   if (authLoading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+        <div className="animate-pulse text-muted-foreground">{t("common:loading")}</div>
       </div>
     );
   }
@@ -326,7 +328,7 @@ const MyBookings = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <span className="font-display text-base sm:text-2xl tracking-wide text-primary-foreground">
-            MY BOOKINGS
+            {t("booking:myBookings")}
           </span>
         </div>
         <img 
@@ -342,16 +344,16 @@ const MyBookings = () => {
           {/* Upcoming Bookings */}
           <section>
             <h2 className="font-display text-2xl text-primary mb-4">
-              UPCOMING BOOKINGS
+              {t("booking:upcomingBookings")}
             </h2>
             {upcomingBookings.length === 0 ? (
               <div className="bg-card rounded-lg p-6 border border-border text-center">
-                <p className="text-muted-foreground">No upcoming bookings</p>
+                <p className="text-muted-foreground">{t("booking:noUpcoming")}</p>
                 <Button
                   className="mt-4 bg-accent text-accent-foreground hover:bg-accent/90"
                   onClick={() => navigate("/booking")}
                 >
-                  Book a Bay
+                  {t("booking:bookBay")}
                 </Button>
               </div>
             ) : (
@@ -446,7 +448,7 @@ const MyBookings = () => {
                               className="text-primary border-primary hover:bg-primary hover:text-primary-foreground"
                             >
                               <Plus className="h-4 w-4 mr-1" />
-                              Extend
+                              {t("booking:extend")}
                             </Button>
                           )}
                           {canReschedule && (
@@ -457,7 +459,7 @@ const MyBookings = () => {
                               className="text-primary border-primary hover:bg-primary hover:text-primary-foreground"
                             >
                               <RefreshCw className="h-4 w-4 mr-1" />
-                              Reschedule
+                              {t("booking:reschedule")}
                             </Button>
                           )}
                           {canCancel && (
@@ -469,36 +471,38 @@ const MyBookings = () => {
                               className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
                             >
                               <X className="h-4 w-4 mr-1" />
-                              Cancel
+                              {t("booking:cancel")}
                             </Button>
                           </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Cancel Booking?</AlertDialogTitle>
+                            <AlertDialogTitle>{t("booking:cancelBookingTitle")}</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Are you sure you want to cancel your booking for Bay {booking.bay_number} on{" "}
-                              {format(parseISO(booking.booking_date), "MMMM d, yyyy")} at{" "}
-                              {formatTime(booking.start_time)}?
+                              {t("booking:cancelBookingConfirm", {
+                                bay: booking.bay_number,
+                                date: format(parseISO(booking.booking_date), "MMMM d, yyyy"),
+                                time: formatTime(booking.start_time),
+                              })}
                               {booking.payment_method === "stripe" && booking.stripe_payment_intent_id && (
                                 <span className="block mt-2 font-medium">
-                                  Your payment of ${booking.total_price.toFixed(2)} will be refunded to your card.
+                                  {t("booking:refundToCard", { amount: booking.total_price.toFixed(2) })}
                                 </span>
                               )}
                               {booking.payment_method === "balance" && (
                                 <span className="block mt-2 font-medium">
-                                  ${booking.total_price.toFixed(2)} will be refunded to your deposit balance.
+                                  {t("booking:refundToBalance", { amount: booking.total_price.toFixed(2) })}
                                 </span>
                               )}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Keep Booking</AlertDialogCancel>
+                            <AlertDialogCancel>{t("booking:keepBooking")}</AlertDialogCancel>
                             <AlertDialogAction
                               onClick={() => handleCancelBooking(booking.id)}
                               disabled={cancellingId === booking.id}
                               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                             >
-                              {cancellingId === booking.id ? "Processing..." : "Cancel & Refund"}
+                              {cancellingId === booking.id ? t("booking:processing") : t("booking:cancelAndRefund")}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
@@ -518,11 +522,11 @@ const MyBookings = () => {
           {/* Past Bookings */}
           <section>
             <h2 className="font-display text-2xl text-primary mb-4">
-              PAST BOOKINGS
+              {t("booking:pastBookings")}
             </h2>
             {pastBookings.length === 0 ? (
               <div className="bg-card rounded-lg p-6 border border-border text-center">
-                <p className="text-muted-foreground">No past bookings</p>
+                <p className="text-muted-foreground">{t("booking:noPast")}</p>
               </div>
             ) : (
               <div className="space-y-4">

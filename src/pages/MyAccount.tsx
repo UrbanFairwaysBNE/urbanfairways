@@ -26,7 +26,10 @@ import { MembershipPaymentIssueDialog } from "@/components/membership/Membership
 import { AlertCircle } from "lucide-react";
 import { PrepaidPacksCard } from "@/components/account/PrepaidPacksCard";
 import { CorporateStaffCard } from "@/components/account/CorporateStaffCard";
+import { LanguageCard } from "@/components/account/LanguageCard";
+
 import { useCorporate } from "@/hooks/useCorporate";
+import { useTranslation } from "react-i18next";
 
 
 
@@ -58,6 +61,7 @@ interface PaymentMethod {
 }
 
 const MyAccount = () => {
+  const { t } = useTranslation(["account", "common"]);
   const { tenant } = useTenant();
   const { pricing, getTier, defaultTier, peakRate } = usePricing();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -87,11 +91,11 @@ const MyAccount = () => {
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
-      toast.success(`$${Number((data as any).amount).toFixed(2)} credit added to your account!`);
+      toast.success(t("account:creditAdded", { amount: Number((data as any).amount).toFixed(2) }));
       setRedeemCode("");
       fetchProfile();
     } catch (e: any) {
-      toast.error(e.message || "Could not redeem code. Please check and try again.");
+      toast.error(e.message || t("account:redeemFailed"));
     } finally {
       setIsRedeeming(false);
     }
@@ -127,21 +131,21 @@ const MyAccount = () => {
   useEffect(() => {
     const setup = searchParams.get("setup");
     if (setup === "success") {
-      toast.success("Payment method added successfully!");
+      toast.success(t("account:paymentMethodAdded"));
       fetchPaymentMethods();
       // Clean up URL
       navigate("/my-account", { replace: true });
     } else if (setup === "cancelled") {
-      toast.info("Payment method setup was cancelled.");
+      toast.info(t("account:paymentSetupCancelled"));
       navigate("/my-account", { replace: true });
     }
 
     const pack = searchParams.get("pack");
     if (pack === "success") {
-      toast.success("Payment received — your prepaid hours are on the way.");
+      toast.success(t("account:packPaymentReceived"));
       navigate("/my-account", { replace: true });
     } else if (pack === "cancelled") {
-      toast.info("Pack purchase cancelled.");
+      toast.info(t("account:packCancelled"));
       navigate("/my-account", { replace: true });
     }
   }, [searchParams, navigate]);
@@ -175,7 +179,7 @@ const MyAccount = () => {
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
-      toast.error("Failed to load profile");
+      toast.error(t("account:profileLoadFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -184,7 +188,7 @@ const MyAccount = () => {
   const handleCopySGT = (field: string, value: string) => {
     navigator.clipboard.writeText(value);
     setCopiedField(field);
-    toast.success(`${field} copied to clipboard`);
+    toast.success(t("account:copiedToClipboard", { field }));
     setTimeout(() => setCopiedField(null), 2000);
   };
 
@@ -214,7 +218,7 @@ const MyAccount = () => {
       }
     } catch (error) {
       console.error("Error creating checkout session:", error);
-      toast.error("Failed to start payment setup");
+      toast.error(t("account:paymentSetupFailed"));
       setIsAddingPaymentMethod(false);
     }
   };
@@ -235,11 +239,11 @@ const MyAccount = () => {
       if (error) throw error;
       if (data.error) throw new Error(data.error);
       
-      toast.success("Payment method removed successfully");
+      toast.success(t("account:paymentMethodRemoved"));
       fetchPaymentMethods();
     } catch (error) {
       console.error("Error deleting payment method:", error);
-      toast.error("Failed to remove payment method");
+      toast.error(t("account:paymentMethodRemoveFailed"));
     } finally {
       setDeletingPaymentMethodId(null);
     }
@@ -258,7 +262,7 @@ const MyAccount = () => {
       }
     } catch (error) {
       console.error("Error opening billing portal:", error);
-      toast.error("Failed to open billing portal. Please try again.");
+      toast.error(t("account:billingPortalFailed"));
     } finally {
       setIsOpeningBillingPortal(false);
     }
@@ -298,12 +302,12 @@ const MyAccount = () => {
 
       if (error) throw error;
 
-      toast.success("Profile updated successfully");
+      toast.success(t("account:profileUpdated"));
       setIsEditingProfile(false);
       fetchProfile();
     } catch (error) {
       console.error("Error updating profile:", error);
-      toast.error("Failed to update profile");
+      toast.error(t("account:profileUpdateFailed"));
     } finally {
       setIsSavingProfile(false);
     }
@@ -311,17 +315,17 @@ const MyAccount = () => {
 
   const handlePasswordChange = async () => {
     if (!passwordForm.newPassword || !passwordForm.confirmPassword) {
-      toast.error("Please fill in both password fields");
+      toast.error(t("account:fillBothPasswords"));
       return;
     }
 
     if (passwordForm.newPassword.length < 6) {
-      toast.error("Password must be at least 6 characters");
+      toast.error(t("account:passwordTooShort"));
       return;
     }
 
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      toast.error("Passwords do not match");
+      toast.error(t("account:passwordsDoNotMatch"));
       return;
     }
 
@@ -333,12 +337,12 @@ const MyAccount = () => {
 
       if (error) throw error;
       
-      toast.success("Password updated successfully!");
+      toast.success(t("account:passwordUpdated"));
       setShowPasswordDialog(false);
       setPasswordForm({ newPassword: "", confirmPassword: "" });
     } catch (error) {
       console.error("Error updating password:", error);
-      toast.error("Failed to update password. Please try again.");
+      toast.error(t("account:passwordUpdateFailed"));
     } finally {
       setIsChangingPassword(false);
     }
@@ -469,8 +473,8 @@ const MyAccount = () => {
                   <Crown className="h-5 w-5 text-accent" />
                 </div>
                 <div>
-                  <CardTitle>Membership</CardTitle>
-                  <CardDescription>Your current membership tier and benefits</CardDescription>
+                  <CardTitle>{t("account:membershipTitle")}</CardTitle>
+                  <CardDescription>{t("account:membershipCardDesc")}</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -508,8 +512,8 @@ const MyAccount = () => {
                     <Wallet className="h-5 w-5 text-accent" />
                   </div>
                   <div>
-                    <CardTitle>Account Credit</CardTitle>
-                    <CardDescription>Available credit balance</CardDescription>
+                    <CardTitle>{t("account:accountCredit")}</CardTitle>
+                    <CardDescription>{t("account:accountCreditDesc")}</CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -541,8 +545,8 @@ const MyAccount = () => {
                   <Gift className="h-5 w-5 text-accent" />
                 </div>
                 <div>
-                  <CardTitle>Redeem Gift Card</CardTitle>
-                  <CardDescription>Got a printed gift card? Enter the code to add credit.</CardDescription>
+                  <CardTitle>{t("account:redeemGiftCard")}</CardTitle>
+                  <CardDescription>{t("account:redeemGiftCardDesc")}</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -571,8 +575,8 @@ const MyAccount = () => {
                     <Gamepad2 className="h-5 w-5 text-accent" />
                   </div>
                   <div>
-                    <CardTitle>{tenant.venue_name} League Account</CardTitle>
-                    <CardDescription>Your simulator golf tour credentials</CardDescription>
+                    <CardTitle>{t("account:leagueAccount", { venue: tenant.venue_name })}</CardTitle>
+                    <CardDescription>{t("account:leagueAccountDesc")}</CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -633,8 +637,8 @@ const MyAccount = () => {
                     <User className="h-5 w-5 text-accent" />
                   </div>
                   <div>
-                    <CardTitle>Profile Information</CardTitle>
-                    <CardDescription>Your personal details</CardDescription>
+                    <CardTitle>{t("account:profileInformation")}</CardTitle>
+                    <CardDescription>{t("account:profileDesc")}</CardDescription>
                   </div>
                 </div>
                 {!isEditingProfile && (
@@ -652,7 +656,7 @@ const MyAccount = () => {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
+                  <Label htmlFor="firstName">{t("account:firstName")}</Label>
                   <Input
                     id="firstName"
                     value={isEditingProfile ? editForm.first_name : (profile?.first_name || "")}
@@ -662,7 +666,7 @@ const MyAccount = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
+                  <Label htmlFor="lastName">{t("account:lastName")}</Label>
                   <Input
                     id="lastName"
                     value={isEditingProfile ? editForm.last_name : (profile?.last_name || "")}
@@ -692,7 +696,7 @@ const MyAccount = () => {
                 <Input
                   id="phone"
                   type="tel"
-                  placeholder="Enter phone number"
+                  placeholder={t("account:enterPhoneNumber")}
                   value={isEditingProfile ? editForm.phone : (profile?.phone || "")}
                   onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
                   disabled={!isEditingProfile}
@@ -739,8 +743,8 @@ const MyAccount = () => {
                   <CreditCard className="h-5 w-5 text-accent" />
                 </div>
                 <div>
-                  <CardTitle>Payment Methods</CardTitle>
-                  <CardDescription>Manage your saved payment methods</CardDescription>
+                  <CardTitle>{t("account:paymentMethods")}</CardTitle>
+                  <CardDescription>{t("account:paymentMethodsDesc")}</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -860,8 +864,8 @@ const MyAccount = () => {
                   <Lock className="h-5 w-5 text-accent" />
                 </div>
                 <div>
-                  <CardTitle>Security</CardTitle>
-                  <CardDescription>Manage your password and security settings</CardDescription>
+                  <CardTitle>{t("account:security")}</CardTitle>
+                  <CardDescription>{t("account:securityDesc")}</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -870,40 +874,45 @@ const MyAccount = () => {
               {/* Password Change */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                  <p className="font-medium">Password</p>
+                  <p className="font-medium">{t("account:password")}</p>
                   <p className="text-sm text-muted-foreground">
-                    Update your account password
+                    {t("account:passwordDesc")}
                   </p>
                 </div>
                 <Button
                   variant="outline"
                   onClick={() => setShowPasswordDialog(true)}
                 >
-                  Change Password
+                  {t("account:changePassword")}
                 </Button>
               </div>
             </CardContent>
           </Card>
 
+          {/* Language */}
+          <LanguageCard />
+
+
+
           {/* Password Change Dialog */}
           <AlertDialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Change Password</AlertDialogTitle>
+                <AlertDialogTitle>{t("account:changePassword")}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Enter your new password below. Must be at least 6 characters.
+                  {t("account:passwordDialogDesc")}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="new-password">New Password</Label>
+                  <Label htmlFor="new-password">{t("account:newPassword")}</Label>
                   <div className="relative">
                     <Input
                       id="new-password"
                       type={showPassword ? "text" : "password"}
                       value={passwordForm.newPassword}
                       onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
-                      placeholder="Enter new password"
+                      placeholder={t("account:enterNewPassword")}
                     />
                     <Button
                       type="button"
@@ -917,13 +926,13 @@ const MyAccount = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Confirm Password</Label>
+                  <Label htmlFor="confirm-password">{t("account:confirmPassword")}</Label>
                   <Input
                     id="confirm-password"
                     type={showPassword ? "text" : "password"}
                     value={passwordForm.confirmPassword}
                     onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                    placeholder="Confirm new password"
+                    placeholder={t("account:confirmNewPassword")}
                   />
                 </div>
               </div>
@@ -945,10 +954,10 @@ const MyAccount = () => {
                   {isChangingPassword ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Updating...
+                      {t("account:updating")}
                     </>
                   ) : (
-                    "Update Password"
+                    t("account:updatePassword")
                   )}
                 </Button>
               </AlertDialogFooter>
@@ -960,7 +969,7 @@ const MyAccount = () => {
       {/* Footer */}
       <footer className="bg-primary py-4 px-6 text-center">
         <p className="text-primary-foreground/60 text-sm">
-          © {new Date().getFullYear()} {tenant.venue_name}. All rights reserved.
+          © {new Date().getFullYear()} {tenant.venue_name}. {t("common:allRightsReserved")}
         </p>
       </footer>
     </div>

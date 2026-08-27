@@ -60,6 +60,9 @@ const resources = {
     booking: enBooking,
     membership: enMembership,
     auth: enAuth,
+    lab: enLab,
+    league: enLeague,
+    clubhouse: enClubhouse,
   },
   zh: {
     common: zhCommon,
@@ -68,6 +71,9 @@ const resources = {
     booking: zhBooking,
     membership: zhMembership,
     auth: zhAuth,
+    lab: zhLab,
+    league: zhLeague,
+    clubhouse: zhClubhouse,
   },
 } as const;
 
@@ -76,7 +82,7 @@ if (!i18n.isInitialized) {
     resources,
     lng: getStoredLanguage(),
     fallbackLng: "en",
-    ns: ["common", "account", "dashboard", "booking", "membership", "auth"],
+    ns: ["common", "account", "dashboard", "booking", "membership", "auth", "lab", "league", "clubhouse"],
     defaultNS: "common",
     interpolation: { escapeValue: false },
     returnEmptyString: false,

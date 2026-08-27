@@ -487,9 +487,9 @@ export default function Booking() {
       }
 
       const totalPrice = sessionTotal;
-      let message = `Your bay is booked for ${format(selectedDate, "PPP")} at ${selectedTime}.`;
+      let message = t("booking:bayBookedFor", { date: format(selectedDate, "PPP", dateFnsLocale), time: selectedTime });
       if (packHoursToApply > 0) {
-        message += ` ${packHoursToApply} prepaid ${packHoursToApply === 1 ? "hour" : "hours"} used.`;
+        message += " " + t("booking:prepaidHoursUsed", { count: packHoursToApply, unit: t(packHoursToApply === 1 ? "booking:duration" : "booking:duration") });
       }
       if (amountAfterHours <= 0 && packHoursToApply > 0) {
         // Fully covered by prepaid hours — nothing else to say

@@ -494,17 +494,17 @@ export default function Booking() {
       if (amountAfterHours <= 0 && packHoursToApply > 0) {
         // Fully covered by prepaid hours — nothing else to say
       } else if (paymentMethod === "balance") {
-        message += " Balance deducted.";
+        message += t("booking:balanceDeducted");
       } else if (applyPartialBalance && depositBalance > 0) {
         const cardAmount = Math.max(0, amountAfterHours - depositBalance);
-        message += ` $${Math.min(depositBalance, amountAfterHours).toFixed(2)} from balance, $${cardAmount.toFixed(2)} charged to card.`;
+        message += t("booking:partialPayment", { card: Math.min(depositBalance, amountAfterHours).toFixed(2), cardAmount: cardAmount.toFixed(2) });
       } else if (savedCard) {
-        message += ` Charged to your ${savedCard.brand} •••• ${savedCard.last4}.`;
+        message += t("booking:chargedToSavedCardMsg", { brand: savedCard.brand, last4: savedCard.last4 });
       }
 
       
       toast({
-        title: "Booking confirmed!",
+        title: t("booking:toastBookingConfirmedTitle"),
         description: message,
       });
 
@@ -516,8 +516,8 @@ export default function Booking() {
       navigate("/dashboard");
     } catch (error: any) {
       toast({
-        title: "Booking failed",
-        description: error.message || "Unable to complete booking. Please try again.",
+        title: t("booking:toastBookingFailedTitle"),
+        description: error.message || t("booking:toastBookingFailedDefault"),
         variant: "destructive",
       });
     } finally {
@@ -547,8 +547,8 @@ export default function Booking() {
 
       const totalPrice = sessionTotal;
       toast({
-        title: "Booking confirmed!",
-        description: `Your bay is booked for ${format(selectedDate, "PPP")} at ${selectedTime}. $${totalPrice.toFixed(2)} deducted from your balance.`,
+        title: t("booking:toastBookingConfirmedTitle"),
+        description: t("booking:balanceDeductedFull", { date: format(selectedDate, "PPP", dateFnsLocale), time: selectedTime, amount: totalPrice.toFixed(2) }),
       });
 
       // Check loyalty credit eligibility (fire and forget)
@@ -559,8 +559,8 @@ export default function Booking() {
       navigate("/dashboard");
     } catch (error: any) {
       toast({
-        title: "Booking failed",
-        description: error.message || "Unable to complete booking. Please try again.",
+        title: t("booking:toastBookingFailedTitle"),
+        description: error.message || t("booking:toastBookingFailedDefault"),
         variant: "destructive",
       });
     } finally {

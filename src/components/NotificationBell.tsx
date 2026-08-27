@@ -210,7 +210,7 @@ export function NotificationBell() {
                 onClick={handleViewSource}
                 className="w-full"
               >
-                View in Clubhouse
+                {t("common:viewInClubhouse")}
               </Button>
             )}
           </div>

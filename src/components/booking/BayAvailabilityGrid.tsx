@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Bay } from "@/hooks/useBooking";
 import { formatDurationLabel } from "@/components/booking/DateTimePicker";
+import { useTranslation } from "react-i18next";
 
 interface BayAvailabilityGridProps {
   bays: Bay[];
@@ -33,10 +34,11 @@ export function BayAvailabilityGrid({
   specialName,
   isPeak,
 }: BayAvailabilityGridProps) {
+  const { t } = useTranslation(["booking", "common"]);
   if (!selectedTime) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        <p>Select a date and time to see bay availability</p>
+        <p>{t("booking:selectDateTimePrompt")}</p>
       </div>
     );
   }
@@ -48,7 +50,7 @@ export function BayAvailabilityGrid({
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
-          <h3 className="font-display text-lg text-foreground">Available Bays</h3>
+          <h3 className="font-display text-lg text-foreground">{t("booking:availableBaysTitle")}</h3>
           {isPeak !== undefined && (
             <Badge 
               variant="outline" 
@@ -57,20 +59,15 @@ export function BayAvailabilityGrid({
                 : "text-green-600 border-green-300 bg-green-50"
               }
             >
-              {isPeak ? "Peak" : "Off-Peak"}
+              {isPeak ? t("booking:isPeakLabel", { defaultValue: "Peak" }) : t("booking:isOffPeakLabel", { defaultValue: "Off-Peak" })}
             </Badge>
           )}
         </div>
         <div className="text-sm text-muted-foreground">
           {specialName ? (
-            <>
-              {specialName} = <span className="font-semibold text-accent">${totalPrice}</span>
-            </>
+            <>{t("booking:priceBreakdownSpecial", { special: specialName, total: totalPrice })}</>
           ) : (
-            <>
-              ${hourlyRate}/hr × {formatDurationLabel(selectedDuration)} ={" "}
-              <span className="font-semibold text-accent">${totalPrice}</span>
-            </>
+            <>{t("booking:priceBreakdown", { rate: hourlyRate, duration: formatDurationLabel(selectedDuration), total: totalPrice })}</>
           )}
         </div>
 
@@ -107,7 +104,7 @@ export function BayAvailabilityGrid({
                   "text-sm mt-1",
                   isAvailable ? "text-green-600" : "text-destructive"
                 )}>
-                  {isAvailable ? "Available" : "Booked"}
+                  {isAvailable ? t("booking:available") : t("booking:booked")}
                 </p>
               </CardContent>
             </Card>
@@ -118,10 +115,7 @@ export function BayAvailabilityGrid({
       {selectedBayId && (
         <div className="mt-6 p-4 bg-secondary rounded-lg">
           <p className="text-sm text-center text-secondary-foreground">
-            <span className="font-semibold">
-              {bays.find((b) => b.id === selectedBayId)?.name}
-            </span>{" "}
-            selected • {formatDurationLabel(selectedDuration)} • ${totalPrice} total
+            {t("booking:selectedBaySummary", { bay: bays.find((b) => b.id === selectedBayId)?.name, duration: formatDurationLabel(selectedDuration), total: totalPrice })}
           </p>
         </div>
       )}

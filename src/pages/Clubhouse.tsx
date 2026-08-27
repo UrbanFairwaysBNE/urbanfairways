@@ -15,6 +15,7 @@ import venueLogo from "@/assets/venue-logo.png";
 import { useTenant } from "@/config/tenant";
 import { usePricing } from "@/hooks/usePricing";
 import { isDefaultTier } from "@/lib/tier-config";
+import { useTranslation } from "react-i18next";
 
 interface Post {
   id: string;
@@ -41,6 +42,7 @@ interface Comment {
 type MembershipTier = string;
 
 const Clubhouse = () => {
+  const { t } = useTranslation(["clubhouse", "common"]);
   const { tenant } = useTenant();
   const { pricing } = usePricing();
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -149,7 +151,7 @@ const Clubhouse = () => {
       setPosts(postsWithDetails);
     } catch (error) {
       console.error("Error fetching posts:", error);
-      toast.error("Failed to load posts");
+      toast.error(t("clubhouse:loadPostsFailed"));
     } finally {
       setLoadingPosts(false);
     }
@@ -193,7 +195,7 @@ const Clubhouse = () => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        toast.error("Image must be less than 5MB");
+        toast.error(t("clubhouse:imageTooLarge"));
         return;
       }
       setNewPostImage(file);
@@ -212,7 +214,7 @@ const Clubhouse = () => {
 
   const handleCreatePost = async () => {
     if (!user || !newPostTitle.trim() || !newPostContent.trim()) {
-      toast.error("Please fill in all required fields");
+      toast.error(t("clubhouse:fillRequiredFields"));
       return;
     }
 
@@ -249,7 +251,7 @@ const Clubhouse = () => {
 
       if (error) throw error;
 
-      toast.success("Post created!");
+      toast.success(t("clubhouse:postCreated"));
       setCreateDialogOpen(false);
       setNewPostTitle("");
       setNewPostContent("");
@@ -258,7 +260,7 @@ const Clubhouse = () => {
       fetchPosts();
     } catch (error) {
       console.error("Error creating post:", error);
-      toast.error("Failed to create post");
+      toast.error(t("clubhouse:createPostFailed"));
     } finally {
       setSubmittingPost(false);
     }
@@ -343,14 +345,14 @@ const Clubhouse = () => {
       });
     } catch (error) {
       console.error("Error adding comment:", error);
-      toast.error("Failed to add comment");
+      toast.error(t("clubhouse:commentAddFailed"));
     } finally {
       setSubmittingComment(false);
     }
   };
 
   const handleDeletePost = async (postId: string) => {
-    if (!confirm("Are you sure you want to delete this post?")) return;
+    if (!confirm(t("clubhouse:confirmDeletePost"))) return;
 
     try {
       const { error } = await supabase
@@ -360,12 +362,12 @@ const Clubhouse = () => {
 
       if (error) throw error;
 
-      toast.success("Post deleted");
+      toast.success(t("clubhouse:postDeleted"));
       setSelectedPost(null);
       fetchPosts();
     } catch (error) {
       console.error("Error deleting post:", error);
-      toast.error("Failed to delete post");
+      toast.error(t("clubhouse:deletePostFailed"));
     }
   };
 
@@ -394,7 +396,7 @@ const Clubhouse = () => {
       });
     } catch (error) {
       console.error("Error deleting comment:", error);
-      toast.error("Failed to delete comment");
+      toast.error(t("clubhouse:deleteCommentFailed"));
     }
   };
 
@@ -424,19 +426,19 @@ const Clubhouse = () => {
             className="text-primary-foreground hover:bg-primary-foreground/10"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            {t("common:back")}
           </Button>
           <img src={venueLogo} alt={tenant.venue_name} className="h-7 sm:h-10 w-auto" />
         </header>
         <main className="flex-1 flex items-center justify-center p-6">
           <Card className="max-w-md text-center">
             <CardContent className="pt-6">
-              <h2 className="text-xl font-semibold mb-2">Members Only</h2>
+              <h2 className="text-xl font-semibold mb-2">{t("clubhouse:membersOnlyTitle")}</h2>
               <p className="text-muted-foreground mb-4">
-                Upgrade your membership to access the {tenant.venue_name} Clubhouse community.
+                {t("clubhouse:membersOnlyBody", { venue: tenant.venue_name })}
               </p>
               <Button onClick={() => navigate("/membership")}>
-                View Memberships
+                {t("clubhouse:viewMemberships")}
               </Button>
             </CardContent>
           </Card>
@@ -457,7 +459,7 @@ const Clubhouse = () => {
             className="text-primary-foreground hover:bg-primary-foreground/10"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            {t("common:back")}
           </Button>
           <img src={venueLogo} alt={tenant.venue_name} className="h-7 sm:h-10 w-auto" />
         </div>
@@ -465,42 +467,42 @@ const Clubhouse = () => {
           <DialogTrigger asChild>
             <Button className="bg-accent text-accent-foreground hover:bg-accent/90">
               <Plus className="h-4 w-4 mr-2" />
-              New Post
+              {t("clubhouse:newPost")}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Create a Post</DialogTitle>
+              <DialogTitle>{t("clubhouse:createPost")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="title">Title</Label>
+                <Label htmlFor="title">{t("clubhouse:postTitleLabel")}</Label>
                 <Input
                   id="title"
                   value={newPostTitle}
                   onChange={(e) => setNewPostTitle(e.target.value)}
-                  placeholder="What's on your mind?"
+                  placeholder={t("clubhouse:postTitlePlaceholder")}
                   maxLength={100}
                 />
               </div>
               <div>
-                <Label htmlFor="content">Content</Label>
+                <Label htmlFor="content">{t("clubhouse:contentLabel")}</Label>
                 <Textarea
                   id="content"
                   value={newPostContent}
                   onChange={(e) => setNewPostContent(e.target.value)}
-                  placeholder="Share your thoughts..."
+                  placeholder={t("clubhouse:contentPlaceholder")}
                   rows={4}
                   maxLength={2000}
                 />
               </div>
               <div>
-                <Label>Image (optional)</Label>
+                <Label>{t("clubhouse:imageLabel")}</Label>
                 {imagePreview ? (
                   <div className="relative mt-2">
                     <img
                       src={imagePreview}
-                      alt="Preview"
+                      alt={t("clubhouse:previewAlt")}
                       className="w-full h-48 object-cover rounded-lg"
                     />
                     <Button
@@ -516,7 +518,7 @@ const Clubhouse = () => {
                   <label className="mt-2 flex items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-accent transition-colors">
                     <div className="flex flex-col items-center text-muted-foreground">
                       <ImageIcon className="h-8 w-8 mb-2" />
-                      <span className="text-sm">Click to upload image</span>
+                      <span className="text-sm">{t("clubhouse:clickToUpload")}</span>
                     </div>
                     <input
                       type="file"
@@ -533,9 +535,9 @@ const Clubhouse = () => {
                 disabled={submittingPost || !newPostTitle.trim() || !newPostContent.trim()}
               >
                 {submittingPost ? (
-                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Creating...</>
+                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {t("clubhouse:creating")}</>
                 ) : (
-                  "Create Post"
+                  t("clubhouse:createPostButton")
                 )}
               </Button>
             </div>
@@ -546,8 +548,8 @@ const Clubhouse = () => {
       {/* Main content */}
       <main className="flex-1 p-6">
         <div className="container max-w-3xl mx-auto">
-          <h1 className="font-display text-4xl text-primary mb-2">{tenant.venue_name.toUpperCase()} CLUBHOUSE</h1>
-          <p className="text-muted-foreground mb-8">Connect with fellow members</p>
+          <h1 className="font-display text-4xl text-primary mb-2">{t("clubhouse:title", { venue: tenant.venue_name.toUpperCase() })}</h1>
+          <p className="text-muted-foreground mb-8">{t("clubhouse:subtitle")}</p>
 
           {loadingPosts ? (
             <div className="text-center py-12">
@@ -556,7 +558,7 @@ const Clubhouse = () => {
           ) : posts.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground">No posts yet. Be the first to share something!</p>
+                <p className="text-muted-foreground">{t("clubhouse:noPosts")}</p>
               </CardContent>
             </Card>
           ) : (
@@ -595,7 +597,7 @@ const Clubhouse = () => {
                     {post.image_url && (
                       <img
                         src={post.image_url}
-                        alt="Post image"
+                        alt={t("clubhouse:postImageAlt")}
                         className="w-full h-48 object-cover rounded-lg mb-3"
                       />
                     )}
@@ -655,7 +657,7 @@ const Clubhouse = () => {
                 {selectedPost.image_url && (
                   <img
                     src={selectedPost.image_url}
-                    alt="Post image"
+                    alt={t("clubhouse:postImageAlt")}
                     className="w-full rounded-lg"
                   />
                 )}
@@ -666,24 +668,24 @@ const Clubhouse = () => {
                     onClick={() => handleUpvote(selectedPost.id, selectedPost.has_upvoted || false)}
                   >
                     <ThumbsUp className={`h-4 w-4 ${selectedPost.has_upvoted ? "fill-current" : ""}`} />
-                    <span>{selectedPost.upvote_count} likes</span>
+                    <span>{t("clubhouse:likes", { count: selectedPost.upvote_count })}</span>
                   </button>
                   <div className="flex items-center gap-1 text-muted-foreground">
                     <MessageCircle className="h-4 w-4" />
-                    <span>{selectedPost.comment_count || 0} comments</span>
+                    <span>{t("clubhouse:comments", { count: selectedPost.comment_count || 0 })}</span>
                   </div>
                 </div>
 
                 {/* Comments */}
                 <div className="space-y-3">
-                  <h3 className="font-semibold">Comments</h3>
+                  <h3 className="font-semibold">{t("clubhouse:commentsHeading")}</h3>
                   
                   {loadingComments ? (
                     <div className="text-center py-4">
                       <Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" />
                     </div>
                   ) : comments.length === 0 ? (
-                    <p className="text-muted-foreground text-sm">No comments yet. Be the first!</p>
+                    <p className="text-muted-foreground text-sm">{t("clubhouse:noComments")}</p>
                   ) : (
                     <div className="space-y-3">
                       {comments.map((comment) => (
@@ -715,7 +717,7 @@ const Clubhouse = () => {
                   {/* Add comment */}
                   <div className="flex gap-2 mt-4">
                     <Input
-                      placeholder="Add a comment..."
+                      placeholder={t("clubhouse:addCommentPlaceholder")}
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleAddComment()}
@@ -725,7 +727,7 @@ const Clubhouse = () => {
                       onClick={handleAddComment}
                       disabled={submittingComment || !newComment.trim()}
                     >
-                      {submittingComment ? <Loader2 className="h-4 w-4 animate-spin" /> : "Post"}
+                      {submittingComment ? <Loader2 className="h-4 w-4 animate-spin" /> : t("clubhouse:postButton")}
                     </Button>
                   </div>
                 </div>
@@ -738,7 +740,7 @@ const Clubhouse = () => {
       {/* Footer */}
       <footer className="bg-primary py-4 px-6 text-center">
         <p className="text-primary-foreground/60 text-sm">
-          © {new Date().getFullYear()} {tenant.venue_name}. All rights reserved.
+          © {new Date().getFullYear()} {tenant.venue_name}. {t("common:allRightsReserved")}
         </p>
       </footer>
     </div>

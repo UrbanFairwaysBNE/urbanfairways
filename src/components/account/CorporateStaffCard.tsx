@@ -30,12 +30,14 @@ import { Users, Loader2, Trash2, ChevronDown, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useCorporate } from "@/hooks/useCorporate";
 import { formatHours } from "@/hooks/usePackHours";
+import { useTranslation } from "react-i18next";
 
 /**
  * Staff access for corporate accounts. Anyone listed here books against the
  * company's prepaid hours instead of paying — with an optional monthly cap.
  */
 export function CorporateStaffCard() {
+  const { t } = useTranslation(["account", "common"]);
   const { account, staff, isOwner, isLoading, addStaff, removeStaff, setCap } = useCorporate();
   const [email, setEmail] = useState("");
   const [cap, setCapInput] = useState("");
@@ -49,14 +51,14 @@ export function CorporateStaffCard() {
     try {
       const parsedCap = cap.trim() === "" ? null : Number(cap);
       if (parsedCap !== null && (!Number.isFinite(parsedCap) || parsedCap <= 0)) {
-        throw new Error("Monthly cap must be a number greater than zero");
+        throw new Error(t("account:capMustBePositive"));
       }
       await addStaff(email, parsedCap);
-      toast.success("Staff member added");
+      toast.success(t("account:staffAdded"));
       setEmail("");
       setCapInput("");
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not add that staff member");
+      toast.error(e instanceof Error ? e.message : t("account:couldNotAddStaff"));
     } finally {
       setIsAdding(false);
     }
@@ -65,9 +67,9 @@ export function CorporateStaffCard() {
   const handleRemove = async (id: string) => {
     try {
       await removeStaff(id);
-      toast.success("Access removed");
+      toast.success(t("account:accessRemoved"));
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not remove access");
+      toast.error(e instanceof Error ? e.message : t("account:couldNotRemoveAccess"));
     }
   };
 
@@ -77,7 +79,7 @@ export function CorporateStaffCard() {
     try {
       await setCap(id, parsed);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not update the cap");
+      toast.error(e instanceof Error ? e.message : t("account:couldNotUpdateCap"));
     }
   };
 
@@ -91,11 +93,11 @@ export function CorporateStaffCard() {
                 <Users className="h-5 w-5 text-accent" />
               </div>
               <div className="min-w-0 flex-1">
-                <CardTitle>Staff</CardTitle>
+                <CardTitle>{t("account:staffTitle")}</CardTitle>
                 <CardDescription>
                   {staff.length === 0
-                    ? "Give your team access to the company hours"
-                    : `${staff.length} staff member${staff.length === 1 ? "" : "s"} with access`}
+                    ? t("account:staffGiveAccessDesc")
+                    : t("account:staffMembersWithAccess_other", { count: staff.length })}
                 </CardDescription>
               </div>
               <ChevronDown
@@ -108,12 +110,12 @@ export function CorporateStaffCard() {
         <CollapsibleContent>
           <CardContent className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="staff-email">Add a staff member</Label>
+              <Label htmlFor="staff-email">{t("account:addStaffMember")}</Label>
               <div className="flex flex-col sm:flex-row gap-2">
                 <Input
                   id="staff-email"
                   type="email"
-                  placeholder="name@company.com.au"
+                  placeholder={t("account:staffEmailPlaceholder")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isAdding}
@@ -126,7 +128,7 @@ export function CorporateStaffCard() {
                   type="number"
                   min={1}
                   step={0.5}
-                  placeholder="Cap (hrs/mo)"
+                  placeholder={t("account:capHoursPlaceholder")}
                   value={cap}
                   onChange={(e) => setCapInput(e.target.value)}
                   disabled={isAdding}
@@ -136,14 +138,13 @@ export function CorporateStaffCard() {
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <>
-                      <Plus className="h-4 w-4 mr-2" /> Add
+                      <Plus className="h-4 w-4 mr-2" /> {t("account:add")}
                     </>
                   )}
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                They just need to create a normal account with this email — access switches on
-                automatically. Leave the cap blank for unlimited.
+                {t("account:staffAddHelp")}
               </p>
             </div>
 
@@ -159,24 +160,24 @@ export function CorporateStaffCard() {
                       <p className="text-xs text-muted-foreground">
                         {s.user_id ? (
                           <>
-                            {formatHours(s.hoursThisMonth ?? 0)} hrs used this month
+                            {t("account:hrsUsedThisMonth", { hours: formatHours(s.hoursThisMonth ?? 0) })}
                             {s.monthly_hour_cap
-                              ? ` of ${formatHours(Number(s.monthly_hour_cap))}`
+                              ? t("account:ofCapHours", { cap: formatHours(Number(s.monthly_hour_cap)) })
                               : ""}
                           </>
                         ) : (
-                          "Waiting for them to create an account"
+                          t("account:waitingForAccount")
                         )}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      {!s.user_id && <Badge variant="secondary">Pending</Badge>}
+                      {!s.user_id && <Badge variant="secondary">{t("account:pending")}</Badge>}
                       <Input
                         className="w-24 h-9"
                         type="number"
                         min={0}
                         step={0.5}
-                        placeholder="No cap"
+                        placeholder={t("account:noCapPlaceholder")}
                         defaultValue={s.monthly_hour_cap ?? ""}
                         onBlur={(e) => handleCapChange(s.id, e.target.value)}
                       />
@@ -188,16 +189,15 @@ export function CorporateStaffCard() {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Remove {s.email}?</AlertDialogTitle>
+                            <AlertDialogTitle>{t("account:removeStaffTitle", { email: s.email })}</AlertDialogTitle>
                             <AlertDialogDescription>
-                              They'll no longer be able to book using the company hours. Sessions
-                              they've already booked are unaffected.
+                              {t("account:removeStaffDesc")}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>{t("common:cancel")}</AlertDialogCancel>
                             <AlertDialogAction onClick={() => handleRemove(s.id)}>
-                              Remove access
+                              {t("account:removeAccess")}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>

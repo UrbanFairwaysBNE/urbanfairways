@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface MembershipCardProps {
   membership: MembershipPricing;
@@ -11,6 +12,7 @@ interface MembershipCardProps {
 }
 
 export function MembershipCard({ membership, isPopular, onSelect }: MembershipCardProps) {
+  const { t } = useTranslation(["booking"]);
   const isCasual = membership.tier === 'casual';
   const hasRestrictions = !!membership.restrictions;
 
@@ -21,7 +23,7 @@ export function MembershipCard({ membership, isPopular, onSelect }: MembershipCa
     )}>
       {isPopular && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-accent-foreground text-xs font-semibold px-3 py-1 rounded-full">
-          Most Popular
+          {t("booking:mostPopular")}
         </div>
       )}
       
@@ -36,15 +38,15 @@ export function MembershipCard({ membership, isPopular, onSelect }: MembershipCa
           {!isCasual && membership.weeklyFee > 0 && (
             <div className="text-muted-foreground text-sm">
               <span className="text-3xl font-bold text-foreground">${membership.weeklyFee}</span>
-              <span>/week</span>
+              <span>{t("booking:perWeek")}</span>
             </div>
           )}
           <div className={cn(
             "font-semibold",
             isCasual ? "text-2xl" : "text-lg text-accent"
           )}>
-            ${membership.hourlyRate}/hr
-            {isCasual && <span className="text-sm font-normal text-muted-foreground"> (peak)</span>}
+            ${membership.hourlyRate}{t("booking:perHour")}
+            {isCasual && <span className="text-sm font-normal text-muted-foreground">{t("booking:peakSuffix")}</span>}
           </div>
         </div>
 
@@ -77,7 +79,7 @@ export function MembershipCard({ membership, isPopular, onSelect }: MembershipCa
               : "bg-primary text-primary-foreground hover:bg-primary/90"
           )}
         >
-          {isCasual ? "Book as Casual" : "Join Now"}
+          {isCasual ? t("booking:bookAsCasual") : t("booking:joinNow")}
         </Button>
       </CardFooter>
     </Card>

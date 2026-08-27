@@ -5,11 +5,13 @@ import { LeagueLayout } from "@/components/league/LeagueLayout";
 import { ScorecardDisplay } from "@/components/league/ScorecardDisplay";
 import { usePlayerScorecards, PlayerRoundWithScorecard } from "@/hooks/usePlayerScorecards";
 import { Loader2, MapPin, ChevronDown } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 
 export default function LeagueRounds() {
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation(["league", "common"]);
   const [searchParams] = useSearchParams();
   const [expandedRound, setExpandedRound] = useState<string | null>(
     searchParams.get("round")
@@ -40,10 +42,10 @@ export default function LeagueRounds() {
     <LeagueLayout>
       <div className="mb-6 animate-fade-in">
         <h1 className="font-display text-2xl md:text-3xl text-primary mb-1">
-          ROUND HISTORY
+          {t("league:rounds.title")}
         </h1>
         <p className="font-inter text-muted-foreground text-sm">
-          {rounds.length} rounds recorded in the League Hub
+          {t("league:rounds.subtitle", { count: rounds.length })}
         </p>
       </div>
 
@@ -53,9 +55,9 @@ export default function LeagueRounds() {
         </div>
       ) : rounds.length === 0 ? (
         <div className="bg-white rounded-2xl border border-border/50 p-12 text-center shadow-sm animate-fade-in">
-          <h3 className="font-display text-xl text-primary mb-2">NO ROUNDS YET</h3>
+          <h3 className="font-display text-xl text-primary mb-2">{t("league:rounds.noRoundsTitle")}</h3>
           <p className="text-muted-foreground font-inter">
-            Your round history will appear here once you've played some rounds.
+            {t("league:rounds.noRoundsBody")}
           </p>
         </div>
       ) : (
@@ -100,7 +102,7 @@ export default function LeagueRounds() {
                     <div className="flex-1">
                       <h3 className="font-inter font-semibold text-primary text-base leading-tight mb-2">
                         {round.tournamentName}
-                        {round.scorecard?.round && ` - Round ${round.scorecard.round}`}
+                        {round.scorecard?.round && t("league:rounds.roundLabel", { round: round.scorecard.round })}
                       </h3>
                       <span className={`inline-block px-3 py-1 rounded-full text-xs font-inter font-medium mb-2 ${
                         round.status === "Completed"

@@ -15,6 +15,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { ScorecardDisplay } from "@/components/league/ScorecardDisplay";
 
@@ -29,6 +30,7 @@ interface UserStanding {
 export default function LeagueHub() {
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation(["league", "common"]);
   const [displayName, setDisplayName] = useState<string>("");
   const [sgtUserId, setSgtUserId] = useState<number | null>(null);
   const [handicap, setHandicap] = useState<number | null>(null);
@@ -156,10 +158,10 @@ export default function LeagueHub() {
       {/* Welcome Section */}
       <div className="mb-6 animate-fade-in">
         <h1 className="font-display text-2xl md:text-3xl text-primary mb-1">
-          WELCOME BACK, {displayName.toUpperCase()}
+          {t("league:hub.welcomeBack", { name: displayName.toUpperCase() })}
         </h1>
         <p className="font-inter text-muted-foreground text-sm">
-          Here's your latest performance in the League Hub
+          {t("league:hub.subtitle")}
         </p>
       </div>
 
@@ -175,28 +177,28 @@ export default function LeagueHub() {
           {/* Stats Grid */}
           <div className="grid grid-cols-2 gap-4 mb-8">
             <StatCard
-              label="Handicap"
-              value={handicap ?? "N/A"}
+              label={t("league:hub.statHandicap")}
+              value={handicap ?? t("league:hub.notAvailable")}
               icon={<Target className="h-5 w-5" />}
               delay={0}
             />
             <StatCard
-              label="Rounds Played"
+              label={t("league:hub.statRoundsPlayed")}
               value={rounds.length}
-              subValue="This season"
+              subValue={t("league:hub.statThisSeason")}
               icon={<Calendar className="h-5 w-5" />}
               delay={100}
             />
             <StatCard
-              label="Tour Position"
-              value={standing?.position ? `#${standing.position}` : "N/A"}
-              subValue={standing ? `${standing.points} pts` : undefined}
+              label={t("league:hub.statTourPosition")}
+              value={standing?.position ? `#${standing.position}` : t("league:hub.notAvailable")}
+              subValue={standing ? t("league:hub.statPoints", { points: standing.points }) : undefined}
               icon={<Trophy className="h-5 w-5" />}
               delay={200}
             />
             <StatCard
-              label="Best Finish"
-              value={standing?.first ? `${standing.first} Win${standing.first > 1 ? "s" : ""}` : standing?.top5 ? `${standing.top5} Top 5` : "N/A"}
+              label={t("league:hub.statBestFinish")}
+              value={standing?.first ? t("league:hub.wins", { count: standing.first }) : standing?.top5 ? t("league:hub.top5Count", { count: standing.top5 }) : t("league:hub.notAvailable")}
               icon={<TrendingUp className="h-5 w-5" />}
               delay={300}
             />
@@ -205,19 +207,19 @@ export default function LeagueHub() {
           {/* Recent Rounds */}
           <div className="mb-8 animate-slide-up" style={{ animationDelay: "200ms" }}>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display text-xl text-primary">RECENT ROUNDS</h2>
+              <h2 className="font-display text-xl text-primary">{t("league:hub.recentRounds")}</h2>
               <Link
                 to="/league/rounds"
                 className="flex items-center gap-1 text-brand-accent font-inter font-medium text-sm hover:underline"
               >
-                View all <ChevronRight className="h-4 w-4" />
+                {t("league:hub.viewAll")} <ChevronRight className="h-4 w-4" />
               </Link>
             </div>
 
             {rounds.length === 0 ? (
               <div className="bg-white rounded-2xl border border-border/50 p-8 text-center shadow-sm">
                 <p className="text-muted-foreground font-inter">
-                  No rounds recorded yet. Get out there and play!
+                  {t("league:hub.noRoundsYet")}
                 </p>
               </div>
             ) : (
@@ -240,7 +242,7 @@ export default function LeagueHub() {
                           <div className="flex-1">
                             <h3 className="font-inter font-semibold text-primary text-base leading-tight mb-2">
                               {round.tournamentName}
-                              {round.scorecard?.round && ` - Round ${round.scorecard.round}`}
+                              {round.scorecard?.round && t("league:hub.roundLabel", { round: round.scorecard.round })}
                             </h3>
                             <span className={`inline-block px-3 py-1 rounded-full text-xs font-inter font-medium mb-2 ${
                               round.status === "Completed"

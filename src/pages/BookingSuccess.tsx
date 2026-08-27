@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import venueLogo from "@/assets/venue-logo-mark.png";
 import { useTenant } from "@/config/tenant";
+import { useTranslation } from "react-i18next";
+import { zhCN } from "date-fns/locale";
 
 interface BookingDetails {
   id: string;
@@ -26,6 +28,8 @@ type PaymentStatus = "loading" | "confirmed" | "failed" | "pending" | "error";
 
 const BookingSuccess = () => {
   const { tenant } = useTenant();
+  const { t, i18n } = useTranslation(["booking", "common"]);
+  const dateFnsLocale = i18n.language === "zh" ? { locale: zhCN } : undefined;
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [booking, setBooking] = useState<BookingDetails | null>(null);
@@ -118,7 +122,7 @@ const BookingSuccess = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Processing your booking...</p>
+          <p className="text-muted-foreground">{t("booking:processingBookingLoading")}</p>
         </div>
       </div>
     );
@@ -144,21 +148,21 @@ const BookingSuccess = () => {
               </div>
 
               <h1 className="text-2xl font-bold text-center text-foreground mb-2">
-                Payment Failed
+                {t("booking:paymentFailedTitle")}
               </h1>
               <p className="text-center text-muted-foreground mb-6">
-                {failureMessage || "Your payment could not be processed. No booking has been made."}
+                {failureMessage || t("booking:paymentFailedDefaultDesc")}
               </p>
 
               <div className="bg-muted/50 rounded-lg p-4 mb-6">
                 <div className="flex items-start gap-3">
                   <AlertCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div className="text-sm text-muted-foreground">
-                    <p className="font-medium text-foreground mb-1">What to do next:</p>
+                    <p className="font-medium text-foreground mb-1">{t("booking:whatToDoNext")}</p>
                     <ul className="list-disc list-inside space-y-1">
-                      <li>Check your card details are correct</li>
-                      <li>Ensure you have sufficient funds</li>
-                      <li>Try a different payment method</li>
+                      <li>{t("booking:checkCardDetails")}</li>
+                      <li>{t("booking:ensureFunds")}</li>
+                      <li>{t("booking:tryDifferentMethod")}</li>
                     </ul>
                   </div>
                 </div>
@@ -169,14 +173,14 @@ const BookingSuccess = () => {
                   className="w-full" 
                   onClick={() => navigate("/booking")}
                 >
-                  Try Again
+                  {t("booking:tryAgain")}
                 </Button>
                 <Button 
                   variant="outline" 
                   className="w-full"
                   onClick={() => navigate("/dashboard")}
                 >
-                  Back to Dashboard
+                  {t("booking:backToDashboard")}
                 </Button>
               </div>
             </CardContent>
@@ -201,16 +205,16 @@ const BookingSuccess = () => {
             <CardContent className="pt-8 pb-6 text-center">
               <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
               <h1 className="text-2xl font-bold text-foreground mb-2">
-                Processing Payment
+                {t("booking:processingPaymentTitle")}
               </h1>
               <p className="text-muted-foreground mb-6">
-                Your payment is still being processed. This may take a moment.
+                {t("booking:processingPaymentDesc")}
               </p>
               <Button 
                 variant="outline" 
                 onClick={() => window.location.reload()}
               >
-                Check Status
+                {t("booking:checkStatus")}
               </Button>
             </CardContent>
           </Card>
@@ -226,8 +230,8 @@ const BookingSuccess = () => {
         <Card className="w-full max-w-md">
           <CardContent className="pt-6 text-center">
             <XCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-            <p className="text-destructive mb-4">{error || "Booking not found"}</p>
-            <Button onClick={() => navigate("/dashboard")}>Go to Dashboard</Button>
+            <p className="text-destructive mb-4">{error || t("booking:bookingNotFound")}</p>
+            <Button onClick={() => navigate("/dashboard")}>{t("booking:goToDashboard")}</Button>
           </CardContent>
         </Card>
       </div>
@@ -258,10 +262,10 @@ const BookingSuccess = () => {
 
             {/* Success Message */}
             <h1 className="text-2xl font-bold text-center text-foreground mb-2">
-              Booking Confirmed!
+              {t("booking:bookingConfirmedTitle")}
             </h1>
             <p className="text-center text-muted-foreground mb-6">
-              Your payment was successful and your bay is reserved. Your card has been saved for future bookings.
+              {t("booking:bookingConfirmedDesc")}
             </p>
 
             {/* Booking Details */}
@@ -269,7 +273,7 @@ const BookingSuccess = () => {
               <div className="flex items-center gap-3">
                 <MapPin className="h-5 w-5 text-primary" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Bay</p>
+                  <p className="text-sm text-muted-foreground">{t("booking:bayLabel")}</p>
                   <p className="font-semibold text-foreground">{booking.bay?.name || "Bay"}</p>
                 </div>
               </div>
@@ -277,9 +281,9 @@ const BookingSuccess = () => {
               <div className="flex items-center gap-3">
                 <Calendar className="h-5 w-5 text-primary" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Date</p>
+                  <p className="text-sm text-muted-foreground">{t("booking:dateLabelField")}</p>
                   <p className="font-semibold text-foreground">
-                    {format(bookingDate, "EEEE, MMMM d, yyyy")}
+                    {format(bookingDate, "EEEE, MMMM d, yyyy", dateFnsLocale)}
                   </p>
                 </div>
               </div>
@@ -287,7 +291,7 @@ const BookingSuccess = () => {
               <div className="flex items-center gap-3">
                 <Clock className="h-5 w-5 text-primary" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Time</p>
+                  <p className="text-sm text-muted-foreground">{t("booking:timeLabelField")}</p>
                   <p className="font-semibold text-foreground">
                     {formatTime(booking.start_time)} - {formatTime(booking.end_time)} ({booking.duration_hours}hr)
                   </p>
@@ -297,7 +301,7 @@ const BookingSuccess = () => {
               <div className="flex items-center gap-3">
                 <CreditCard className="h-5 w-5 text-primary" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Amount Paid</p>
+                  <p className="text-sm text-muted-foreground">{t("booking:amountPaidLabel")}</p>
                   <p className="font-semibold text-foreground">${booking.total_price.toFixed(2)}</p>
                 </div>
               </div>
@@ -310,21 +314,21 @@ const BookingSuccess = () => {
                   ? "bg-green-100 text-green-800" 
                   : "bg-yellow-100 text-yellow-800"
               }`}>
-                {booking.status === "confirmed" ? "Confirmed" : "Processing"}
+                {booking.status === "confirmed" ? t("booking:confirmedStatus") : t("booking:processingStatus")}
               </span>
             </div>
 
             {/* How to Use Guide */}
             <div className="mt-6 p-4 bg-muted/50 rounded-lg border text-center">
-              <p className="font-display text-lg text-foreground mb-2">First Time at {tenant.venue_name}?</p>
+              <p className="font-display text-lg text-foreground mb-2">{t("booking:firstTimeAt", { venue: tenant.venue_name })}</p>
               <p className="text-sm text-muted-foreground mb-3">
-                Check out our guide for everything you need to know about accessing the facility and using the simulators.
+                {t("booking:guideDesc")}
               </p>
               <a 
                 href="/quick-start-guide" 
                 className="inline-block px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
               >
-                View the Guide
+                {t("booking:viewGuide")}
               </a>
             </div>
 
@@ -334,14 +338,14 @@ const BookingSuccess = () => {
                 className="w-full" 
                 onClick={() => navigate("/my-bookings")}
               >
-                View My Bookings
+                {t("booking:viewMyBookings")}
               </Button>
               <Button 
                 variant="outline" 
                 className="w-full"
                 onClick={() => navigate("/dashboard")}
               >
-                Back to Dashboard
+                {t("booking:backToDashboard")}
               </Button>
             </div>
           </CardContent>
@@ -350,7 +354,7 @@ const BookingSuccess = () => {
 
       {/* Footer */}
       <footer className="py-4 text-center text-sm text-muted-foreground">
-        <p>A confirmation email has been sent to your registered email address.</p>
+        <p>{t("booking:emailConfirmationFooter")}</p>
       </footer>
     </div>
   );

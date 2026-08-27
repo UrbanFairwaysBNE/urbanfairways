@@ -19,6 +19,7 @@ import {
   Gauge,
   Award
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface HoleData {
   [key: string]: number | string;
@@ -107,6 +108,7 @@ function calculateProgressStats(rounds: PlayerRound[]): ProgressStats | null {
 export default function LeagueProfile() {
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation(["league", "common"]);
   const [displayName, setDisplayName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [stats, setStats] = useState<MemberStats | null>(null);
@@ -202,9 +204,9 @@ export default function LeagueProfile() {
 
           {/* Handicap Section */}
           <div className="p-6 text-center">
-            <p className="text-xs font-display text-muted-foreground uppercase tracking-wide mb-1">CURRENT HANDICAP</p>
+            <p className="text-xs font-display text-muted-foreground uppercase tracking-wide mb-1">{t("league:profile.currentHandicap")}</p>
             <p className="text-5xl text-primary" style={{ fontFamily: "'Montserrat', system-ui, sans-serif" }}>
-              {stats?.handicap ?? "N/A"}
+              {stats?.handicap ?? t("league:hub.notAvailable")}
             </p>
           </div>
         </div>
@@ -218,33 +220,33 @@ export default function LeagueProfile() {
             {/* Performance Stats */}
             <div className="mb-6 animate-slide-up" style={{ animationDelay: "100ms" }}>
               <h2 className="font-display text-xl text-primary mb-4">
-                PERFORMANCE STATS
+                {t("league:profile.performanceStats")}
               </h2>
               <div className="grid grid-cols-2 gap-4">
                 <StatCard
-                  label="Average Score"
-                  value={avgScore ?? "N/A"}
+                  label={t("league:profile.averageScore")}
+                  value={avgScore ?? t("league:hub.notAvailable")}
                   icon={<BarChart3 className="h-5 w-5" />}
                   delay={0}
                 />
                 <StatCard
-                  label="Best Round"
-                  value={bestRound?.scorecard.total_gross ?? "N/A"}
+                  label={t("league:profile.bestRound")}
+                  value={bestRound?.scorecard.total_gross ?? t("league:hub.notAvailable")}
                   subValue={bestRound?.courseName}
                   icon={<TrendingDown className="h-5 w-5" />}
                   delay={100}
                 />
                 <StatCard
-                  label="Tour Rank"
-                  value={stats?.standing?.position ? `#${stats.standing.position}` : "N/A"}
-                  subValue={stats?.standing ? `${stats.standing.points} points` : undefined}
+                  label={t("league:profile.tourRank")}
+                  value={stats?.standing?.position ? `#${stats.standing.position}` : t("league:hub.notAvailable")}
+                  subValue={stats?.standing ? t("league:profile.points", { points: stats.standing.points }) : undefined}
                   icon={<Trophy className="h-5 w-5" />}
                   delay={200}
                 />
                 <StatCard
-                  label="Rounds Played"
+                  label={t("league:profile.roundsPlayed")}
                   value={completedRounds.length}
-                  subValue="Completed (18 holes)"
+                  subValue={t("league:profile.completed18Holes")}
                   icon={<Target className="h-5 w-5" />}
                   delay={300}
                 />
@@ -255,44 +257,44 @@ export default function LeagueProfile() {
             {progressStats && (
               <div className="mb-6 animate-slide-up" style={{ animationDelay: "150ms" }}>
                 <h2 className="font-display text-xl text-primary mb-4">
-                  MY PROGRESS
+                  {t("league:profile.myProgress")}
                 </h2>
                 <div className="bg-white rounded-2xl border border-border/50 p-5 shadow-sm">
                   {/* Scoring Breakdown */}
                   <div className="mb-6">
                     <h3 className="font-inter font-semibold text-primary mb-4 flex items-center gap-2 text-sm">
                       <CircleDot className="h-4 w-4 text-brand-accent" />
-                      Average Per Round
+                      {t("league:profile.averagePerRound")}
                     </h3>
                     <div className="grid grid-cols-2 gap-3">
                       <ProgressStatCard
                         value={progressStats.avgBirdies.toFixed(1)}
-                        label="Birdies"
-                        explanation="The average number of birdies (one under par) you score per round."
+                        label={t("league:profile.birdies")}
+                        explanation={t("league:profile.birdiesExplanation")}
                         className="bg-primary/10"
                         valueClassName="text-primary"
                         variant="compact"
                       />
                       <ProgressStatCard
                         value={progressStats.avgPars.toFixed(1)}
-                        label="Pars"
-                        explanation="The average number of pars you make per round."
+                        label={t("league:profile.pars")}
+                        explanation={t("league:profile.parsExplanation")}
                         className="bg-muted"
                         valueClassName="text-foreground"
                         variant="compact"
                       />
                       <ProgressStatCard
                         value={progressStats.avgBogeys.toFixed(1)}
-                        label="Bogeys"
-                        explanation="The average number of bogeys (one over par) per round."
+                        label={t("league:profile.bogeys")}
+                        explanation={t("league:profile.bogeysExplanation")}
                         className="bg-brand-accent/10"
                         valueClassName="text-foreground"
                         variant="compact"
                       />
                       <ProgressStatCard
                         value={progressStats.avgDoublePlus.toFixed(1)}
-                        label="Double+"
-                        explanation="The average number of double bogeys or worse per round."
+                        label={t("league:profile.doublePlus")}
+                        explanation={t("league:profile.doublePlusExplanation")}
                         className="bg-muted"
                         valueClassName="text-foreground"
                         variant="compact"
@@ -304,32 +306,32 @@ export default function LeagueProfile() {
                   <div className="mb-6">
                     <h3 className="font-inter font-semibold text-primary mb-4 flex items-center gap-2 text-sm">
                       <Zap className="h-4 w-4 text-brand-accent" />
-                      Par Performance
+                      {t("league:profile.parPerformance")}
                     </h3>
                     <div className="grid grid-cols-3 gap-3">
                       <ProgressStatCard
                         value={progressStats.par3Avg.toFixed(1)}
-                        label="Par 3 Avg"
-                        subValue={`${progressStats.par3Avg - 3 > 0 ? '+' : ''}${(progressStats.par3Avg - 3).toFixed(1)} vs par`}
-                        explanation="Your average score on Par 3 holes."
+                        label={t("league:profile.par3Avg")}
+                        subValue={`${progressStats.par3Avg - 3 > 0 ? '+' : ''}${(progressStats.par3Avg - 3).toFixed(1)} ${t("league:profile.vsPar")}`}
+                        explanation={t("league:profile.par3Explanation")}
                         className="bg-muted/50"
                         valueClassName="text-primary"
                         variant="compact"
                       />
                       <ProgressStatCard
                         value={progressStats.par4Avg.toFixed(1)}
-                        label="Par 4 Avg"
-                        subValue={`${progressStats.par4Avg - 4 > 0 ? '+' : ''}${(progressStats.par4Avg - 4).toFixed(1)} vs par`}
-                        explanation="Your average score on Par 4 holes."
+                        label={t("league:profile.par4Avg")}
+                        subValue={`${progressStats.par4Avg - 4 > 0 ? '+' : ''}${(progressStats.par4Avg - 4).toFixed(1)} ${t("league:profile.vsPar")}`}
+                        explanation={t("league:profile.par4Explanation")}
                         className="bg-muted/50"
                         valueClassName="text-primary"
                         variant="compact"
                       />
                       <ProgressStatCard
                         value={progressStats.par5Avg.toFixed(1)}
-                        label="Par 5 Avg"
-                        subValue={`${progressStats.par5Avg - 5 > 0 ? '+' : ''}${(progressStats.par5Avg - 5).toFixed(1)} vs par`}
-                        explanation="Your average score on Par 5 holes."
+                        label={t("league:profile.par5Avg")}
+                        subValue={`${progressStats.par5Avg - 5 > 0 ? '+' : ''}${(progressStats.par5Avg - 5).toFixed(1)} ${t("league:profile.vsPar")}`}
+                        explanation={t("league:profile.par5Explanation")}
                         className="bg-muted/50"
                         valueClassName="text-primary"
                         variant="compact"
@@ -341,24 +343,24 @@ export default function LeagueProfile() {
                   <div className="grid grid-cols-2 gap-3">
                     <ProgressStatCard
                       value={progressStats.bestToPar === 0 ? 'E' : progressStats.bestToPar > 0 ? `+${progressStats.bestToPar}` : progressStats.bestToPar}
-                      label="Best To Par"
-                      explanation="Your best score relative to par across all recorded rounds."
+                      label={t("league:profile.bestToPar")}
+                      explanation={t("league:profile.bestToParExplanation")}
                       className="bg-muted/30"
                       valueClassName="text-foreground"
                       icon={<div className="w-10 h-10 rounded-full bg-brand-accent/20 flex items-center justify-center"><Award className="h-5 w-5 text-brand-accent" /></div>}
                     />
                     <ProgressStatCard
                       value={`${progressStats.blowUpFrequency.toFixed(1)}%`}
-                      label="Blow-up Holes"
-                      explanation="The percentage of holes where you scored triple bogey or worse."
+                      label={t("league:profile.blowUpHoles")}
+                      explanation={t("league:profile.blowUpHolesExplanation")}
                       className="bg-muted/30"
                       valueClassName="text-foreground"
                       icon={<div className="w-10 h-10 rounded-full bg-brand-accent/20 flex items-center justify-center"><AlertTriangle className="h-5 w-5 text-brand-accent" /></div>}
                     />
                     <ProgressStatCard
                       value={`${progressStats.consistencyScore.toFixed(0)}%`}
-                      label="Consistency"
-                      explanation="The percentage of your rounds that fall within 5 shots of your average score."
+                      label={t("league:profile.consistency")}
+                      explanation={t("league:profile.consistencyExplanation")}
                       className="bg-muted/30 col-span-2 md:col-span-1"
                       valueClassName="text-foreground"
                       icon={<div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center"><Gauge className="h-5 w-5 text-primary" /></div>}

@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Capacitor } from "@capacitor/core";
 import { Browser } from "@capacitor/browser";
+import { useTranslation } from "react-i18next";
 
 const CARD_SETUP_PENDING_KEY = "bb:cardSetupPending";
 
@@ -24,6 +25,7 @@ interface NoCardDialogProps {
 }
 
 export function NoCardDialog({ open, onClose, onCardAdded, returnPath = "/card-added" }: NoCardDialogProps) {
+  const { t } = useTranslation(["booking", "common"]);
   const [isOpeningStripe, setIsOpeningStripe] = useState(false);
   const [isAwaitingReturn, setIsAwaitingReturn] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
@@ -90,16 +92,16 @@ export function NoCardDialog({ open, onClose, onCardAdded, returnPath = "/card-a
           
           if (hasCard) {
             toast({
-              title: "Card Added",
-              description: "Your payment method has been saved successfully.",
+              title: t("booking:cardAddedTitle"),
+              description: t("booking:cardAddedDesc"),
             });
             onCardAdded?.();
             onClose();
           } else {
             setIsAwaitingReturn(false);
             toast({
-              title: "Card Not Added",
-              description: "It looks like the card setup wasn't completed. Please try again.",
+              title: t("booking:cardNotAddedTitle"),
+              description: t("booking:cardNotAddedDesc"),
               variant: "destructive",
             });
           }
@@ -122,8 +124,8 @@ export function NoCardDialog({ open, onClose, onCardAdded, returnPath = "/card-a
       }
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to start card setup. Please try again.",
+        title: t("booking:errorTitle"),
+        description: error.message || t("booking:failedStartSetup"),
         variant: "destructive",
       });
       localStorage.removeItem(CARD_SETUP_PENDING_KEY);
@@ -161,37 +163,37 @@ export function NoCardDialog({ open, onClose, onCardAdded, returnPath = "/card-a
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CreditCard className="h-5 w-5" />
-            Add a Payment Method
+            {t("booking:addPaymentMethodTitle")}
           </DialogTitle>
           <DialogDescription>
             {isVerifying
-              ? "Checking your payment method..."
+              ? t("booking:verifyingPaymentMethod")
               : isAwaitingReturn
               ? Capacitor.isNativePlatform()
-                ? "Complete the card setup, then tap Done to return here."
-                : "Complete the card setup in the new tab, then click Done below."
-              : "You need a card on file to make bookings or subscribe to memberships. You'll be redirected to securely add your card."}
+                ? t("booking:completeSetupNative")
+                : t("booking:completeSetupWeb")
+              : t("booking:needCardDesc")}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex-col gap-2 sm:flex-row">
           {isVerifying ? (
             <Button disabled className="w-full sm:w-auto">
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Verifying...
+              {t("booking:verifyingBtn")}
             </Button>
           ) : isAwaitingReturn ? (
             <>
               <Button variant="outline" onClick={() => handleClose(false)} className="w-full sm:w-auto">
-                Cancel
+                {t("booking:cancel")}
               </Button>
               <Button onClick={() => handleClose(true)} className="w-full sm:w-auto">
-                Done
+                {t("booking:doneBtn")}
               </Button>
             </>
           ) : (
             <>
               <Button variant="outline" onClick={() => handleClose(false)} className="w-full sm:w-auto">
-                Cancel
+                {t("booking:cancel")}
               </Button>
               <Button 
                 onClick={handleAddCard} 
@@ -201,10 +203,10 @@ export function NoCardDialog({ open, onClose, onCardAdded, returnPath = "/card-a
                 {isOpeningStripe ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Opening...
+                    {t("booking:openingBtn")}
                   </>
                 ) : (
-                  "Add Card"
+                  t("booking:addCardBtn")
                 )}
               </Button>
             </>

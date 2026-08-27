@@ -14,8 +14,10 @@ import { getDefaultTier, isDefaultTier, subscriptionTiers as getSubscriptionTier
 import { useSavedCard } from "@/hooks/useSavedCard";
 import { NoCardDialog } from "@/components/booking/NoCardDialog";
 import { FrontlineVerificationDialog } from "@/components/membership/FrontlineVerificationDialog";
+import { useTranslation } from "react-i18next";
 
 const Membership = () => {
+  const { t } = useTranslation(["membership", "common"]);
   const { tenant } = useTenant();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -73,7 +75,7 @@ const Membership = () => {
   useEffect(() => {
     if (searchParams.get("success") === "true") {
       const tier = searchParams.get("tier");
-      toast.success(`Successfully subscribed to ${tier ? tier.charAt(0).toUpperCase() + tier.slice(1) : ''} membership!`);
+      toast.success(t("membership:subscribedSuccess", { tier: tier ? tier.charAt(0).toUpperCase() + tier.slice(1) : '' }));
       fetchCurrentMembership();
     }
   }, [searchParams]);
@@ -107,7 +109,7 @@ const Membership = () => {
 
   const continueSubscribe = async (tier: PricingTier) => {
     if (!tier.stripe_price_id) {
-      toast.error("Subscription not available for this tier");
+      toast.error(t("membership:subscriptionUnavailable"));
       return;
     }
 
@@ -136,7 +138,7 @@ const Membership = () => {
 
       // If subscription was created directly (using saved card)
       if (data.success && data.subscriptionId) {
-        toast.success(`Successfully subscribed to ${tier.display_name} membership!`);
+        toast.success(t("membership:subscribedSuccess", { tier: tier.display_name }));
         navigate(`/membership?success=true&tier=${tier.tier}`, { replace: true });
         fetchCurrentMembership();
         return;
@@ -149,7 +151,7 @@ const Membership = () => {
       }
     } catch (error) {
       console.error("Error creating subscription:", error);
-      toast.error("Failed to subscribe. Please try again.");
+      toast.error(t("membership:subscribeFailed"));
     } finally {
       setSubscribingTier(null);
     }
@@ -199,7 +201,7 @@ const Membership = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <span className="font-display text-base sm:text-2xl tracking-wide text-primary-foreground">
-            MEMBERSHIP
+            {t("membership:pageTitle")}
           </span>
         </div>
         <img 
@@ -219,13 +221,13 @@ const Membership = () => {
                 <div className="flex items-center gap-3">
                   <Crown className="h-6 w-6 text-accent" />
                   <div>
-                    <CardTitle>Your Current Membership</CardTitle>
+                    <CardTitle>{t("membership:yourCurrentMembership")}</CardTitle>
                     <CardDescription>
-                      You are currently on the{" "}
+                      {t("membership:currentlyOnPlan")}{" "}
                       <Badge variant="outline">
                         {currentTierPricing.display_name || currentTier}
                       </Badge>{" "}
-                      plan at <span className="font-semibold">${currentTierPricing.hourly_rate}/hour</span>
+                      {t("membership:planAtRate")} <span className="font-semibold">${currentTierPricing.hourly_rate}{t("membership:perHour")}</span>
                     </CardDescription>
                   </div>
                 </div>
@@ -236,11 +238,10 @@ const Membership = () => {
           {/* Intro text */}
           <div className="text-center mb-8">
             <h1 className="font-display text-3xl md:text-4xl text-primary mb-2">
-              {hasActiveMembership ? "UPGRADE YOUR MEMBERSHIP" : "BECOME A MEMBER"}
+              {hasActiveMembership ? t("membership:upgradeYourMembership") : t("membership:becomeAMember")}
             </h1>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Join the {tenant.venue_name} family and enjoy discounted hourly rates, exclusive access to leagues, and more perks. 
-              All memberships are billed weekly with no lock-in contracts.
+              {t("membership:introText", { venueName: tenant.venue_name })}
             </p>
           </div>
 
@@ -250,20 +251,20 @@ const Membership = () => {
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Clock className="h-5 w-5" />
-                {casualPricing.display_name} Pricing
+                {casualPricing.display_name} {t("membership:pricingSuffix")}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-4">
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-orange-600 border-orange-300">Peak</Badge>
+                  <Badge variant="outline" className="text-orange-600 border-orange-300">{t("membership:peak")}</Badge>
                   <span className="font-semibold">${peakRate}/hr</span>
-                  <span className="text-sm text-muted-foreground">(Mon–Fri from 4pm, Sat–Sun from 10am)</span>
+                  <span className="text-sm text-muted-foreground">{t("membership:peakHours")}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-green-600 border-green-300">Off-Peak</Badge>
+                  <Badge variant="outline" className="text-green-600 border-green-300">{t("membership:offPeak")}</Badge>
                   <span className="font-semibold">${offPeakRate}/hr</span>
-                  <span className="text-sm text-muted-foreground">(Mon–Fri 5:30am–4pm, Sat–Sun 5:30am–10am)</span>
+                  <span className="text-sm text-muted-foreground">{t("membership:offPeakHours")}</span>
                 </div>
               </div>
             </CardContent>
@@ -275,9 +276,9 @@ const Membership = () => {
             <Card className="border-dashed">
               <CardContent className="py-12 text-center space-y-2">
                 <Crown className="h-8 w-8 mx-auto text-muted-foreground" />
-                <p className="font-semibold">No membership plans yet</p>
+                <p className="font-semibold">{t("membership:noPlansTitle")}</p>
                 <p className="text-sm text-muted-foreground">
-                  Memberships aren't available at {tenant.venue_name} right now. Book as a walk-in any time.
+                  {t("membership:noPlansDesc", { venueName: tenant.venue_name })}
                 </p>
               </CardContent>
             </Card>
@@ -294,7 +295,7 @@ const Membership = () => {
                 >
                   {isCurrentTier(tier.tier) && (
                     <div className="absolute -top-3 right-4">
-                      <Badge variant="outline" className="bg-background">Your Plan</Badge>
+                      <Badge variant="outline" className="bg-background">{t("membership:yourPlan")}</Badge>
                     </div>
                   )}
                   
@@ -302,7 +303,7 @@ const Membership = () => {
                     <CardTitle className="font-display text-2xl">{tier.display_name.toUpperCase()}</CardTitle>
                     <div className="mt-4">
                       <span className="text-4xl font-bold text-accent">${tier.hourly_rate}</span>
-                      <span className="text-muted-foreground"> Per Hour</span>
+                      <span className="text-muted-foreground"> {t("membership:perHourLabel")}</span>
                     </div>
                   </CardHeader>
                   
@@ -325,7 +326,7 @@ const Membership = () => {
                     
                     <div className="text-center mb-4">
                       <span className="text-2xl font-bold">${tier.weekly_subscription_price}</span>
-                      <span className="text-muted-foreground"> per week</span>
+                      <span className="text-muted-foreground"> {t("membership:perWeekLabel")}</span>
                     </div>
                     
                     <Button
@@ -340,14 +341,14 @@ const Membership = () => {
                       {subscribingTier === tier.tier ? (
                         <>
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Processing...
+                          {t("membership:processing")}
                         </>
                       ) : isCurrentTier(tier.tier) ? (
-                        "Current Plan"
+                        t("membership:currentPlanButton")
                       ) : hasActiveMembership ? (
-                        "Switch Plan"
+                        t("membership:switchPlanButton")
                       ) : (
-                        "Subscribe"
+                        t("membership:subscribeButton")
                       )}
                     </Button>
                   </CardContent>
@@ -360,7 +361,7 @@ const Membership = () => {
           {subscriptionTiers.length > 0 && (
           <Card className="mt-8">
             <CardHeader>
-              <CardTitle className="text-lg">Which membership is right for you?</CardTitle>
+              <CardTitle className="text-lg">{t("membership:whichMembershipRight")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3 text-sm">
@@ -373,7 +374,7 @@ const Membership = () => {
                   return (
                     <p key={tier.tier}>
                       <strong>{tier.display_name} (${weeklyPrice}/wk):</strong>{" "}
-                      ${hourlyRate}/hr rate.{breakEvenVsPeak !== null && ` Break-even at ~${breakEvenVsPeak} hours/week vs the peak walk-in rate.`}
+                      ${hourlyRate}/hr {t("membership:breakEvenText")}{breakEvenVsPeak !== null && t("membership:breakEvenSuffix", { hours: breakEvenVsPeak })}
                     </p>
                   );
                 })}
@@ -384,7 +385,7 @@ const Membership = () => {
 
           {/* Footer note */}
           <p className="text-center text-sm text-muted-foreground mt-8">
-            Need to cancel or make changes? Email us at {tenant.support_email} and we'll help you out.
+            {t("membership:cancelFooterNote", { email: tenant.support_email })}
           </p>
         </div>
       </main>

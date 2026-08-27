@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface Announcement {
   id: string;
@@ -30,6 +31,7 @@ interface Announcement {
 export function NotificationBell() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation(["common"]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
   const [isOpen, setIsOpen] = useState(false);
@@ -133,7 +135,7 @@ export function NotificationBell() {
         </PopoverTrigger>
         <PopoverContent className="w-80 p-0" align="end">
           <div className="flex items-center justify-between p-4 border-b">
-            <h4 className="font-semibold">Notifications</h4>
+            <h4 className="font-semibold">{t("common:notifications")}</h4>
             {unreadCount > 0 && (
               <Button
                 variant="ghost"
@@ -141,14 +143,14 @@ export function NotificationBell() {
                 className="text-xs text-muted-foreground hover:text-foreground"
                 onClick={markAllAsRead}
               >
-                Mark all read
+                {t("common:markAllRead")}
               </Button>
             )}
           </div>
           <ScrollArea className="h-[300px]">
             {announcements.length === 0 ? (
               <div className="p-4 text-center text-muted-foreground text-sm">
-                No notifications
+                {t("common:noNotifications")}
               </div>
             ) : (
               <div className="divide-y">
@@ -208,7 +210,7 @@ export function NotificationBell() {
                 onClick={handleViewSource}
                 className="w-full"
               >
-                View in Clubhouse
+                {t("common:viewInClubhouse")}
               </Button>
             )}
           </div>

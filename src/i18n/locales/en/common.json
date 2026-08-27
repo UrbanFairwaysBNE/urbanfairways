@@ -38,5 +38,9 @@
   "allRightsReserved": "All rights reserved.",
   "somethingWentWrong": "Something went wrong. Please try again.",
   "copied": "Copied",
-  "language": "Language"
+  "language": "Language",
+  "notifications": "Notifications",
+  "markAllRead": "Mark all read",
+  "noNotifications": "No notifications",
+  "viewInClubhouse": "View in Clubhouse"
 }

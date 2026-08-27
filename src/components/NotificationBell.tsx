@@ -31,6 +31,7 @@ interface Announcement {
 export function NotificationBell() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation(["common"]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
   const [isOpen, setIsOpen] = useState(false);

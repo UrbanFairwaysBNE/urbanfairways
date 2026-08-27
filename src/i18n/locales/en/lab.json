@@ -169,5 +169,6 @@
   "ironDispersionInfo": "Are your irons getting more accurate? Standard deviation of left/right carry across all your irons (3i–9i). Lower = tighter approach shots.",
   "wedgeDispersion": "Wedge Dispersion ({{unit}})",
   "wedgeDispersionInfo": "Are your wedges getting more accurate? Standard deviation of left/right carry across all your wedges (PW, GW, SW, LW). Lower = better scoring club control.",
-  "sessionsPerWeekInfo": "Are you playing enough to improve? Your average UF Lab sessions per week over the window. Practice frequency drives improvement more than any single session."
+  "sessionsPerWeekInfo": "Are you playing enough to improve? Your average UF Lab sessions per week over the window. Practice frequency drives improvement more than any single session.",
+  "totalUnit": "Total ({{unit}})"
 }

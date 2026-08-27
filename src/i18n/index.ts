@@ -7,6 +7,9 @@ import enDashboard from "./locales/en/dashboard.json";
 import enBooking from "./locales/en/booking.json";
 import enMembership from "./locales/en/membership.json";
 import enAuth from "./locales/en/auth.json";
+import enLab from "./locales/en/lab.json";
+import enLeague from "./locales/en/league.json";
+import enClubhouse from "./locales/en/clubhouse.json";
 
 import zhCommon from "./locales/zh/common.json";
 import zhAccount from "./locales/zh/account.json";
@@ -14,6 +17,9 @@ import zhDashboard from "./locales/zh/dashboard.json";
 import zhBooking from "./locales/zh/booking.json";
 import zhMembership from "./locales/zh/membership.json";
 import zhAuth from "./locales/zh/auth.json";
+import zhLab from "./locales/zh/lab.json";
+import zhLeague from "./locales/zh/league.json";
+import zhClubhouse from "./locales/zh/clubhouse.json";
 
 export const SUPPORTED_LANGUAGES = ["en", "zh"] as const;
 export type AppLanguage = (typeof SUPPORTED_LANGUAGES)[number];

@@ -20,8 +20,10 @@ import { getCurrentBlockLabel } from "@/lib/league-block";
 import { TournamentStatsView } from "@/components/sgt/TournamentStatsView";
 import { useExemptPlayers, TRUE_HCP_ROUNDS } from "@/hooks/useExemptPlayers";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useTranslation, Trans } from "react-i18next";
 
 function ExemptBadge() {
+  const { t } = useTranslation(["league"]);
   return (
     <TooltipProvider>
       <Tooltip>
@@ -31,10 +33,7 @@ function ExemptBadge() {
           </span>
         </TooltipTrigger>
         <TooltipContent className="max-w-xs">
-          Exempt — still on their onboarding handicap for their first{" "}
-          {TRUE_HCP_ROUNDS} rounds. They take part but aren't eligible for
-          prizes or monthly points until their official UF handicap applies.
-
+          {t("league:leaderboard.exemptTooltip", { rounds: TRUE_HCP_ROUNDS })}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
@@ -60,6 +59,7 @@ export default function LeagueLeaderboard() {
   const { nick } = useSgtNicknames();
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation(["league", "common"]);
   const [displayName, setDisplayName] = useState<string>("");
   const [scoreType, setScoreType] = useState<"gross" | "net">("net");
   const [showAllWeeks, setShowAllWeeks] = useState(false);
@@ -180,18 +180,18 @@ export default function LeagueLeaderboard() {
     <LeagueLayout>
       <div className="mb-6 animate-fade-in">
         <h1 className="font-display text-3xl md:text-4xl text-foreground mb-2">
-          LEADERBOARD
+          {t("league:leaderboard.title")}
         </h1>
         <p className="font-inter text-muted-foreground">
-          See how you compare to other League Hub players
+          {t("league:leaderboard.subtitle")}
         </p>
       </div>
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "monthly" | "weekly")} className="mb-6">
         <TabsList className="grid w-full max-w-md grid-cols-2 bg-muted">
-          <TabsTrigger value="monthly" className="font-inter">Monthly Winner</TabsTrigger>
-          <TabsTrigger value="weekly" className="font-inter">Weekly Results</TabsTrigger>
+          <TabsTrigger value="monthly" className="font-inter">{t("league:leaderboard.monthlyWinner")}</TabsTrigger>
+          <TabsTrigger value="weekly" className="font-inter">{t("league:leaderboard.weeklyResults")}</TabsTrigger>
         </TabsList>
 
         {/* Monthly Winner Tab */}
@@ -213,7 +213,7 @@ export default function LeagueLeaderboard() {
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  Gross
+                  {t("league:leaderboard.gross")}
                 </button>
                 <button
                   onClick={() => setScoreType("net")}
@@ -224,7 +224,7 @@ export default function LeagueLeaderboard() {
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  Net
+                  {t("league:leaderboard.net")}
                 </button>
               </div>
             </div>
@@ -236,26 +236,26 @@ export default function LeagueLeaderboard() {
             </div>
           ) : monthlyStandings.length === 0 ? (
             <div className="bg-card rounded-xl border border-border p-12 text-center animate-fade-in">
-              <h3 className="font-display text-xl text-foreground mb-2">NO RESULTS YET</h3>
+              <h3 className="font-display text-xl text-foreground mb-2">{t("league:leaderboard.noResultsYet")}</h3>
               <p className="text-muted-foreground font-inter">
-                Monthly standings will appear once tournaments are completed this month
+                {t("league:leaderboard.monthlyStandingsEmpty")}
               </p>
             </div>
           ) : (
             <div className="bg-card rounded-xl border border-border overflow-hidden animate-slide-up">
               <div className="px-4 py-3 bg-primary/10 border-b border-border">
                 <h3 className="font-display text-lg text-foreground">
-                  {currentMonth} - Monthly Medal
+                  {t("league:leaderboard.monthlyMedal", { month: currentMonth })}
                 </h3>
               </div>
 
               {/* Table Header */}
               <div className="grid grid-cols-12 gap-4 px-4 py-3 bg-muted/50 border-b border-border font-inter text-sm font-medium text-muted-foreground">
-                <div className="col-span-1 text-center">#</div>
-                <div className="col-span-5">Player</div>
-                <div className="col-span-2 text-center">Played</div>
-                <div className="col-span-2 text-center">Best</div>
-                <div className="col-span-2 text-center">Points</div>
+                <div className="col-span-1 text-center">{t("league:leaderboard.colPosition")}</div>
+                <div className="col-span-5">{t("league:leaderboard.colPlayer")}</div>
+                <div className="col-span-2 text-center">{t("league:leaderboard.colPlayed")}</div>
+                <div className="col-span-2 text-center">{t("league:leaderboard.colBest")}</div>
+                <div className="col-span-2 text-center">{t("league:leaderboard.colPoints")}</div>
               </div>
 
               <div className="divide-y divide-border">
@@ -299,7 +299,7 @@ export default function LeagueLeaderboard() {
                             isCurrentPlayer ? "text-secondary" : "text-foreground"
                           )}>
                             {nick(standing.player_name)}
-                            {isCurrentPlayer && <span className="text-xs ml-2">(You)</span>}
+                            {isCurrentPlayer && <span className="text-xs ml-2">{t("league:leaderboard.you")}</span>}
                           </p>
                         </div>
                       </div>
@@ -334,7 +334,7 @@ export default function LeagueLeaderboard() {
                 onValueChange={(val) => setSelectedTournament(parseInt(val))}
               >
                 <SelectTrigger className="w-full sm:w-[350px] font-inter">
-                  <SelectValue placeholder="Select week" />
+                  <SelectValue placeholder={t("league:leaderboard.selectWeek")} />
                 </SelectTrigger>
                 <SelectContent>
                   {(showAllWeeks ? filteredTournaments : filteredTournaments.slice(0, INITIAL_WEEKS_TO_SHOW)).map((tournament, index) => (
@@ -343,7 +343,7 @@ export default function LeagueLeaderboard() {
                         <span>{tournament.name}</span>
                         {currentTournament && tournament.tournament_id === currentTournament.tournament_id && (
                           <span className="ml-1 px-1.5 py-0.5 text-[10px] font-semibold bg-secondary text-secondary-foreground rounded">
-                            CURRENT
+                            {t("league:leaderboard.current")}
                           </span>
                         )}
                       </div>
@@ -357,7 +357,7 @@ export default function LeagueLeaderboard() {
                         setShowAllWeeks(!showAllWeeks);
                       }}
                     >
-                      {showAllWeeks ? "Show less" : `Show ${filteredTournaments.length - INITIAL_WEEKS_TO_SHOW} more weeks...`}
+                      {showAllWeeks ? t("league:leaderboard.showLess") : t("league:leaderboard.showMoreWeeks", { count: filteredTournaments.length - INITIAL_WEEKS_TO_SHOW })}
                     </div>
                   )}
                 </SelectContent>
@@ -375,7 +375,7 @@ export default function LeagueLeaderboard() {
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  Gross
+                  {t("league:leaderboard.gross")}
                 </button>
                 <button
                   onClick={() => setScoreType("net")}
@@ -386,7 +386,7 @@ export default function LeagueLeaderboard() {
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  Net
+                  {t("league:leaderboard.net")}
                 </button>
               </div>
             </div>
@@ -404,7 +404,7 @@ export default function LeagueLeaderboard() {
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                Scores
+                {t("league:leaderboard.scores")}
               </button>
               <button
                 onClick={() => setWeeklyView("stats")}
@@ -415,7 +415,7 @@ export default function LeagueLeaderboard() {
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                Stats
+                {t("league:leaderboard.stats")}
               </button>
             </div>
           </div>
@@ -432,7 +432,7 @@ export default function LeagueLeaderboard() {
                 />
               ) : (
                 <p className="text-center text-muted-foreground py-12 font-inter">
-                  Select a week to view stats.
+                  {t("league:leaderboard.selectWeekPrompt")}
                 </p>
               )}
             </div>
@@ -442,11 +442,11 @@ export default function LeagueLeaderboard() {
             </div>
           ) : tournamentStandings.length === 0 ? (
             <div className="bg-card rounded-xl border border-border p-12 text-center animate-fade-in">
-              <h3 className="font-display text-xl text-foreground mb-2">NO RESULTS YET</h3>
+              <h3 className="font-display text-xl text-foreground mb-2">{t("league:leaderboard.noResultsYet")}</h3>
               <p className="text-muted-foreground font-inter">
                 {filteredTournaments.length === 0
-                  ? "No tournaments available yet"
-                  : "No results available for this tournament"
+                  ? t("league:leaderboard.noTournamentsAvailable")
+                  : t("league:leaderboard.noResultsForTournament")
                 }
               </p>
             </div>
@@ -465,11 +465,11 @@ export default function LeagueLeaderboard() {
               )}
 
               <div className="px-4 py-2 border-b border-border bg-muted/20 font-inter text-xs text-muted-foreground">
-                <span className="font-bold text-foreground">E</span> = Exempt — new
-                players stay on their onboarding handicap for their first{" "}
-                {TRUE_HCP_ROUNDS} rounds. They play, but aren't eligible for prizes
-                or monthly points until their official UF handicap kicks in (round{" "}
-                {TRUE_HCP_ROUNDS + 1}).
+                <Trans
+                  i18nKey="league:leaderboard.exemptLegend"
+                  values={{ rounds: TRUE_HCP_ROUNDS, nextRound: TRUE_HCP_ROUNDS + 1 }}
+                  components={{ bold: <span className="font-bold text-foreground" /> }}
+                />
               </div>
 
 
@@ -477,21 +477,21 @@ export default function LeagueLeaderboard() {
 
               {/* Table Header - Mobile */}
               <div className="grid md:hidden grid-cols-12 gap-4 px-4 py-2 bg-muted/50 border-b border-border font-inter text-xs font-medium text-muted-foreground">
-                <div className="col-span-2 text-center">#</div>
-                <div className="col-span-4">Player</div>
-                <div className="col-span-2 text-center">R1</div>
-                <div className="col-span-2 text-center">R2</div>
-                <div className="col-span-2 text-center">+/-</div>
+                <div className="col-span-2 text-center">{t("league:leaderboard.colPosition")}</div>
+                <div className="col-span-4">{t("league:leaderboard.colPlayer")}</div>
+                <div className="col-span-2 text-center">{t("league:leaderboard.colR1")}</div>
+                <div className="col-span-2 text-center">{t("league:leaderboard.colR2")}</div>
+                <div className="col-span-2 text-center">{t("league:leaderboard.colToPar")}</div>
               </div>
 
               {/* Table Header - Desktop */}
               <div className="hidden md:grid grid-cols-12 gap-4 px-4 py-3 bg-muted/50 border-b border-border font-inter text-sm font-medium text-muted-foreground">
-                <div className="col-span-1 text-center">#</div>
-                <div className="col-span-4">Player</div>
-                <div className="col-span-2 text-center">R1</div>
-                <div className="col-span-2 text-center">R2</div>
-                <div className="col-span-1 text-center">Total</div>
-                <div className="col-span-2 text-center">To Par</div>
+                <div className="col-span-1 text-center">{t("league:leaderboard.colPosition")}</div>
+                <div className="col-span-4">{t("league:leaderboard.colPlayer")}</div>
+                <div className="col-span-2 text-center">{t("league:leaderboard.colR1")}</div>
+                <div className="col-span-2 text-center">{t("league:leaderboard.colR2")}</div>
+                <div className="col-span-1 text-center">{t("league:leaderboard.colTotal")}</div>
+                <div className="col-span-2 text-center">{t("league:leaderboard.colToParFull")}</div>
               </div>
 
               <div className="divide-y divide-border">
@@ -536,10 +536,10 @@ export default function LeagueLeaderboard() {
                           )}>
                             {nick(result.playerName)}
                             {playerExempt && <ExemptBadge />}
-                            {isCurrentPlayer && <span className="text-xs ml-1">(You)</span>}
+                            {isCurrentPlayer && <span className="text-xs ml-1">{t("league:leaderboard.you")}</span>}
                           </p>
                           <p className="font-inter text-xs text-muted-foreground">
-                            HCP: {result.hcp ?? "-"}
+                            {t("league:leaderboard.hcpShort", { hcp: result.hcp ?? "-" })}
                           </p>
                         </div>
                       </div>
@@ -550,7 +550,7 @@ export default function LeagueLeaderboard() {
                         </span>
                         {result.r1Thru && (
                           <div className="text-[10px] text-muted-foreground">
-                            {result.r1Thru === "F" ? "F" : `Thru ${result.r1Thru}`}
+                            {result.r1Thru === "F" ? "F" : t("league:leaderboard.thru", { thru: result.r1Thru })}
                           </div>
                         )}
                       </div>
@@ -561,7 +561,7 @@ export default function LeagueLeaderboard() {
                         </span>
                         {result.r2Thru && (
                           <div className="text-[10px] text-muted-foreground">
-                            {result.r2Thru === "F" ? "F" : `Thru ${result.r2Thru}`}
+                            {result.r2Thru === "F" ? "F" : t("league:leaderboard.thru", { thru: result.r2Thru })}
                           </div>
                         )}
                       </div>
@@ -607,7 +607,7 @@ export default function LeagueLeaderboard() {
                             <span className="text-muted-foreground font-normal ml-1">
                               ({result.hcp ?? "-"})
                             </span>
-                            {isCurrentPlayer && <span className="text-xs ml-2">(You)</span>}
+                            {isCurrentPlayer && <span className="text-xs ml-2">{t("league:leaderboard.you")}</span>}
                           </p>
                         </div>
                       </div>

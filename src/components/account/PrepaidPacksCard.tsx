@@ -18,12 +18,14 @@ import { Clock, Loader2, Timer, Copy, Gift, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { formatBrisbaneDate } from "@/lib/brisbane-time";
 import { usePackHours, formatHours, type PackProduct } from "@/hooks/usePackHours";
+import { useTranslation } from "react-i18next";
 
 /**
  * Prepaid hour packs. Hours are a separate wallet to the dollar credit balance —
  * they buy simulator time only, work any day/time, and expire per pack.
  */
 export function PrepaidPacksCard() {
+  const { t } = useTranslation(["account", "common"]);
   const { balance, lots, products, corporate, isLoading, refresh, purchase, redeemCode } =
     usePackHours();
   const [selected, setSelected] = useState<PackProduct | null>(null);
@@ -44,7 +46,7 @@ export function PrepaidPacksCard() {
       const url = await purchase(selected.id, { isGift, recipientName: recipientName.trim() });
       window.location.href = url;
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not start checkout");
+      toast.error(e instanceof Error ? e.message : t("account:couldNotStartCheckout"));
       setIsPurchasing(false);
     }
   };
@@ -53,10 +55,10 @@ export function PrepaidPacksCard() {
     setIsRedeeming(true);
     try {
       const hours = await redeemCode(code);
-      toast.success(`${formatHours(hours)} hours added to your account`);
+      toast.success(t("account:hoursAddedToast", { hours: formatHours(hours) }));
       setCode("");
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not redeem that code");
+      toast.error(e instanceof Error ? e.message : t("account:redeemFailedGeneric"));
     } finally {
       setIsRedeeming(false);
     }
@@ -76,21 +78,21 @@ export function PrepaidPacksCard() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <CardTitle>
-                    {corporate ? `${corporate.companyName} Hours` : "Prepaid Hours"}
+                    {corporate ? t("account:corporateHoursTitle", { company: corporate.companyName }) : t("account:prepaidHoursTitle")}
                   </CardTitle>
                   <CardDescription>
                     {balance > 0
-                      ? `${formatHours(balance)} hours available`
+                      ? t("account:hoursAvailable", { hours: formatHours(balance) })
                       : corporate
                         ? corporate.isOwner
-                          ? "Buy a corporate pack and share the hours with your staff."
-                          : "Your company has no hours left — ask your manager to top up."
-                        : "Buy simulator time up front and use it any day, any time."}
+                          ? t("account:buyCorporatePackDesc")
+                          : t("account:companyNoHoursDesc")
+                        : t("account:buyHoursDesc")}
                   </CardDescription>
                 </div>
                 {balance > 0 && (
                   <Badge variant="secondary" className="shrink-0 whitespace-nowrap">
-                    {formatHours(balance)} hrs
+                    {t("account:hrsBadge", { hours: formatHours(balance) })}
                   </Badge>
                 )}
                 <ChevronDown
@@ -106,15 +108,15 @@ export function PrepaidPacksCard() {
           {/* Balance */}
           {balance > 0 && (
             <div className="rounded-lg border bg-muted/40 p-4">
-              <p className="text-sm text-muted-foreground">Your prepaid balance</p>
+              <p className="text-sm text-muted-foreground">{t("account:yourPrepaidBalance")}</p>
               <p className="text-3xl font-bold text-primary">
-                {formatHours(balance)} <span className="text-lg font-medium">hours</span>
+                {formatHours(balance)} <span className="text-lg font-medium">{t("account:hoursUnit")}</span>
               </p>
               <div className="mt-3 space-y-1">
                 {activeLots.map((lot) => (
                   <p key={lot.id} className="text-xs text-muted-foreground">
                     {formatHours(Number(lot.hours_remaining))}h from {lot.product_name}
-                    {lot.expires_at && ` — expires ${formatBrisbaneDate(new Date(lot.expires_at))}`}
+                    {lot.expires_at && t("account:expiresOn", { date: formatBrisbaneDate(new Date(lot.expires_at)) })}
                   </p>
                 ))}
               </div>
@@ -124,7 +126,7 @@ export function PrepaidPacksCard() {
           {/* Gift codes waiting to be passed on */}
           {giftLots.length > 0 && (
             <div className="space-y-2">
-              <p className="text-sm font-medium">Gift codes you've bought</p>
+              <p className="text-sm font-medium">{t("account:giftCodesBought")}</p>
               {giftLots.map((lot) => (
                 <div
                   key={lot.id}
@@ -144,7 +146,7 @@ export function PrepaidPacksCard() {
                     size="sm"
                     onClick={() => {
                       navigator.clipboard.writeText(lot.redemption_code!);
-                      toast.success("Code copied");
+                      toast.success(t("account:codeCopied"));
                     }}
                   >
                     <Copy className="h-4 w-4" />
@@ -157,7 +159,7 @@ export function PrepaidPacksCard() {
           {/* Packs for sale */}
           {products.length > 0 && (
             <div className="space-y-3">
-              <p className="text-sm font-medium">Available packs</p>
+              <p className="text-sm font-medium">{t("account:availablePacks")}</p>
               <div className="grid gap-3 sm:grid-cols-2">
                 {products.map((p) => (
                   <div key={p.id} className="rounded-lg border p-4 flex flex-col">
@@ -169,8 +171,8 @@ export function PrepaidPacksCard() {
                       ${Number(p.price).toFixed(0)}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      ${(Number(p.price) / Number(p.hours)).toFixed(2)}/hr · valid{" "}
-                      {Math.round(p.validity_days / 30)} months
+                      ${(Number(p.price) / Number(p.hours)).toFixed(2)}/hr ·{" "}
+                      {t("account:validForMonths", { months: Math.round(p.validity_days / 30) })}
                     </p>
                     {p.description && (
                       <p className="mt-2 text-xs text-muted-foreground">{p.description}</p>
@@ -183,7 +185,7 @@ export function PrepaidPacksCard() {
                         setRecipientName("");
                       }}
                     >
-                      Buy pack
+                      {t("account:buyPack")}
                     </Button>
                   </div>
                 ))}
@@ -194,17 +196,17 @@ export function PrepaidPacksCard() {
           {/* Redeem a pack code — retail only, corporate packs aren't giftable */}
           {!corporate && (
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Redeem a pack code</Label>
+              <Label className="text-sm font-medium">{t("account:redeemPackCode")}</Label>
               <div className="flex flex-col sm:flex-row gap-2">
                 <Input
-                  placeholder="UF-XXXXXX"
+                  placeholder={t("account:redeemPlaceholder")}
                   value={code}
                   onChange={(e) => setCode(e.target.value.toUpperCase())}
                   className="font-mono tracking-wider uppercase"
                   disabled={isRedeeming}
                 />
                 <Button onClick={handleRedeem} disabled={isRedeeming || !code.trim()}>
-                  {isRedeeming ? <Loader2 className="h-4 w-4 animate-spin" /> : "Redeem"}
+                  {isRedeeming ? <Loader2 className="h-4 w-4 animate-spin" /> : t("account:redeem")}
                 </Button>
               </div>
             </div>
@@ -221,10 +223,11 @@ export function PrepaidPacksCard() {
             <DialogDescription>
               {selected && (
                 <>
-                  {formatHours(Number(selected.hours))} hours of simulator time for $
-                  {Number(selected.price).toFixed(0)}. Valid {selected.validity_days} days
-                  {isGift ? " from the day it's redeemed" : " from purchase"}. Usable any day, any
-                  time, and can be combined with card or account credit.
+                  {t("account:hoursSimulatorTimeFor", { hours: formatHours(Number(selected.hours)), price: Number(selected.price).toFixed(0) })}{" "}
+                  {isGift
+                    ? t("account:validForDaysGift", { days: selected.validity_days })
+                    : t("account:validForDaysPurchase", { days: selected.validity_days })}{" "}
+                  {t("account:usableAnyTimeDesc")}
                 </>
               )}
             </DialogDescription>
@@ -232,8 +235,7 @@ export function PrepaidPacksCard() {
 
           {corporate ? (
             <p className="text-sm text-muted-foreground">
-              These hours go into your company wallet and can be used by any staff member you've
-              given access to.
+              {t("account:corporateWalletDesc")}
             </p>
           ) : (
             <div className="space-y-4">
@@ -245,24 +247,23 @@ export function PrepaidPacksCard() {
                 />
                 <div className="space-y-1">
                   <Label htmlFor="pack-gift" className="flex items-center gap-2 cursor-pointer">
-                    <Gift className="h-4 w-4" /> Buying this as a gift
+                    <Gift className="h-4 w-4" /> {t("account:buyingAsGift")}
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    We'll email you a redemption code to pass on. The hours land in their account
-                    when they redeem it.
+                    {t("account:giftEmailDesc")}
                   </p>
                 </div>
               </div>
 
               {isGift && (
                 <div className="space-y-2">
-                  <Label htmlFor="pack-recipient">Recipient name (optional)</Label>
+                  <Label htmlFor="pack-recipient">{t("account:recipientNameLabel")}</Label>
                   <Input
                     id="pack-recipient"
                     value={recipientName}
                     maxLength={80}
                     onChange={(e) => setRecipientName(e.target.value)}
-                    placeholder="Who's it for?"
+                    placeholder={t("account:recipientNamePlaceholder")}
                   />
                 </div>
               )}
@@ -271,14 +272,14 @@ export function PrepaidPacksCard() {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setSelected(null)} disabled={isPurchasing}>
-              Cancel
+              {t("common:cancel")}
             </Button>
             <Button onClick={handlePurchase} disabled={isPurchasing}>
               {isPurchasing ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <>
-                  <Clock className="h-4 w-4 mr-2" /> Pay ${Number(selected?.price ?? 0).toFixed(0)}
+                  <Clock className="h-4 w-4 mr-2" /> {t("account:payAmount", { amount: Number(selected?.price ?? 0).toFixed(0) })}
                 </>
               )}
             </Button>

@@ -3,6 +3,8 @@ import { isPeakTime, addDurationToTime } from "@/lib/pricing-utils";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Loader2, AlertCircle, Wallet, CreditCard } from "lucide-react";
 import { format } from "date-fns";
+import { zhCN } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useBooking, PaymentMethod } from "@/hooks/useBooking";
@@ -39,6 +41,8 @@ export default function Booking() {
   const { tenant } = useTenant();
   const { pricing, defaultTier, getTierLabel, peakRate: walkInPeakRate } = usePricing();
   const walkInLabel = defaultTier?.display_name || "Walk-in";
+  const { t, i18n } = useTranslation(["booking", "common"]);
+  const dateFnsLocale = i18n.language === "zh" ? { locale: zhCN } : undefined;
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
   const {
     bays,
@@ -92,8 +96,8 @@ export default function Booking() {
   useEffect(() => {
     if (searchParams.get("setup_cancelled") === "true") {
       toast({
-        title: "Card setup cancelled",
-        description: "You need to add a payment method to make bookings.",
+        title: t("booking:toastCardSetupCancelledTitle"),
+        description: t("booking:toastCardSetupCancelledDesc"),
         variant: "destructive",
       });
     }
@@ -152,8 +156,8 @@ export default function Booking() {
             .eq("status", "pending");
           
           toast({
-            title: "Booking cancelled",
-            description: "Your booking was not completed. Any credits have been restored.",
+            title: t("booking:toastBookingCancelledTitle"),
+            description: t("booking:toastBookingCancelledDesc"),
             variant: "destructive",
           });
         } catch (error) {
@@ -279,8 +283,8 @@ export default function Booking() {
         // Slot conflict
         if (msg.includes("no longer available") || msg.includes("overlap")) {
           toast({
-            title: "Slot Unavailable",
-            description: "This time slot was just booked. Please select a different time or bay.",
+            title: t("booking:toastSlotUnavailableTitle"),
+            description: t("booking:toastSlotUnavailableDesc"),
             variant: "destructive",
           });
           fetchBookingsForDate(selectedDate);
@@ -289,8 +293,8 @@ export default function Booking() {
 
         // Generic fallback - surface the actual error so users aren't left in the dark
         toast({
-          title: "Couldn't reserve slot",
-          description: error.message || "Please try again or contact us.",
+          title: t("booking:toastCouldntReserveTitle"),
+          description: error.message || t("booking:toastCouldntReserveDefault"),
           variant: "destructive",
         });
         throw error;
@@ -306,8 +310,8 @@ export default function Booking() {
   const handleConfirmClick = async () => {
     if (!selectedDate || !selectedTime || !selectedBayId) {
       toast({
-        title: "Missing selection",
-        description: "Please select a date, time, and bay.",
+        title: t("booking:toastMissingSelectionTitle"),
+        description: t("booking:toastMissingSelectionDesc"),
         variant: "destructive",
       });
       return;
@@ -376,7 +380,7 @@ export default function Booking() {
         .single();
       
       if (fetchError || !booking) {
-        throw new Error("Booking reservation expired. Please try again.");
+        throw new Error(t("booking:bookingExpired"));
       }
       
       // Get bay name for description
@@ -430,14 +434,14 @@ export default function Booking() {
       }
 
       toast({
-        title: "Booking confirmed!",
-        description: `Your bay is booked for ${format(bookingDate, "PPP")} at ${booking.start_time}.`,
+        title: t("booking:toastBookingConfirmedTitle"),
+        description: t("booking:bayBookedFor", { date: format(bookingDate, "PPP", dateFnsLocale), time: booking.start_time }),
       });
       navigate("/dashboard");
     } catch (error: any) {
       toast({
-        title: "Booking failed",
-        description: error.message || "Unable to complete booking. Please try again.",
+        title: t("booking:toastBookingFailedTitle"),
+        description: error.message || t("booking:toastBookingFailedDefault"),
         variant: "destructive",
       });
       // Clean up the pending booking

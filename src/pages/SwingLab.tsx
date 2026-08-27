@@ -48,6 +48,7 @@ import {
   LineChart, Line, Legend,
 } from "recharts";
 import { format, parseISO } from "date-fns";
+import { useTranslation, Trans } from "react-i18next";
 
 type Session = {
   id: string;
@@ -62,6 +63,7 @@ type Session = {
 };
 
 export default function SwingLab() {
+  const { t } = useTranslation(["lab", "common"]);
   const { user, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -177,7 +179,7 @@ export default function SwingLab() {
   );
 
   if (isLoading || sessionsLoading) {
-    return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading UF Lab data…</div>;
+    return <div className="min-h-screen flex items-center justify-center text-muted-foreground">{t("lab:loadingData")}</div>;
   }
 
 
@@ -190,26 +192,26 @@ export default function SwingLab() {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[180px]">
-        <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-muted-foreground">Distance</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-muted-foreground">{t("lab:distance")}</DropdownMenuLabel>
         {(["m", "yd"] as DistanceUnit[]).map((u) => (
           <DropdownMenuItem
             key={u}
             onSelect={() => setDistUnit(u)}
             className={`cursor-pointer flex items-center justify-between ${activeDist === u ? "text-accent" : ""}`}
           >
-            <span>{u === "m" ? "Meters (m)" : "Yards (yd)"}</span>
+            <span>{u === "m" ? t("lab:meters") : t("lab:yards")}</span>
             {activeDist === u && <Check className="h-4 w-4 text-accent" />}
           </DropdownMenuItem>
         ))}
         <DropdownMenuSeparator />
-        <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-muted-foreground">Speed</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-muted-foreground">{t("lab:speed")}</DropdownMenuLabel>
         {(["kph", "mph"] as SpeedUnit[]).map((u) => (
           <DropdownMenuItem
             key={u}
             onSelect={() => setSpdUnit(u)}
             className={`cursor-pointer flex items-center justify-between ${activeSpd === u ? "text-accent" : ""}`}
           >
-            <span>{u === "kph" ? "km/h" : "mph"}</span>
+            <span>{u === "kph" ? t("lab:kph") : t("lab:mph")}</span>
             {activeSpd === u && <Check className="h-4 w-4 text-accent" />}
           </DropdownMenuItem>
         ))}
@@ -219,19 +221,19 @@ export default function SwingLab() {
           onCheckedChange={(v) => setTrim(!!v)}
           className="cursor-pointer [&_[data-state=checked]]:text-accent"
         >
-          Hide outliers
+          {t("lab:hideOutliers")}
         </DropdownMenuCheckboxItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 
   const TABS: { value: string; label: string }[] = [
-    { value: "overview", label: "Overview" },
-    { value: "sessions", label: "Sessions" },
-    { value: "gapping", label: "Gapping" },
-    { value: "dispersion", label: "Dispersion" },
-    { value: "swing", label: "Data" },
-    { value: "optimise", label: "Optimise" },
+    { value: "overview", label: t("lab:tabOverview") },
+    { value: "sessions", label: t("lab:tabSessions") },
+    { value: "gapping", label: t("lab:tabGapping") },
+    { value: "dispersion", label: t("lab:tabDispersion") },
+    { value: "swing", label: t("lab:tabData") },
+    { value: "optimise", label: t("lab:tabOptimise") },
   ];
 
   return (
@@ -240,12 +242,12 @@ export default function SwingLab() {
         <div className="max-w-6xl mx-auto px-4 pt-3 pb-2 space-y-3">
           <div className="flex items-center justify-between gap-3">
             <Button variant="ghost" size="sm" className="-ml-2" onClick={() => navigate("/dashboard")}>
-              <ArrowLeft className="h-4 w-4 mr-1" /> Back
+              <ArrowLeft className="h-4 w-4 mr-1" /> {t("common:back")}
             </Button>
             <img src={swingLabBadge} alt="UF Lab" className="h-12 md:h-14 w-auto object-contain rounded-full" />
 
             <Button variant="ghost" size="sm" className="-mr-2 border border-accent" onClick={() => setHowToOpen(true)}>
-              <HelpCircle className="h-4 w-4 mr-1" /> How To
+              <HelpCircle className="h-4 w-4 mr-1" /> {t("lab:howTo")}
             </Button>
           </div>
         </div>
@@ -256,42 +258,42 @@ export default function SwingLab() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <img src={swingLabBadge} alt="" className="h-6 w-6 rounded-full object-cover" />
-              {howToPage === 1 ? "How to use UF Lab" : "How to customise your bag"}
+              {howToPage === 1 ? t("lab:howToUseTitle") : t("lab:howToBagTitle")}
             </DialogTitle>
           </DialogHeader>
           {howToPage === 1 ? (
             <div className="space-y-5 text-sm">
               <ol className="space-y-3 list-decimal pl-5">
-                <li>Start a driving range session, ensuring you change to the correct club every time in the bottom left.</li>
+                <li>{t("lab:howToStep1")}</li>
                 <li>
                   <div className="flex items-start gap-3 flex-wrap">
-                    <span>Once you have completed your session, click the clipboard in the top left:</span>
+                    <span>{t("lab:howToStep2")}</span>
                     <img
                       src={swingLabClipboard.url}
-                      alt="GSPro clipboard icon"
+                      alt={t("lab:clipboardAlt")}
                       className="h-12 w-12 rounded-md border border-border object-contain bg-background"
                     />
                   </div>
                 </li>
-                <li>Click <strong>Export to CSV</strong>.</li>
-                <li><strong>Done!</strong> That's all you need to do — we take care of the rest and your session appears in UF Lab.</li>
+                <li><Trans i18nKey="lab:howToStep3" components={{ strong: <strong /> }} /></li>
+                <li><Trans i18nKey="lab:howToStep4" components={{ strong: <strong /> }} /></li>
               </ol>
               <div className="border-t border-border pt-4 space-y-2">
-                <h4 className="font-semibold text-foreground">Tip</h4>
+                <h4 className="font-semibold text-foreground">{t("lab:tip")}</h4>
                 <p className="text-muted-foreground">
-                  You can remove any outlier or bad shots by clicking the clipboard and deleting the individual shots. UF Lab has a <strong>Hide Outliers</strong> filter too.
+                  <Trans i18nKey="lab:howToTip" components={{ strong: <strong /> }} />
                 </p>
               </div>
             </div>
           ) : (
             <div className="space-y-5 text-sm">
               <ol className="space-y-3 list-decimal pl-5">
-                <li>Click your player name in the <strong>Players</strong> section.</li>
-                <li>Click <strong>Golf Bag</strong>.</li>
-                <li>Match up the bag to your actual clubs.</li>
-                <li>Click <strong>Apply Updates</strong> to save your bag.</li>
+                <li><Trans i18nKey="lab:bagStep1" components={{ strong: <strong /> }} /></li>
+                <li><Trans i18nKey="lab:bagStep2" components={{ strong: <strong /> }} /></li>
+                <li>{t("lab:bagStep3")}</li>
+                <li><Trans i18nKey="lab:bagStep4" components={{ strong: <strong /> }} /></li>
               </ol>
-              <p className="text-xs text-muted-foreground">Your bag setup is saved to your profile and will be applied to your future sessions automatically.</p>
+              <p className="text-xs text-muted-foreground">{t("lab:bagNote")}</p>
             </div>
           )}
           <div className="flex items-center justify-between border-t border-border pt-4">
@@ -300,9 +302,9 @@ export default function SwingLab() {
               size="sm"
               onClick={() => setHowToPage(howToPage === 1 ? 2 : 1)}
             >
-              {howToPage === 1 ? "Customise your bag →" : "← UF Lab basics"}
+              {howToPage === 1 ? t("lab:customiseBagCta") : t("lab:backToBasicsCta")}
             </Button>
-            <span className="text-xs text-muted-foreground">{howToPage} / 2</span>
+            <span className="text-xs text-muted-foreground">{t("lab:pageOf", { page: howToPage })}</span>
           </div>
         </DialogContent>
       </Dialog>
@@ -313,10 +315,9 @@ export default function SwingLab() {
           <Card>
             <CardContent className="py-12 text-center space-y-3">
               <Target className="h-10 w-10 mx-auto text-muted-foreground" />
-              <h2 className="text-lg font-semibold">No UF Lab sessions yet</h2>
+              <h2 className="text-lg font-semibold">{t("lab:noSessionsTitle")}</h2>
               <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                UF Lab data comes from your GSPro range sessions — select your club as you go, then hit <strong>Export to CSV</strong> on the clipboard when you finish.
-                That's all you need to do; we take care of the rest and your shots appear here shortly after.
+                <Trans i18nKey="lab:noSessionsBody" components={{ strong: <strong /> }} />
               </p>
             </CardContent>
           </Card>
@@ -324,7 +325,7 @@ export default function SwingLab() {
           <>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <Button variant="ghost" size="sm" onClick={() => setSelectedSessionId(null)}>
-                <ArrowLeft className="h-4 w-4 mr-1" /> All sessions
+                <ArrowLeft className="h-4 w-4 mr-1" /> {t("lab:allSessions")}
               </Button>
               {unitBar}
             </div>
@@ -368,9 +369,9 @@ export default function SwingLab() {
               {/* Context row: averages label + units */}
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/50 pb-3">
                 <div className="min-w-0">
-                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground">My Averages</div>
+                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{t("lab:myAverages")}</div>
                   <div className="text-sm text-foreground">
-                    {totalShots} shots · {sessions.length} sessions
+                    {t("lab:shotsSessionsCount", { shots: totalShots, sessions: sessions.length })}
                   </div>
                 </div>
                 {unitBar}
@@ -387,13 +388,13 @@ export default function SwingLab() {
 
               <TabsContent value="gapping" className="space-y-4">
                 <Card className="overflow-hidden">
-                  <CardHeader><CardTitle className="text-base">Average distances by club ({dLbl})</CardTitle></CardHeader>
+                  <CardHeader><CardTitle className="text-base">{t("lab:avgDistancesByClub", { unit: dLbl })}</CardTitle></CardHeader>
                   <CardContent className="p-0">
                     <div className="divide-y divide-border/60">
                       <div className="grid grid-cols-[1fr_6rem_6rem] items-center px-4 py-2 text-xs text-muted-foreground font-sans uppercase tracking-wider">
-                        <div>Club</div>
-                        <div className="text-center">Carry</div>
-                        <div className="text-right">Total</div>
+                        <div>{t("lab:club")}</div>
+                        <div className="text-center">{t("lab:carry")}</div>
+                        <div className="text-right">{t("lab:total")}</div>
                       </div>
                       {clubStats.map((c) => (
                         <div key={c.club} className="grid grid-cols-[1fr_6rem_6rem] items-center px-4 py-3">
@@ -414,7 +415,7 @@ export default function SwingLab() {
                         </div>
                       ))}
                       {clubStats.length === 0 && (
-                        <div className="px-4 py-6 text-center text-sm text-muted-foreground">No club data yet</div>
+                        <div className="px-4 py-6 text-center text-sm text-muted-foreground">{t("lab:noClubData")}</div>
                       )}
                     </div>
                   </CardContent>
@@ -461,13 +462,13 @@ export default function SwingLab() {
                           )}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          {s.shot_count} shots
-                          {s.duration_minutes ? ` · ${Math.round(s.duration_minutes)} min` : ""}
+                          {t("lab:shotsCount", { count: s.shot_count })}
+                          {s.duration_minutes ? ` · ${Math.round(s.duration_minutes)} ${t("lab:min")}` : ""}
                           {s.source_filename ? ` · ${s.source_filename}` : ""}
                         </div>
                       </button>
                       <div className="flex items-center gap-2 shrink-0">
-                        <Badge variant="secondary" className="cursor-pointer" onClick={() => setSelectedSessionId(s.id)}>View</Badge>
+                        <Badge variant="secondary" className="cursor-pointer" onClick={() => setSelectedSessionId(s.id)}>{t("lab:view")}</Badge>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive">
@@ -476,15 +477,19 @@ export default function SwingLab() {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete this session?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This will permanently delete the session from{" "}
-                                <strong>{format(parseISO(s.session_date), "EEE d MMM yyyy")}</strong>
-                                {" "}and all {s.shot_count} of its shots from the server. This can't be undone.
+                              <AlertDialogTitle>{t("lab:deleteSessionTitle")}</AlertDialogTitle>
+                              <AlertDialogDescription asChild>
+                                <span>
+                                  <Trans
+                                    i18nKey="lab:deleteSessionDesc"
+                                    values={{ date: format(parseISO(s.session_date), "EEE d MMM yyyy"), count: s.shot_count }}
+                                    components={{ strong: <strong /> }}
+                                  />
+                                </span>
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogCancel>{t("common:cancel")}</AlertDialogCancel>
                               <AlertDialogAction
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 onClick={async () => {
@@ -494,16 +499,16 @@ export default function SwingLab() {
                                     .eq("id", s.id)
                                     .eq("user_id", user!.id);
                                   if (error) {
-                                    toast.error("Couldn't delete session: " + error.message);
+                                    toast.error(t("lab:deleteSessionError", { message: error.message }));
                                     return;
                                   }
                                   if (selectedSessionId === s.id) setSelectedSessionId(null);
-                                  toast.success("Session deleted");
+                                  toast.success(t("lab:sessionDeleted"));
                                   queryClient.invalidateQueries({ queryKey: ["range-sessions"] });
                                   queryClient.invalidateQueries({ queryKey: ["range-shots-all"] });
                                 }}
                               >
-                                Delete permanently
+                                {t("lab:deletePermanently")}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>

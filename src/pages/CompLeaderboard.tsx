@@ -12,9 +12,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 export default function CompLeaderboard() {
   const navigate = useNavigate();
+  const { t } = useTranslation(["league", "common"]);
   const [selectedCompId, setSelectedCompId] = useState<string>("");
 
   // Fetch all competitions (completed + active, oldest first for week numbering)
@@ -97,19 +99,19 @@ export default function CompLeaderboard() {
           className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Comp Area
+          {t("league:comp.leaderboard.backToCompArea")}
         </button>
 
         <div>
-          <h1 className="font-display text-2xl text-primary font-bold">AMBROSE LEADERBOARD</h1>
-          <p className="text-muted-foreground text-sm mt-1">Weekly competition results</p>
+          <h1 className="font-display text-2xl text-primary font-bold">{t("league:comp.leaderboard.title")}</h1>
+          <p className="text-muted-foreground text-sm mt-1">{t("league:comp.leaderboard.subtitle")}</p>
         </div>
 
         {/* Competition Selector */}
         {competitions && competitions.length > 0 && (
           <Select value={selectedCompId} onValueChange={setSelectedCompId}>
             <SelectTrigger className="w-full bg-card border-border">
-              <SelectValue placeholder="Select competition" />
+              <SelectValue placeholder={t("league:comp.leaderboard.selectCompetition")} />
             </SelectTrigger>
             <SelectContent>
               {competitions.map((c) => (
@@ -121,7 +123,7 @@ export default function CompLeaderboard() {
                     </span>
                     {competitions[0].id === c.id && (
                       <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-accent text-accent-foreground rounded">
-                        LATEST
+                        {t("league:comp.leaderboard.latest")}
                       </span>
                     )}
                   </div>
@@ -135,7 +137,7 @@ export default function CompLeaderboard() {
         {selectedComp && (
           <div className="text-center py-2">
             <div className="inline-block px-2 py-0.5 bg-accent text-accent-foreground text-xs font-bold rounded mb-1">
-              WEEK {getWeekNumber(selectedComp.id)}
+              {t("league:comp.leaderboard.week", { number: getWeekNumber(selectedComp.id) })}
             </div>
           </div>
         )}
@@ -148,18 +150,18 @@ export default function CompLeaderboard() {
         ) : sortedTeams.length === 0 ? (
           <div className="bg-card rounded-xl border border-border p-12 text-center">
             <Trophy className="h-12 w-12 mx-auto text-muted-foreground/30 mb-3" />
-            <h3 className="font-bold text-lg text-foreground mb-1">No Results Yet</h3>
-            <p className="text-muted-foreground text-sm">Results will appear once scores are entered</p>
+            <h3 className="font-bold text-lg text-foreground mb-1">{t("league:comp.leaderboard.noResultsTitle")}</h3>
+            <p className="text-muted-foreground text-sm">{t("league:comp.leaderboard.noResultsBody")}</p>
           </div>
         ) : (
           <div className="bg-card rounded-xl border border-border overflow-hidden shadow-sm">
             {/* Table Header */}
             <div className="grid grid-cols-12 gap-1 px-3 py-2 bg-primary text-sm font-medium text-primary-foreground">
-              <div className="col-span-1 text-center">#</div>
-              <div className="col-span-4">Team</div>
-              <div className="col-span-2 text-center">HCP</div>
-              <div className="col-span-2 text-center">Gross</div>
-              <div className="col-span-3 text-center">Net</div>
+              <div className="col-span-1 text-center">{t("league:leaderboard.colPosition")}</div>
+              <div className="col-span-4">{t("league:comp.leaderboard.colTeam")}</div>
+              <div className="col-span-2 text-center">{t("league:comp.leaderboard.colHcp")}</div>
+              <div className="col-span-2 text-center">{t("league:comp.leaderboard.colGross")}</div>
+              <div className="col-span-3 text-center">{t("league:comp.leaderboard.colNet")}</div>
             </div>
 
             <div className="divide-y divide-border">
@@ -217,7 +219,7 @@ export default function CompLeaderboard() {
 
         {/* Footer */}
         <div className="text-center text-xs text-muted-foreground pb-4">
-          Auto-updates every 30 seconds
+          {t("league:comp.leaderboard.autoUpdates")}
         </div>
       </div>
     </div>

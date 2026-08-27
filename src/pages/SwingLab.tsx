@@ -535,6 +535,7 @@ function OverviewTiles({
   activeDist: DistanceUnit;
   activeSpd: SpeedUnit;
 }) {
+  const { t } = useTranslation(["lab", "common"]);
   const navigate = useNavigate();
   const dLbl = activeDist;
 
@@ -686,10 +687,10 @@ function OverviewTiles({
         <div className="flex items-center justify-between gap-3">
           <div>
             <div className="text-xs uppercase tracking-wide text-accent flex items-center gap-1">
-              <TrendingUp className="h-3.5 w-3.5" />My Progress
+              <TrendingUp className="h-3.5 w-3.5" />{t("lab:myProgress")}
             </div>
-            <div className="text-lg font-display mt-1 leading-tight">Track your trends over time</div>
-            <div className="text-xs text-muted-foreground mt-1">See which metrics are improving, flat, or slipping.</div>
+            <div className="text-lg font-display mt-1 leading-tight">{t("lab:trackTrends")}</div>
+            <div className="text-xs text-muted-foreground mt-1">{t("lab:seeMetrics")}</div>
           </div>
           <ChevronDown className="h-5 w-5 -rotate-90 text-accent group-hover:translate-x-0.5 transition-transform shrink-0" />
         </div>
@@ -698,53 +699,53 @@ function OverviewTiles({
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {/* Tile 1 — Sessions */}
         <TileCard
-          label="Sessions"
+          label={t("lab:sessionsLabel")}
           icon={<TrendingUp className="h-3.5 w-3.5" />}
           value={sessions.length.toString()}
-          sub={`${sessionsThisMonth} this month`}
-          info="Total UF Lab sessions on your account. A session is one bay visit where shots were exported from GSPro."
+          sub={t("lab:thisMonth", { count: sessionsThisMonth })}
+          info={t("lab:sessionsInfo")}
         />
 
         {/* Tile 2 — Shots */}
         <TileCard
-          label="Shots Hit"
+          label={t("lab:shotsHit")}
           icon={<Target className="h-3.5 w-3.5" />}
           value={totalShots.toLocaleString()}
-          sub={totalShots > 0 ? `≈ ${buckets} range bucket${buckets === 1 ? "" : "s"}` : "—"}
-          info="Every shot you've captured in the UF Lab. Bucket equivalent assumes ~50 balls per range bucket."
+          sub={totalShots > 0 ? t("lab:rangeBucket", { count: buckets }) : "—"}
+          info={t("lab:shotsInfo")}
         />
 
         {/* Tile 3 — Longest carry */}
         <TileCard
-          label="Longest Carry"
+          label={t("lab:longestCarry")}
           value={longest ? `${Math.round(longest.carry)} ${dLbl}` : "—"}
-          sub={longest ? `${longest.club}${longest.date ? ` · ${format(parseISO(longest.date.slice(0, 10)), "d MMM")}` : ""}` : "Not enough data"}
-          info={`Furthest carry (${dLbl}). The distance the ball flew in the air, not roll.`}
+          sub={longest ? `${longest.club}${longest.date ? ` · ${format(parseISO(longest.date.slice(0, 10)), "d MMM")}` : ""}` : t("lab:notEnoughData")}
+          info={t("lab:longestCarryInfo", { unit: dLbl })}
         />
 
         {/* Tile 4 — Best club vs tour */}
         <TileCard
-          label="Best Club (vs Tour)"
+          label={t("lab:bestClubVsTour")}
           value={bestVsTour ? `${Math.round(bestVsTour.pct)}%` : "—"}
-          sub={bestVsTour ? `${bestVsTour.club} smash efficiency` : "Need 10+ shots per club"}
-          info="Your best club by smash factor (ball speed ÷ club speed) shown as a percentage of the PGA Tour average for that club. Smash measures strike quality, so it rewards pure contact over raw speed. A 70-year-old can still score 95%+."
+          sub={bestVsTour ? t("lab:smashEfficiency", { club: bestVsTour.club }) : t("lab:needTenShotsPerClub")}
+          info={t("lab:bestClubInfo")}
         />
 
         {/* Tile 5 — Consistency */}
         <TileCard
-          label="Consistency"
+          label={t("lab:consistency")}
           value={consistency.current != null ? `${consistency.current} / 100` : "—"}
           sub={
             consistency.current == null
-              ? "Need 10+ shots on a club"
+              ? t("lab:needTenShotsOnClub")
               : consistency.trend == null
-                ? "Trend after 30 days"
+                ? t("lab:trendAfter30Days")
                 : consistency.trend === 0
-                  ? "Steady vs last month"
-                  : `${consistency.trend > 0 ? "▲" : "▼"} ${Math.abs(consistency.trend)} vs last month`
+                  ? t("lab:steadyVsLastMonth")
+                  : t("lab:vsLastMonth", { arrow: consistency.trend > 0 ? "▲" : "▼", value: Math.abs(consistency.trend) })
           }
           highlight={consistency.trend != null && consistency.trend > 0}
-          info="How repeatable your carry distances are, scored 0–100 (higher = tighter). We take the carry standard deviation for your three most-hit clubs, express it as a percent of each club's average, then convert to a score: 0% variation = 100, 20%+ variation = 0. Consistency is the number that actually moves with practice. Averages barely budge month to month, this does."
+          info={t("lab:consistencyInfo")}
         />
 
         {/* Tile 6 — Focus Point (compact, orange-outlined, click for detail) */}
@@ -769,6 +770,7 @@ function TileCard({
   highlight?: boolean;
   info?: string;
 }) {
+  const { t } = useTranslation(["lab", "common"]);
   return (
     <Card>
       <CardContent className="p-4">
@@ -779,7 +781,7 @@ function TileCard({
               <PopoverTrigger asChild>
                 <button
                   type="button"
-                  aria-label={`About ${label}`}
+                  aria-label={t("lab:aboutLabel", { label })}
                   className="text-muted-foreground hover:text-accent active:text-accent transition-colors"
                 >
                   <InfoIcon className="h-3.5 w-3.5" />
@@ -801,9 +803,10 @@ function TileCard({
 }
 
 function FocusPointCard({ focus }: { focus: { club: string; pct: number; avgSmash: number; tourSmash: number } | null }) {
+  const { t } = useTranslation(["lab", "common"]);
   const [open, setOpen] = useState(false);
-  const headline = focus ? `${focus.club} · ${Math.round(focus.pct)}%` : "All clean";
-  const sub = focus ? "Tap for coaching cue" : "No clubs lagging tour";
+  const headline = focus ? `${focus.club} · ${Math.round(focus.pct)}%` : t("lab:allClean");
+  const sub = focus ? t("lab:tapForCoachingCue") : t("lab:noClubsLagging");
   return (
     <>
       <button
@@ -812,7 +815,7 @@ function FocusPointCard({ focus }: { focus: { club: string; pct: number; avgSmas
         className="text-left rounded-lg border-2 border-accent bg-card p-4 transition-colors hover:bg-accent/5 active:bg-accent/10"
       >
         <div className="text-xs uppercase tracking-wide text-accent flex items-center justify-between gap-1">
-          <span className="flex items-center gap-1"><FlaskConical className="h-3.5 w-3.5" />Focus Point</span>
+          <span className="flex items-center gap-1"><FlaskConical className="h-3.5 w-3.5" />{t("lab:focusPoint")}</span>
           <InfoIcon className="h-3.5 w-3.5 opacity-80" />
         </div>
         <div className="text-2xl font-display text-primary mt-1 leading-tight">{headline}</div>
@@ -824,27 +827,27 @@ function FocusPointCard({ focus }: { focus: { club: string; pct: number; avgSmas
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FlaskConical className="h-4 w-4 text-accent" />
-              Focus Point
+              {t("lab:focusPoint")}
             </DialogTitle>
             <DialogDescription asChild>
               <div className="space-y-3 text-sm text-foreground/90 pt-2">
                 {focus ? (
                   <>
                     <p className="font-display text-lg text-foreground">
-                      {focus.club}: {Math.round(focus.pct)}% of tour smash
+                      {t("lab:focusPointHeadline", { club: focus.club, pct: Math.round(focus.pct) })}
                     </p>
                     <p>
-                      You're averaging a smash factor of <span className="font-semibold">{focus.avgSmash.toFixed(2)}</span> with your {focus.club}, versus the PGA Tour average of <span className="font-semibold">{focus.tourSmash.toFixed(2)}</span>.
+                      <Trans
+                        i18nKey="lab:focusPointBody1"
+                        values={{ club: focus.club, avgSmash: focus.avgSmash.toFixed(2), tourSmash: focus.tourSmash.toFixed(2) }}
+                        components={{ strong: <span className="font-semibold" /> }}
+                      />
                     </p>
-                    <p>
-                      Smash factor (ball speed ÷ club speed) is the purest measure of strike quality. Closing this gap means more ball speed and carry for the exact same swing effort, no extra club speed needed.
-                    </p>
-                    <p className="text-muted-foreground">
-                      Next session: hit a focused block with this club. Slow your tempo, aim for centre-face contact, and watch the smash number climb.
-                    </p>
+                    <p>{t("lab:focusPointBody2")}</p>
+                    <p className="text-muted-foreground">{t("lab:focusPointBody3")}</p>
                   </>
                 ) : (
-                  <p>Every club you've hit enough shots with is meeting or beating the PGA Tour smash benchmark. Keep grinding, a new focus point will appear as you build more data.</p>
+                  <p>{t("lab:focusPointClean")}</p>
                 )}
               </div>
             </DialogDescription>
@@ -870,24 +873,25 @@ function Kpi({ label, value, icon }: { label: string; value: string; icon?: Reac
 }
 
 function ClubStatsTable({ rows, dLbl, sLbl }: { rows: ReturnType<typeof statsByClub>; dLbl: string; sLbl: string }) {
+  const { t } = useTranslation(["lab", "common"]);
   return (
     <Card>
-      <CardHeader><CardTitle className="text-base">Per-club statistics</CardTitle></CardHeader>
+      <CardHeader><CardTitle className="text-base">{t("lab:perClubStats")}</CardTitle></CardHeader>
       <CardContent className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Club</TableHead>
-              <TableHead className="text-right">Shots</TableHead>
-              <TableHead className="text-right">Avg carry ({dLbl})</TableHead>
-              <TableHead className="text-right">Max carry ({dLbl})</TableHead>
-              <TableHead className="text-right">Avg total ({dLbl})</TableHead>
-              <TableHead className="text-right">Ball ({sLbl})</TableHead>
-              <TableHead className="text-right">Club ({sLbl})</TableHead>
-              <TableHead className="text-right">Smash</TableHead>
-              <TableHead className="text-right">Launch°</TableHead>
-              <TableHead className="text-right">Spin</TableHead>
-              <TableHead className="text-right">Lat. SD</TableHead>
+              <TableHead>{t("lab:club")}</TableHead>
+              <TableHead className="text-right">{t("lab:shots")}</TableHead>
+              <TableHead className="text-right">{t("lab:avgCarryUnit", { unit: dLbl })}</TableHead>
+              <TableHead className="text-right">{t("lab:maxCarryUnit", { unit: dLbl })}</TableHead>
+              <TableHead className="text-right">{t("lab:avgTotalUnit", { unit: dLbl })}</TableHead>
+              <TableHead className="text-right">{t("lab:ballUnit", { unit: sLbl })}</TableHead>
+              <TableHead className="text-right">{t("lab:clubUnit", { unit: sLbl })}</TableHead>
+              <TableHead className="text-right">{t("lab:smash")}</TableHead>
+              <TableHead className="text-right">{t("lab:launch")}</TableHead>
+              <TableHead className="text-right">{t("lab:spin")}</TableHead>
+              <TableHead className="text-right">{t("lab:latSd")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -915,26 +919,27 @@ function ClubStatsTable({ rows, dLbl, sLbl }: { rows: ReturnType<typeof statsByC
 }
 
 function SwingStatsTable({ rows }: { rows: ReturnType<typeof swingStatsByClub> }) {
+  const { t } = useTranslation(["lab", "common"]);
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Swing dynamics</CardTitle>
+        <CardTitle className="text-base">{t("lab:swingDynamics")}</CardTitle>
         <p className="text-xs text-muted-foreground">
-          Positive = right / out-to-in for right-handers. Face-to-path shows shape tendency.
+          {t("lab:swingDynamicsSub")}
         </p>
       </CardHeader>
       <CardContent className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Club</TableHead>
-              <TableHead className="text-right">Shots</TableHead>
-              <TableHead className="text-right">Path°</TableHead>
-              <TableHead className="text-right">Face°</TableHead>
-              <TableHead className="text-right">Face-to-Path°</TableHead>
-              <TableHead className="text-right">AoA°</TableHead>
-              <TableHead className="text-right">Launch°</TableHead>
-              <TableHead className="text-right">Spin axis°</TableHead>
+              <TableHead>{t("lab:club")}</TableHead>
+              <TableHead className="text-right">{t("lab:shots")}</TableHead>
+              <TableHead className="text-right">{t("lab:path")}</TableHead>
+              <TableHead className="text-right">{t("lab:face")}</TableHead>
+              <TableHead className="text-right">{t("lab:faceToPath")}</TableHead>
+              <TableHead className="text-right">{t("lab:aoa")}</TableHead>
+              <TableHead className="text-right">{t("lab:launch")}</TableHead>
+              <TableHead className="text-right">{t("lab:spinAxis")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -958,6 +963,7 @@ function SwingStatsTable({ rows }: { rows: ReturnType<typeof swingStatsByClub> }
 }
 
 function DispersionChart({ shots, dLbl, sessions }: { shots: Shot[]; dLbl: string; sessions?: Session[] }) {
+  const { t } = useTranslation(["lab", "common"]);
   type DateRange = "all" | "30" | "60" | "90" | "180" | "365";
   const [dateRange, setDateRange] = useState<DateRange>("all");
   const [isMobileChart, setIsMobileChart] = useState(() => {
@@ -1061,21 +1067,21 @@ function DispersionChart({ shots, dLbl, sessions }: { shots: Shot[]; dLbl: strin
   }, [clubData]);
 
   const DATE_RANGES: { value: DateRange; label: string }[] = [
-    { value: "all", label: "All time" },
-    { value: "30", label: "Last 30 days" },
-    { value: "60", label: "Last 60 days" },
-    { value: "90", label: "Last 3 months" },
-    { value: "180", label: "Last 6 months" },
-    { value: "365", label: "Last 12 months" },
+    { value: "all", label: t("lab:allTime") },
+    { value: "30", label: t("lab:last30Days") },
+    { value: "60", label: t("lab:last60Days") },
+    { value: "90", label: t("lab:last3Months") },
+    { value: "180", label: t("lab:last6Months") },
+    { value: "365", label: t("lab:last12Months") },
   ];
-  const activeRangeLabel = DATE_RANGES.find((r) => r.value === dateRange)?.label ?? "All time";
+  const activeRangeLabel = DATE_RANGES.find((r) => r.value === dateRange)?.label ?? t("lab:allTime");
   const allSelected = sessionsInRange.length > 0 && selectedSessions.size === sessionsInRange.length;
   const sessionsLabel =
     !sessions || sessionsInRange.length === 0
-      ? "Sessions"
+      ? t("lab:sessionsLabel")
       : allSelected
-      ? `All sessions (${sessionsInRange.length})`
-      : `${selectedSessions.size} / ${sessionsInRange.length}`;
+      ? t("lab:allSessionsCount", { count: sessionsInRange.length })
+      : t("lab:sessionsFraction", { selected: selectedSessions.size, total: sessionsInRange.length });
 
   return (
     <Card>
@@ -1095,11 +1101,11 @@ function DispersionChart({ shots, dLbl, sessions }: { shots: Shot[]; dLbl: strin
                   <button
                     onClick={() => setSelectedSessions(new Set(sessionsInRange.map((s) => s.id)))}
                     className="text-xs px-2 py-0.5 rounded border border-border hover:bg-muted"
-                  >All</button>
+                  >{t("lab:all")}</button>
                   <button
                     onClick={() => setSelectedSessions(new Set())}
                     className="text-xs px-2 py-0.5 rounded border border-border hover:bg-muted"
-                  >None</button>
+                  >{t("lab:none")}</button>
                 </div>
                 {sessionsInRange.map((s) => {
                   const on = selectedSessions.has(s.id);
@@ -1121,7 +1127,7 @@ function DispersionChart({ shots, dLbl, sessions }: { shots: Shot[]; dLbl: strin
                   );
                 })}
                 {sessionsInRange.length === 0 && (
-                  <div className="px-3 py-2 text-xs text-muted-foreground">No sessions in range</div>
+                  <div className="px-3 py-2 text-xs text-muted-foreground">{t("lab:noSessionsInRange")}</div>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
@@ -1149,7 +1155,7 @@ function DispersionChart({ shots, dLbl, sessions }: { shots: Shot[]; dLbl: strin
           </div>
         )}
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <CardTitle className="text-base">Shot dispersion ({dLbl})</CardTitle>
+          <CardTitle className="text-base">{t("lab:shotDispersion", { unit: dLbl })}</CardTitle>
           <div className="flex gap-2 text-xs">
             <button
               onClick={() => setShowFairway((v) => !v)}
@@ -1158,15 +1164,15 @@ function DispersionChart({ shots, dLbl, sessions }: { shots: Shot[]; dLbl: strin
                   ? "bg-green-600/20 border-green-600 text-green-700 dark:text-green-400"
                   : "border-border hover:bg-muted"
               }`}
-            >{showFairway ? "Hide fairway" : "Show fairway"}</button>
+            >{showFairway ? t("lab:hideFairway") : t("lab:showFairway")}</button>
             <button
               onClick={() => setSelected(new Set(allClubs))}
               className="px-2 py-1 rounded border border-border hover:bg-muted"
-            >Select all</button>
+            >{t("lab:selectAll")}</button>
             <button
               onClick={() => setSelected(new Set())}
               className="px-2 py-1 rounded border border-border hover:bg-muted"
-            >Clear</button>
+            >{t("lab:clear")}</button>
           </div>
         </div>
         <div className="flex flex-wrap gap-1.5">
@@ -1203,7 +1209,7 @@ function DispersionChart({ shots, dLbl, sessions }: { shots: Shot[]; dLbl: strin
               domain={[bounds.yMin, bounds.yMax]}
               tickFormatter={(v: number) => `${Math.round(v)}`}
               width={44}
-              label={{ value: `Carry (${dLbl})`, angle: -90, position: "insideLeft", style: { textAnchor: "middle" } }}
+              label={{ value: t("lab:carryUnitAxis", { unit: dLbl }), angle: -90, position: "insideLeft", style: { textAnchor: "middle" } }}
             />
             <ReferenceLine x={0} stroke="hsl(var(--muted-foreground))" strokeDasharray="4 4" />
             <Tooltip
@@ -1282,23 +1288,22 @@ function DispersionChart({ shots, dLbl, sessions }: { shots: Shot[]; dLbl: strin
               <div className="flex items-center gap-2 mb-1">
                 <span className="inline-block w-3 h-3 rounded-full" style={{ background: color }} />
                 <span className="font-medium">{club}</span>
-                <span className="text-xs text-muted-foreground ml-auto">{pts.length} shots</span>
+                <span className="text-xs text-muted-foreground ml-auto">{t("lab:shotsCount", { count: pts.length })}</span>
               </div>
               {ellipse ? (
                 <>
                   <div className="text-xs text-muted-foreground">
-                    Pattern: <span className="text-foreground font-medium">{ellipse.shape}</span>
-                    {" "}({ellipse.shapePct.toFixed(0)}%)
+                    {t("lab:patternLabel", { shape: ellipse.shape, pct: ellipse.shapePct.toFixed(0) })}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    Landing zone: {(ellipse.rx * 2).toFixed(0)} × {(ellipse.ry * 2).toFixed(0)} {dLbl} (95%)
+                    {t("lab:landingZone", { w: (ellipse.rx * 2).toFixed(0), h: (ellipse.ry * 2).toFixed(0), unit: dLbl })}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    Centre: {ellipse.cx.toFixed(0)} side / {ellipse.cy.toFixed(0)} carry
+                    {t("lab:centreLabel", { x: ellipse.cx.toFixed(0), y: ellipse.cy.toFixed(0) })}
                   </div>
                 </>
               ) : (
-                <div className="text-xs text-muted-foreground">Need at least 3 shots for a pattern.</div>
+                <div className="text-xs text-muted-foreground">{t("lab:needThreeShots")}</div>
               )}
             </div>
           ))}

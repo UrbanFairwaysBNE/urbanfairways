@@ -230,5 +230,7 @@
   "perHour": "/小时",
   "peakSuffix": "（高峰）",
   "bookAsCasual": "以散客身份预订",
-  "joinNow": "立即加入"
+  "joinNow": "立即加入",
+  "isPeakLabel": "高峰",
+  "isOffPeakLabel": "非高峰"
 }

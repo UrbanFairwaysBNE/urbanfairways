@@ -1,28 +1,30 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Users, UserSearch, Trophy, ArrowLeft } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const CompHub = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation(["league", "common"]);
 
   const tiles = [
     {
-      title: "Register Team",
-      description: "Sign up your 2-man Ambrose team, only register once and you're locked in for every weekly comp.",
+      title: t("league:comp.tileRegisterTeamTitle"),
+      description: t("league:comp.tileRegisterTeamDesc"),
       icon: Users,
       onClick: () => navigate("/comp/register-team"),
       accent: true,
     },
     {
-      title: "Find a Partner",
-      description: "Looking for a teammate? Find other players who need a partner.",
+      title: t("league:comp.tileFindPartnerTitle"),
+      description: t("league:comp.tileFindPartnerDesc"),
       icon: UserSearch,
       onClick: () => navigate("/comp/find-partner"),
       accent: false,
     },
     {
-      title: "Leaderboard",
-      description: "View scores and standings from past and current competitions.",
+      title: t("league:comp.tileLeaderboardTitle"),
+      description: t("league:comp.tileLeaderboardDesc"),
       icon: Trophy,
       onClick: () => navigate("/comp/leaderboard"),
       accent: false,
@@ -37,13 +39,13 @@ const CompHub = () => {
           className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Hub
+          {t("league:comp.hubBackToHub")}
         </button>
 
         <div>
-          <h1 className="font-display text-3xl text-primary font-bold">WEEKLY COMP</h1>
+          <h1 className="font-display text-3xl text-primary font-bold">{t("league:comp.hubTitle")}</h1>
           <p className="text-muted-foreground mt-1">
-            2-Man Ambrose, register, find a partner, and check results.
+            {t("league:comp.hubSubtitle")}
           </p>
         </div>
 

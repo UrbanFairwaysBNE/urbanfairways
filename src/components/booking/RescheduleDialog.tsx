@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { addDurationToTime } from "@/lib/pricing-utils";
 import { format, addDays, isToday, isBefore, startOfDay } from "date-fns";
+import { zhCN } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import {
@@ -81,6 +84,8 @@ export const RescheduleDialog = ({
   onOpenChange,
   onSuccess,
 }: RescheduleDialogProps) => {
+  const { t } = useTranslation(["booking", "common"]);
+  const dateLocale = i18n.language === "zh" ? zhCN : undefined;
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [selectedBayId, setSelectedBayId] = useState<string>("");
@@ -293,12 +298,12 @@ export const RescheduleDialog = ({
 
   const handleSubmit = async () => {
     if (!selectedDate || !selectedTime || !selectedBayId) {
-      toast.error("Please select a date, time, and bay");
+      toast.error(t("booking:toastMissingSelectionDesc"));
       return;
     }
 
     setIsSubmitting(true);
-    const toastId = toast.loading("Rescheduling your booking...");
+    const toastId = toast.loading(t("booking:reschedulingToast"));
 
     try {
       const { data, error } = await supabase.functions.invoke("reschedule-booking", {
@@ -316,16 +321,16 @@ export const RescheduleDialog = ({
       toast.dismiss(toastId);
 
       // Show detailed success message
-      let successMessage = "Booking rescheduled successfully!";
+      let successMessage = t("booking:rescheduledSuccess");
       if (data?.priceChanged) {
         if (data.priceDifference > 0) {
           if (data.payment?.chargedToCard) {
-            successMessage = `Rescheduled! $${data.payment.chargedToCard.toFixed(2)} charged to your card.`;
+            successMessage = t("booking:rescheduledChargedCard", { amount: data.payment.chargedToCard.toFixed(2) });
           } else if (data.payment?.chargedFromBalance) {
-            successMessage = `Rescheduled! $${data.payment.chargedFromBalance.toFixed(2)} deducted from your balance.`;
+            successMessage = t("booking:rescheduledDeductedBalance", { amount: data.payment.chargedFromBalance.toFixed(2) });
           }
         } else if (data.priceDifference < 0) {
-          successMessage = `Rescheduled! $${data.payment?.refundedToBalance?.toFixed(2)} added to your balance.`;
+          successMessage = t("booking:rescheduledAddedBalance", { amount: data.payment?.refundedToBalance?.toFixed(2) });
         }
       }
 
@@ -335,7 +340,7 @@ export const RescheduleDialog = ({
     } catch (error) {
       console.error("Reschedule error:", error);
       toast.dismiss(toastId);
-      toast.error(error instanceof Error ? error.message : "Failed to reschedule booking");
+      toast.error(error instanceof Error ? error.message : t("booking:failedToReschedule"));
     } finally {
       setIsSubmitting(false);
     }
@@ -355,13 +360,12 @@ export const RescheduleDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Reschedule Booking</DialogTitle>
+          <DialogTitle>{t("booking:rescheduleTitle")}</DialogTitle>
           <DialogDescription>
-            Choose a new date, time, and bay for your {booking.duration_hours} hour
-            {booking.duration_hours > 1 ? "s" : ""} session.
+            {t("booking:rescheduleDesc", { duration: t("booking:durationHr", { count: booking.duration_hours }) })}
             {showPriceChanges && (
               <span className="text-xs block mt-1 text-muted-foreground">
-                Note: Price may vary based on peak/off-peak times.
+                {t("booking:priceMayVaryNote")}
               </span>
             )}
           </DialogDescription>
@@ -370,9 +374,9 @@ export const RescheduleDialog = ({
         <div className="space-y-4 py-4">
           {/* Current booking info */}
           <div className="bg-muted rounded-lg p-3 text-sm">
-            <p className="font-medium mb-1">Current booking:</p>
+            <p className="font-medium mb-1">{t("booking:currentBookingLabel")}</p>
             <p className="text-muted-foreground">
-              {format(new Date(booking.booking_date), "EEE, MMM d")} at{" "}
+              {format(new Date(booking.booking_date), "EEE, MMM d", { locale: dateLocale })} at{" "}
               {formatTime(booking.start_time)} - Bay {booking.bay_number}
             </p>
             <p className="text-muted-foreground">
@@ -384,7 +388,7 @@ export const RescheduleDialog = ({
           <div className="space-y-2">
             <label className="text-sm font-medium flex items-center gap-2">
               <CalendarIcon className="h-4 w-4" />
-              New Date
+              {t("booking:newDateLabel")}
             </label>
             <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
               <PopoverTrigger asChild>
@@ -395,7 +399,7 @@ export const RescheduleDialog = ({
                     !selectedDate && "text-muted-foreground"
                   )}
                 >
-                  {selectedDate ? format(selectedDate, "EEE, MMM d, yyyy") : "Select a date"}
+                  {selectedDate ? format(selectedDate, "EEE, MMM d, yyyy", { locale: dateLocale }) : t("booking:selectADatePlaceholder")}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -422,7 +426,7 @@ export const RescheduleDialog = ({
           <div className="space-y-2">
             <label className="text-sm font-medium flex items-center gap-2">
               <Clock className="h-4 w-4" />
-              New Time
+              {t("booking:newTimeLabel")}
             </label>
             <Select
               value={selectedTime}
@@ -433,7 +437,7 @@ export const RescheduleDialog = ({
               disabled={!selectedDate || isLoading}
             >
               <SelectTrigger>
-                <SelectValue placeholder={isLoading ? "Loading..." : "Select a time"} />
+                <SelectValue placeholder={isLoading ? t("common:loading", { defaultValue: "Loading..." }) : t("booking:selectATimePlaceholder")} />
               </SelectTrigger>
               <SelectContent>
                 {availableTimeSlots.map((time) => (
@@ -449,7 +453,7 @@ export const RescheduleDialog = ({
           <div className="space-y-2">
             <label className="text-sm font-medium flex items-center gap-2">
               <MapPin className="h-4 w-4" />
-              Bay
+              {t("booking:bayLabel")}
             </label>
             <Select
               value={selectedBayId}
@@ -457,12 +461,12 @@ export const RescheduleDialog = ({
               disabled={!selectedTime || isLoading}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a bay" />
+                <SelectValue placeholder={t("booking:selectABayPlaceholder")} />
               </SelectTrigger>
               <SelectContent>
                 {availableBays.length === 0 && selectedTime ? (
                   <div className="px-2 py-4 text-sm text-muted-foreground text-center">
-                    No bays available at this time
+                    {t("booking:noBaysAvailable")}
                   </div>
                 ) : (
                   availableBays.map((bay) => (
@@ -483,20 +487,20 @@ export const RescheduleDialog = ({
               priceDifference < 0 ? "bg-green-500/10 border border-green-500/20" :
               "bg-primary/10"
             )}>
-              <p className="font-medium mb-1">New booking:</p>
+              <p className="font-medium mb-1">{t("booking:newBookingLabel")}</p>
               <p>
-                {format(selectedDate, "EEE, MMM d")} at {formatTime(selectedTime)} -{" "}
+                {format(selectedDate, "EEE, MMM d", { locale: dateLocale })} at {formatTime(selectedTime)} -{" "}
                 {formatTime(calculateEndTime(selectedTime, booking.duration_hours))}
               </p>
-              <p>Bay {bays.find((b) => b.id === selectedBayId)?.bay_number}</p>
+              <p>{t("booking:bayLabel")} {bays.find((b) => b.id === selectedBayId)?.bay_number}</p>
               
               {/* Price info */}
               <div className="mt-2 pt-2 border-t border-current/10">
                 <p className="font-medium">
                   ${newPriceInfo.totalPrice.toFixed(2)}
                   <span className="font-normal text-muted-foreground ml-1">
-                    ({booking.duration_hours}hr × ${newPriceInfo.hourlyRate}/hr
-                    {showPriceChanges && ` • ${newPriceInfo.isPeak ? "peak" : "off-peak"}`})
+                    ({t("booking:durationHr", { count: booking.duration_hours })} × ${newPriceInfo.hourlyRate}{t("booking:perHour")}
+                    {showPriceChanges && ` • ${newPriceInfo.isPeak ? t("booking:peakLabel", { defaultValue: "peak" }) : t("booking:offPeakLabel", { defaultValue: "off-peak" })}`})
                   </span>
                 </p>
                 
@@ -508,12 +512,12 @@ export const RescheduleDialog = ({
                     {priceDifference > 0 ? (
                       <>
                         <ArrowUp className="h-3 w-3" />
-                        ${priceDifference.toFixed(2)} extra will be charged
+                        {t("booking:extraCharged", { amount: priceDifference.toFixed(2) })}
                       </>
                     ) : (
                       <>
                         <ArrowDown className="h-3 w-3" />
-                        ${Math.abs(priceDifference).toFixed(2)} will be refunded to your balance
+                        {t("booking:refundedToBalanceAmount", { amount: Math.abs(priceDifference).toFixed(2) })}
                       </>
                     )}
                   </p>
@@ -525,7 +529,7 @@ export const RescheduleDialog = ({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
-            Cancel
+            {t("booking:cancel")}
           </Button>
           <Button
             onClick={handleSubmit}
@@ -534,14 +538,14 @@ export const RescheduleDialog = ({
             {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Rescheduling...
+                {t("booking:reschedulingBtn")}
               </>
             ) : priceDifference > 0 ? (
-              `Confirm (+$${priceDifference.toFixed(2)})`
+              t("booking:confirmPlus", { amount: priceDifference.toFixed(2) })
             ) : priceDifference < 0 ? (
-              `Confirm (-$${Math.abs(priceDifference).toFixed(2)})`
+              t("booking:confirmMinus", { amount: Math.abs(priceDifference).toFixed(2) })
             ) : (
-              "Confirm Reschedule"
+              t("booking:confirmRescheduleBtn")
             )}
           </Button>
         </DialogFooter>

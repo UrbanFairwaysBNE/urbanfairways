@@ -15,6 +15,7 @@ import { calculateExtensionCost, isPeakTime, addDurationToTime } from "@/lib/pri
 import { TierConfig, TIER_SELECT, normaliseTier, findTier } from "@/lib/tier-config";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { useTranslation } from "react-i18next";
 
 interface Booking {
   id: string;
@@ -46,10 +47,10 @@ interface Props {
 
 const addHours = (time: string, hours: number) => addDurationToTime(time.slice(0, 5), hours);
 
-/** "30 min", "1hr", "1.5hr" */
-const durationLabel = (h: number) => (h === 0.5 ? "30 min" : `${h}hr`);
-
 export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) => {
+  const { t } = useTranslation(["booking", "common"]);
+  /** "30 min", "1hr", "1.5hr" */
+  const durationLabel = (h: number) => (h === 0.5 ? t("booking:duration30min") : t("booking:durationHr", { count: h }));
   const [profile, setProfile] = useState<Profile | null>(null);
   const [pricingConfig, setPricingConfig] = useState<TierConfig[]>([]);
   const [nextBookingStart, setNextBookingStart] = useState<string | null>(null);
@@ -184,7 +185,7 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
 
   const handleSubmit = async () => {
     setSubmitting(true);
-    const t = toast.loading("Extending your booking...");
+    const toastId = toast.loading(t("booking:extendingToast"));
     try {
       const { data, error } = await supabase.functions.invoke("extend-booking", {
         body: {
@@ -195,18 +196,18 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast.dismiss(t);
+      toast.dismiss(toastId);
       const p = data.payment || {};
-      let msg = `Extended by ${durationLabel(selectedHours)}!`;
-      if (p.packHoursUsed) msg += ` ${p.packHoursUsed} prepaid ${p.packHoursUsed === 1 ? "hour" : "hours"} used.`;
-      if (p.chargedToCard) msg += ` $${p.chargedToCard.toFixed(2)} charged to card.`;
-      if (p.chargedFromBalance && !p.chargedToCard) msg += ` $${p.chargedFromBalance.toFixed(2)} from balance.`;
+      let msg = t("booking:extendedBy", { duration: durationLabel(selectedHours) });
+      if (p.packHoursUsed) msg += t("booking:prepaidUsedMsg", { count: p.packHoursUsed, unit: t("booking:hourUnit", { count: p.packHoursUsed }) });
+      if (p.chargedToCard) msg += t("booking:chargedCardMsg", { amount: p.chargedToCard.toFixed(2) });
+      if (p.chargedFromBalance && !p.chargedToCard) msg += t("booking:fromBalanceMsg", { amount: p.chargedFromBalance.toFixed(2) });
       toast.success(msg);
       onSuccess();
       onOpenChange(false);
     } catch (e) {
-      toast.dismiss(t);
-      toast.error(e instanceof Error ? e.message : "Failed to extend");
+      toast.dismiss(toastId);
+      toast.error(e instanceof Error ? e.message : t("booking:failedToExtend"));
     } finally {
       setSubmitting(false);
     }
@@ -216,9 +217,9 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Extend Your Session</DialogTitle>
+          <DialogTitle>{t("booking:extendSessionTitle")}</DialogTitle>
           <DialogDescription>
-            Bay {booking.bay_number} · currently ends at {booking.end_time.slice(0, 5)}
+            {t("booking:currentlyEndsAt", { bay: booking.bay_number, time: booking.end_time.slice(0, 5) })}
           </DialogDescription>
         </DialogHeader>
 
@@ -228,22 +229,22 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
           </div>
         ) : maxExtendHours === 0 ? (
           <div className="py-6 text-sm text-muted-foreground text-center space-y-2">
-            <p className="font-medium text-foreground">No additional time available</p>
+            <p className="font-medium text-foreground">{t("booking:noAdditionalTimeTitle")}</p>
             <p>
               {nextBookingStart
-                ? `The bay is booked at ${nextBookingStart}.`
+                ? t("booking:bayBookedAtNote", { time: nextBookingStart })
                 : closeTime
-                  ? `We close at ${closeTime}.`
-                  : "This booking is already at the maximum length."}
+                  ? t("booking:weCloseAtNote", { time: closeTime })
+                  : t("booking:atMaxLengthNote")}
             </p>
-            <p>You can book another bay from the home screen.</p>
+            <p>{t("booking:bookAnotherBayNote")}</p>
           </div>
         ) : (
           <div className="space-y-4 py-2">
             <div>
               <p className="text-sm font-medium mb-2 flex items-center gap-2">
                 <Clock className="h-4 w-4" />
-                Add time
+                {t("booking:addTimeLabel")}
               </p>
               <div className="grid grid-cols-4 gap-2">
                 {[0.5, 1, 2, 3].map((h) => (
@@ -256,7 +257,7 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
                     className="h-14 flex-col gap-1 px-1"
                   >
                     <span className="text-sm font-semibold">+{durationLabel(h)}</span>
-                    <span className="text-[10px] opacity-80">until {addHours(booking.end_time, h)}</span>
+                    <span className="text-[10px] opacity-80">{t("booking:untilTime", { time: addHours(booking.end_time, h) })}</span>
                   </Button>
                 ))}
               </div>
@@ -265,8 +266,8 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
             <div className="bg-muted rounded-lg p-3 text-sm space-y-1">
               <div className="flex justify-between">
                 <span>
-                  Additional {durationLabel(selectedHours)}
-                  {hasFlatExtendPricing ? "" : ` (${isPeak ? "peak" : "off-peak"})`}
+                  {t("booking:additionalDurationLabel", { duration: durationLabel(selectedHours), defaultValue: `Additional ${durationLabel(selectedHours)}` })}
+                  {hasFlatExtendPricing ? "" : (isPeak ? t("booking:additionalDurationPeak") : t("booking:additionalDurationOffPeak"))}
                 </span>
                 <span className="font-semibold">${extensionCost.toFixed(2)}</span>
               </div>
@@ -280,8 +281,7 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
                   <Label htmlFor="extend-pack-hours" className="flex-1 cursor-pointer font-normal">
                     <span className="flex justify-between">
                       <span>
-                        Use {packHoursAvailable} of {packHoursBalance} prepaid{" "}
-                        {packHoursBalance === 1 ? "hour" : "hours"}
+                        {t("booking:usePrepaidOf", { used: packHoursAvailable, total: packHoursBalance, unit: t("booking:hourUnit", { count: packHoursBalance }) })}
                       </span>
                       <span className="text-green-600">−${packDiscount.toFixed(2)}</span>
                     </span>
@@ -290,13 +290,13 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
               )}
               {fromBalance > 0 && (
                 <div className="flex justify-between text-muted-foreground">
-                  <span>From balance</span>
+                  <span>{t("booking:fromBalanceLabel")}</span>
                   <span>−${fromBalance.toFixed(2)}</span>
                 </div>
               )}
               {fromCard > 0 && (
                 <div className="flex justify-between text-muted-foreground">
-                  <span>Charged to saved card</span>
+                  <span>{t("booking:chargedToSavedCardLabel")}</span>
                   <span>${fromCard.toFixed(2)}</span>
                 </div>
               )}
@@ -306,14 +306,14 @@ export const ExtendDialog = ({ booking, open, onOpenChange, onSuccess }: Props) 
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
-            Cancel
+            {t("booking:cancel")}
           </Button>
           {maxExtendHours > 0 && (
             <Button onClick={handleSubmit} disabled={submitting || loading}>
               {submitting ? (
-                <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Extending...</>
+                <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> {t("booking:extendingBtn")}</>
               ) : (
-                <><Plus className="h-4 w-4 mr-1" /> Confirm Extension</>
+                <><Plus className="h-4 w-4 mr-1" /> {t("booking:confirmExtensionBtn")}</>
               )}
             </Button>
           )}

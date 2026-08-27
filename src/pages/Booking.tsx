@@ -636,7 +636,7 @@ export default function Booking() {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <h1 className="font-display text-base sm:text-2xl tracking-wide">
-              {lessonMode ? "BOOK A LESSON" : "BOOK A BAY"}
+              {lessonMode ? t("booking:headerBookLesson") : t("booking:headerBookBay")}
             </h1>
           </div>
           <img 
@@ -655,19 +655,17 @@ export default function Booking() {
               <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="font-display text-base text-destructive">
-                  Membership payment failed, paying {walkInLabel} rates
+                  {t("booking:membershipPaymentFailedRate", { label: walkInLabel })}
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Your last {getTierLabel(actualMembershipTier) || "Member"} payment
-                  didn't go through. You can still book at the <strong>${walkInPeakRate}/hr {walkInLabel.toLowerCase()} rate</strong>,
-                  or retry your membership payment now to get member pricing back.
+                  {t("booking:membershipPaymentFailedDetail", { tier: getTierLabel(actualMembershipTier) || "Member", rate: walkInPeakRate, label: walkInLabel.toLowerCase() })}
                 </p>
                 <Button
                   size="sm"
                   className="mt-3 gradient-orange"
                   onClick={() => setShowMembershipIssueDialog(true)}
                 >
-                  Retry membership payment
+                  {t("booking:retryMembershipPayment")}
                 </Button>
               </div>
             </div>
@@ -687,7 +685,7 @@ export default function Booking() {
           
           {(rateInfo?.isRestricted || rateInfo?.isMultiBayRestricted) && selectedTime && (
             <Badge variant="outline" className="text-amber-600 border-amber-300 bg-amber-50">
-              {walkInLabel} Rate Applied
+              {t("booking:walkInRateApplied", { label: walkInLabel })}
             </Badge>
           )}
         </div>
@@ -697,8 +695,7 @@ export default function Booking() {
           <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
             <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
             <div>
-              <strong>Additional bay booking.</strong> You already have a bay booked at this time. 
-              Additional bays during peak hours are charged at {defaultTier?.display_name || "walk-in"} rates (${walkInPeakRate}/hr).
+              {t("booking:multiBayRestrictionDetail", { label: defaultTier?.display_name || "walk-in", rate: walkInPeakRate })}
             </div>
           </div>
         )}
@@ -708,8 +705,7 @@ export default function Booking() {
           <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
             <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
             <div>
-              <strong>Peak time selected.</strong> As a {getTierLabel(userMembershipTier)} member, your member rate applies during off-peak hours only. 
-              This booking will be charged at the {defaultTier?.display_name || "walk-in"} peak rate (${walkInPeakRate}/hr).
+              {t("booking:offPeakOnlyDetail", { tier: getTierLabel(userMembershipTier), label: defaultTier?.display_name || "walk-in", rate: walkInPeakRate })}
             </div>
           </div>
         )}
@@ -719,22 +715,19 @@ export default function Booking() {
           <div className="flex items-start gap-2 p-3 bg-primary/10 border-2 border-primary/30 rounded-lg text-sm text-foreground">
             <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5 text-primary" />
             <div>
-              <strong>Public Holiday Surcharge.</strong>{" "}
-              {rateInfo.holidayName ? `${rateInfo.holidayName}, ` : ""}
-              A {rateInfo.surchargePercent}% surcharge applies to all bookings on this day.
+              {t("booking:holidaySurchargeDetail", { name: rateInfo.holidayName ? `${rateInfo.holidayName}, ` : "", percent: rateInfo.surchargePercent })}
             </div>
           </div>
         )}
         {lessonMode && (
           <Card>
             <CardHeader>
-              <CardTitle className="font-display text-xl">Who is the lesson for?</CardTitle>
+              <CardTitle className="font-display text-xl">{t("booking:lessonForWhoTitle")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               <LessonClientPicker value={lessonClient} onChange={setLessonClient} />
               <p className="text-xs text-muted-foreground">
-                The bay is booked and paid for under your account. Both you and the client
-                get a confirmation with a calendar invite.
+                {t("booking:lessonForWhoNote")}
               </p>
             </CardContent>
           </Card>
@@ -743,7 +736,7 @@ export default function Booking() {
         <Card>
           <CardHeader>
             <CardTitle className="font-display text-xl">
-              {lessonMode ? "When is the lesson?" : "When would you like to play?"}
+              {lessonMode ? t("booking:whenLesson") : t("booking:whenPlay")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -767,7 +760,7 @@ export default function Booking() {
         {/* Bay Availability */}
         <Card>
           <CardHeader>
-            <CardTitle className="font-display text-xl">Select a Bay</CardTitle>
+            <CardTitle className="font-display text-xl">{t("booking:selectABayTitle")}</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -796,7 +789,7 @@ export default function Booking() {
         {canConfirm && packHoursBalance > 0 && sessionTotal > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle className="font-display text-xl">Prepaid Hours</CardTitle>
+              <CardTitle className="font-display text-xl">{t("booking:prepaidHoursTitle")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-start gap-3 p-3 rounded-lg bg-secondary/50">
@@ -808,8 +801,7 @@ export default function Booking() {
                 <Label htmlFor="pack-hours" className="flex-1 cursor-pointer">
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-medium">
-                      Use {packHoursAvailable} of your {packHoursBalance} prepaid{" "}
-                      {packHoursBalance === 1 ? "hour" : "hours"}
+                      {t("booking:usePrepaidHours", { used: packHoursAvailable, total: packHoursBalance, unit: t(packHoursBalance === 1 ? "common:hour" : "common:hours") })}
                     </span>
                     <span className="font-semibold text-green-600">
                       -${packDiscount.toFixed(2)}
@@ -817,8 +809,8 @@ export default function Booking() {
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
                     {amountAfterHours <= 0
-                      ? "This session is fully covered by your prepaid hours."
-                      : `$${amountAfterHours.toFixed(2)} left to pay.`}
+                      ? t("booking:fullyCoveredByPrepaid")
+                      : t("booking:leftToPay", { amount: amountAfterHours.toFixed(2) })}
                   </p>
                 </Label>
               </div>
@@ -831,7 +823,7 @@ export default function Booking() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="font-display text-xl">Payment Method</CardTitle>
+              <CardTitle className="font-display text-xl">{t("booking:paymentMethodTitle")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {(() => {
@@ -846,9 +838,9 @@ export default function Booking() {
                       <div className="flex items-center gap-2">
                         <Wallet className="h-5 w-5 text-accent" />
                         <div>
-                          <span className="font-medium">Credit Balance</span>
+                          <span className="font-medium">{t("booking:creditBalance")}</span>
                           {hasEnoughBalance && (
-                            <p className="text-sm text-green-700 font-semibold">You can pay with this!</p>
+                            <p className="text-sm text-green-700 font-semibold">{t("booking:canPayWithThis")}</p>
                           )}
                         </div>
                       </div>
@@ -873,12 +865,12 @@ export default function Booking() {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <Wallet className="h-4 w-4 text-muted-foreground" />
-                              <span>Pay with Credit Balance</span>
+                              <span>{t("booking:payWithCreditBalance")}</span>
                             </div>
                             <span className="font-medium text-green-600">-${totalPrice.toFixed(2)}</span>
                           </div>
                           <p className="text-sm text-muted-foreground mt-1">
-                            Remaining balance: ${(depositBalance - totalPrice).toFixed(2)}
+                            {t("booking:remainingBalance", { amount: (depositBalance - totalPrice).toFixed(2) })}
                           </p>
                         </Label>
                       </div>
@@ -893,8 +885,8 @@ export default function Booking() {
                             <CreditCard className="h-4 w-4 text-muted-foreground" />
                             <span>
                               {savedCard 
-                                ? `Pay with ${savedCard.brand} •••• ${savedCard.last4}` 
-                                : "Pay with Card"}
+                                ? t("booking:payWithSavedCard", { brand: savedCard.brand, last4: savedCard.last4 }) 
+                                : t("booking:payWithCard")}
                             </span>
                           </div>
                           <span className="font-medium">${totalPrice.toFixed(2)}</span>
@@ -912,9 +904,9 @@ export default function Booking() {
                             onCheckedChange={(checked) => setUsePartialBalance(checked === true)}
                           />
                           <Label htmlFor="partial" className="cursor-pointer">
-                            <div className="font-medium">Apply credit balance to reduce card payment</div>
+                            <div className="font-medium">{t("booking:applyCreditToReduceCard")}</div>
                             <p className="text-sm text-muted-foreground mt-1">
-                              Use ${depositBalance.toFixed(2)} credit, pay ${remainingAfterBalance.toFixed(2)} by card
+                              {t("booking:useCreditPayCard", { credit: depositBalance.toFixed(2), card: remainingAfterBalance.toFixed(2) })}
                             </p>
                           </Label>
                         </div>
@@ -939,32 +931,32 @@ export default function Booking() {
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 {sessionTotal <= 0 
-                  ? "Confirming..." 
+                  ? t("booking:confirming") 
                   : selectedPaymentMethod === "balance" 
-                    ? "Processing..." 
-                    : "Charging Card..."}
+                    ? t("booking:processingPayment") 
+                    : t("booking:chargingCard")}
               </>
             ) : (
               (() => {
-                if (!canConfirm) return "Confirm Booking";
+                if (!canConfirm) return t("booking:confirmBookingDefault");
                 // Free bookings get special treatment
                 if (sessionTotal <= 0) {
-                  return "Confirm Free Booking";
+                  return t("booking:confirmFreeBooking");
                 }
                 const totalPrice = amountAfterHours;
                 if (totalPrice <= 0) {
-                  return `Confirm Booking - ${packHoursToApply} Prepaid ${packHoursToApply === 1 ? "Hour" : "Hours"}`;
+                  return t("booking:confirmBookingPrepaid", { count: packHoursToApply, unit: t(packHoursToApply === 1 ? "common:hour" : "common:hours") });
                 }
                 const hoursSuffix =
-                  packHoursToApply > 0 ? ` + ${packHoursToApply}h Prepaid` : "";
+                  packHoursToApply > 0 ? t("booking:prepaidSuffix", { count: packHoursToApply }) : "";
                 if (selectedPaymentMethod === "balance" && depositBalance >= totalPrice) {
-                  return `Confirm Booking - $${totalPrice.toFixed(2)} from Balance${hoursSuffix}`;
+                  return t("booking:confirmBookingBalance", { amount: totalPrice.toFixed(2), suffix: hoursSuffix });
                 }
                 if (usePartialBalance && depositBalance > 0) {
                   const cardAmount = Math.max(0, totalPrice - depositBalance);
-                  return `Confirm Booking - $${cardAmount.toFixed(2)} Card + $${Math.min(depositBalance, totalPrice).toFixed(2)} Balance${hoursSuffix}`;
+                  return t("booking:confirmBookingCardPlusBalance", { card: cardAmount.toFixed(2), balance: Math.min(depositBalance, totalPrice).toFixed(2), suffix: hoursSuffix });
                 }
-                return `Confirm Booking - $${totalPrice.toFixed(2)}${hoursSuffix}`;
+                return t("booking:confirmBookingCard", { amount: totalPrice.toFixed(2), suffix: hoursSuffix });
               })()
 
             )}
@@ -972,10 +964,10 @@ export default function Booking() {
           {canConfirm && depositBalance === 0 && sessionTotal > 0 && (
             <p className="text-center text-sm text-muted-foreground">
               {isLoadingSavedCard 
-                ? "Checking payment method..."
+                ? t("booking:checkingPaymentMethod")
                 : savedCard 
-                  ? `Will charge your ${savedCard.brand} card ending in ${savedCard.last4}`
-                  : "You'll need to add a payment method"}
+                  ? t("booking:willChargeCard", { brand: savedCard.brand, last4: savedCard.last4 })
+                  : t("booking:needPaymentMethod")}
             </p>
           )}
         </div>

@@ -9,9 +9,11 @@ import { toast } from "sonner";
 import venueLogo from "@/assets/venue-logo.png";
 import { useTenant } from "@/config/tenant";
 import { Loader2, ArrowLeft, CheckCircle2, Eye, EyeOff, UserPlus } from "lucide-react";
+import { Trans, useTranslation } from "react-i18next";
 
 export default function LeagueRegister() {
   const { tenant } = useTenant();
+  const { t } = useTranslation(["league", "common"]);
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -80,12 +82,12 @@ export default function LeagueRegister() {
     if (!user || !username || !password) return;
 
     if (!/^[a-zA-Z0-9_]{2,64}$/.test(username)) {
-      toast.error("Username must be 2-64 alphanumeric characters or underscores");
+      toast.error(t("league:register.usernameInvalid"));
       return;
     }
 
     if (password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+      toast.error(t("league:register.passwordTooShort"));
       return;
     }
 
@@ -98,7 +100,7 @@ export default function LeagueRegister() {
 
       if (error) {
         console.error("Registration error:", error);
-        toast.error("Registration failed. Please try again.");
+        toast.error(t("league:register.registrationFailed"));
         return;
       }
 
@@ -109,14 +111,14 @@ export default function LeagueRegister() {
 
       if (data?.success) {
         setRegistrationComplete(true);
-        toast.success("SGT account created!", {
-          description: "Your account has been linked. Redirecting to League Hub...",
+        toast.success(t("league:register.accountCreated"), {
+          description: t("league:register.accountCreatedDescription"),
         });
         setTimeout(() => navigate("/league"), 2500);
       }
     } catch (error) {
       console.error("Registration error:", error);
-      toast.error("Registration failed. Please try again.");
+      toast.error(t("league:register.registrationFailed"));
     } finally {
       setIsRegistering(false);
     }
@@ -142,10 +144,10 @@ export default function LeagueRegister() {
           <div className="text-center">
             <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
             <h1 className="font-display text-2xl text-primary mb-2">
-              WELCOME TO THE LEAGUE!
+              {t("league:register.welcomeTitle")}
             </h1>
             <p className="font-inter text-muted-foreground">
-              Redirecting you to the League Hub...
+              {t("league:register.redirecting")}
             </p>
             <Loader2 className="h-6 w-6 text-brand-accent animate-spin mx-auto mt-4" />
           </div>
@@ -174,10 +176,10 @@ export default function LeagueRegister() {
         <div className="bg-white border-b border-border/50 px-4 py-4">
           <div className="container max-w-md">
             <h1 className="font-display text-xl text-primary mb-1">
-              JOIN {tenant.venue_name.toUpperCase()} LEAGUE
+              {t("league:register.joinLeague", { venueName: tenant.venue_name.toUpperCase() })}
             </h1>
             <p className="font-inter text-sm text-muted-foreground">
-              Create your Simulator Golf Tour account to join the league
+              {t("league:register.createAccountSubtitle")}
             </p>
           </div>
         </div>
@@ -188,13 +190,13 @@ export default function LeagueRegister() {
               {/* Username */}
               <div className="space-y-2">
                 <Label htmlFor="sgt-username" className="font-inter text-sm font-medium text-primary">
-                  SGT Username
+                  {t("league:register.sgtUsername")}
                 </Label>
                 <div className="relative">
                   <Input
                     id="sgt-username"
                     type="text"
-                    placeholder="e.g. CalBrown"
+                    placeholder={t("league:register.usernamePlaceholder")}
                     value={username}
                     onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))}
                     maxLength={64}
@@ -208,23 +210,23 @@ export default function LeagueRegister() {
                   )}
                 </div>
                 {usernameAvailable === false && (
-                  <p className="text-xs text-destructive font-inter">Username is already taken</p>
+                  <p className="text-xs text-destructive font-inter">{t("league:register.usernameTaken")}</p>
                 )}
                 <p className="text-xs text-muted-foreground font-inter">
-                  Letters, numbers, and underscores only
+                  {t("league:register.usernameHint")}
                 </p>
               </div>
 
               {/* Password */}
               <div className="space-y-2">
                 <Label htmlFor="sgt-password" className="font-inter text-sm font-medium text-primary">
-                  SGT Password
+                  {t("league:register.sgtPassword")}
                 </Label>
                 <div className="relative">
                   <Input
                     id="sgt-password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="At least 6 characters"
+                    placeholder={t("league:register.passwordPlaceholder")}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pr-10"
@@ -241,25 +243,25 @@ export default function LeagueRegister() {
                   </button>
                 </div>
                 <p className="text-xs text-muted-foreground font-inter">
-                  This is for your SGT account only, not your {tenant.venue_name} Hub login
+                  {t("league:register.passwordHint", { venueName: tenant.venue_name })}
                 </p>
               </div>
 
               {/* Typical 18-hole score */}
               <div className="space-y-2">
                 <Label htmlFor="typical-score" className="font-inter text-sm font-medium text-primary">
-                  What do you typically shoot over 18 holes?
+                  {t("league:register.typicalScoreLabel")}
                 </Label>
                 <Input
                   id="typical-score"
                   type="text"
                   inputMode="numeric"
-                  placeholder="e.g. 95, or 90-100 if unsure"
+                  placeholder={t("league:register.typicalScorePlaceholder")}
                   value={typicalScore}
                   onChange={(e) => setTypicalScore(e.target.value.slice(0, 20))}
                 />
                 <p className="text-xs text-muted-foreground font-inter">
-                  Helps us set your starting handicap. A rough estimate is fine.
+                  {t("league:register.typicalScoreHint")}
                 </p>
               </div>
 
@@ -268,8 +270,11 @@ export default function LeagueRegister() {
               {/* Info note */}
               <div className="rounded-md bg-muted/50 p-3">
                 <p className="font-inter text-xs text-muted-foreground">
-                  Your {tenant.venue_name} Hub email (<strong className="text-primary">{user.email}</strong>) will be used for your SGT account. 
-                  An admin will set your initial handicap after registration.
+                  <Trans
+                    i18nKey="league:register.infoNote"
+                    values={{ venueName: tenant.venue_name, email: user.email }}
+                    components={{ strong: <strong className="text-primary" /> }}
+                  />
                 </p>
               </div>
 
@@ -282,12 +287,12 @@ export default function LeagueRegister() {
                 {isRegistering ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Creating Account...
+                    {t("league:register.creatingAccount")}
                   </>
                 ) : (
                   <>
                     <UserPlus className="h-4 w-4 mr-2" />
-                    Create SGT Account & Join League
+                    {t("league:register.createAccountButton")}
                   </>
                 )}
               </Button>

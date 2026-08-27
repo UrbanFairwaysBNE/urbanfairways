@@ -8,9 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
 import { ArrowLeft, Users, CheckCircle } from "lucide-react";
+import { Trans, useTranslation } from "react-i18next";
 
 export default function CompRegisterTeam() {
   const navigate = useNavigate();
+  const { t } = useTranslation(["league", "common"]);
   const { user, isLoading: authLoading } = useAuth();
   const [teamName, setTeamName] = useState("");
   const [player1, setPlayer1] = useState("");
@@ -26,7 +28,7 @@ export default function CompRegisterTeam() {
     const name = teamName.trim();
 
     if (!p1 || !p2 || !name) {
-      toast.error("All fields are required");
+      toast.error(t("league:comp.registerTeam.allFieldsRequired"));
       return;
     }
 
@@ -48,7 +50,7 @@ export default function CompRegisterTeam() {
     if (duplicate) {
       setSubmitting(false);
       toast.error(
-        `This team is already registered as "${duplicate.team_name}". You're locked in, no need to register again!`,
+        t("league:comp.registerTeam.alreadyRegistered", { teamName: duplicate.team_name }),
         { duration: 6000 }
       );
       return;
@@ -65,7 +67,7 @@ export default function CompRegisterTeam() {
 
     if (teamError) {
       setSubmitting(false);
-      toast.error("Failed to register team. Please try again.");
+      toast.error(t("league:comp.registerTeam.registerFailed"));
       console.error(teamError);
       return;
     }
@@ -101,9 +103,9 @@ export default function CompRegisterTeam() {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
         <Users className="h-12 w-12 text-muted-foreground mb-4" />
-        <h1 className="text-xl font-bold mb-2">Sign in Required</h1>
-        <p className="text-muted-foreground mb-6">You need to be signed in to register a team.</p>
-        <Button onClick={() => navigate("/")}>Go to Login</Button>
+        <h1 className="text-xl font-bold mb-2">{t("league:comp.registerTeam.signInRequiredTitle")}</h1>
+        <p className="text-muted-foreground mb-6">{t("league:comp.registerTeam.signInRequiredBody")}</p>
+        <Button onClick={() => navigate("/")}>{t("league:comp.registerTeam.goToLogin")}</Button>
       </div>
     );
   }
@@ -112,15 +114,15 @@ export default function CompRegisterTeam() {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
         <CheckCircle className="h-16 w-16 text-primary mb-4" />
-        <h1 className="text-2xl font-bold mb-2">Team Registered!</h1>
+        <h1 className="text-2xl font-bold mb-2">{t("league:comp.registerTeam.registeredTitle")}</h1>
         <p className="text-muted-foreground mb-6">
-          Your team has been submitted. The admin will confirm your handicaps before the comp.
+          {t("league:comp.registerTeam.registeredBody")}
         </p>
         <div className="flex gap-3">
           <Button variant="outline" onClick={() => { setSubmitted(false); setTeamName(""); setPlayer1(""); setPlayer2(""); }}>
-            Register Another
+            {t("league:comp.registerTeam.registerAnother")}
           </Button>
-          <Button onClick={() => navigate("/comp")}>Back to Comp Area</Button>
+          <Button onClick={() => navigate("/comp")}>{t("league:comp.registerTeam.backToCompArea")}</Button>
         </div>
       </div>
     );
@@ -133,62 +135,65 @@ export default function CompRegisterTeam() {
           onClick={() => navigate("/comp")}
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
         >
-          <ArrowLeft className="h-4 w-4" /> Back to Comp Area
+          <ArrowLeft className="h-4 w-4" /> {t("league:comp.registerTeam.backToCompAreaLink")}
         </button>
 
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5 text-primary" />
-              Register Your Team
+              {t("league:comp.registerTeam.cardTitle")}
             </CardTitle>
             <CardDescription>
-              Sign up your 2-man Ambrose team for the weekly competition. Handicaps will be confirmed by the admin.
+              {t("league:comp.registerTeam.cardDescription")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="mb-5 rounded-lg border-2 border-primary/30 bg-primary/10 p-4 flex gap-3">
               <CheckCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
               <p className="text-sm font-semibold text-foreground leading-snug">
-                Register your team <span className="underline">once</span>, you're locked in for every week's comp after that.
+                <Trans
+                  i18nKey="league:comp.registerTeam.lockedInNote"
+                  components={{ underline: <span className="underline" /> }}
+                />
               </p>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="player1">Player 1 Full Name *</Label>
+                <Label htmlFor="player1">{t("league:comp.registerTeam.player1Label")}</Label>
                 <Input
                   id="player1"
                   value={player1}
                   onChange={(e) => setPlayer1(e.target.value)}
-                  placeholder="e.g. John Smith"
+                  placeholder={t("league:comp.registerTeam.player1Placeholder")}
                   maxLength={100}
                   required
                 />
               </div>
               <div>
-                <Label htmlFor="player2">Player 2 Full Name *</Label>
+                <Label htmlFor="player2">{t("league:comp.registerTeam.player2Label")}</Label>
                 <Input
                   id="player2"
                   value={player2}
                   onChange={(e) => setPlayer2(e.target.value)}
-                  placeholder="e.g. Jane Doe"
+                  placeholder={t("league:comp.registerTeam.player2Placeholder")}
                   maxLength={100}
                   required
                 />
               </div>
               <div>
-                <Label htmlFor="teamName">Team Name *</Label>
+                <Label htmlFor="teamName">{t("league:comp.registerTeam.teamNameLabel")}</Label>
                 <Input
                   id="teamName"
                   value={teamName}
                   onChange={(e) => setTeamName(e.target.value)}
-                  placeholder="e.g. The Eagles"
+                  placeholder={t("league:comp.registerTeam.teamNamePlaceholder")}
                   maxLength={100}
                   required
                 />
               </div>
               <Button type="submit" className="w-full" disabled={submitting}>
-                {submitting ? "Registering..." : "Register Team"}
+                {submitting ? t("league:comp.registerTeam.registering") : t("league:comp.registerTeam.registerButton")}
               </Button>
             </form>
           </CardContent>

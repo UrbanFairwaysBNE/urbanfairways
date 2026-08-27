@@ -230,5 +230,7 @@
   "perHour": "/hr",
   "peakSuffix": " (peak)",
   "bookAsCasual": "Book as Casual",
-  "joinNow": "Join Now"
+  "joinNow": "Join Now",
+  "isPeakLabel": "Peak",
+  "isOffPeakLabel": "Off-Peak"
 }

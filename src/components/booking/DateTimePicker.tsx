@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo } from "react";
 import { useOperatingHours } from "@/hooks/useOperatingHours";
 import { useLocalCompSettings, timeToMinutes, formatTimeLabel, DAY_NAMES } from "@/hooks/useLocalCompSettings";
 import { format, isToday } from "date-fns";
+import { zhCN } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
 import { CalendarIcon, Clock, Trophy, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -75,9 +77,9 @@ export const formatDurationLabel = (hours: number): string => {
   const totalMinutes = Math.round(hours * 60);
   const h = Math.floor(totalMinutes / 60);
   const m = totalMinutes % 60;
-  if (m === 0) return `${h} ${h === 1 ? "hour" : "hours"}`;
-  if (h === 0) return `${m} minutes`;
-  return `${h} hr ${m} min`;
+  if (m === 0) return `${h} ${h === 1 ? t("common:hour", { defaultValue: "hour" }) : t("common:hours", { defaultValue: "hours" })}`;
+  if (h === 0) return `${m} ${t("common:minutes", { defaultValue: "minutes" })}`;
+  return `${h} ${t("common:hr", { defaultValue: "hr" })} ${m} ${t("common:min", { defaultValue: "min" })}`;
 };
 
 
@@ -122,6 +124,8 @@ export function DateTimePicker({
   onCompChange,
   hidePlayers = false,
 }: DateTimePickerProps) {
+  const { t, i18n } = useTranslation(["booking", "common"]);
+  const dateFnsLocale = i18n.language === "zh" ? { locale: zhCN } : undefined;
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [compPromptOpen, setCompPromptOpen] = useState(false);
   const [compLocked, setCompLocked] = useState(false);
@@ -254,7 +258,7 @@ export function DateTimePicker({
     <div className="space-y-4">
       {/* Date Picker */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground">Select Date</label>
+        <label className="text-sm font-medium text-foreground">{t("booking:selectDate")}</label>
         <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
           <PopoverTrigger asChild>
             <Button
@@ -265,7 +269,7 @@ export function DateTimePicker({
               )}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+              {selectedDate ? format(selectedDate, "PPP", dateFnsLocale) : <span>{t("booking:pickADate")}</span>}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0 bg-popover" align="start">
@@ -287,9 +291,9 @@ export function DateTimePicker({
           <div className="flex items-center gap-2 rounded-md border border-primary/30 bg-primary/10 p-3 text-sm">
             <Trophy className="h-4 w-4 text-primary" />
             <div className="flex-1">
-              <p className="font-medium text-foreground">{DAY_NAMES[compDay]} Ambrose Comp</p>
+              <p className="font-medium text-foreground">{t("booking:compBadgeTitle", { day: DAY_NAMES[compDay] })}</p>
               <p className="text-xs text-muted-foreground">
-                Tee off {formatTimeLabel(compSettings?.comp_start_time ?? "17:00")}–{formatTimeLabel(compSettings?.comp_end_time ?? "20:00")} • {compDuration} hours • 2 players
+                {t("booking:compBadgeDetail", { start: formatTimeLabel(compSettings?.comp_start_time ?? "17:00"), end: formatTimeLabel(compSettings?.comp_end_time ?? "20:00"), duration: compDuration })}
               </p>
             </div>
             <Button
@@ -298,7 +302,7 @@ export function DateTimePicker({
               onClick={() => { setCompLocked(false); onCompChange?.(false); }}
               className="h-7 text-xs"
             >
-              Cancel
+              {t("booking:cancelComp")}
             </Button>
           </div>
           <Link
@@ -306,8 +310,8 @@ export function DateTimePicker({
             className="flex items-center justify-between gap-2 rounded-md border border-accent/40 bg-accent/10 p-3 text-sm transition-colors hover:bg-accent/20"
           >
             <div className="flex-1">
-              <p className="font-medium text-foreground">Don't forget to register your team</p>
-              <p className="text-xs text-muted-foreground">Only register once, your team carries over to every week's comp</p>
+              <p className="font-medium text-foreground">{t("booking:registerTeamTitle")}</p>
+              <p className="text-xs text-muted-foreground">{t("booking:registerTeamDesc")}</p>
             </div>
             <ArrowRight className="h-4 w-4 text-accent-foreground shrink-0" />
           </Link>
@@ -316,11 +320,11 @@ export function DateTimePicker({
 
       {/* Time Selector */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground">Start Time</label>
+        <label className="text-sm font-medium text-foreground">{t("booking:startTime")}</label>
         <Select value={selectedTime} onValueChange={handleTimeSelect}>
           <SelectTrigger className="w-full">
             <Clock className="mr-2 h-4 w-4" />
-            <SelectValue placeholder="Select time" />
+            <SelectValue placeholder={t("booking:selectTimePlaceholder")} />
           </SelectTrigger>
           <SelectContent className="bg-popover max-h-60">
             {getAvailableTimeSlots().map((time) => (
@@ -334,14 +338,14 @@ export function DateTimePicker({
 
       {/* Duration Selector */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground">Duration</label>
+        <label className="text-sm font-medium text-foreground">{t("booking:duration")}</label>
         <Select
           value={selectedDuration.toString()}
           onValueChange={(value) => onDurationChange(parseFloat(value))}
           disabled={compLocked}
         >
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select duration" />
+            <SelectValue placeholder={t("booking:selectDurationPlaceholder")} />
           </SelectTrigger>
           <SelectContent className="bg-popover">
             {durations.map((duration) => (
@@ -356,19 +360,19 @@ export function DateTimePicker({
 
       {/* Players Selector */}
       <div className={cn("space-y-2", hidePlayers && "hidden")}>
-        <label className="text-sm font-medium text-foreground">Number of Players</label>
+        <label className="text-sm font-medium text-foreground">{t("booking:numberOfPlayers")}</label>
         <Select
           value={selectedPlayers.toString()}
           onValueChange={(value) => onPlayersChange(parseInt(value))}
           disabled={compLocked}
         >
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select players" />
+            <SelectValue placeholder={t("booking:selectPlayersPlaceholder")} />
           </SelectTrigger>
           <SelectContent className="bg-popover">
             {PLAYERS.map((count) => (
               <SelectItem key={count} value={count.toString()}>
-                {count} {count === 1 ? "player" : "players"}
+                {t("booking:playerCount", { count })}
               </SelectItem>
             ))}
           </SelectContent>
@@ -381,19 +385,15 @@ export function DateTimePicker({
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <Trophy className="h-5 w-5 text-primary" />
-              Playing in the {DAY_NAMES[compDay]} Ambrose Comp?
+              {t("booking:playingInComp", { day: DAY_NAMES[compDay] })}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Our weekly 2-Man Ambrose comp tees off {DAY_NAMES[compDay]}s from{" "}
-              {formatTimeLabel(compSettings?.comp_start_time ?? "17:00")} to{" "}
-              {formatTimeLabel(compSettings?.comp_end_time ?? "20:00")}.
-              You can tee off at your chosen time, we'll lock your booking to
-              a {compDuration}-hour session for 2 players.
+              {t("booking:compDialogDesc", { day: DAY_NAMES[compDay], start: formatTimeLabel(compSettings?.comp_start_time ?? "17:00"), end: formatTimeLabel(compSettings?.comp_end_time ?? "20:00"), duration: compDuration })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCompNo}>No, just a session</AlertDialogCancel>
-            <AlertDialogAction onClick={handleCompYes}>Yes, I'm in the comp</AlertDialogAction>
+            <AlertDialogCancel onClick={handleCompNo}>{t("booking:noJustSession")}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleCompYes}>{t("booking:yesImIn")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

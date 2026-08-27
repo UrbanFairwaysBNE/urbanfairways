@@ -38,5 +38,9 @@
   "allRightsReserved": "版权所有。",
   "somethingWentWrong": "出了点问题，请重试。",
   "copied": "已复制",
-  "language": "语言"
+  "language": "语言",
+  "notifications": "通知",
+  "markAllRead": "全部标记为已读",
+  "noNotifications": "暂无通知",
+  "viewInClubhouse": "在会所中查看"
 }

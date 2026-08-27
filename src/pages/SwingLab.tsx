@@ -1379,8 +1379,8 @@ function SessionDetail({
                     <TableHead className="text-right">{t("lab:smash")}</TableHead>
                     <TableHead className="text-right">{t("lab:launch")}</TableHead>
                     <TableHead className="text-right">{t("lab:spin")}</TableHead>
-                    <TableHead className="text-right">{t("lab:avgCarryUnit", { unit: dLbl })}</TableHead>
-                    <TableHead className="text-right">{t("lab:avgTotalUnit", { unit: dLbl })}</TableHead>
+                    <TableHead className="text-right">{t("lab:carryUnitAxis", { unit: dLbl })}</TableHead>
+                    <TableHead className="text-right">{t("lab:totalUnit", { unit: dLbl })}</TableHead>
                     <TableHead className="text-right">{t("lab:sideUnit", { unit: dLbl })}</TableHead>
                   </TableRow>
                 </TableHeader>

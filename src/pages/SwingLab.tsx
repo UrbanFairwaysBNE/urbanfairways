@@ -1316,6 +1316,7 @@ function DispersionChart({ shots, dLbl, sessions }: { shots: Shot[]; dLbl: strin
 function SessionTrendChart({
   sessions, shots, dLbl, sLbl,
 }: { sessions: Session[]; shots: Shot[]; dLbl: string; sLbl: string }) {
+  const { t } = useTranslation(["lab", "common"]);
   const data = sessions.map((s) => {
     const ss = shots.filter((x) => x.session_id === s.id);
     return {
@@ -1332,8 +1333,8 @@ function SessionTrendChart({
         <YAxis />
         <Tooltip />
         <Legend />
-        <Line type="monotone" dataKey="carry" stroke="#1C1F24" name={`Avg carry (${dLbl})`} strokeWidth={2} dot={false} />
-        <Line type="monotone" dataKey="ball" stroke="#5F6F52" name={`Avg ball spd (${sLbl})`} strokeWidth={2} dot={false} />
+        <Line type="monotone" dataKey="carry" stroke="#1C1F24" name={t("lab:avgCarryLegend", { unit: dLbl })} strokeWidth={2} dot={false} />
+        <Line type="monotone" dataKey="ball" stroke="#5F6F52" name={t("lab:avgBallSpdLegend", { unit: sLbl })} strokeWidth={2} dot={false} />
       </LineChart>
     </ResponsiveContainer>
   );
@@ -1342,21 +1343,22 @@ function SessionTrendChart({
 function SessionDetail({
   session, shots, dLbl, sLbl,
 }: { session: Session; shots: Shot[]; dLbl: string; sLbl: string }) {
+  const { t } = useTranslation(["lab", "common"]);
   const stats = useMemo(() => statsByClub(shots), [shots]);
   return (
     <div className="space-y-4">
       <div className="text-sm text-muted-foreground">
         {format(parseISO(session.session_date), "EEE d MMM yyyy")}
         {session.started_at ? ` · ${format(parseISO(session.started_at), "h:mma").toLowerCase()}` : ""}
-        {session.duration_minutes ? ` · ${Math.round(session.duration_minutes)} min` : ""}
-        {" · "}{session.shot_count} shots
+        {session.duration_minutes ? t("lab:durationSuffix", { min: Math.round(session.duration_minutes) }) : ""}
+        {" · "}{t("lab:shotsCount", { count: session.shot_count })}
       </div>
 
       <Tabs defaultValue="stats">
         <TabsList>
-          <TabsTrigger value="stats">Stats</TabsTrigger>
-          <TabsTrigger value="dispersion">Dispersion</TabsTrigger>
-          <TabsTrigger value="shots">Every shot</TabsTrigger>
+          <TabsTrigger value="stats">{t("lab:stats")}</TabsTrigger>
+          <TabsTrigger value="dispersion">{t("lab:dispersion")}</TabsTrigger>
+          <TabsTrigger value="shots">{t("lab:everyShot")}</TabsTrigger>
         </TabsList>
         <TabsContent value="stats" className="pt-4">
           <ClubStatsTable rows={stats} dLbl={dLbl} sLbl={sLbl} />
@@ -1371,15 +1373,15 @@ function SessionDetail({
                 <TableHeader>
                   <TableRow>
                     <TableHead>#</TableHead>
-                    <TableHead>Club</TableHead>
-                    <TableHead className="text-right">Ball ({sLbl})</TableHead>
-                    <TableHead className="text-right">Club ({sLbl})</TableHead>
-                    <TableHead className="text-right">Smash</TableHead>
-                    <TableHead className="text-right">Launch°</TableHead>
-                    <TableHead className="text-right">Spin</TableHead>
-                    <TableHead className="text-right">Carry ({dLbl})</TableHead>
-                    <TableHead className="text-right">Total ({dLbl})</TableHead>
-                    <TableHead className="text-right">Side ({dLbl})</TableHead>
+                    <TableHead>{t("lab:club")}</TableHead>
+                    <TableHead className="text-right">{t("lab:ballUnit", { unit: sLbl })}</TableHead>
+                    <TableHead className="text-right">{t("lab:clubUnit", { unit: sLbl })}</TableHead>
+                    <TableHead className="text-right">{t("lab:smash")}</TableHead>
+                    <TableHead className="text-right">{t("lab:launch")}</TableHead>
+                    <TableHead className="text-right">{t("lab:spin")}</TableHead>
+                    <TableHead className="text-right">{t("lab:avgCarryUnit", { unit: dLbl })}</TableHead>
+                    <TableHead className="text-right">{t("lab:avgTotalUnit", { unit: dLbl })}</TableHead>
+                    <TableHead className="text-right">{t("lab:sideUnit", { unit: dLbl })}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

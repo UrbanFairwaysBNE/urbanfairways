@@ -77,9 +77,9 @@ export const formatDurationLabel = (hours: number): string => {
   const totalMinutes = Math.round(hours * 60);
   const h = Math.floor(totalMinutes / 60);
   const m = totalMinutes % 60;
-  if (m === 0) return `${h} ${h === 1 ? t("common:hour", { defaultValue: "hour" }) : t("common:hours", { defaultValue: "hours" })}`;
-  if (h === 0) return `${m} ${t("common:minutes", { defaultValue: "minutes" })}`;
-  return `${h} ${t("common:hr", { defaultValue: "hr" })} ${m} ${t("common:min", { defaultValue: "min" })}`;
+  if (m === 0) return `${h} ${h === 1 ? "hour" : "hours"}`;
+  if (h === 0) return `${m} minutes`;
+  return `${h} hr ${m} min`;
 };
 
 

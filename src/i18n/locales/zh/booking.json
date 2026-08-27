@@ -232,5 +232,13 @@
   "bookAsCasual": "以散客身份预订",
   "joinNow": "立即加入",
   "isPeakLabel": "高峰",
-  "isOffPeakLabel": "非高峰"
+  "isOffPeakLabel": "非高峰",
+  "failedToLoadStripe": "加载 Stripe 失败",
+  "failedToInitPaymentForm": "初始化付款表单失败",
+  "doneBtn": "完成",
+  "peakLabel": "高峰时段",
+  "offPeakLabel": "非高峰时段",
+  "hourUnit_one": "小时",
+  "hourUnit_other": "小时",
+  "additionalDurationLabel": "增加 {{duration}}"
 }

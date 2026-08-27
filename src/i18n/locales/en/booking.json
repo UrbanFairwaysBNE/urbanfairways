@@ -232,5 +232,13 @@
   "bookAsCasual": "Book as Casual",
   "joinNow": "Join Now",
   "isPeakLabel": "Peak",
-  "isOffPeakLabel": "Off-Peak"
+  "isOffPeakLabel": "Off-Peak",
+  "failedToLoadStripe": "Failed to load Stripe",
+  "failedToInitPaymentForm": "Failed to initialize payment form",
+  "doneBtn": "Done",
+  "peakLabel": "peak",
+  "offPeakLabel": "off-peak",
+  "hourUnit_one": "hour",
+  "hourUnit_other": "hours",
+  "additionalDurationLabel": "Additional {{duration}}"
 }

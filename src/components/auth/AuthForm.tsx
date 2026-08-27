@@ -13,19 +13,20 @@ import { z } from "zod";
 import { TermsContent } from "@/components/legal/TermsContent";
 import { CURRENT_TERMS_VERSION } from "@/lib/terms-version";
 import { useTenant } from "@/config/tenant";
+import { useTranslation } from "react-i18next";
 
 
-const signUpSchema = z.object({
-  firstName: z.string().trim().min(1, "First name is required").max(50, "First name too long"),
-  lastName: z.string().trim().min(1, "Last name is required").max(50, "Last name too long"),
-  email: z.string().trim().email("Invalid email address").max(255, "Email too long"),
-  phone: z.string().trim().min(8, "Phone number must be at least 8 digits").max(20, "Phone number too long"),
-  password: z.string().min(6, "Password must be at least 6 characters").max(100, "Password too long"),
+const buildSignUpSchema = (t: (k: string) => string) => z.object({
+  firstName: z.string().trim().min(1, t("auth:firstNameRequired")).max(50, t("auth:firstNameTooLong")),
+  lastName: z.string().trim().min(1, t("auth:lastNameRequired")).max(50, t("auth:lastNameTooLong")),
+  email: z.string().trim().email(t("auth:invalidEmail")).max(255, t("auth:emailTooLong")),
+  phone: z.string().trim().min(8, t("auth:phoneMinLength")).max(20, t("auth:phoneTooLong")),
+  password: z.string().min(6, t("auth:passwordMinLength")).max(100, t("auth:passwordTooLong")),
 });
 
-const signInSchema = z.object({
-  email: z.string().trim().email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
+const buildSignInSchema = (t: (k: string) => string) => z.object({
+  email: z.string().trim().email(t("auth:invalidEmail")),
+  password: z.string().min(1, t("auth:passwordRequired")),
 });
 
 interface AuthFormProps {
@@ -33,7 +34,10 @@ interface AuthFormProps {
 }
 
 export function AuthForm({ defaultToSignUp = false }: AuthFormProps) {
+  const { t } = useTranslation(["auth", "common"]);
   const { tenant } = useTenant();
+  const signUpSchema = buildSignUpSchema(t);
+  const signInSchema = buildSignInSchema(t);
   const [searchParams] = useSearchParams();
   const [isSignUp, setIsSignUp] = useState(defaultToSignUp);
   const [isLoading, setIsLoading] = useState(false);
@@ -71,13 +75,13 @@ export function AuthForm({ defaultToSignUp = false }: AuthFormProps) {
     setErrors({});
     
     if (!formData.email.trim()) {
-      setErrors({ email: "Email is required" });
+      setErrors({ email: t("auth:emailRequired") });
       return;
     }
 
     const emailValidation = z.string().email().safeParse(formData.email.trim());
     if (!emailValidation.success) {
-      setErrors({ email: "Invalid email address" });
+      setErrors({ email: t("auth:invalidEmail") });
       return;
     }
 
@@ -93,27 +97,27 @@ export function AuthForm({ defaultToSignUp = false }: AuthFormProps) {
 
       if (error) {
         toast({
-          title: "Error",
-          description: error.message || "Failed to send reset link",
+          title: t("auth:errorTitle"),
+          description: error.message || t("auth:failedToSendResetLink"),
           variant: "destructive",
         });
       } else if (data?.error) {
         toast({
-          title: "Error",
-          description: data.error || "Failed to send reset link",
+          title: t("auth:errorTitle"),
+          description: data.error || t("auth:failedToSendResetLink"),
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Check your email",
-          description: "We've sent you a password reset link.",
+          title: t("auth:checkYourEmailTitle"),
+          description: t("auth:resetLinkSentDesc"),
         });
         setIsForgotPassword(false);
       }
     } catch (err) {
       toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
+        title: t("auth:errorTitle"),
+        description: t("auth:somethingWentWrong"),
         variant: "destructive",
       });
     } finally {
@@ -129,7 +133,7 @@ export function AuthForm({ defaultToSignUp = false }: AuthFormProps) {
     try {
       if (isSignUp) {
         if (!acceptedTerms) {
-          setErrors({ terms: "You must accept the terms and conditions" });
+          setErrors({ terms: t("auth:termsRequired") });
           setIsLoading(false);
           return;
         }
@@ -166,13 +170,13 @@ export function AuthForm({ defaultToSignUp = false }: AuthFormProps) {
             setIsForgotPassword(true);
             setIsLoading(false);
             toast({
-              title: "You already have an account!",
-              description: "Just set your password below to get started.",
+              title: t("auth:alreadyHaveAccountTitle"),
+              description: t("auth:alreadyHaveAccountDesc"),
             });
             return;
           } else {
             toast({
-              title: "Sign up failed",
+              title: t("auth:signUpFailed"),
               description: error.message,
               variant: "destructive",
             });
@@ -203,8 +207,8 @@ export function AuthForm({ defaultToSignUp = false }: AuthFormProps) {
           
           toast({
 
-            title: `Welcome to ${tenant.venue_name}!`,
-            description: "Your account has been created successfully.",
+            title: t("auth:welcomeToVenue", { venueName: tenant.venue_name }),
+            description: t("auth:accountCreatedDesc"),
           });
         }
       } else {
@@ -231,16 +235,16 @@ export function AuthForm({ defaultToSignUp = false }: AuthFormProps) {
 
         if (error) {
           toast({
-            title: "Sign in failed",
-            description: "Invalid email or password. Please try again.",
+            title: t("auth:signInFailed"),
+            description: t("auth:invalidEmailOrPassword"),
             variant: "destructive",
           });
         }
       }
     } catch (err) {
       toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
+        title: t("auth:errorTitle"),
+        description: t("auth:somethingWentWrong"),
         variant: "destructive",
       });
     } finally {
@@ -254,22 +258,22 @@ export function AuthForm({ defaultToSignUp = false }: AuthFormProps) {
       <Card className="w-full max-w-md shadow-xl border-none">
         <CardHeader className="text-center space-y-2">
           <CardTitle className="font-display text-3xl text-primary">
-            RESET PASSWORD
+            {t("auth:resetPasswordTitle")}
           </CardTitle>
           <CardDescription>
-            Enter your email and we'll send you a reset link
+            {t("auth:resetPasswordDesc")}
           </CardDescription>
         </CardHeader>
 
         <CardContent>
           <form onSubmit={handleForgotPassword} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="reset-email">Email</Label>
+              <Label htmlFor="reset-email">{t("auth:emailLabel")}</Label>
               <Input
                 id="reset-email"
                 name="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder={t("auth:emailPlaceholder")}
                 value={formData.email}
                 onChange={handleChange}
                 inputMode="email"
@@ -289,7 +293,7 @@ export function AuthForm({ defaultToSignUp = false }: AuthFormProps) {
               className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
               disabled={isLoading}
             >
-              {isLoading ? "Sending..." : "Send Reset Link"}
+              {isLoading ? t("auth:sending") : t("auth:sendResetLinkButton")}
             </Button>
           </form>
 
@@ -302,7 +306,7 @@ export function AuthForm({ defaultToSignUp = false }: AuthFormProps) {
               }}
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
-              ← Back to sign in
+              {t("auth:backToSignIn")}
             </button>
           </div>
         </CardContent>
@@ -314,12 +318,12 @@ export function AuthForm({ defaultToSignUp = false }: AuthFormProps) {
     <Card className="w-full max-w-md shadow-xl border-none">
         <CardHeader className="text-center space-y-2">
           <CardTitle className="font-display text-3xl text-primary">
-            {isSignUp ? "CREATE ACCOUNT" : "WELCOME BACK"}
+            {isSignUp ? t("auth:createAccountTitle") : t("auth:welcomeBackTitle")}
           </CardTitle>
           <CardDescription>
             {isSignUp
-              ? `Join ${tenant.venue_name} and start booking bays today`
-              : "Sign in to access your account"}
+              ? t("auth:joinVenueDesc", { venueName: tenant.venue_name })
+              : t("auth:signInToAccessDesc")}
           </CardDescription>
         </CardHeader>
 
@@ -330,11 +334,11 @@ export function AuthForm({ defaultToSignUp = false }: AuthFormProps) {
             <>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
+                  <Label htmlFor="firstName">{t("auth:firstName")}</Label>
                   <Input
                     id="firstName"
                     name="firstName"
-                    placeholder="John"
+                    placeholder={t("auth:firstNamePlaceholder")}
                     value={formData.firstName}
                     onChange={handleChange}
                     className={errors.firstName ? "border-destructive" : ""}
@@ -344,11 +348,11 @@ export function AuthForm({ defaultToSignUp = false }: AuthFormProps) {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
+                  <Label htmlFor="lastName">{t("auth:lastName")}</Label>
                   <Input
                     id="lastName"
                     name="lastName"
-                    placeholder="Smith"
+                    placeholder={t("auth:lastNamePlaceholder")}
                     value={formData.lastName}
                     onChange={handleChange}
                     className={errors.lastName ? "border-destructive" : ""}
@@ -360,12 +364,12 @@ export function AuthForm({ defaultToSignUp = false }: AuthFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
+                <Label htmlFor="phone">{t("auth:phoneNumberLabel")}</Label>
                 <Input
                   id="phone"
                   name="phone"
                   type="tel"
-                  placeholder="0400 000 000"
+                  placeholder={t("auth:phonePlaceholder")}
                   value={formData.phone}
                   onChange={handleChange}
                   inputMode="tel"
@@ -380,12 +384,12 @@ export function AuthForm({ defaultToSignUp = false }: AuthFormProps) {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("auth:emailLabel")}</Label>
             <Input
               id="email"
               name="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={t("auth:emailPlaceholder")}
               value={formData.email}
               onChange={handleChange}
               inputMode="email"
@@ -401,7 +405,7 @@ export function AuthForm({ defaultToSignUp = false }: AuthFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t("auth:password")}</Label>
             <Input
               id="password"
               name="password"
@@ -427,7 +431,7 @@ export function AuthForm({ defaultToSignUp = false }: AuthFormProps) {
                 }}
                 className="text-sm text-accent hover:underline"
               >
-                Forgot password?
+                {t("auth:forgotPassword")}
               </button>
             )}
           </div>
@@ -451,17 +455,17 @@ export function AuthForm({ defaultToSignUp = false }: AuthFormProps) {
                     htmlFor="terms"
                     className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
-                    I accept the{" "}
+                    {t("auth:acceptThe")}{" "}
                     <Dialog>
                       <DialogTrigger asChild>
                         <button type="button" className="text-accent hover:underline font-semibold">
-                          Terms and Conditions
+                          {t("auth:termsAndConditions")}
                         </button>
                       </DialogTrigger>
                       <DialogContent className="max-w-2xl max-h-[80vh]">
                         <DialogHeader>
                           <DialogTitle className="font-display text-xl text-primary">
-                            Terms and Conditions
+                            {t("auth:termsAndConditions")}
                           </DialogTitle>
                         </DialogHeader>
                         <ScrollArea className="h-[60vh] pr-4">
@@ -484,7 +488,7 @@ export function AuthForm({ defaultToSignUp = false }: AuthFormProps) {
             className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
             disabled={isLoading}
           >
-            {isLoading ? "Please wait..." : isSignUp ? "Create Account" : "Sign In"}
+            {isLoading ? t("auth:pleaseWait") : isSignUp ? t("auth:createAccountButton") : t("auth:signInButton")}
           </Button>
         </form>
 
@@ -499,8 +503,8 @@ export function AuthForm({ defaultToSignUp = false }: AuthFormProps) {
             className="text-sm text-muted-foreground hover:text-primary transition-colors"
           >
             {isSignUp
-              ? "Already have an account? Sign in"
-              : "Don't have an account? Sign up"}
+              ? t("auth:alreadyHaveAccountLink")
+              : t("auth:noAccountLink")}
           </button>
         </div>
       </CardContent>

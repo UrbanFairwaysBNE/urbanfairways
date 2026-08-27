@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { ShieldCheck } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export const FRONTLINE_SECTORS = [
   "Emergency Services",
@@ -31,7 +32,14 @@ interface Props {
  * access is granted immediately with no approval step.
  */
 export function FrontlineVerificationDialog({ open, tierName, onOpenChange, onConfirm }: Props) {
+  const { t } = useTranslation(["membership", "common"]);
   const [sector, setSector] = useState<string>("");
+
+  const sectorLabels: Record<string, string> = {
+    "Emergency Services": t("membership:sectorEmergencyServices"),
+    "Defence": t("membership:sectorDefence"),
+    "Healthcare": t("membership:sectorHealthcare"),
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -41,11 +49,10 @@ export function FrontlineVerificationDialog({ open, tierName, onOpenChange, onCo
             <ShieldCheck className="h-6 w-6 text-accent" />
           </div>
           <DialogTitle className="text-center font-display text-xl">
-            {tierName} Eligibility
+            {t("membership:eligibilityTitle", { tierName })}
           </DialogTitle>
           <DialogDescription className="text-center">
-            This membership is for Emergency Services, Defence and Healthcare workers. Just let us
-            know which applies to you — your membership starts straight away.
+            {t("membership:eligibilityDesc")}
           </DialogDescription>
         </DialogHeader>
 
@@ -57,21 +64,21 @@ export function FrontlineVerificationDialog({ open, tierName, onOpenChange, onCo
               className="flex items-center gap-3 rounded-lg border border-border p-3 cursor-pointer hover:bg-muted/50 has-[:checked]:border-accent has-[:checked]:bg-accent/5"
             >
               <RadioGroupItem value={option} id={`sector-${option}`} />
-              <span className="text-sm font-medium">{option}</span>
+              <span className="text-sm font-medium">{sectorLabels[option] ?? option}</span>
             </Label>
           ))}
         </RadioGroup>
 
         <DialogFooter className="gap-2 sm:gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
-            Cancel
+            {t("common:cancel")}
           </Button>
           <Button
             disabled={!sector}
             onClick={() => onConfirm(sector)}
             className="w-full sm:w-auto bg-accent text-accent-foreground hover:bg-accent/90"
           >
-            Continue
+            {t("common:continue")}
           </Button>
         </DialogFooter>
       </DialogContent>

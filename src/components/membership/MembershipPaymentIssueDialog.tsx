@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle, CreditCard, Loader2, RotateCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   open: boolean;
@@ -27,6 +28,7 @@ export function MembershipPaymentIssueDialog({
   onResolved,
   context,
 }: Props) {
+  const { t } = useTranslation(["membership", "common"]);
   const [isRetrying, setIsRetrying] = useState(false);
   const [isAddingCard, setIsAddingCard] = useState(false);
 
@@ -37,7 +39,7 @@ export function MembershipPaymentIssueDialog({
       if (error) throw error;
 
       if (data?.success) {
-        toast.success(data.message || "Membership payment successful!");
+        toast.success(data.message || t("membership:membershipPaymentSuccessful"));
         onOpenChange(false);
         onResolved?.();
         return;
@@ -45,15 +47,15 @@ export function MembershipPaymentIssueDialog({
 
       // Not successful - show specific message
       if (data?.status === "no_payment_method" || data?.status === "no_customer") {
-        toast.error(data.message || "No card on file. Please add one.");
+        toast.error(data.message || t("membership:noCardOnFile"));
       } else if (data?.status === "card_declined") {
-        toast.error(data.message || "Card declined. Please try a different card.");
+        toast.error(data.message || t("membership:cardDeclined"));
       } else {
-        toast.error(data?.message || data?.error || "Could not process payment.");
+        toast.error(data?.message || data?.error || t("membership:couldNotProcessPayment"));
       }
     } catch (err: any) {
       console.error("[MembershipPaymentIssueDialog] retry failed", err);
-      toast.error(err?.message || "Could not process payment. Please try a new card.");
+      toast.error(err?.message || t("membership:couldNotProcessPaymentRetry"));
     } finally {
       setIsRetrying(false);
     }
@@ -72,7 +74,7 @@ export function MembershipPaymentIssueDialog({
       }
     } catch (err: any) {
       console.error("[MembershipPaymentIssueDialog] add card failed", err);
-      toast.error(err?.message || "Could not start card setup.");
+      toast.error(err?.message || t("membership:couldNotStartCardSetup"));
       setIsAddingCard(false);
     }
   };
@@ -85,12 +87,10 @@ export function MembershipPaymentIssueDialog({
             <AlertCircle className="h-6 w-6 text-destructive" />
           </div>
           <DialogTitle className="text-center font-display text-xl">
-            Membership Payment Issue
+            {t("membership:paymentIssueTitle")}
           </DialogTitle>
           <DialogDescription className="text-center">
-            Your last membership payment didn't go through, so new bookings are paused
-            {context ? ` ${context}` : ""}. You're still a member, we just need to settle the
-            outstanding invoice.
+            {t("membership:paymentIssueContextDesc", { context: context ? ` ${context}` : "" })}
           </DialogDescription>
         </DialogHeader>
 
@@ -104,12 +104,12 @@ export function MembershipPaymentIssueDialog({
             {isRetrying ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Retrying payment...
+                {t("membership:retryingPayment")}
               </>
             ) : (
               <>
                 <RotateCw className="mr-2 h-4 w-4" />
-                Retry with card on file
+                {t("membership:retryWithCardOnFile")}
               </>
             )}
           </Button>
@@ -124,12 +124,12 @@ export function MembershipPaymentIssueDialog({
             {isAddingCard ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Opening secure checkout...
+                {t("membership:openingSecureCheckout")}
               </>
             ) : (
               <>
                 <CreditCard className="mr-2 h-4 w-4" />
-                Update card instead
+                {t("membership:updateCardInstead")}
               </>
             )}
           </Button>
@@ -137,7 +137,7 @@ export function MembershipPaymentIssueDialog({
 
         <DialogFooter className="sm:justify-center pt-2">
           <p className="text-xs text-muted-foreground text-center">
-            Still stuck? Contact us and we'll sort it out manually.
+            {t("membership:stillStuckContact")}
           </p>
         </DialogFooter>
       </DialogContent>

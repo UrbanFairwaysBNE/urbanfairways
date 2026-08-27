@@ -9,10 +9,12 @@ import { toast } from "sonner";
 import { Eye, EyeOff, Lock, Check, AlertCircle, Loader2, Mail } from "lucide-react";
 import venueLogo from "@/assets/venue-logo.png";
 import { useTenant } from "@/config/tenant";
+import { useTranslation } from "react-i18next";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
 export default function ResetPassword() {
+  const { t } = useTranslation(["auth", "common"]);
   const { tenant } = useTenant();
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
@@ -37,7 +39,7 @@ export default function ResetPassword() {
 
   const finishValidation = (isValid: boolean, message?: string | null) => {
     setIsValidSession(isValid);
-    setErrorMessage(isValid ? null : message || "Invalid or expired reset link. Please request a new password reset.");
+    setErrorMessage(isValid ? null : message || t("auth:invalidOrExpiredLink"));
     setIsValidating(false);
     setPendingTokens(null);
   };
@@ -74,7 +76,7 @@ export default function ResetPassword() {
         if (!isMounted) return;
 
         if (errorParam) {
-          finishValidation(false, errorDescription || "Invalid or expired link");
+          finishValidation(false, errorDescription || t("auth:invalidOrExpiredLinkShort"));
           return;
         }
 
@@ -116,10 +118,10 @@ export default function ResetPassword() {
           return;
         }
 
-        finishValidation(false, "Invalid or expired reset link. Please request a new password reset.");
+        finishValidation(false, t("auth:invalidOrExpiredLink"));
       } catch (error: any) {
         console.error("[RESET] Detection error:", error);
-        finishValidation(false, "An error occurred. Please try again.");
+        finishValidation(false, t("auth:anErrorOccurred"));
       }
     };
 
@@ -174,7 +176,7 @@ export default function ResetPassword() {
       finishValidation(true);
     } catch (error: any) {
       console.error("[RESET] Confirm error:", error);
-      finishValidation(false, "Invalid or expired reset link. Please request a new one.");
+      finishValidation(false, t("auth:invalidOrExpiredRequestNew"));
     } finally {
       setIsConfirming(false);
     }
@@ -184,12 +186,12 @@ export default function ResetPassword() {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      toast.error("Passwords don't match");
+      toast.error(t("auth:passwordsDontMatch"));
       return;
     }
 
     if (password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+      toast.error(t("auth:passwordMinLength"));
       return;
     }
 
@@ -204,7 +206,7 @@ export default function ResetPassword() {
       sessionStorage.removeItem("password_reset_in_progress");
       
       setIsSuccess(true);
-      toast.success("Password updated successfully!");
+      toast.success(t("auth:passwordUpdatedSuccess"));
       
       // Redirect to dashboard after a moment
       setTimeout(() => {
@@ -212,7 +214,7 @@ export default function ResetPassword() {
       }, 2000);
     } catch (error: any) {
       console.error("Update password error:", error);
-      toast.error(error.message || "Failed to update password");
+      toast.error(error.message || t("auth:failedToUpdatePassword"));
     } finally {
       setIsLoading(false);
     }
@@ -225,7 +227,7 @@ export default function ResetPassword() {
         <Card className="w-full max-w-md">
           <CardContent className="pt-6 text-center">
             <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-            <p className="text-muted-foreground">Validating your reset link...</p>
+            <p className="text-muted-foreground">{t("auth:validatingResetLink")}</p>
           </CardContent>
         </Card>
       </div>
@@ -241,10 +243,10 @@ export default function ResetPassword() {
           <CardHeader className="text-center">
             <img src={venueLogo} alt={tenant.venue_name} className="h-12 mx-auto mb-4" />
             <CardTitle className="font-display text-xl uppercase tracking-wide">
-              Reset Your Password
+              {t("auth:resetYourPasswordTitle")}
             </CardTitle>
             <CardDescription>
-              Click the button below to confirm and continue setting a new password.
+              {t("auth:confirmContinueDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -252,10 +254,10 @@ export default function ResetPassword() {
               {isConfirming ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Verifying...
+                  {t("auth:verifying")}
                 </>
               ) : (
-                "Continue"
+                t("auth:continueButton")
               )}
             </Button>
           </CardContent>
@@ -268,7 +270,7 @@ export default function ResetPassword() {
     e.preventDefault();
     
     if (!resetEmail) {
-      toast.error("Please enter your email address");
+      toast.error(t("auth:pleaseEnterEmail"));
       return;
     }
 
@@ -283,14 +285,14 @@ export default function ResetPassword() {
         },
       });
 
-      if (error) throw new Error(error.message || "Failed to send reset link");
+      if (error) throw new Error(error.message || t("auth:failedToSendResetLink"));
       if (data?.error) throw new Error(data.error);
 
       setLinkRequested(true);
-      toast.success("Password reset link sent! Check your email.");
+      toast.success(t("auth:resetLinkSentToast"));
     } catch (error: any) {
       console.error("Request new link error:", error);
-      toast.error(error.message || "Failed to send reset link");
+      toast.error(error.message || t("auth:failedToSendResetLink"));
     } finally {
       setIsRequestingLink(false);
     }
@@ -307,11 +309,11 @@ export default function ResetPassword() {
               <AlertCircle className="h-8 w-8 text-destructive" />
             </div>
             <CardTitle className="font-display text-xl uppercase tracking-wide">
-              {linkRequested ? "Check Your Email" : "Link Expired"}
+              {linkRequested ? t("auth:checkYourEmailHeading") : t("auth:linkExpiredHeading")}
             </CardTitle>
             <CardDescription>
               {linkRequested 
-                ? "We've sent you a new password reset link. Please check your inbox."
+                ? t("auth:newResetLinkSentDesc")
                 : errorMessage
               }
             </CardDescription>
@@ -323,20 +325,20 @@ export default function ResetPassword() {
                   <Check className="h-8 w-8 text-green-600" />
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Didn't receive the email? Check your spam folder or try again.
+                  {t("auth:didntReceiveEmail")}
                 </p>
                 <Button 
                   variant="outline" 
                   onClick={() => setLinkRequested(false)}
                   className="w-full"
                 >
-                  Request Another Link
+                  {t("auth:requestAnotherLink")}
                 </Button>
               </div>
             ) : (
               <form onSubmit={handleRequestNewLink} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="resetEmail">Email Address</Label>
+                  <Label htmlFor="resetEmail">{t("auth:emailAddressLabel")}</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -344,7 +346,7 @@ export default function ResetPassword() {
                       type="email"
                       value={resetEmail}
                       onChange={(e) => setResetEmail(e.target.value)}
-                      placeholder="Enter your email"
+                      placeholder={t("auth:enterYourEmailPlaceholder")}
                       className="pl-10"
                       required
                     />
@@ -354,10 +356,10 @@ export default function ResetPassword() {
                   {isRequestingLink ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Sending...
+                      {t("auth:sending")}
                     </>
                   ) : (
-                    "Request New Link"
+                    t("auth:requestNewLink")
                   )}
                 </Button>
                 <Button 
@@ -366,7 +368,7 @@ export default function ResetPassword() {
                   className="w-full"
                   onClick={() => navigate("/")}
                 >
-                  Back to Login
+                  {t("auth:backToLogin")}
                 </Button>
               </form>
             )}
@@ -385,9 +387,9 @@ export default function ResetPassword() {
             <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
               <Check className="h-8 w-8 text-green-600" />
             </div>
-            <h2 className="text-xl font-display uppercase tracking-wide mb-2">Password Updated!</h2>
+            <h2 className="text-xl font-display uppercase tracking-wide mb-2">{t("auth:passwordUpdatedHeading")}</h2>
             <p className="text-muted-foreground">
-              Redirecting you to the dashboard...
+              {t("auth:redirectingToDashboard")}
             </p>
           </CardContent>
         </Card>
@@ -406,16 +408,16 @@ export default function ResetPassword() {
         <CardHeader className="text-center">
           <img src={venueLogo} alt={tenant.venue_name} className="h-12 mx-auto mb-4" />
           <CardTitle className="font-display text-2xl uppercase tracking-wide">
-            Set Your Password
+            {t("auth:setYourPasswordTitle")}
           </CardTitle>
           <CardDescription>
-            Enter a new password for your account
+            {t("auth:setYourPasswordDesc")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="password">New Password</Label>
+              <Label htmlFor="password">{t("auth:newPasswordLabel")}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -423,7 +425,7 @@ export default function ResetPassword() {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter new password"
+                  placeholder={t("auth:newPasswordPlaceholder")}
                   className="pl-10 pr-10"
                   required
                   minLength={6}
@@ -439,7 +441,7 @@ export default function ResetPassword() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword">{t("auth:confirmPasswordLabel")}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -447,7 +449,7 @@ export default function ResetPassword() {
                   type={showPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm new password"
+                  placeholder={t("auth:confirmPasswordPlaceholder")}
                   className="pl-10"
                   required
                   minLength={6}
@@ -456,7 +458,7 @@ export default function ResetPassword() {
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Updating..." : "Set Password"}
+              {isLoading ? t("auth:updating") : t("auth:setPasswordButton")}
             </Button>
           </form>
         </CardContent>

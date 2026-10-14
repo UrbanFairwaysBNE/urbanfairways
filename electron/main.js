@@ -11,7 +11,7 @@ const execAsync = promisify(exec);
 // GO-LIVE: change this to "https://urbanfairways.com.au" when the custom domain
 // is connected, then push to main so the controller auto-updates on every bay PC.
 // See docs/platform/GO-LIVE-CHECKLIST.md
-const HUB_ORIGIN = process.env.HUB_ORIGIN || "https://urbanfairways.lovable.app";
+const HUB_ORIGIN = process.env.HUB_ORIGIN || "https://urbanfairways.com.au";
 const VENUE_NAME = process.env.VENUE_NAME || "Urban Fairways";
 
 // =====================================================

@@ -16,7 +16,7 @@ const logStep = (step: string, details?: any) => {
 };
 
 const normalizeSiteUrl = (rawUrl: string | undefined) => {
-  const fallbackUrl = "https://urbanfairways.lovable.app";
+  const fallbackUrl = "https://urbanfairways.com.au";
   if (!rawUrl) return fallbackUrl;
 
   const trimmedUrl = rawUrl.trim();

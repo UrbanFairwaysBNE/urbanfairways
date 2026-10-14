@@ -1,10 +1,7 @@
 import { Phone, Mail, MapPin, Facebook, Instagram } from "lucide-react";
 import venueLogo from "@/assets/venue-logo.png";
-import googlePlayBadge from "@/assets/google-play-badge.svg";
 import { useTenant, hubUrl, formatTenantAddress } from "@/config/tenant";
 
-const APP_STORE_BADGE_URL =
-  "https://tools.applemediaservices.com/api/badges/download-on-the-app-store/white/en-au?size=250x83";
 
 const SiteFooter = () => {
   const { tenant } = useTenant();
@@ -39,30 +36,6 @@ const SiteFooter = () => {
                 <Instagram className="h-4 w-4" />
               </a>
             )}
-          </div>
-          <div className="flex flex-wrap items-center gap-3 mt-5">
-            <a
-              href={tenant.socials?.ios_app_url || "#"}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <img
-                src={APP_STORE_BADGE_URL}
-                alt={`Download ${tenant.venue_name} Hub on the App Store`}
-                className="h-10 w-auto"
-              />
-            </a>
-            <a
-              href={tenant.socials?.android_app_url || "#"}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <img
-                src={googlePlayBadge}
-                alt={`Get ${tenant.venue_name} Hub on Google Play`}
-                className="h-10 w-auto"
-              />
-            </a>
           </div>
         </div>
 

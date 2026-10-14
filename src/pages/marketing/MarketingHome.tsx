@@ -9,7 +9,6 @@ import simBayImage from "@/assets/sim-bay.webp.asset.json";
 import heroVideo from "@/assets/hero-video-v3.mp4.asset.json";
 
 import swingLabBadge from "@/assets/uf-lab-circle-dark.png";
-import googlePlayBadge from "@/assets/google-play-badge.svg";
 import { useTenant, hubUrl } from "@/config/tenant";
 import { useMarketingPricing, type MarketingTier } from "@/hooks/useMarketingPricing";
 
@@ -68,28 +67,6 @@ const MarketingHome = () => {
               className="bg-accent hover:bg-accent/90 text-accent-foreground font-display tracking-wide uppercase px-7 h-12 rounded-md inline-flex items-center justify-center gap-2 transition-all hover:translate-x-0.5"
             >
               Book Now <ArrowRight className="h-4 w-4" />
-            </a>
-            <a
-              href={tenant.socials?.ios_app_url || "#"}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img
-                src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/white/en-au?size=250x83"
-                alt="Download on the App Store"
-                className="h-12 w-auto rounded-md"
-              />
-            </a>
-            <a
-              href={tenant.socials?.android_app_url || "#"}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img
-                src={googlePlayBadge}
-                alt="Get it on Google Play"
-                className="h-12 w-auto"
-              />
             </a>
           </div>
         </div>

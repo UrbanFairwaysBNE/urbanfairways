@@ -1,0 +1,2 @@
+# Project rules
+- Keep system-switchover notices separate from promotional campaign composition; the dedicated admin tab is preparation-only so reviewing a notice cannot trigger billing changes or customer sends.

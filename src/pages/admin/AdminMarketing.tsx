@@ -47,6 +47,7 @@ import {
   Smile,
 } from "lucide-react";
 import { EmailPreviewFrame } from "@/components/admin/EmailPreviewFrame";
+import { SystemSwitchover } from "@/components/admin/SystemSwitchover";
 
 interface Campaign {
   id: string;
@@ -570,7 +571,15 @@ export default function AdminMarketing() {
               <MessageSquare className="h-4 w-4" />
               Feedback
             </TabsTrigger>
+            <TabsTrigger value="switchover" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Switchover
+            </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="switchover" className="mt-6">
+            <SystemSwitchover />
+          </TabsContent>
 
           {/* Campaigns Tab */}
           <TabsContent value="campaigns" className="mt-4">

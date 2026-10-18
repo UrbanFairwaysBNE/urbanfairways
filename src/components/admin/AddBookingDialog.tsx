@@ -538,6 +538,23 @@ export function AddBookingDialog({
     setIsSaving(false);
   };
 
+  // All-day toggle: fill start/duration from the day's operating hours
+  const applyAllDayTimes = (date: Date) => {
+    const hours = getForDate(date);
+    if (!hours.is_open) return;
+    setStartTime(hours.open_time);
+    try {
+      setDuration(String(allDaySpan(hours.open_time, hours.close_time).hours));
+    } catch {
+      // Closed day is surfaced on save
+    }
+  };
+
+  const handleToggleAllDay = (checked: boolean) => {
+    setIsAllDayBlock(checked);
+    if (checked && bookingDate) applyAllDayTimes(bookingDate);
+  };
+
   const createBlock = async () => {
     if (!bookingDate || !bayId) {
       toast({

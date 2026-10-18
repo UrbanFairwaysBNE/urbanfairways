@@ -67,6 +67,10 @@ time, click a booking to open details, add bookings (`AddBookingDialog`), block 
 record internal staff notes (marked with a speech-bubble icon), and log first-time
 customers' referral source (`profiles.referral_source`, surfaced in Admin Analytics).
 
+Bay blocks support 30-minute increments up to 10 hours, within the selected date's operating hours.
+Click an existing block and choose Edit Block to change its date, start time, duration, bay or reason.
+Creation and editing use the same form and availability check; editing excludes the block itself from overlap checks.
+
 ## Notifications on booking
 
 `send-booking-notification` sends email + SMS on confirm/reschedule/cancel. It selects a

@@ -21,12 +21,13 @@ import {
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CalendarIcon, Plus, UserPlus, Ban, Check, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { calculateHourlyRate, isOffPeakTime, getPricingLabel } from "@/lib/pricing-utils";
 import { TierConfig, TIER_SELECT, findTier, isDefaultTier, normaliseTier, tierLabel } from "@/lib/tier-config";
-import { BLOCK_DURATION_OPTIONS, blockEndTime } from "@/lib/bay-block-utils";
+import { BLOCK_DURATION_OPTIONS, blockEndTime, allDaySpan } from "@/lib/bay-block-utils";
 import { useOperatingHours } from "@/hooks/useOperatingHours";
 
 interface Bay {
@@ -58,6 +59,12 @@ interface AddBookingDialogProps {
 }
 
 // Operating hours time options
+const formatTimeLabel = (time: string) => {
+  const [h, m] = time.split(":").map(Number);
+  const ampm = h >= 12 ? "PM" : "AM";
+  const displayHour = h % 12 || 12;
+  return `${displayHour}:${String(m || 0).padStart(2, "0")}${ampm}`;
+};
 const TIME_OPTIONS: { value: string; label: string }[] = [];
 for (let hour = 5; hour < 23; hour++) {
   for (const minute of [0, 30]) {
@@ -113,6 +120,7 @@ export function AddBookingDialog({
   // Block form state
   const [blockReason, setBlockReason] = useState("");
   const [blockCalendarOpen, setBlockCalendarOpen] = useState(false);
+  const [isAllDayBlock, setIsAllDayBlock] = useState(false);
   
   // Customer search and list
   const [customers, setCustomers] = useState<Profile[]>([]);
@@ -164,7 +172,19 @@ export function AddBookingDialog({
       setIsAddingNewCustomer(false);
       setBlockReason(editBlock?.reason || "");
       resetNewCustomerForm();
+      // Detect a previously saved all-day block (spans the day's full operating hours)
+      if (editBlock) {
+        const dayHours = getForDate(new Date(`${editBlock.block_date}T12:00:00`));
+        setIsAllDayBlock(
+          Boolean(dayHours?.is_open &&
+            editBlock.start_time.slice(0, 5) === dayHours.open_time &&
+            editBlock.end_time.slice(0, 5) === dayHours.close_time)
+        );
+      } else {
+        setIsAllDayBlock(false);
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, initialDate, initialTime, initialBayId, editBlock]);
 
   const resetNewCustomerForm = () => {
@@ -524,22 +544,57 @@ export function AddBookingDialog({
     setIsSaving(false);
   };
 
+  // All-day toggle: fill start/duration from the day's operating hours
+  const applyAllDayTimes = (date: Date) => {
+    const hours = getForDate(date);
+    if (!hours.is_open) return;
+    setStartTime(hours.open_time);
+    try {
+      setDuration(String(allDaySpan(hours.open_time, hours.close_time).hours));
+    } catch {
+      // Closed day is surfaced on save
+    }
+  };
+
+  const handleToggleAllDay = (checked: boolean) => {
+    setIsAllDayBlock(checked);
+    if (checked && bookingDate) applyAllDayTimes(bookingDate);
+  };
+
   const createBlock = async () => {
-    if (!bookingDate || !startTime || !bayId) {
+    if (!bookingDate || !bayId) {
       toast({
         title: "Missing information",
-        description: "Please select a date, time, and bay.",
+        description: "Please select a date and bay.",
+        variant: "destructive",
+        duration: 4000,
+      });
+      return;
+    }
+    if (!isAllDayBlock && !startTime) {
+      toast({
+        title: "Missing information",
+        description: "Please select a start time, or toggle All day.",
         variant: "destructive",
         duration: 4000,
       });
       return;
     }
 
+    let start = startTime;
     let endTime: string;
+    let blockHours = Number(duration);
     try {
       const hours = getForDate(bookingDate);
       if (!hours.is_open) throw new Error("The venue is closed on this date.");
-      endTime = blockEndTime(startTime, Number(duration), hours.open_time, hours.close_time);
+      if (isAllDayBlock) {
+        const span = allDaySpan(hours.open_time, hours.close_time);
+        start = span.start;
+        endTime = span.end;
+        blockHours = span.hours;
+      } else {
+        endTime = blockEndTime(start, blockHours, hours.open_time, hours.close_time);
+      }
     } catch (error) {
       toast({
         title: "Invalid time",
@@ -554,7 +609,7 @@ export function AddBookingDialog({
 
     // Check for overlapping bookings or blocks
     const dateStr = format(bookingDate, "yyyy-MM-dd");
-    const { hasOverlap, message } = await checkForOverlaps(dateStr, bayId, startTime, endTime);
+    const { hasOverlap, message } = await checkForOverlaps(dateStr, bayId, start, endTime);
     
     if (hasOverlap) {
       toast({
@@ -571,7 +626,7 @@ export function AddBookingDialog({
       const values = {
           bay_id: bayId,
           block_date: format(bookingDate, "yyyy-MM-dd"),
-          start_time: startTime,
+          start_time: start,
           end_time: endTime,
           reason: blockReason || null,
         };
@@ -583,7 +638,9 @@ export function AddBookingDialog({
 
       toast({
         title: editBlock ? "Block updated" : "Bay blocked",
-        description: `Bay blocked for ${duration} hour${Number(duration) !== 1 ? "s" : ""}.`,
+        description: isAllDayBlock
+          ? "Bay blocked for the whole day."
+          : `Bay blocked for ${blockHours} hour${blockHours !== 1 ? "s" : ""}.`,
         duration: 4000,
       });
 
@@ -925,6 +982,7 @@ export function AddBookingDialog({
                     onSelect={(date) => {
                       setBookingDate(date);
                       setBlockCalendarOpen(false);
+                      if (isAllDayBlock && date) applyAllDayTimes(date);
                     }}
                     className="pointer-events-auto"
                   />
@@ -932,39 +990,64 @@ export function AddBookingDialog({
               </Popover>
             </div>
 
-            {/* Start Time */}
-            <div className="space-y-2">
-              <Label>Start Time</Label>
-              <Select value={startTime} onValueChange={setStartTime}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select time" />
-                </SelectTrigger>
-                <SelectContent>
-                  {TIME_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* All day */}
+            <div className="flex items-center justify-between gap-3 rounded-lg border p-3">
+              <div className="space-y-0.5">
+                <Label className="font-medium">All day</Label>
+                <p className="text-xs text-muted-foreground">
+                  {(() => {
+                    if (!bookingDate) return "Blocks the bay for the venue's full opening hours";
+                    const h = getForDate(bookingDate);
+                    if (!h.is_open) return "The venue is closed on this date";
+                    try {
+                      const span = allDaySpan(h.open_time, h.close_time);
+                      return `${formatTimeLabel(h.open_time)} – ${formatTimeLabel(h.close_time)} (${span.hours} hours)`;
+                    } catch {
+                      return "Blocks the bay for the venue's full opening hours";
+                    }
+                  })()}
+                </p>
+              </div>
+              <Switch checked={isAllDayBlock} onCheckedChange={handleToggleAllDay} />
             </div>
 
-            {/* Duration */}
-            <div className="space-y-2">
-              <Label>Duration</Label>
-              <Select value={duration} onValueChange={setDuration}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select duration" />
-                </SelectTrigger>
-                <SelectContent>
-                  {BLOCK_DURATION_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {!isAllDayBlock && (
+              <>
+                {/* Start Time */}
+                <div className="space-y-2">
+                  <Label>Start Time</Label>
+                  <Select value={startTime} onValueChange={setStartTime}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TIME_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Duration */}
+                <div className="space-y-2">
+                  <Label>Duration</Label>
+                  <Select value={duration} onValueChange={setDuration}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select duration" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {BLOCK_DURATION_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
 
             {/* Bay */}
             <div className="space-y-2">

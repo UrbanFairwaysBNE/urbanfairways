@@ -166,7 +166,19 @@ export function AddBookingDialog({
       setIsAddingNewCustomer(false);
       setBlockReason(editBlock?.reason || "");
       resetNewCustomerForm();
+      // Detect a previously saved all-day block (spans the day's full operating hours)
+      if (editBlock) {
+        const dayHours = getForDate(new Date(`${editBlock.block_date}T12:00:00`));
+        setIsAllDayBlock(
+          Boolean(dayHours?.is_open &&
+            editBlock.start_time.slice(0, 5) === dayHours.open_time &&
+            editBlock.end_time.slice(0, 5) === dayHours.close_time)
+        );
+      } else {
+        setIsAllDayBlock(false);
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, initialDate, initialTime, initialBayId, editBlock]);
 
   const resetNewCustomerForm = () => {

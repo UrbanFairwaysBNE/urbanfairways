@@ -19,3 +19,20 @@ export function blockEndTime(start: string, hours: number, openTime: string, clo
   }
   return `${String(Math.floor(endMinutes / 60)).padStart(2, "0")}:${String(endMinutes % 60).padStart(2, "0")}`;
 }
+
+/**
+ * Full-day block: spans the day's entire operating hours.
+ * Deliberately exempt from the MAX_BLOCK_HOURS cap — "all day" is the whole day.
+ */
+export function allDaySpan(openTime: string, closeTime: string): { start: string; end: string; hours: number } {
+  const minutes = (time: string) => {
+    const [h, m] = time.split(":").map(Number);
+    return h * 60 + m;
+  };
+  const open = minutes(openTime);
+  const close = minutes(closeTime);
+  if (!Number.isFinite(open) || !Number.isFinite(close) || close <= open) {
+    throw new Error("All-day blocks need a date with valid operating hours.");
+  }
+  return { start: openTime, end: closeTime, hours: (close - open) / 60 };
+}

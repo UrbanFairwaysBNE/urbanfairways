@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { blockEndTime } from "./bay-block-utils";
+import { blockEndTime, allDaySpan } from "./bay-block-utils";
 
 describe("admin block duration", () => {
   test("allows a 10-hour block", () => {
@@ -10,5 +10,17 @@ describe("admin block duration", () => {
   });
   test("does not allow a block beyond closing time", () => {
     expect(() => blockEndTime("13:30", 10, "05:30", "23:00")).toThrow();
+  });
+});
+
+describe("all-day block", () => {
+  test("spans the full operating day", () => {
+    expect(allDaySpan("05:30", "23:00")).toEqual({ start: "05:30", end: "23:00", hours: 17.5 });
+  });
+  test("exceeds the 10-hour manual cap", () => {
+    expect(allDaySpan("05:30", "23:00").hours).toBeGreaterThan(10);
+  });
+  test("rejects a closed day", () => {
+    expect(() => allDaySpan("05:30", "05:30")).toThrow();
   });
 });

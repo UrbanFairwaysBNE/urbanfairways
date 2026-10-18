@@ -539,21 +539,39 @@ export function AddBookingDialog({
   };
 
   const createBlock = async () => {
-    if (!bookingDate || !startTime || !bayId) {
+    if (!bookingDate || !bayId) {
       toast({
         title: "Missing information",
-        description: "Please select a date, time, and bay.",
+        description: "Please select a date and bay.",
+        variant: "destructive",
+        duration: 4000,
+      });
+      return;
+    }
+    if (!isAllDayBlock && !startTime) {
+      toast({
+        title: "Missing information",
+        description: "Please select a start time, or toggle All day.",
         variant: "destructive",
         duration: 4000,
       });
       return;
     }
 
+    let start = startTime;
     let endTime: string;
+    let blockHours = Number(duration);
     try {
       const hours = getForDate(bookingDate);
       if (!hours.is_open) throw new Error("The venue is closed on this date.");
-      endTime = blockEndTime(startTime, Number(duration), hours.open_time, hours.close_time);
+      if (isAllDayBlock) {
+        const span = allDaySpan(hours.open_time, hours.close_time);
+        start = span.start;
+        endTime = span.end;
+        blockHours = span.hours;
+      } else {
+        endTime = blockEndTime(start, blockHours, hours.open_time, hours.close_time);
+      }
     } catch (error) {
       toast({
         title: "Invalid time",
@@ -568,7 +586,7 @@ export function AddBookingDialog({
 
     // Check for overlapping bookings or blocks
     const dateStr = format(bookingDate, "yyyy-MM-dd");
-    const { hasOverlap, message } = await checkForOverlaps(dateStr, bayId, startTime, endTime);
+    const { hasOverlap, message } = await checkForOverlaps(dateStr, bayId, start, endTime);
     
     if (hasOverlap) {
       toast({
@@ -585,7 +603,7 @@ export function AddBookingDialog({
       const values = {
           bay_id: bayId,
           block_date: format(bookingDate, "yyyy-MM-dd"),
-          start_time: startTime,
+          start_time: start,
           end_time: endTime,
           reason: blockReason || null,
         };
@@ -597,7 +615,9 @@ export function AddBookingDialog({
 
       toast({
         title: editBlock ? "Block updated" : "Bay blocked",
-        description: `Bay blocked for ${duration} hour${Number(duration) !== 1 ? "s" : ""}.`,
+        description: isAllDayBlock
+          ? "Bay blocked for the whole day."
+          : `Bay blocked for ${blockHours} hour${blockHours !== 1 ? "s" : ""}.`,
         duration: 4000,
       });
 

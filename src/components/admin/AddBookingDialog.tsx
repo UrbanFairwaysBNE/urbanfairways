@@ -976,6 +976,7 @@ export function AddBookingDialog({
                     onSelect={(date) => {
                       setBookingDate(date);
                       setBlockCalendarOpen(false);
+                      if (isAllDayBlock && date) applyAllDayTimes(date);
                     }}
                     className="pointer-events-auto"
                   />

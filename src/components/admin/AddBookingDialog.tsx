@@ -26,6 +26,8 @@ import { CalendarIcon, Plus, UserPlus, Ban, Check, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { calculateHourlyRate, isOffPeakTime, getPricingLabel } from "@/lib/pricing-utils";
 import { TierConfig, TIER_SELECT, findTier, isDefaultTier, normaliseTier, tierLabel } from "@/lib/tier-config";
+import { BLOCK_DURATION_OPTIONS, blockEndTime } from "@/lib/bay-block-utils";
+import { useOperatingHours } from "@/hooks/useOperatingHours";
 
 interface Bay {
   id: string;
@@ -52,6 +54,7 @@ interface AddBookingDialogProps {
   initialTime?: string;
   initialBayId?: string;
   onBookingCreated: () => void;
+  editBlock?: { id: string; bay_id: string; block_date: string; start_time: string; end_time: string; reason: string | null } | null;
 }
 
 // Operating hours time options
@@ -89,8 +92,10 @@ export function AddBookingDialog({
   initialTime,
   initialBayId,
   onBookingCreated,
+  editBlock,
 }: AddBookingDialogProps) {
   const { toast } = useToast();
+  const { getForDate } = useOperatingHours();
   
   // Tab state
   const [activeTab, setActiveTab] = useState<"booking" | "block">("booking");
@@ -146,20 +151,21 @@ export function AddBookingDialog({
   // Reset form when dialog opens/closes
   useEffect(() => {
     if (open) {
-      setActiveTab("booking");
-      setBookingDate(initialDate || new Date());
-      setStartTime(initialTime || "");
-      setBayId(initialBayId || "");
-      setDuration("1");
+      setActiveTab(editBlock ? "block" : "booking");
+      setBookingDate(editBlock ? new Date(`${editBlock.block_date}T12:00:00`) : initialDate || new Date());
+      setStartTime(editBlock?.start_time.slice(0, 5) || initialTime || "");
+      setBayId(editBlock?.bay_id || initialBayId || "");
+      const toMinutes = (time: string) => { const [h, m] = time.split(":").map(Number); return h * 60 + m; };
+      setDuration(editBlock ? String((toMinutes(editBlock.end_time) - toMinutes(editBlock.start_time)) / 60) : "1");
       setPlayerCount("1");
       setSelectedCustomerId("");
       setCustomerSearch("");
       setCustomers([]);
       setIsAddingNewCustomer(false);
-      setBlockReason("");
+      setBlockReason(editBlock?.reason || "");
       resetNewCustomerForm();
     }
-  }, [open, initialDate, initialTime, initialBayId]);
+  }, [open, initialDate, initialTime, initialBayId, editBlock]);
 
   const resetNewCustomerForm = () => {
     setNewFirstName("");
@@ -353,7 +359,7 @@ export function AddBookingDialog({
 
     if (bookingError) {
       console.error("Error checking bookings:", bookingError);
-      return { hasOverlap: false, message: "" };
+      return { hasOverlap: true, message: "Could not verify availability. Please try again." };
     }
 
     // Check existing blocks
@@ -365,7 +371,7 @@ export function AddBookingDialog({
 
     if (blockError) {
       console.error("Error checking blocks:", blockError);
-      return { hasOverlap: false, message: "" };
+      return { hasOverlap: true, message: "Could not verify availability. Please try again." };
     }
 
     // Helper to check if two time ranges overlap
@@ -399,6 +405,7 @@ export function AddBookingDialog({
 
     // Check blocks for overlap
     for (const block of existingBlocks || []) {
+      if (block.id === editBlock?.id) continue;
       const existingStart = timeToMinutes(block.start_time);
       const existingEnd = timeToMinutes(block.end_time);
       
@@ -528,13 +535,15 @@ export function AddBookingDialog({
       return;
     }
 
-    const endTime = calculateEndTime(startTime, parseInt(duration));
-    const endHour = parseInt(endTime.split(":")[0]);
-    
-    if (endHour > 23) {
+    let endTime: string;
+    try {
+      const hours = getForDate(bookingDate);
+      if (!hours.is_open) throw new Error("The venue is closed on this date.");
+      endTime = blockEndTime(startTime, Number(duration), hours.open_time, hours.close_time);
+    } catch (error) {
       toast({
         title: "Invalid time",
-        description: "Block cannot extend past 11pm.",
+        description: error instanceof Error ? error.message : "Invalid block time.",
         variant: "destructive",
         duration: 4000,
       });
@@ -559,21 +568,22 @@ export function AddBookingDialog({
     }
 
     try {
-      const { error } = await supabase
-        .from("bay_blocks")
-        .insert({
+      const values = {
           bay_id: bayId,
           block_date: format(bookingDate, "yyyy-MM-dd"),
           start_time: startTime,
           end_time: endTime,
           reason: blockReason || null,
-        });
+        };
+      const result = editBlock
+        ? await supabase.from("bay_blocks").update(values).eq("id", editBlock.id).select("id").single()
+        : await supabase.from("bay_blocks").insert(values).select("id").single();
 
-      if (error) throw error;
+      if (result.error) throw result.error;
 
       toast({
-        title: "Bay blocked",
-        description: `Bay blocked for ${duration} hour${parseInt(duration) > 1 ? "s" : ""}.`,
+        title: editBlock ? "Block updated" : "Bay blocked",
+        description: `Bay blocked for ${duration} hour${Number(duration) !== 1 ? "s" : ""}.`,
         duration: 4000,
       });
 
@@ -581,7 +591,7 @@ export function AddBookingDialog({
       onBookingCreated();
     } catch (error: any) {
       toast({
-        title: "Error creating block",
+        title: editBlock ? "Error updating block" : "Error creating block",
         description: error.message || "Failed to block bay.",
         variant: "destructive",
         duration: 4000,
@@ -596,13 +606,13 @@ export function AddBookingDialog({
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-display text-xl uppercase tracking-wide">
-            Add to Timetable
+            {editBlock ? "Edit Block" : "Add to Timetable"}
           </DialogTitle>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "booking" | "block")}>
+        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as "booking" | "block"); setDuration("1"); }}>
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="booking" className="flex items-center gap-2">
+            <TabsTrigger value="booking" disabled={Boolean(editBlock)} className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               Booking
             </TabsTrigger>
@@ -947,7 +957,7 @@ export function AddBookingDialog({
                   <SelectValue placeholder="Select duration" />
                 </SelectTrigger>
                 <SelectContent>
-                  {DURATION_OPTIONS.map((opt) => (
+                  {BLOCK_DURATION_OPTIONS.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value}>
                       {opt.label}
                     </SelectItem>
@@ -1008,7 +1018,7 @@ export function AddBookingDialog({
                 disabled={isSaving}
               >
                 <Ban className="h-4 w-4 mr-2" />
-                {isSaving ? "Blocking..." : "Block Bay"}
+                {isSaving ? "Saving..." : editBlock ? "Save Block" : "Block Bay"}
               </Button>
             </div>
           </TabsContent>

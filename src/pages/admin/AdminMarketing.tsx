@@ -114,6 +114,45 @@ export default function AdminMarketing() {
   const [recipientCount, setRecipientCount] = useState(0);
   const [isSending, setIsSending] = useState(false);
   const [isCountingRecipients, setIsCountingRecipients] = useState(false);
+  const [testEmail, setTestEmail] = useState("");
+  const [isSendingTest, setIsSendingTest] = useState(false);
+
+  const sendTestEmail = async () => {
+    const to = testEmail.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {
+      toast({ title: "Invalid email", description: "Enter a valid test email address.", variant: "destructive" });
+      return;
+    }
+    if (!campaignSubject.trim() || !campaignHtml.trim()) {
+      toast({ title: "Missing content", description: "Add a subject and email content first.", variant: "destructive" });
+      return;
+    }
+    setIsSendingTest(true);
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("first_name, last_name")
+        .ilike("email", to)
+        .maybeSingle();
+      const first = profile?.first_name || "Test";
+      const last = profile?.last_name || "Customer";
+      const fill = (s: string) =>
+        s.replace(/\{first_name\}/gi, first)
+          .replace(/\{last_name\}/gi, last)
+          .replace(/\{email\}/gi, to)
+          .replace(/\{full_name\}/gi, `${first} ${last}`.trim());
+      const { error } = await supabase.functions.invoke("send-bulk-email", {
+        body: { to, subject: `[TEST] ${fill(campaignSubject)}`, html: fill(campaignHtml) },
+      });
+      if (error) throw error;
+      toast({ title: "Test sent", description: `Test email sent to ${to}.` });
+    } catch (err) {
+      console.error("Test email failed:", err);
+      toast({ title: "Test failed", description: "Could not send the test email.", variant: "destructive" });
+    } finally {
+      setIsSendingTest(false);
+    }
+  };
   
   // Preview state
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -905,6 +944,26 @@ export default function AdminMarketing() {
                     <span className="font-medium">{recipientCount} recipients</span>
                   )}
                   <span className="text-muted-foreground">will receive this email</span>
+                </div>
+              </div>
+
+              {/* Send test email */}
+              <div className="space-y-2 p-4 bg-muted/50 rounded-lg">
+                <Label className="text-base font-medium">Send Test Email</Label>
+                <p className="text-xs text-muted-foreground">
+                  Sends this campaign to one address only. Merge tags use that customer's name if they exist.
+                </p>
+                <div className="flex gap-2">
+                  <Input
+                    type="email"
+                    placeholder="you@example.com"
+                    value={testEmail}
+                    onChange={(e) => setTestEmail(e.target.value)}
+                  />
+                  <Button type="button" variant="outline" onClick={sendTestEmail} disabled={isSendingTest}>
+                    <Send className="h-4 w-4 mr-2" />
+                    {isSendingTest ? "Sending..." : "Send Test"}
+                  </Button>
                 </div>
               </div>
 

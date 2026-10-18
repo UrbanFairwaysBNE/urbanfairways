@@ -990,39 +990,64 @@ export function AddBookingDialog({
               </Popover>
             </div>
 
-            {/* Start Time */}
-            <div className="space-y-2">
-              <Label>Start Time</Label>
-              <Select value={startTime} onValueChange={setStartTime}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select time" />
-                </SelectTrigger>
-                <SelectContent>
-                  {TIME_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* All day */}
+            <div className="flex items-center justify-between gap-3 rounded-lg border p-3">
+              <div className="space-y-0.5">
+                <Label className="font-medium">All day</Label>
+                <p className="text-xs text-muted-foreground">
+                  {(() => {
+                    if (!bookingDate) return "Blocks the bay for the venue's full opening hours";
+                    const h = getForDate(bookingDate);
+                    if (!h.is_open) return "The venue is closed on this date";
+                    try {
+                      const span = allDaySpan(h.open_time, h.close_time);
+                      return `${formatTimeLabel(h.open_time)} – ${formatTimeLabel(h.close_time)} (${span.hours} hours)`;
+                    } catch {
+                      return "Blocks the bay for the venue's full opening hours";
+                    }
+                  })()}
+                </p>
+              </div>
+              <Switch checked={isAllDayBlock} onCheckedChange={handleToggleAllDay} />
             </div>
 
-            {/* Duration */}
-            <div className="space-y-2">
-              <Label>Duration</Label>
-              <Select value={duration} onValueChange={setDuration}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select duration" />
-                </SelectTrigger>
-                <SelectContent>
-                  {BLOCK_DURATION_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {!isAllDayBlock && (
+              <>
+                {/* Start Time */}
+                <div className="space-y-2">
+                  <Label>Start Time</Label>
+                  <Select value={startTime} onValueChange={setStartTime}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TIME_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Duration */}
+                <div className="space-y-2">
+                  <Label>Duration</Label>
+                  <Select value={duration} onValueChange={setDuration}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select duration" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {BLOCK_DURATION_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
 
             {/* Bay */}
             <div className="space-y-2">

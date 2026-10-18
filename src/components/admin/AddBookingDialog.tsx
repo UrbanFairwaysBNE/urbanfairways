@@ -59,6 +59,12 @@ interface AddBookingDialogProps {
 }
 
 // Operating hours time options
+const formatTimeLabel = (time: string) => {
+  const [h, m] = time.split(":").map(Number);
+  const ampm = h >= 12 ? "PM" : "AM";
+  const displayHour = h % 12 || 12;
+  return `${displayHour}:${String(m || 0).padStart(2, "0")}${ampm}`;
+};
 const TIME_OPTIONS: { value: string; label: string }[] = [];
 for (let hour = 5; hour < 23; hour++) {
   for (const minute of [0, 30]) {

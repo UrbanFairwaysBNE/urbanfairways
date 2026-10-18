@@ -154,6 +154,7 @@ export default function AdminTimetable() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [selectedBlock, setSelectedBlock] = useState<BayBlock | null>(null);
+  const [editingBlock, setEditingBlock] = useState<BayBlock | null>(null);
   const [calendarOpen, setCalendarOpen] = useState(false);
   
   // Edit mode state
@@ -1476,6 +1477,12 @@ export default function AdminTimetable() {
 
                 <hr className="border-border" />
 
+                <Button variant="outline" className="w-full" onClick={() => {
+                  setEditingBlock(selectedBlock);
+                  setSelectedBlock(null);
+                  setShowAddBookingDialog(true);
+                }}><Pencil className="h-4 w-4 mr-2" />Edit Block</Button>
+
                 <Button
                   variant="destructive"
                   className="w-full"
@@ -1514,7 +1521,8 @@ export default function AdminTimetable() {
         {/* Add Booking Dialog */}
         <AddBookingDialog
           open={showAddBookingDialog}
-          onOpenChange={setShowAddBookingDialog}
+          onOpenChange={(open) => { setShowAddBookingDialog(open); if (!open) setEditingBlock(null); }}
+          editBlock={editingBlock}
           bays={bays}
           initialDate={selectedDate}
           initialTime={addBookingInitialTime}

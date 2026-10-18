@@ -6,7 +6,7 @@ const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (character) => {
 });
 
 export function getSwitchoverNotices(tenant: TenantSettings) {
-  const ahead = `Hi there,
+  const ahead = `Hi {first_name},
 
 We’re moving ${tenant.venue_name} to our new app and booking system on Tuesday 20 October 2026.
 
@@ -21,7 +21,7 @@ On launch day, we’ll email you a secure link to set your password and access y
 Thanks for your patience as we make the move.
 The ${tenant.venue_name} team`;
 
-  const launch = `Hi there,
+  const launch = `Hi {first_name},
 
 The new ${tenant.venue_name} app and booking system is now live.
 

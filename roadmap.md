@@ -9,6 +9,6 @@
 - [x] Apply and reconcile one-week migration credits without duplicates; verify customer records and account editing.
 
 # Switchover notices and timetable blocks
-- [ ] Use the customer first-name tag in both switchover greetings.
-- [ ] Add up-to-10-hour blocks and editing for existing blocks; verify in the admin timetable.
+- [x] Use the customer first-name tag in both switchover greetings.
+- [x] Add up-to-10-hour blocks and editing for existing blocks; verified create, edit readback, and test-block removal in the signed-in admin timetable.
 - [ ] Send and test notices: blocked pending a dedicated bulk email service; Lovable app emails cannot send to customer lists.

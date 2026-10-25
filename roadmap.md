@@ -1,4 +1,5 @@
 # Switchover preparation
+- [x] Disable First Session Free schedule, templates and award endpoint; reverse 174 $40 credits ($6,960) with an auditable entry per original credit; preserve all 18 migration credits ($915).
 - [x] Add a separate Switchover tab with the account-change notice and launch-day instructions.
 - [x] Verify the notice preview and existing customer-import link.
 - [x] Document remaining operational prerequisites; do not cancel memberships, issue credits or send emails in this task.

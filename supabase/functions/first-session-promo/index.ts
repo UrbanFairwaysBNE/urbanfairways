@@ -1,4 +1,3 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { Resend } from "npm:resend@2.0.0";
 import { getTenant, tenantHubUrl, TenantConfig } from "../_shared/tenant.ts";
@@ -45,10 +44,16 @@ const replaceTemplateTags = (template: string, tags: Record<string, string>): st
   return result;
 };
 
-serve(async (req: Request): Promise<Response> => {
+Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // Disabled by venue request. This also covers forced/manual invocations.
+  return new Response(JSON.stringify({ success: true, disabled: true, processed: 0 }), {
+    status: 200,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
 
   try {
     const tenant = await getTenant();

@@ -1,0 +1,3 @@
+ALTER TABLE public.profiles ADD COLUMN first_session_promo_exempt boolean NOT NULL DEFAULT false;
+UPDATE public.profiles SET first_session_promo_exempt=true;
+COMMENT ON COLUMN public.profiles.first_session_promo_exempt IS 'Permanent First Session Free exclusion. All existing customers at 25 October 2026 are exempt; future eligibility must exclude this flag. Promotion remains disabled independently.';

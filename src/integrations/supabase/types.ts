@@ -2328,6 +2328,7 @@ export type Database = {
           display_name: string | null
           email: string
           first_name: string
+          first_session_promo_exempt: boolean
           first_session_promo_sent: string | null
           id: string
           is_coach: boolean
@@ -2360,6 +2361,7 @@ export type Database = {
           display_name?: string | null
           email: string
           first_name: string
+          first_session_promo_exempt?: boolean
           first_session_promo_sent?: string | null
           id?: string
           is_coach?: boolean
@@ -2392,6 +2394,7 @@ export type Database = {
           display_name?: string | null
           email?: string
           first_name?: string
+          first_session_promo_exempt?: boolean
           first_session_promo_sent?: string | null
           id?: string
           is_coach?: boolean

@@ -237,6 +237,7 @@ export default function AdminMarketing() {
           .from("profiles")
           .select("user_id, created_at")
           .is("first_session_promo_sent", null)
+          .eq("first_session_promo_exempt", false)
           .eq("marketing_opt_out", false)
           .lt("created_at", signupCutoff)
           .order("created_at", { ascending: true })

@@ -41,37 +41,21 @@ export function SystemSwitchover() {
   };
 
   /**
-   * Body markup only. The bulk email sender adds the branded header, footer
-   * and unsubscribe link itself, so pasting the full document there would
-   * brand the email twice.
+   * Branded body markup only — fonts, colours and the button are styled
+   * inline so it matches the preview wherever it is pasted. The bulk email
+   * sender adds the header, footer and unsubscribe link itself, so copying
+   * the whole document would brand the email twice.
    */
-  const copyBodyHtml = async (notice: typeof notices[number]) => {
-    setCopying(`${notice.id}:body`);
+  const copyHtml = async (notice: typeof notices[number]) => {
+    setCopying(notice.id);
     try {
       await navigator.clipboard.writeText(notice.html);
       toast({
-        title: "HTML email copied",
-        description: "Paste it into Bulk email → HTML Content. The branding is added automatically when it sends.",
+        title: "Branded email body copied",
+        description: "Paste it into Bulk email → HTML Content. The header, footer and unsubscribe link are added when it sends.",
       });
     } catch {
       toast({ title: "Could not copy HTML", variant: "destructive" });
-    } finally {
-      setCopying(null);
-    }
-  };
-
-  /** The complete branded email, header and footer included. */
-  const copyFullHtml = async (notice: typeof notices[number]) => {
-    setCopying(`${notice.id}:full`);
-    try {
-      const html = await renderTemplatePreview(notice.subject, notice.html);
-      await navigator.clipboard.writeText(html);
-      toast({
-        title: "Full branded email copied",
-        description: "Includes the header, footer and button — for pasting into another email tool.",
-      });
-    } catch {
-      toast({ title: "Could not copy full email", variant: "destructive" });
     } finally {
       setCopying(null);
     }
@@ -106,11 +90,8 @@ export function SystemSwitchover() {
                   {previewing === notice.id ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Eye className="h-4 w-4 mr-2" />}Preview email
                 </Button>
                 <Button variant="ghost" disabled={isLoading || Boolean(error)} onClick={() => copyNotice(notice)}><Copy className="h-4 w-4 mr-2" />Copy notice</Button>
-                <Button variant="ghost" disabled={isLoading || Boolean(error) || copying !== null} onClick={() => copyBodyHtml(notice)}>
-                  {copying === `${notice.id}:body` ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Code2 className="h-4 w-4 mr-2" />}Copy HTML email
-                </Button>
-                <Button variant="ghost" disabled={isLoading || Boolean(error) || copying !== null} onClick={() => copyFullHtml(notice)}>
-                  {copying === `${notice.id}:full` ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Code2 className="h-4 w-4 mr-2" />}Copy full branded email
+                <Button variant="ghost" disabled={isLoading || Boolean(error) || copying !== null} onClick={() => copyHtml(notice)}>
+                  {copying === notice.id ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Code2 className="h-4 w-4 mr-2" />}Copy HTML email
                 </Button>
               </div>
             </CardContent>

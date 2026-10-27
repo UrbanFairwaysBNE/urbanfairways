@@ -5,12 +5,16 @@ const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (character) => {
   return entities[character] ?? character;
 });
 
+// Inline styling so the copied body looks like the previewed email even when
+// the paste target strips the wrapper's <style> block (email clients, editors).
+const BODY_STYLE = "font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.7; color:#2F3134;";
+
 /**
  * Branded call-to-action button, matching the style used by
  * `supabase/functions/_shared/email-wrapper.ts` (accent fill, rounded,
  * display font) so notice emails look like every other transactional email.
  */
-const ctaButton = (url: string, label: string) => `<table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:22px auto 0;">
+const ctaButton = (url: string, label: string) => `<table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:22px auto 24px;">
   <tr>
     <td bgcolor="#5F6F52" style="border-radius:12px;">
       <a href="${url}"
@@ -22,12 +26,17 @@ const ctaButton = (url: string, label: string) => `<table role="presentation" al
 </table>`;
 
 const paragraphs = (parts: string[]) =>
-  parts.map((part) => `<p>${escapeHtml(part).replace(/\n/g, "<br />")}</p>`).join("\n");
+  parts
+    .map((part) => `<p style="margin:0 0 16px; ${BODY_STYLE}">${escapeHtml(part).replace(/\n/g, "<br />")}</p>`)
+    .join("\n");
 
 const steps = (items: string[]) =>
-  `<ol style="margin:18px 0 0; padding-left:22px; font-family:Manrope, Arial, sans-serif; font-size:16px; line-height:1.7; color:#2F3134;">${items
+  `<ol style="margin:0 0 22px; padding-left:22px; ${BODY_STYLE}">${items
     .map((item) => `<li style="margin-bottom:6px;">${escapeHtml(item)}</li>`)
     .join("")}</ol>`;
+
+/** Body content only — the sender adds the branded header, footer and unsubscribe link. */
+const body = (inner: string) => `<div style="${BODY_STYLE}">\n${inner}\n</div>`;
 
 export function getSwitchoverNotices(tenant: TenantSettings) {
   const ahead = `Hi {first_name},
@@ -68,7 +77,7 @@ The ${tenant.venue_name} team`;
 
   // Same copy as `launch`, but the forgot-password address becomes a button
   // instead of a raw link, so customers only have to tap one thing.
-  const launchHtml = [
+  const launchHtml = body([
     paragraphs([
       "Hi {first_name},",
       `The new ${tenant.venue_name} app and booking system is now live.`,
@@ -86,7 +95,7 @@ The ${tenant.venue_name} team`;
       "If you were a current member at the switchover, account credit equal to one week of your previous tier has been added for future sessions. This offsets overlapping weekly payments if you rejoin immediately.",
       `Need help? Contact us at ${tenant.support_email}.\nThe ${tenant.venue_name} team`,
     ]),
-  ].join("\n");
+  ].join("\n"));
 
   return [
     {
@@ -94,7 +103,7 @@ The ${tenant.venue_name} team`;
       title: "Before launch · Account change notice",
       subject: `${tenant.venue_name}: important account and membership changes`,
       text: ahead,
-      html: paragraphs(ahead.split("\n\n")),
+      html: body(paragraphs(ahead.split("\n\n"))),
     },
     {
       id: "launch-day",

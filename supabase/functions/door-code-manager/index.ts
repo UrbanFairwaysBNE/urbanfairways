@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2.45.0";
 import { TuyaClient, getTuyaCredentials } from "../_shared/tuya.ts";
+import { TTLockMultiLock, getTTLockCredentials, DEFAULT_TTLOCK_LOCK_IDS } from "../_shared/ttlock.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,7 +22,7 @@ interface Settings {
   append_hash: boolean;
   valid_from_minutes_before: number;
   valid_until_minutes_after: number;
-  provider: "manual" | "tuya";
+  provider: "manual" | "tuya" | "ttlock";
   tuya_device_id: string | null;
   tuya_region: string;
   enabled: boolean;
@@ -97,7 +98,19 @@ async function generateUniqueCode(s: Settings): Promise<string> {
   throw new Error("Could not generate a unique door code");
 }
 
-async function getTuya(s: Settings, force = false): Promise<TuyaClient | null> {
+type LockClient = Pick<TuyaClient, "issueTempPassword" | "deleteTempPassword" | "listTempPasswords" | "unlockNow">;
+
+function ttlockIds(s: Settings): number[] {
+  const ids = (s.tuya_device_id || "").split(",").map((x) => Number(x.trim())).filter(Boolean);
+  return ids.length ? ids : DEFAULT_TTLOCK_LOCK_IDS;
+}
+
+async function getTuya(s: Settings, force = false): Promise<LockClient | null> {
+  if (s.provider === "ttlock") {
+    if (!force && !s.enabled) return null;
+    const c = getTTLockCredentials();
+    return c ? (new TTLockMultiLock(c, ttlockIds(s)) as unknown as LockClient) : null;
+  }
   if (!force && (s.provider !== "tuya" || !s.enabled)) return null;
   const creds = getTuyaCredentials();
   if (!creds || !s.tuya_device_id) return null;
@@ -150,7 +163,7 @@ async function issueTestCode(opts: {
       valid_from: validFrom.toISOString(),
       valid_until: validUntil.toISOString(),
       status: "pending",
-      provider: "tuya",
+      provider: s.provider === "manual" ? "tuya" : s.provider,
     })
     .select()
     .single();
@@ -248,7 +261,7 @@ async function issueNamedCode(opts: {
       valid_from: validFrom.toISOString(),
       valid_until: validUntil.toISOString(),
       status: "pending",
-      provider: "tuya",
+      provider: s.provider === "manual" ? "tuya" : s.provider,
     })
     .select()
     .single();
@@ -574,9 +587,9 @@ async function pushToProvider(codeRow: any, s: Settings, bookingLabel: string) {
     });
     await supabase
       .from("door_codes")
-      .update({ status: "active", provider: "tuya", provider_ref: ref, last_error: null })
+      .update({ status: "active", provider: s.provider, provider_ref: ref, last_error: null })
       .eq("id", codeRow.id);
-    await logEvent(codeRow.id, codeRow.booking_id, "issued_tuya", { ref, via });
+    await logEvent(codeRow.id, codeRow.booking_id, `issued_${s.provider}`, { ref, via });
     return { pushed: true, ref };
   } catch (e) {
     const msg = (e as Error).message;
@@ -593,7 +606,7 @@ async function revokeCode(codeRow: any, s: Settings, reason: string) {
   const tuya = await getTuya(s, codeRow.scope === "test" || codeRow.scope === "staff");
 
   let removalError: string | null = null;
-  if (tuya && codeRow.provider === "tuya" && codeRow.provider_ref) {
+  if (tuya && codeRow.provider !== "manual" && codeRow.provider_ref) {
     try {
       await tuya.deleteTempPassword(codeRow.provider_ref);
     } catch (e) {
@@ -772,7 +785,7 @@ async function syncAll() {
       continue;
     }
 
-    if (row.status === "pending" && s.provider === "tuya" && s.enabled) {
+    if (row.status === "pending" && s.provider !== "manual" && s.enabled) {
       await pushToProvider(row, s, `Booking ${booking.booking_date}`);
       retried++;
     }
@@ -904,6 +917,13 @@ Deno.serve(async (req) => {
 
       case "test": {
         const s = await getSettings();
+        if (s.provider === "ttlock") {
+          const c = getTTLockCredentials();
+          if (!c) { result = { success: false, error: "TTLock credentials not configured" }; break; }
+          const m = new TTLockMultiLock(c, ttlockIds(s));
+          result = { success: true, capabilities: { locks: await m.details() } };
+          break;
+        }
         const creds = getTuyaCredentials();
         if (!creds) {
           result = { success: false, error: "TUYA_ACCESS_ID / TUYA_ACCESS_SECRET not configured" };

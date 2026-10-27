@@ -15,6 +15,13 @@
       "when": 1792901425431,
       "tag": "0001_first_session_promo_customer_exemptions",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793069133458,
+      "tag": "0002_migration",
+      "breakpoints": true
     }
   ]
 }

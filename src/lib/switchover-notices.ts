@@ -36,7 +36,10 @@ const steps = (items: string[]) =>
     .join("")}</ol>`;
 
 /** Body content only — the sender adds the branded header, footer and unsubscribe link. */
-const body = (inner: string) => `<div style="${BODY_STYLE}">\n${inner}\n</div>`;
+const FONT_IMPORT =
+  '<style>@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Manrope:wght@400;600&display=swap");</style>';
+
+const body = (inner: string) => `${FONT_IMPORT}\n<div style="${BODY_STYLE}">\n${inner}\n</div>`;
 
 export function getSwitchoverNotices(tenant: TenantSettings) {
   const ahead = `Hi {first_name},

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Copy, Eye, FileText, Loader2 } from "lucide-react";
+import { ArrowRight, Code2, Copy, Eye, FileText, Loader2 } from "lucide-react";
 import { useTenant } from "@/config/tenant";
 import { getSwitchoverNotices } from "@/lib/switchover-notices";
 import { renderTemplatePreview } from "@/lib/email-preview";
@@ -16,6 +16,7 @@ export function SystemSwitchover() {
   const { toast } = useToast();
   const [preview, setPreview] = useState<{ subject: string; html: string } | null>(null);
   const [previewing, setPreviewing] = useState<string | null>(null);
+  const [copying, setCopying] = useState<string | null>(null);
   const notices = getSwitchoverNotices(tenant);
 
   const showPreview = async (notice: typeof notices[number]) => {
@@ -36,6 +37,43 @@ export function SystemSwitchover() {
       toast({ title: "Notice copied" });
     } catch {
       toast({ title: "Could not copy notice", variant: "destructive" });
+    }
+  };
+
+  /**
+   * Body markup only. The bulk email sender adds the branded header, footer
+   * and unsubscribe link itself, so pasting the full document there would
+   * brand the email twice.
+   */
+  const copyBodyHtml = async (notice: typeof notices[number]) => {
+    setCopying(`${notice.id}:body`);
+    try {
+      await navigator.clipboard.writeText(notice.html);
+      toast({
+        title: "HTML email copied",
+        description: "Paste it into Bulk email → HTML Content. The branding is added automatically when it sends.",
+      });
+    } catch {
+      toast({ title: "Could not copy HTML", variant: "destructive" });
+    } finally {
+      setCopying(null);
+    }
+  };
+
+  /** The complete branded email, header and footer included. */
+  const copyFullHtml = async (notice: typeof notices[number]) => {
+    setCopying(`${notice.id}:full`);
+    try {
+      const html = await renderTemplatePreview(notice.subject, notice.html);
+      await navigator.clipboard.writeText(html);
+      toast({
+        title: "Full branded email copied",
+        description: "Includes the header, footer and button — for pasting into another email tool.",
+      });
+    } catch {
+      toast({ title: "Could not copy full email", variant: "destructive" });
+    } finally {
+      setCopying(null);
     }
   };
 
@@ -68,6 +106,12 @@ export function SystemSwitchover() {
                   {previewing === notice.id ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Eye className="h-4 w-4 mr-2" />}Preview email
                 </Button>
                 <Button variant="ghost" disabled={isLoading || Boolean(error)} onClick={() => copyNotice(notice)}><Copy className="h-4 w-4 mr-2" />Copy notice</Button>
+                <Button variant="ghost" disabled={isLoading || Boolean(error) || copying !== null} onClick={() => copyBodyHtml(notice)}>
+                  {copying === `${notice.id}:body` ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Code2 className="h-4 w-4 mr-2" />}Copy HTML email
+                </Button>
+                <Button variant="ghost" disabled={isLoading || Boolean(error) || copying !== null} onClick={() => copyFullHtml(notice)}>
+                  {copying === `${notice.id}:full` ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Code2 className="h-4 w-4 mr-2" />}Copy full branded email
+                </Button>
               </div>
             </CardContent>
           </Card>

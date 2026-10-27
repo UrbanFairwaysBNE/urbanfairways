@@ -31,7 +31,7 @@ const paragraphs = (parts: string[]) =>
     .join("\n");
 
 const steps = (items: string[]) =>
-  `<ol style="margin:0 0 22px; padding-left:22px; ${BODY_STYLE}">${items
+  `<ol style="margin:0 0 22px; padding-left:30px; ${BODY_STYLE}">${items
     .map((item) => `<li style="margin-bottom:6px;">${escapeHtml(item)}</li>`)
     .join("")}</ol>`;
 

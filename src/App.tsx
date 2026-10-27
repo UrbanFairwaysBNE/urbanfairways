@@ -61,7 +61,6 @@ const MarketingAbout = lazy(() => import("./pages/marketing/MarketingAbout"));
 const MarketingMembership = lazy(() => import("./pages/marketing/MarketingMembership"));
 const MarketingLeague = lazy(() => import("./pages/marketing/MarketingLeague"));
 const MarketingMonthlyWinner = lazy(() => import("./pages/marketing/MarketingMonthlyWinner"));
-const MarketingAmbrose = lazy(() => import("./pages/marketing/MarketingAmbrose"));
 
 const MarketingContact = lazy(() => import("./pages/marketing/MarketingContact"));
 const MarketingFAQs = lazy(() => import("./pages/marketing/MarketingFAQs"));
@@ -275,7 +274,7 @@ const App = () => {
             <Route path="/membership-info" element={<MarketingMembership />} />
             <Route path="/league-info" element={<MarketingLeague />} />
             <Route path="/monthly-winner" element={<MarketingMonthlyWinner />} />
-            <Route path="/ambrose" element={<MarketingAmbrose />} />
+            <Route path="/ambrose" element={<Navigate to="/league-info" replace />} />
             <Route path="/compete-info" element={<Navigate to="/league-info" replace />} />
 
             <Route path="/contact" element={<MarketingContact />} />

@@ -20,7 +20,6 @@ const getFaqs = (venueName: string) => [
     items: [
       { q: `What is the ${venueName} League?`, a: `The ${venueName} League (UF League) is a members-only simulator golf league run through the Simulator Golf Tour (SGT). You play handicapped tournament rounds in your own time, with live leaderboards, weekly winners, monthly standings and prizes.` },
       { q: "How much does it cost to join?", a: `Access to the UF League is included with eligible memberships. Higher tiers include full access, and entry-level members can still join our local weekly comp.` },
-      { q: "Is it the same as the Wednesday 2-Man Ambrose?", a: "No. The Ambrose is a separate in-person team comp scored on the night. The UF League is the ongoing online tour with its own handicaps and standings." },
     ],
   },
   {

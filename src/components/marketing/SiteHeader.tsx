@@ -31,7 +31,6 @@ const navGroups: NavGroup[] = [
     links: [
       { to: "/league-info", label: "The League" },
       { to: "/monthly-winner", label: "Monthly Winner" },
-      { to: "/ambrose", label: "2-Man Ambrose" },
     ],
 
   },

@@ -62,7 +62,7 @@ export function SystemSwitchover() {
               </div>
               <p className="text-sm font-medium break-words">{notice.subject}</p>
               <div className="whitespace-pre-line text-sm leading-relaxed">{notice.text}</div>
-              {notice.id === "launch-day" && <p className="text-sm text-destructive">Send only after the accounts, cancellations and credits are verified. Each recipient needs their own secure password setup link; the preview does not contain one.</p>}
+              {notice.id === "launch-day" && <p className="text-sm text-destructive">Send only after the accounts, cancellations and credits are verified. Customers set their password themselves through the forgot-password form linked in the notice.</p>}
               <div className="flex flex-wrap gap-2">
                 <Button variant="outline" disabled={isLoading || Boolean(error) || previewing !== null} onClick={() => showPreview(notice)}>
                   {previewing === notice.id ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Eye className="h-4 w-4 mr-2" />}Preview email

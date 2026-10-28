@@ -5,6 +5,7 @@ import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
 import { getTenant, tenantHubUrl, tenantBookingUrl, tenantAddress } from "../_shared/tenant.ts";
 import { sendSMS as sharedSendSMS } from "../_shared/sms.ts";
 import { normaliseLanguage, localiseEmailTemplate, localiseSmsMessage } from "../_shared/i18n.ts";
+import { withLessonDoorAccess } from "../_shared/lesson-door-access.ts";
 
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
@@ -477,6 +478,7 @@ serve(async (req) => {
     const renderSmsTemplate = async (
       templateKey: string,
       tags: Record<string, string> = templateTags,
+      language = recipientLang,
     ): Promise<string | null> => {
       const { data: tpl } = await supabaseClient
         .from("sms_templates")
@@ -484,7 +486,7 @@ serve(async (req) => {
         .eq("template_key", templateKey)
         .maybeSingle();
       if (!tpl || !(tpl as any).is_active) return null;
-      const picked = localiseSmsMessage(tpl as any, recipientLang);
+      const picked = localiseSmsMessage(tpl as any, language);
       if (!picked) return null;
       let out = picked;
       for (const [tag, value] of Object.entries(tags)) {
@@ -520,16 +522,16 @@ serve(async (req) => {
         <p style="margin:0 0 16px 0; font-size:16px;"><strong>${bookingDate}</strong><br />${startTime12hr} - ${endTime12hr}<br />${bayName}</p>
       `;
 
-      const bodyContent = localisedTemplate?.html_content
+      const bodyContent = withLessonDoorAccess(localisedTemplate?.html_content
         ? replaceTemplateTags(localisedTemplate.html_content, templateTags)
-        : fallbackBody;
+        : fallbackBody, doorCode, "email", notification_type, recipientLang);
 
       htmlContent = await renderBrandedEmail(supabaseClient, heading, bodyContent, {
         text: "View My Bookings",
         url: tenantHubUrl(tenant, "/my-bookings"),
       });
 
-      smsMessage = (await renderSmsTemplate(templateKey)) ?? "";
+      smsMessage = withLessonDoorAccess((await renderSmsTemplate(templateKey)) ?? "", doorCode, "sms", notification_type, recipientLang);
       logStep("Lesson coach email prepared", { templateKey });
     } else if (notification_type === "confirmation" || notification_type === "reschedule") {
 
@@ -785,9 +787,9 @@ serve(async (req) => {
             </p>
           `;
 
-          const clientBody = (clientTpl as any)?.html_content
+          const clientBody = withLessonDoorAccess((clientTpl as any)?.html_content
             ? replaceTemplateTags((clientTpl as any).html_content, clientTags)
-            : fallbackBody;
+            : fallbackBody, doorCode, "email", notification_type, clientLang);
 
           const clientSubject = replaceTemplateTags(
             (clientTpl as any)?.subject || `${heading} - ${shortDate} ${startTime12hr}`,
@@ -815,7 +817,7 @@ serve(async (req) => {
             '{first_name}': lessonClient.first_name || '',
             '{last_name}': lessonClient.last_name || '',
           };
-          const clientSms = await renderSmsTemplate(clientKey, clientTagsSms);
+          const clientSms = withLessonDoorAccess((await renderSmsTemplate(clientKey, clientTagsSms, clientLang)) ?? "", doorCode, "sms", notification_type, clientLang);
           if (clientSms && clientSms.trim().length > 0) {
             const clientSmsResult = await sendSMS(lessonClient.phone, clientSms, tenant.venue_name);
             logStep("Lesson client SMS result", clientSmsResult);

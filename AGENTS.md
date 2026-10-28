@@ -1,4 +1,5 @@
 # Project rules
+- Lesson confirmation/reschedule emails and SMS use the shared lesson-door-access helper after template rendering for both recipients, so edited templates cannot accidentally omit the resolved booking-day code; disabled sends and cancellations remain unchanged.
 - Retired public marketing pages redirect to a relevant active page while preserving their source for later restoration; hiding a promotion must not delete its admin tools or competition history.
 - Keep system-switchover notices separate from promotional campaign composition; the dedicated admin tab is preparation-only so reviewing a notice cannot trigger billing changes or customer sends.
 - Create and edit timetable blocks through the same AddBookingDialog form and shared block duration validation, to keep availability checks and limits consistent.

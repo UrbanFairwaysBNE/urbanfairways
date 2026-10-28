@@ -2,6 +2,7 @@ import { Resend } from "npm:resend@2.0.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { getTenant, tenantBookingUrl, TenantConfig } from "../_shared/tenant.ts";
 import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
+import { unsubscribeToken, unsubscribeUrl, isMarketingSuppressed } from "../_shared/marketing-unsubscribe.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -52,12 +53,20 @@ Deno.serve(async (req) => {
       { auth: { persistSession: false } },
     );
 
+    if (await isMarketingSuppressed(supabase, to)) {
+      return new Response(JSON.stringify({ success: false, error: "This customer is unsubscribed from marketing emails" }), {
+        status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const optOutUrl = unsubscribeUrl(tenant.booking_domain, to, await unsubscribeToken(to, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""));
+
     const brandedHtml = await renderBrandedEmail(
       supabase,
       subject,
       bodyContent,
       { text: `Visit ${tenant.venue_name}`, url: tenantBookingUrl(tenant) },
       tenant,
+      optOutUrl,
     );
 
     // Send email
@@ -66,7 +75,12 @@ Deno.serve(async (req) => {
       to: [to],
       subject: subject,
       html: brandedHtml,
+      headers: {
+        "List-Unsubscribe": `<${Deno.env.get("SUPABASE_URL")}/functions/v1/marketing-unsubscribe?${new URL(optOutUrl).searchParams.toString()}>`,
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+      },
     });
+    if (emailResponse.error) throw new Error(emailResponse.error.message);
 
     logStep("Email sent successfully", { emailResponse });
 

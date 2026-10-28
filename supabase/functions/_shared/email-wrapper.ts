@@ -112,9 +112,14 @@ export function buildEmailTemplate(
   ctaButton?: EmailCta,
   layout?: Partial<EmailLayout>,
   tenant: TenantConfig = NEUTRAL_TENANT,
+  unsubscribeLink?: string,
 ): string {
   const header = layout?.header_html || defaultHeaderHtml(tenant);
-  const footer = layout?.footer_html || defaultFooterHtml(tenant);
+  let footer = layout?.footer_html || defaultFooterHtml(tenant);
+  if (unsubscribeLink) {
+    const link = `<div style="margin-top:14px;font-size:12px;"><a href="${unsubscribeLink.replace(/&/g, "&amp;")}" style="color:inherit;text-decoration:underline;">Unsubscribe from marketing emails</a></div>`;
+    footer = footer.replace(/(<\/td>\s*<\/tr>\s*<\/table>)/i, `${link}$1`);
+  }
 
   const buttonHtml = ctaButton
     ? `
@@ -229,8 +234,9 @@ export async function renderBrandedEmail(
   bodyContent: string,
   ctaButton?: EmailCta,
   tenant?: TenantConfig,
+  unsubscribeLink?: string,
 ): Promise<string> {
   const t = tenant ?? (await getTenant().catch(() => NEUTRAL_TENANT));
   const layout = await fetchEmailLayout(supabase, t);
-  return buildEmailTemplate(heading, bodyContent, ctaButton, layout, t);
+  return buildEmailTemplate(heading, bodyContent, ctaButton, layout, t, unsubscribeLink);
 }

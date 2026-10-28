@@ -1,4 +1,5 @@
 # Switchover preparation
+- [x] Verify email-footer unsubscribe and add a manual marketing unsubscribe action in customer profiles; tested signed-out email links, one-click POST, persisted admin opt-out, and blocked sends without sending customer emails.
 - [x] Review SEO foundations and add a generated sitemap for public website pages with a robots.txt reference; verify the preview serves valid XML. Live availability requires the next publish.
 - [x] Allow 1.5-hour bookings in the live database; verify the booking row type preserves 1.5 and retain a read-only SQL regression test.
 - [x] Include the lesson's door code in customer and coach confirmation/reschedule emails and SMS; deployed sender and passed 11 regression tests. No customer test messages sent.

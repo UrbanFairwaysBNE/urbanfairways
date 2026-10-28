@@ -66,6 +66,8 @@ imperfect — have fun.
 
 ## Marketing
 
+Marketing and bulk emails include a signed, recipient-specific unsubscribe link in the saved global footer. The public `/unsubscribe` page needs no login; the same endpoint accepts standard one-click POST requests. Previously delivered tokens remain valid. Admin Customer Profile has a manual unsubscribe action, authorized server-side with `has_role`. Opt-out sets `profiles.marketing_opt_out` and records the normalized address in `marketing_unsubscribes` (no profile_id column). Both senders recheck these suppression sources before sending. Booking confirmations, password resets and other service emails remain unchanged.
+
 `marketing_campaigns`, `marketing_unsubscribes`, `send-marketing-email`,
 `send-bulk-email`, `marketing-unsubscribe`. Automated programmes:
 

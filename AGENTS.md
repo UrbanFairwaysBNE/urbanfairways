@@ -1,4 +1,5 @@
 # Project rules
+- Generate public/sitemap.xml through scripts/generate-sitemap.ts before dev/build; keep its paths aligned with public indexable routes, exclude app/auth/admin/redirects, and omit lastmod without authoritative page-specific timestamps so crawlers discover only intended website content.
 - Store booking durations as numeric hours, not integers, so the existing half-hour booking flow preserves fractional durations through confirmation.
 - Lesson confirmation/reschedule emails and SMS use the shared lesson-door-access helper after template rendering for both recipients, so edited templates cannot accidentally omit the resolved booking-day code; disabled sends and cancellations remain unchanged.
 - Retired public marketing pages redirect to a relevant active page while preserving their source for later restoration; hiding a promotion must not delete its admin tools or competition history.

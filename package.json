@@ -4,8 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "predev": "bun scripts/generate-sitemap.ts",
     "dev": "vite",
+    "prebuild": "bun scripts/generate-sitemap.ts",
     "build": "vite build",
+    "prebuild:dev": "bun scripts/generate-sitemap.ts",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview"

@@ -89,7 +89,7 @@ export default function Unsubscribe() {
             variant="outline"
             onClick={() => window.location.href = hubUrl(tenant, "/")}
           >
-            Go to Hub
+            Go to app
           </Button>
         </CardContent>
       </Card>

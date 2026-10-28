@@ -100,6 +100,7 @@ interface Customer {
   custom_segment?: string | null;
   membership_on_hold?: boolean;
   booking_flag_enabled?: boolean;
+  marketing_opt_out?: boolean;
 }
 
 
@@ -139,6 +140,7 @@ export default function AdminCustomers() {
   const [bookingCountFilter, setBookingCountFilter] = useState<string | null>(null);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isUnsubscribing, setIsUnsubscribing] = useState(false);
 
   // Edit customer state
   const [editFirstName, setEditFirstName] = useState("");
@@ -1047,6 +1049,25 @@ export default function AdminCustomers() {
     setIsEditMode(true);
   };
 
+  const unsubscribeCustomer = async () => {
+    if (!selectedCustomer || isUnsubscribing) return;
+    const customer = selectedCustomer;
+    setIsUnsubscribing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("marketing-unsubscribe", {
+        body: { email: customer.email, source: "admin" },
+      });
+      if (error || !data?.success) throw error || new Error(data?.error || "Unable to unsubscribe");
+      setCustomers(prev => prev.map(c => c.id === customer.id ? { ...c, marketing_opt_out: true } : c));
+      setSelectedCustomer(prev => prev?.id === customer.id ? { ...prev, marketing_opt_out: true } : prev);
+      toast({ title: "Unsubscribed from marketing", description: "Booking confirmations and account emails are unchanged." });
+    } catch {
+      toast({ title: "Unable to unsubscribe", description: "Please try again.", variant: "destructive" });
+    } finally {
+      setIsUnsubscribing(false);
+    }
+  };
+
   const closeEditMode = () => {
     setIsEditMode(false);
     setEditFirstName("");
@@ -1711,6 +1732,19 @@ export default function AdminCustomers() {
                 <hr className="border-border" />
 
                 {/* Balance Section */}
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-medium">Marketing emails</div>
+                    <div className="text-xs text-muted-foreground">
+                      {selectedCustomer.marketing_opt_out ? "Unsubscribed" : "Subscribed"}
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={unsubscribeCustomer} disabled={isUnsubscribing || selectedCustomer.marketing_opt_out}>
+                    <Mail className="h-4 w-4 mr-2" />
+                    {isUnsubscribing ? "Unsubscribing..." : selectedCustomer.marketing_opt_out ? "Unsubscribed" : "Unsubscribe"}
+                  </Button>
+                </div>
+
                 <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                   <div>
                     <div className="text-sm text-muted-foreground">Credit Balance</div>

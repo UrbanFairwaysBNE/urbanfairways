@@ -1,4 +1,5 @@
 # Project rules
+- Marketing and bulk email senders must recheck profile opt-out and recorded unsubscribes at send time, and use recipient-specific signed public unsubscribe links in the shared footer; the same endpoint supports authenticated admin opt-out and keeps legacy email links valid so existing recipients are not stranded.
 - Generate public/sitemap.xml through scripts/generate-sitemap.ts before dev/build; keep its paths aligned with public indexable routes, exclude app/auth/admin/redirects, and omit lastmod without authoritative page-specific timestamps so crawlers discover only intended website content.
 - Store booking durations as numeric hours, not integers, so the existing half-hour booking flow preserves fractional durations through confirmation.
 - Lesson confirmation/reschedule emails and SMS use the shared lesson-door-access helper after template rendering for both recipients, so edited templates cannot accidentally omit the resolved booking-day code; disabled sends and cancellations remain unchanged.

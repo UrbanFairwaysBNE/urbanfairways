@@ -1,8 +1,8 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { getTenant, tenantHubUrl, tenantBookingUrl, TenantConfig } from "../_shared/tenant.ts";
 import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
+import { unsubscribeToken, unsubscribeUrl as buildPublicUnsubscribeUrl, isMarketingSuppressed } from "../_shared/marketing-unsubscribe.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -19,17 +19,11 @@ interface Recipient {
 
 // Simple token generator for unsubscribe URL verification
 async function generateUnsubscribeToken(email: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(email.toLowerCase() + "venue-unsubscribe-salt");
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.slice(0, 8).map(b => b.toString(16).padStart(2, "0")).join("");
+  return unsubscribeToken(email, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "");
 }
 
 function buildUnsubscribeUrl(email: string, token: string, tenant: TenantConfig): string {
-  const rawUrl = Deno.env.get("SITE_URL") || tenantHubUrl(tenant);
-  const siteUrl = /^https?:\/\//i.test(rawUrl) ? rawUrl.replace(/\/$/, "") : `https://${rawUrl.replace(/^\/+/, "").replace(/\/$/, "")}`;
-  return `${siteUrl}/unsubscribe?email=${encodeURIComponent(email)}&token=${token}`;
+  return buildPublicUnsubscribeUrl(tenant.booking_domain, email, token);
 }
 
 interface MarketingEmailRequest {
@@ -124,6 +118,7 @@ async function sendEmailsInBackground(
     // Prepare all emails in this batch
     const emailPromises = batch.map(async (recipient) => {
       try {
+        if (await isMarketingSuppressed(supabaseForUpdate, recipient.email)) return null;
         // Generate reset link if needed
         let resetLink: string | undefined;
         if (needsResetLink && supabaseAdmin) {
@@ -151,17 +146,13 @@ async function sendEmailsInBackground(
             </div>
         `;
         
-        const unsubscribeBlock = `
-            <p style="margin:24px 0 0; font-family:Manrope, Arial, sans-serif; font-size:11px; line-height:1.5; color:#2F3134; opacity:0.6; text-align:center;">
-              <a href="${unsubscribeUrl}" style="color:#2F3134; text-decoration:underline;">Unsubscribe from marketing emails</a>
-            </p>`;
-
         const brandedHtml = await renderBrandedEmail(
           supabaseForUpdate,
           personalizedSubject,
-          bodyContent + unsubscribeBlock,
+          bodyContent,
           undefined,
           tenant,
+          unsubscribeUrl,
         );
 
         return {
@@ -170,7 +161,7 @@ async function sendEmailsInBackground(
           subject: personalizedSubject,
           html: brandedHtml,
           headers: {
-            "List-Unsubscribe": `<${unsubscribeUrl}>`,
+            "List-Unsubscribe": `<${Deno.env.get("SUPABASE_URL")}/functions/v1/marketing-unsubscribe?${new URL(unsubscribeUrl).searchParams.toString()}>`,
             "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
           },
         };
@@ -185,7 +176,9 @@ async function sendEmailsInBackground(
     // Send each email individually (Resend batch API requires different format)
     for (const emailData of preparedEmails) {
       try {
-        await resend.emails.send(emailData);
+        if (await isMarketingSuppressed(supabaseForUpdate, emailData.to[0])) continue;
+        const { error } = await resend.emails.send(emailData);
+        if (error) throw error;
         successCount++;
       } catch (error) {
         failCount++;
@@ -280,4 +273,4 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-serve(handler);
+Deno.serve(handler);

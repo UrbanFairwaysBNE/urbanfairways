@@ -1,4 +1,5 @@
 # Switchover preparation
+- [x] Allow 1.5-hour bookings in the live database; verify the booking row type preserves 1.5 and retain a read-only SQL regression test.
 - [x] Include the lesson's door code in customer and coach confirmation/reschedule emails and SMS; deployed sender and passed 11 regression tests. No customer test messages sent.
 - [x] Hide 2-Man Ambrose from the website and verify the Wednesday competition popup is disabled (live comp_enabled=false; booking prompt checks that flag).
 - [x] Permanently exempt all 966 current customers from First Session Free and exclude exempt accounts from the marketing eligibility count.

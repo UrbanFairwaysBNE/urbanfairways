@@ -63,6 +63,14 @@ serve(async (req) => {
 
     if (linkError) {
       logStep("Error generating link", { error: linkError.message });
+      // Don't leak whether an account exists, and don't scare customers with a
+      // cryptic error when they simply typed the wrong email address.
+      if (/user not found/i.test(linkError.message)) {
+        return new Response(
+          JSON.stringify({ success: true, message: "If an account exists for that email, a reset link has been sent" }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
       throw linkError;
     }
 

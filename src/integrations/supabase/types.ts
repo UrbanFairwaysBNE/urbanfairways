@@ -2349,6 +2349,8 @@ export type Database = {
           updated_at: string
           user_id: string
           verification_sector: string | null
+          verification_status: string | null
+          verified_at: string | null
         }
         Insert: {
           booking_flag_enabled?: boolean
@@ -2382,6 +2384,8 @@ export type Database = {
           updated_at?: string
           user_id: string
           verification_sector?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
         }
         Update: {
           booking_flag_enabled?: boolean
@@ -2415,6 +2419,8 @@ export type Database = {
           updated_at?: string
           user_id?: string
           verification_sector?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
         }
         Relationships: []
       }

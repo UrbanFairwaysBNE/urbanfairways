@@ -266,8 +266,8 @@ const App = () => {
             <Route path="/comp/leaderboard" element={<CompGate><CompLeaderboard /></CompGate>} />
             <Route path="/embed/local-comp-leaderboard" element={<EmbedLocalCompLeaderboard />} />
             <Route path="/gift" element={<Gift />} />
-            <Route path="/swing-lab" element={<SwingLab />} />
-            <Route path="/swing-lab/progress" element={<SwingLabProgress />} />
+            <Route path="/swing-lab" element={<UFLabAccessGuard><SwingLab /></UFLabAccessGuard>} />
+            <Route path="/swing-lab/progress" element={<UFLabAccessGuard><SwingLabProgress /></UFLabAccessGuard>} />
 
             {/* Public Marketing Site Routes */}
             <Route path="/about" element={<MarketingAbout />} />

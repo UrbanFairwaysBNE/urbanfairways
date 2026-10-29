@@ -1,3 +1,4 @@
+import UFLabAccessGuard from "./components/UFLabAccessGuard";
 import { lazy, Suspense, useEffect, useRef } from "react";
 import BrandLoader from "@/components/brand/BrandLoader";
 import { Toaster } from "@/components/ui/toaster";

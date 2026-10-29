@@ -1052,6 +1052,30 @@ export default function AdminCustomers() {
     setIsEditMode(true);
   };
 
+  const [isUpdatingVerification, setIsUpdatingVerification] = useState(false);
+
+  const setVerification = async (customer: Customer, status: "approved" | "rejected") => {
+    if (isUpdatingVerification) return;
+    setIsUpdatingVerification(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ verification_status: status, verified_at: new Date().toISOString() })
+      .eq("id", customer.id);
+    setIsUpdatingVerification(false);
+    if (error) {
+      toast({ title: "Couldn't update verification", description: error.message, variant: "destructive" });
+      return;
+    }
+    setCustomers(prev => prev.map(c => c.id === customer.id ? { ...c, verification_status: status } : c));
+    setSelectedCustomer(prev => prev?.id === customer.id ? { ...prev, verification_status: status } : prev);
+    toast({
+      title: status === "approved" ? "Membership approved" : "Verification declined",
+      description: status === "approved"
+        ? `${customer.first_name}'s ${customer.verification_sector || "frontline"} eligibility is confirmed.`
+        : "If their membership is still active, cancel it below to revert them to casual.",
+    });
+  };
+
   const unsubscribeCustomer = async () => {
     if (!selectedCustomer || isUnsubscribing) return;
     const customer = selectedCustomer;

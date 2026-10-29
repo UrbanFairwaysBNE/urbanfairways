@@ -101,6 +101,9 @@ interface Customer {
   membership_on_hold?: boolean;
   booking_flag_enabled?: boolean;
   marketing_opt_out?: boolean;
+  verification_sector?: string | null;
+  verification_status?: string | null;
+  verified_at?: string | null;
 }
 
 

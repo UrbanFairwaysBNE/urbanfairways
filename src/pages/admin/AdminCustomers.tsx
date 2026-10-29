@@ -1758,6 +1758,63 @@ export default function AdminCustomers() {
 
                 <hr className="border-border" />
 
+                {/* Membership Verification - shown for tiers that require eligibility review (e.g. frontline) */}
+                {selectedCustomer.verification_status && (
+                  <>
+                    <div className="p-3 bg-muted/50 border border-border rounded-lg space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <Shield className="h-4 w-4 text-primary shrink-0" />
+                          <div className="text-sm font-medium">Membership verification</div>
+                        </div>
+                        <Badge
+                          variant={selectedCustomer.verification_status === "approved" ? "default" : "outline"}
+                          className={
+                            selectedCustomer.verification_status === "pending"
+                              ? "border-brand-accent text-brand-accent"
+                              : selectedCustomer.verification_status === "rejected"
+                                ? "border-destructive/50 text-destructive"
+                                : ""
+                          }
+                        >
+                          {selectedCustomer.verification_status === "pending" ? "Pending review" : selectedCustomer.verification_status}
+                        </Badge>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Sector: {selectedCustomer.verification_sector || "Not provided"}
+                      </div>
+                      {selectedCustomer.verification_status === "pending" && (
+                        <div className="flex gap-2 pt-1">
+                          <Button
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => setVerification(selectedCustomer, "approved")}
+                            disabled={isUpdatingVerification}
+                          >
+                            Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="flex-1 border-destructive/50 text-destructive hover:bg-destructive/10"
+                            onClick={() => setVerification(selectedCustomer, "rejected")}
+                            disabled={isUpdatingVerification}
+                          >
+                            Decline
+                          </Button>
+                        </div>
+                      )}
+                      {selectedCustomer.verification_status === "rejected" && (
+                        <div className="text-xs text-muted-foreground">
+                          Declined — if their membership is still active, cancel it below to revert them to casual.
+                        </div>
+                      )}
+                    </div>
+
+                    <hr className="border-border" />
+                  </>
+                )}
+
                 {/* Balance Section */}
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>

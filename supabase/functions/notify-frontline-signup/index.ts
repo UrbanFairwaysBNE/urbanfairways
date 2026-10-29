@@ -48,8 +48,11 @@ Deno.serve(async (req) => {
       .eq("user_id", user.id)
       .maybeSingle();
 
-    // Record the sector on the profile so admins can see it later
-    await supabase.from("profiles").update({ verification_sector: sector }).eq("user_id", user.id);
+    // Record the sector on the profile and mark it pending admin review
+    await supabase
+      .from("profiles")
+      .update({ verification_sector: sector, verification_status: "pending", verified_at: null })
+      .eq("user_id", user.id);
 
     const { data: template } = await supabase
       .from("email_templates")

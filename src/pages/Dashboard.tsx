@@ -200,7 +200,7 @@ const Dashboard = () => {
 
   const firstName = user?.user_metadata?.first_name || t("dashboard:defaultName");
   const hasLeagueAccess = hasLeagueTierAccess(membershipTier) || isStaff || isAdmin;
-  const hasRangeAccess = hasRangeTierAccess(membershipTier) || isStaff || isAdmin;
+  const hasRangeAccess = hasRangeTierAccess(membershipTier) || isCoach || isStaff || isAdmin;
 
   return (
     <div className="min-h-screen flex flex-col">

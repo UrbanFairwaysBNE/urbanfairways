@@ -1094,7 +1094,9 @@ export default function AdminTimetable() {
                         ? "Cash"
                         : selectedBooking.payment_method === "pending"
                         ? "Pending"
-                        : selectedBooking.payment_method || ","}
+                        : selectedBooking.payment_method === "prepaid_hours"
+                        ? "Prepaid Hours"
+                        : selectedBooking.payment_method || "-"}
                     </p>
                   </div>
                 </div>

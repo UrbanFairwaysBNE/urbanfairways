@@ -196,14 +196,14 @@ export default function AdminDashboard() {
     // Fetch bookings (excluding those paid via POS - they'll be counted from POS items)
     const { data: bookingRevenueData } = await supabase
       .from('bookings')
-      .select('id, total_price')
+      .select('id, total_price, payment_method')
       .gte('created_at', revenueRange.start)
       .lte('created_at', revenueRange.end)
       .in('status', ['confirmed', 'completed', 'charged']);
 
     // Only count bookings NOT paid via POS
     const bookingRevenue = (bookingRevenueData || [])
-      .filter(b => !posBookingIds.has(String(b.id)))
+      .filter(b => !posBookingIds.has(String(b.id)) && b.payment_method !== 'prepaid_hours')
       .reduce((sum, b) => sum + Number(b.total_price), 0);
 
     // Fetch POS transactions and calculate revenue from items (same logic as SalesReporting)
@@ -239,7 +239,16 @@ export default function AdminDashboard() {
     const membershipRevenue = (membershipPaymentsData || [])
       .reduce((sum, p) => sum + Number(p.amount), 0);
 
-    const revenue = bookingRevenue + posRevenue + membershipRevenue;
+    // Prepaid pack purchases (redemptions are excluded from booking revenue above)
+    const { data: packRevenueData } = await supabase
+      .from('pack_lots')
+      .select('price_paid')
+      .not('stripe_payment_intent_id', 'is', null)
+      .gte('purchased_at', revenueRange.start)
+      .lte('purchased_at', revenueRange.end);
+    const packRevenue = (packRevenueData || []).reduce((sum, p) => sum + Number(p.price_paid || 0), 0);
+
+    const revenue = bookingRevenue + posRevenue + membershipRevenue + packRevenue;
 
     // Fetch occupancy based on filter (uses booking_date which is a DATE column)
     const occupancyRange = getBookingDateRange(occupancyFilter);

@@ -532,6 +532,7 @@ export function SalesReporting() {
                   <SelectItem value="booking">Bookings Only</SelectItem>
                   <SelectItem value="pos">POS Only</SelectItem>
                   <SelectItem value="membership">Memberships Only</SelectItem>
+                  <SelectItem value="pack">Prepaid Packs Only</SelectItem>
                 </SelectContent>
               </Select>
             </div>

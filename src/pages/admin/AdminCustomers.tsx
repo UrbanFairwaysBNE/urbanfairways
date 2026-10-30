@@ -78,6 +78,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Switch } from "@/components/ui/switch";
 import { GiftCardsSection } from "@/components/admin/GiftCardsSection";
 import { CreditTransactionHistory } from "@/components/admin/CreditTransactionHistory";
+import { CustomerHistoryDialog } from "@/components/admin/CustomerHistoryDialog";
 import { MembersSection } from "@/components/admin/MembersSection";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -142,6 +143,7 @@ export default function AdminCustomers() {
   const [tierFilter, setTierFilter] = useState<string | null>(null);
   const [bookingCountFilter, setBookingCountFilter] = useState<string | null>(null);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isUnsubscribing, setIsUnsubscribing] = useState(false);
 
@@ -1750,10 +1752,20 @@ export default function AdminCustomers() {
 
                   <div className="flex items-center gap-3 text-sm">
                     <Users className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <span className={selectedCustomer.booking_count === 0 ? "text-muted-foreground" : ""}>
-                      {selectedCustomer.booking_count || 0} booking{selectedCustomer.booking_count !== 1 ? 's' : ''}
-                    </span>
+                    <button
+                      type="button"
+                      className="text-primary underline underline-offset-2 font-medium"
+                      onClick={() => setHistoryOpen(true)}
+                    >
+                      History
+                    </button>
                   </div>
+                  <CustomerHistoryDialog
+                    open={historyOpen}
+                    onOpenChange={setHistoryOpen}
+                    userId={selectedCustomer.user_id}
+                    customerName={`${selectedCustomer.first_name || ""} ${selectedCustomer.last_name || ""}`.trim()}
+                  />
                 </div>
 
                 <hr className="border-border" />

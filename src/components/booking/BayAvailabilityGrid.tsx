@@ -106,6 +106,9 @@ export function BayAvailabilityGrid({
                 )}>
                   {isAvailable ? t("booking:available") : t("booking:booked")}
                 </p>
+                {bay.name === "Bay 5" && (
+                  <p className="text-xs text-muted-foreground mt-1">Not suitable for left handers</p>
+                )}
               </CardContent>
             </Card>
           );

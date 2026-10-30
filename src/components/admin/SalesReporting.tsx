@@ -27,7 +27,7 @@ import { toZonedTime } from "date-fns-tz";
 
 interface SaleRecord {
   id: string;
-  type: "booking" | "pos" | "membership";
+  type: "booking" | "pos" | "membership" | "pack";
   date: Date;
   amount: number;
   paymentMethod: string;
@@ -44,7 +44,7 @@ const tierDisplayNames: Record<string, string> = {
 };
 
 type DatePreset = "today" | "yesterday" | "last7" | "last30" | "thisMonth" | "lastMonth" | "custom";
-type SaleType = "all" | "booking" | "pos" | "membership";
+type SaleType = "all" | "booking" | "pos" | "membership" | "pack";
 type PaymentMethod = "all" | "card" | "deposit" | "cash" | "terminal" | "stripe";
 
 export function SalesReporting() {
@@ -181,7 +181,8 @@ export function SalesReporting() {
             id: booking.id,
             type: "booking",
             date: new Date(booking.created_at),
-            amount: booking.total_price,
+            // Prepaid-hour redemptions were already paid when the pack was bought
+            amount: bookingPaymentMethod === "prepaid_hours" ? 0 : Number(booking.total_price),
             paymentMethod: bookingPaymentMethod,
             customerName: profile ? `${profile.first_name} ${profile.last_name}` : null,
             customerEmail: profile?.email || null,
@@ -372,6 +373,31 @@ export function SalesReporting() {
       }
     }
 
+    // Fetch prepaid pack purchases
+    if (saleType === "all" || saleType === "pack") {
+      const { data: packs } = await supabase
+        .from("pack_lots")
+        .select("id, purchased_at, price_paid, product_name, hours_total, purchaser_name, purchaser_email, status, is_gift, stripe_payment_intent_id")
+        .not("purchased_at", "is", null)
+        .not("stripe_payment_intent_id", "is", null)
+        .gte("purchased_at", startStr)
+        .lte("purchased_at", endStr);
+      for (const lot of packs || []) {
+        if (paymentMethod !== "all" && paymentMethod !== "stripe" && paymentMethod !== "card") continue;
+        allSales.push({
+          id: lot.id,
+          type: "pack",
+          date: new Date(lot.purchased_at as string),
+          amount: Number(lot.price_paid || 0),
+          paymentMethod: "stripe",
+          customerName: lot.purchaser_name,
+          customerEmail: lot.purchaser_email,
+          description: `${lot.product_name} (${Number(lot.hours_total)}hr)${lot.is_gift ? " - gift" : ""}`,
+          status: lot.status,
+        });
+      }
+    }
+
     // Sort by date descending
     allSales.sort((a, b) => b.date.getTime() - a.date.getTime());
 
@@ -403,7 +429,7 @@ export function SalesReporting() {
     const rows = sales.map(sale => [
       format(sale.date, "yyyy-MM-dd"),
       format(sale.date, "HH:mm"),
-      sale.type === "booking" ? "Booking" : sale.type === "membership" ? "Membership" : "POS",
+      sale.type === "booking" ? "Booking" : sale.type === "membership" ? "Membership" : sale.type === "pack" ? "Prepaid Pack" : "POS",
       `"${sale.description.replace(/"/g, '""')}"`,
       sale.customerName ? `"${sale.customerName.replace(/"/g, '""')}"` : "",
       sale.customerEmail || "",
@@ -631,7 +657,7 @@ export function SalesReporting() {
                       </TableCell>
                       <TableCell>
                         <Badge variant={sale.type === "booking" ? "default" : sale.type === "membership" ? "outline" : "secondary"}>
-                          {sale.type === "booking" ? "Booking" : sale.type === "membership" ? "Membership" : "POS"}
+                          {sale.type === "booking" ? "Booking" : sale.type === "membership" ? "Membership" : sale.type === "pack" ? "Prepaid Pack" : "POS"}
                         </Badge>
                       </TableCell>
                       <TableCell className="max-w-[300px] truncate">{sale.description}</TableCell>

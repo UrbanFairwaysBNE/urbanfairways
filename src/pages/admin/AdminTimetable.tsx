@@ -458,7 +458,9 @@ export default function AdminTimetable() {
     return booking.stripe_payment_intent_id 
       || booking.payment_method === 'card'
       || booking.payment_method === 'balance'
-      || booking.payment_method === 'cash';
+      || booking.payment_method === 'cash'
+      || booking.payment_method === 'prepaid_hours'
+      || booking.payment_method === 'free';
   };
 
   const openAddBookingDialog = (slot: TimeSlot, bayId: string) => {

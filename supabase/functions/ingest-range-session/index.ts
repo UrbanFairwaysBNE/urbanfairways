@@ -1,6 +1,7 @@
 // Ingest a GSPro driving-range CSV export from the Bay Controller.
 // Auth: caller must be a signed-in admin (verified via JWT + has_role).
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { rangeSessionOwner } from "../_shared/range-session-owner.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -98,6 +99,20 @@ Deno.serve(async (req) => {
   const { user_id, booking_id, bay_id, csv_base64, csv_text, filename } = body ?? {};
   if (!user_id || (!csv_base64 && !csv_text)) return json({ error: "missing_fields" }, 400);
 
+  // Resolve ownership from the stored booking, not the controller's booker ID.
+  let ownerId = user_id;
+  let sessionBayId = bay_id ?? null;
+  if (booking_id) {
+    const { data: booking, error } = await admin.from("bookings")
+      .select("user_id, booking_type, client_user_id, bay_id")
+      .eq("id", booking_id).maybeSingle();
+    if (error) return json({ error: "booking_lookup_failed" }, 500);
+    if (!booking) return json({ error: "booking_not_found" }, 404);
+    try { ownerId = rangeSessionOwner(booking); }
+    catch { return json({ error: "lesson_customer_missing" }, 409); }
+    sessionBayId = booking.bay_id;
+  }
+
   let csvText: string;
   try {
     csvText = csv_text ?? new TextDecoder().decode(Uint8Array.from(atob(csv_base64), (c) => c.charCodeAt(0)));
@@ -126,7 +141,7 @@ Deno.serve(async (req) => {
   const { data: session, error: sessErr } = await admin
     .from("range_sessions")
     .insert({
-      user_id, booking_id: booking_id ?? null, bay_id: bay_id ?? null,
+      user_id: ownerId, booking_id: booking_id ?? null, bay_id: sessionBayId,
       shot_count: rows.length, source_filename: filename ?? null,
       ...(filenameStamp ? { session_date: filenameStamp.date, started_at: filenameStamp.iso } : {}),
     })
@@ -177,7 +192,7 @@ Deno.serve(async (req) => {
   const ended = stamps[stamps.length - 1] ?? null;
   const durationMin = started && ended ? (new Date(ended).getTime() - new Date(started).getTime()) / 60000 : null;
 
-  const csvPath = `${user_id}/${sessionId}.csv`;
+  const csvPath = `${ownerId}/${sessionId}.csv`;
   const { error: upErr } = await admin.storage.from("range-session-csv").upload(csvPath, new Blob([csvText], { type: "text/csv" }), { upsert: true });
   const finalCsvPath = upErr ? null : csvPath;
 

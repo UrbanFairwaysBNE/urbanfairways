@@ -254,14 +254,6 @@ Deno.serve(async (req) => {
         if (!userId || !SETTINGS_FILES.has(file)) return jsonResponse({ error: "bad_request" }, 400);
         if (!(await hasBookingAccess(userId, bookingId))) return jsonResponse({ error: "forbidden" }, 403);
 
-        const { data: booking, error: bookingError } = await supabase.from("bookings")
-          .select("user_id, booking_type, client_user_id")
-          .eq("id", bookingId).eq("bay_id", bay.id).maybeSingle();
-        if (bookingError || !booking) return jsonResponse({ error: "booking_lookup_failed" }, 500);
-        let ownerId: string;
-        try { ownerId = rangeSessionOwner(booking); }
-        catch { return jsonResponse({ error: "lesson_customer_missing" }, 409); }
-
         const path = `${userId}/${file}`;
         const { data, error } = await supabase.storage.from(SETTINGS_BUCKET).download(path);
         if (error || !data) return jsonResponse({ exists: false });
@@ -325,6 +317,14 @@ Deno.serve(async (req) => {
         const filename = typeof body?.filename === "string" ? body.filename : null;
         if (!userId || (!csvBase64 && !csvTextBody)) return jsonResponse({ error: "missing_fields" }, 400);
         if (!(await hasBookingAccess(userId, bookingId))) return jsonResponse({ error: "forbidden" }, 403);
+
+        const { data: booking, error: bookingError } = await supabase.from("bookings")
+          .select("user_id, booking_type, client_user_id")
+          .eq("id", bookingId).eq("bay_id", bay.id).maybeSingle();
+        if (bookingError || !booking) return jsonResponse({ error: "booking_lookup_failed" }, 500);
+        let ownerId: string;
+        try { ownerId = rangeSessionOwner(booking); }
+        catch { return jsonResponse({ error: "lesson_customer_missing" }, 409); }
 
         let csvText: string;
         try {

@@ -122,6 +122,12 @@ starts within 120 seconds.
 - Range/launch-monitor CSVs are exported on simulator close and posted to
   `bay-controller-api`; `fs.watch` attributes them to the booking that just ended.
 
+Both CSV ingestion endpoints resolve the data owner from the stored booking: lessons use
+`client_user_id`, ordinary sessions use `user_id`. Session rows and CSV storage paths use
+that resolved owner, irrespective of membership; viewing keeps the current UF Lab access
+rules. A lesson missing its customer is rejected rather than saved to the coach. Controller
+booking tiles also show the lesson customer's name; booker IDs and GSPro settings are unchanged.
+
 ## Logging
 
 Every scheduled action writes a high-precision `local_timestamp` entry to

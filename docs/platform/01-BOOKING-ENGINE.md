@@ -67,6 +67,9 @@ time, click a booking to open details, add bookings (`AddBookingDialog`), block 
 record internal staff notes (marked with a speech-bubble icon), and log first-time
 customers' referral source (`profiles.referral_source`, surfaced in Admin Analytics).
 
+Lesson tiles use the profile linked by `client_user_id`, not the coach/booker's `user_id`.
+The paying booker remains unchanged for billing and booking management.
+
 Bay blocks support 30-minute increments up to 10 hours, within the selected date's operating hours.
 An "All day" toggle creates a block spanning the day's full operating hours (`allDaySpan` in
 `src/lib/bay-block-utils.ts`) — deliberately exempt from the 10-hour cap.

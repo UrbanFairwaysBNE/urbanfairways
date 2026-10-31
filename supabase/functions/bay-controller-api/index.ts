@@ -1,5 +1,5 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { rangeSessionOwner } from "../_shared/range-session-owner.ts";
 
 // Version tracking for deployment debugging
 const VERSION = "2.2.0";
@@ -129,7 +129,7 @@ function decodeBase64(base64: string): Uint8Array {
   return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   // Handle CORS preflight with proper response body
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -318,6 +318,14 @@ serve(async (req) => {
         if (!userId || (!csvBase64 && !csvTextBody)) return jsonResponse({ error: "missing_fields" }, 400);
         if (!(await hasBookingAccess(userId, bookingId))) return jsonResponse({ error: "forbidden" }, 403);
 
+        const { data: booking, error: bookingError } = await supabase.from("bookings")
+          .select("user_id, booking_type, client_user_id")
+          .eq("id", bookingId).eq("bay_id", bay.id).maybeSingle();
+        if (bookingError || !booking) return jsonResponse({ error: "booking_lookup_failed" }, 500);
+        let ownerId: string;
+        try { ownerId = rangeSessionOwner(booking); }
+        catch { return jsonResponse({ error: "lesson_customer_missing" }, 409); }
+
         let csvText: string;
         try {
           csvText = csvTextBody || new TextDecoder().decode(decodeBase64(csvBase64));
@@ -334,7 +342,7 @@ serve(async (req) => {
         const { data: session, error: sessErr } = await supabase
           .from("range_sessions")
           .insert({
-            user_id: userId,
+            user_id: ownerId,
             booking_id: bookingId,
             bay_id: explicitBayId ?? bay.id,
             shot_count: rows.length,
@@ -381,7 +389,7 @@ serve(async (req) => {
         const ended = stamps[stamps.length - 1] ?? null;
         const durationMin = started && ended ? (new Date(ended).getTime() - new Date(started).getTime()) / 60000 : null;
 
-        const csvPath = `${userId}/${sessionId}.csv`;
+        const csvPath = `${ownerId}/${sessionId}.csv`;
         const { error: upErr } = await supabase.storage.from(CSV_BUCKET).upload(csvPath, new Blob([csvText], { type: "text/csv" }), { upsert: true });
         const finalCsvPath = upErr ? null : csvPath;
 
@@ -856,6 +864,8 @@ serve(async (req) => {
             duration_hours,
             player_count,
             status,
+            booking_type,
+            client_user_id,
             user_id
           `)
           .eq("bay_id", bay.id)
@@ -880,7 +890,7 @@ serve(async (req) => {
         }
 
         // Fetch customer names and SGT info for each booking
-        const userIds = [...new Set(filteredBookings.map((b: Record<string, unknown>) => b.user_id as string))];
+        const userIds = [...new Set(filteredBookings.flatMap(b => [b.user_id, b.client_user_id]).filter((id): id is string => !!id))];
         let profilesMap: Record<string, { first_name: string; last_name: string; sgt_user_id: number | null; preferred_language: string }> = {};
         
         if (userIds.length > 0) {
@@ -926,6 +936,9 @@ serve(async (req) => {
         // Transform bookings to include customer_name and SGT info
         const bookingsWithNames = filteredBookings.map((booking: Record<string, unknown>) => {
           const profile = profilesMap[booking.user_id as string];
+          const customerProfile = booking.booking_type === "lesson"
+            ? profilesMap[booking.client_user_id as string]
+            : profile;
           const sgtMember = profile?.sgt_user_id ? sgtMembersMap[profile.sgt_user_id] : null;
           return {
             id: booking.id,
@@ -936,9 +949,9 @@ serve(async (req) => {
             player_count: booking.player_count,
             status: booking.status,
             user_id: booking.user_id,
-            customer_name: profile 
-              ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() 
-              : 'Unknown',
+            customer_name: customerProfile
+              ? `${customerProfile.first_name || ''} ${customerProfile.last_name || ''}`.trim()
+              : booking.booking_type === "lesson" ? 'Lesson customer' : 'Unknown',
             sgt_user_id: profile?.sgt_user_id || null,
             sgt_username: sgtMember?.user_name || null,
             sgt_game_id: sgtMember?.user_game_id || null,

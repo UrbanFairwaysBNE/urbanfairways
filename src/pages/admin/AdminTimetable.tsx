@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { bookingCustomerId } from "@/lib/booking-customer";
 import { usePricing } from "@/hooks/usePricing";
 import { addDurationToTime } from "@/lib/pricing-utils";
 import { tierBadgeClass } from "@/lib/tier-config";
@@ -80,6 +81,9 @@ interface Booking {
   player_count: number;
   total_price: number;
   user_id: string;
+  booking_type: string;
+  client_user_id: string | null;
+  customer_profile?: Booking["profile"];
   stripe_payment_intent_id?: string | null;
   payment_method?: string | null;
   notes?: string | null;
@@ -361,7 +365,7 @@ export default function AdminTimetable() {
       
       // Fetch profiles if there are bookings
       if (data.length > 0) {
-        const userIds = [...new Set(data.map(b => b.user_id))];
+        const userIds = [...new Set(data.flatMap(b => [b.user_id, b.client_user_id]).filter((id): id is string => !!id))];
         const { data: profiles } = await supabase
           .from("profiles")
           .select("user_id, first_name, last_name, email, phone, membership_tier, total_bookings, referral_source")
@@ -373,7 +377,8 @@ export default function AdminTimetable() {
         
         const transformedData = data.map((booking: any) => ({
           ...booking,
-          profile: profileMap.get(booking.user_id)
+          profile: profileMap.get(booking.user_id),
+          customer_profile: profileMap.get(bookingCustomerId(booking) ?? ""),
         }));
         setBookings(transformedData);
       } else {
@@ -920,7 +925,7 @@ export default function AdminTimetable() {
                                 <p className={`text-[10px] font-medium truncate leading-tight pr-4 flex items-center gap-1 ${
                                   booking.status === 'pending' ? "text-white" : "text-primary-foreground"
                                 }`}>
-                                  {(booking.profile?.total_bookings ?? 0) <= 1 && (
+                                  {booking.customer_profile && (booking.customer_profile.total_bookings ?? 0) <= 1 && (
                                     <span
                                       title="First ever booking"
                                       className="inline-flex shrink-0 items-center justify-center w-3.5 h-3.5 rounded-full bg-accent text-accent-foreground text-[8px] font-bold leading-none"
@@ -936,7 +941,7 @@ export default function AdminTimetable() {
                                       C
                                     </span>
                                   )}
-                                  {(booking as any).booking_type === "lesson" && (
+                                  {booking.booking_type === "lesson" && (
                                     <span
                                       title="Coaching lesson"
                                       className="inline-flex shrink-0 items-center justify-center w-3.5 h-3.5 rounded-full bg-accent text-accent-foreground text-[8px] font-bold leading-none ring-1 ring-accent-foreground/30"
@@ -945,9 +950,7 @@ export default function AdminTimetable() {
                                     </span>
                                   )}
                                   <span className="truncate">
-                                    {booking.status === 'pending' 
-                                      ? `${booking.profile?.first_name || 'Processing'} ${booking.profile?.last_name || '...'}` 
-                                      : `${booking.profile?.first_name} ${booking.profile?.last_name}`}
+                                    {[booking.customer_profile?.first_name, booking.customer_profile?.last_name].filter(Boolean).join(" ") || (booking.booking_type === "lesson" ? "Lesson customer" : booking.status === "pending" ? "Processing..." : "Customer")}
                                   </span>
                                 </p>
                                 <p className={`text-[9px] truncate leading-tight ${

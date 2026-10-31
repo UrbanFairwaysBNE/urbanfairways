@@ -1,4 +1,5 @@
 # Switchover preparation
+- [ ] Show lesson customers on booking tiles and attribute lesson UF Lab exports to their accounts; test both rules.
 - [x] Verify email-footer unsubscribe and add a manual marketing unsubscribe action in customer profiles; tested signed-out email links, one-click POST, persisted admin opt-out, and blocked sends without sending customer emails.
 - [x] Review SEO foundations and add a generated sitemap for public website pages with a robots.txt reference; verify the preview serves valid XML. Live availability requires the next publish.
 - [x] Allow 1.5-hour bookings in the live database; verify the booking row type preserves 1.5 and retain a read-only SQL regression test.

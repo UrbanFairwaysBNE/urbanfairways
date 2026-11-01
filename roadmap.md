@@ -1,4 +1,6 @@
 # Switchover preparation
+- [x] Harden Bay Controller shutdown: correct ProTee executable/window targeting, tree-kill, bounded retries, booking rechecks; nine tests passed and browser simulation confirmed forced shutdown after three attempts.
+- [ ] Windows release delivery and real-PC shutdown verification: blocked on updated sources reaching the controller release repository and a Windows installer reaching a bay PC; no GitHub connection available here. This checkout's release target is urbanfairways, while project memory names UF-Bay-Controller, so the correct release destination must be reconciled before delivery.
 - [x] Show lesson customers on booking tiles and attribute lesson UF Lab exports to their accounts; seven tests passed, both deployed ingestion paths verified with a confirmed lesson and test CSVs removed, customer tile checked signed-in.
 - [x] Verify email-footer unsubscribe and add a manual marketing unsubscribe action in customer profiles; tested signed-out email links, one-click POST, persisted admin opt-out, and blocked sends without sending customer emails.
 - [x] Review SEO foundations and add a generated sitemap for public website pages with a robots.txt reference; verify the preview serves valid XML. Live availability requires the next publish.

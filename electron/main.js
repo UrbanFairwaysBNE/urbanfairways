@@ -2,9 +2,11 @@ const { app, BrowserWindow, Tray, Menu, ipcMain, screen, dialog, clipboard, glob
 const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const fs = require('fs');
-const { exec, spawn } = require('child_process');
+const { exec, execFile, spawn } = require('child_process');
 const { promisify } = require('util');
 const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
+const { isProteeLabsTitle, killSimulatorTrees } = require('./simulator-processes.cjs');
 
 // The controller loads the live app (webviews, booking data, extend links) from
 // this origin. Override with the HUB_ORIGIN env var while the domain is pending.
@@ -1444,18 +1446,16 @@ async function findGsproWindow() {
   return { success: false };
 }
 
-// Find Protee Labs window specifically (must contain "Labs" but NOT "United VX")
+// Protee labs.exe exposes the window title "ProTee"; do not require "Labs".
 async function findProteeLabsWindow() {
   const windowList = await getAllVisibleWindows();
-  console.log('Looking for Protee Labs window (must contain "Labs", not "United VX")...');
+  console.log('Looking for ProTee simulator window...');
   windowList.forEach(w => {
     if (w.title) console.log(`  - "${w.title}"`);
   });
   
   const proteeLabsWindow = windowList.find(w => 
-    w.title && 
-    w.title.toLowerCase().includes('labs') &&
-    !w.title.toLowerCase().includes('united vx')
+    isProteeLabsTitle(w.title)
   );
   
   if (proteeLabsWindow) {
@@ -2126,23 +2126,18 @@ async function closeApps(appNames) {
 
   // Belt-and-braces: also explicitly kill known simulator processes by name in case
   // they run windowless background helpers (launchers, update services, etc).
-  const namedKills = [
-    'GSPro.exe', 'GSProLauncher.exe',
-    'Protee Labs.exe', 'ProteeLabs.exe',
-    'ProTee United VX.exe', 'ProTeeUnitedVX.exe',
-  ];
-  for (const processName of namedKills) {
-    try {
-      await execAsync(`taskkill /IM "${processName}" /F`, { timeout: 5000 });
-      console.log(`Closed (by name): ${processName}`);
-    } catch {
-      // not running - fine
+  const treeResults = await killSimulatorTrees(execFileAsync);
+  results.push(...treeResults);
+  for (const result of treeResults) {
+    if (result.status === 'failed') {
+      console.error(`Tree-kill failed for ${result.app}: ${result.error}. Check controller Windows privileges.`);
     }
   }
 
   // POST-KILL VERIFICATION: confirm no user-facing windows remain (besides Bay Controller).
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  await new Promise(resolve => setTimeout(resolve, 5000));
   let stillRunning = [];
+  let verificationFailed = false;
   try {
     const verifyScript = `
       $protected = @(${protectedList});
@@ -2156,17 +2151,18 @@ async function closeApps(appNames) {
       const [name, pid] = l.split('|');
       return { name, pid: parseInt(pid) };
     });
-  } catch {
-    // verification failed - assume clean
+  } catch (error) {
+    verificationFailed = true;
+    console.error('Post-kill verification failed:', error.message);
   }
 
   if (stillRunning.length > 0) {
     console.warn(`STILL RUNNING after bulk kill: ${stillRunning.map(p => `${p.name} (PID ${p.pid})`).join(', ')}`);
   } else {
-    console.log('All user-facing apps confirmed closed');
+    console.log(verificationFailed ? 'Could not verify simulator shutdown' : 'All user-facing apps confirmed closed');
   }
 
-  const allDead = stillRunning.length === 0;
+  const allDead = !verificationFailed && stillRunning.length === 0 && !treeResults.some(result => result.status === 'failed');
   console.log(`=== CLOSE APPS COMPLETE (${allDead ? 'CLEAN' : 'SOME STILL ALIVE'}) ===`);
   return { success: allDead, results, stillRunning };
 }

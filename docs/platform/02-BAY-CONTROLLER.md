@@ -67,8 +67,18 @@ The restore runs **before every launch**, whether the launch was automated or tr
 staff closing/reopening apps. Baseline files are *not* restored when GSPro closes — that
 behaviour caused customers to lose their settings.
 
-`closeApps()` kills any process with a visible window from a whitelist, so a renamed
-simulator binary cannot survive shutdown. On close/F10 the GSPro config files are reset to
+`closeApps()` closes visible user processes except its protected process list, then uses
+`taskkill /F /T` for known simulator executables, including `Protee labs.exe` and `GSPro.exe`.
+ProTee Labs exposes the window title `ProTee`, not `Labs`. Named-kill permission errors
+are logged, and failed verification is not treated as clean shutdown. Automatic plug-off
+has at most three close attempts with five-second settling after each attempt, then logs
+an error and switches off the assigned bay plugs even if apps remain/unverified. The total
+elapsed time also includes IPC/Windows command execution; this is not a 15-second deadline.
+Shutdown is serialized and rechecks live bookings before every attempt and before power-off,
+so an extension or back-to-back booking cancels it. Manual plug-off remains an override.
+If logs show access denied, the controller/watchdog must run with sufficient Windows
+privileges on the bay PC; code changes do not grant those rights remotely.
+On close/F10 the GSPro config files are reset to
 fix a single-monitor window-position bug.
 
 ProTee Labs settings and the UF Lab CSV are stored under the logged-in user's `%APPDATA%` /

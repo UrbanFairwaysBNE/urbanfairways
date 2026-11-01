@@ -17,6 +17,7 @@
     },
     "files": [
       "main.js",
+      "simulator-processes.cjs",
       "preload.js",
       "obs-controller.js",
       "hole-splitter.js",

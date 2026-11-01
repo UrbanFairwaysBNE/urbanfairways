@@ -1,4 +1,5 @@
 # Project rules
+- Bay shutdown uses one serialized, bounded operation with live booking rechecks; simulator executables are tree-killed separately from window-title detection, and verification failures must never be reported as clean shutdown.
 - Lesson tiles resolve the linked customer separately from the paying booker; both range ingestion endpoints resolve the owner from the stored booking and use that owner for session rows and CSV paths, so coach billing/settings remain unchanged and lesson data never falls back to the coach.
 - Marketing and bulk email senders must recheck profile opt-out and recorded unsubscribes at send time, and use recipient-specific signed public unsubscribe links in the shared footer; the same endpoint supports authenticated admin opt-out and keeps legacy email links valid so existing recipients are not stranded.
 - Generate public/sitemap.xml through scripts/generate-sitemap.ts before dev/build; keep its paths aligned with public indexable routes, exclude app/auth/admin/redirects, and omit lastmod without authoritative page-specific timestamps so crawlers discover only intended website content.

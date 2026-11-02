@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { usePricing } from "@/hooks/usePricing";
+import { needsMembershipReview } from "@/lib/membership-verification";
 import { tierBadgeClass } from "@/lib/tier-config";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -1712,7 +1713,7 @@ export default function AdminCustomers() {
             }
           }}
         >
-          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogContent className="w-[calc(100%-2rem)] max-w-md min-w-0 max-h-[90vh] overflow-y-auto overflow-x-hidden">
             <DialogHeader>
               <DialogTitle className="font-display text-xl uppercase tracking-wide">
                 {isEditMode ? "Edit Customer" : "Customer Profile"}
@@ -1720,7 +1721,7 @@ export default function AdminCustomers() {
             </DialogHeader>
             
             {selectedCustomer && !isEditMode && (
-              <div className="space-y-4">
+              <div className="min-w-0 space-y-4 [overflow-wrap:anywhere]">
                 {/* Header */}
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
@@ -1829,16 +1830,16 @@ export default function AdminCustomers() {
                 <hr className="border-border" />
 
                 {/* Membership Verification - shown for tiers that require eligibility review (e.g. frontline) */}
-                {selectedCustomer.verification_status && (
+                {needsMembershipReview(selectedCustomer.verification_status) && (
                   <>
-                    <div className="p-3 bg-muted/50 border border-border rounded-lg space-y-2">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
+                    <div className="min-w-0 p-3 bg-muted/50 border border-border rounded-lg space-y-2">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex min-w-0 items-center gap-2">
                           <Shield className="h-4 w-4 text-primary shrink-0" />
-                          <div className="text-sm font-medium">Membership verification</div>
+                          <div className="min-w-0 text-sm font-medium">Membership verification</div>
                         </div>
                         <Badge
-                          variant={selectedCustomer.verification_status === "approved" ? "default" : "outline"}
+                          variant="outline"
                           className={
                             selectedCustomer.verification_status === "pending"
                               ? "border-brand-accent text-brand-accent"

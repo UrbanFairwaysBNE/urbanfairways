@@ -1,4 +1,5 @@
 # Project rules
+- Customer review visibility uses the membership-verification predicate so completed approvals disappear immediately without deleting the stored decision.
 - Complimentary assignment uses an authenticated admin-only function and existing custom billing; reject existing subscriptions/checkouts rather than silently retaining charges, block self-service checkout for custom billing, and protect profile tier/billing writes from non-admins.
 - Bay shutdown uses one serialized, bounded operation with live booking rechecks; simulator executables are tree-killed separately from window-title detection, and verification failures must never be reported as clean shutdown.
 - Lesson tiles resolve the linked customer separately from the paying booker; both range ingestion endpoints resolve the owner from the stored booking and use that owner for session rows and CSV paths, so coach billing/settings remain unchanged and lesson data never falls back to the coach.

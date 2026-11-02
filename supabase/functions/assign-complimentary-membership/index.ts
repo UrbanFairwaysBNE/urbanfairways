@@ -25,13 +25,12 @@ Deno.serve(async (req: Request) => {
     const { data: selectedTier, error: tierError } = await client.from("pricing_config").select("tier, is_subscription, is_default").eq("tier", tier).single();
     if (tierError || !selectedTier) return json({ error: "Membership tier not found" }, 400);
     const update = complimentaryProfileUpdate(selectedTier);
-    const { data: profile, error: profileError } = await client.from("profiles").select("email, stripe_customer_id").eq("user_id", user_id).single();
+    const { data: profile, error: profileError } = await client.from("profiles").select("email").eq("user_id", user_id).single();
     if (profileError || !profile) return json({ error: "Customer not found" }, 404);
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("Cannot verify existing billing right now. Please try again later.");
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customerIds = new Set<string>();
-    if (profile.stripe_customer_id) customerIds.add(profile.stripe_customer_id);
     if (profile.email) {
       for await (const customer of stripe.customers.list({ email: profile.email, limit: 100 })) customerIds.add(customer.id);
     }

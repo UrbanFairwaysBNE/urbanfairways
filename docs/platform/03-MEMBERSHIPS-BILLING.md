@@ -61,6 +61,8 @@ for both shapes.
 
 ## Audit trail
 
+Complimentary memberships are assigned from Customers → customer three-dot menu → Assign Complimentary Membership. The admin-only function assigns an existing subscription tier and enables custom billing without creating a Stripe subscription. Existing subscriptions or open membership checkouts must be cancelled first; the grant never silently leaves recurring billing active. Custom-billing profiles cannot start self-service membership checkout. Profile tier and custom-billing writes are protected from non-admin callers. Session charges remain governed by the selected tier's rates; tier transitions still use the existing audit trigger.
+
 - `membership_changes` — every tier transition, written by the
   `trg_log_membership_tier_change` trigger.
 - `membership_payments` — payment history.

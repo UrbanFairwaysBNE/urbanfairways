@@ -78,7 +78,7 @@ const MarketingHome = () => {
           <div>
             <p className="text-accent font-display font-bold tracking-[0.2em] uppercase text-sm mb-3">What is {tenant.venue_name}?</p>
             <h2 className="font-display text-4xl sm:text-5xl text-primary leading-tight mb-6">
-              A premier indoor golf centre in the West End of Brisbane.
+              A premier indoor golf centre in the West End, Brisbane
             </h2>
             <p className="text-foreground/80 text-lg leading-relaxed mb-4">
               {tenant.venue_name} combines cutting-edge simulator technology with 4K visuals and tour-level accuracy.

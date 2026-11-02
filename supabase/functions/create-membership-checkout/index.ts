@@ -47,6 +47,15 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
+    const { data: billingProfile, error: billingError } = await supabaseAdmin
+      .from("profiles").select("custom_billing").eq("user_id", user.id).single();
+    if (billingError) throw new Error("Unable to verify membership billing");
+    if (billingProfile.custom_billing) {
+      return new Response(JSON.stringify({ error: "Your membership is managed by the venue. Please contact us to change it." }), {
+        status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { priceId, tierKey } = await req.json();
     const tenant = await getTenant();
 

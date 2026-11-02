@@ -79,6 +79,7 @@ import { Switch } from "@/components/ui/switch";
 import { GiftCardsSection } from "@/components/admin/GiftCardsSection";
 import { CreditTransactionHistory } from "@/components/admin/CreditTransactionHistory";
 import { CustomerHistoryDialog } from "@/components/admin/CustomerHistoryDialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MembersSection } from "@/components/admin/MembersSection";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -129,7 +130,7 @@ const DEFAULT_COLUMNS: ColumnConfig[] = [
 export default function AdminCustomers() {
   const { isAdmin, isLoading: authLoading } = useAdminAuth();
   const isMobile = useIsMobile();
-  const { pricing } = usePricing();
+  const { pricing, memberTiers } = usePricing();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -146,6 +147,9 @@ export default function AdminCustomers() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isUnsubscribing, setIsUnsubscribing] = useState(false);
+  const [complimentaryCustomer, setComplimentaryCustomer] = useState<Customer | null>(null);
+  const [complimentaryTier, setComplimentaryTier] = useState("");
+  const [isAssigningMembership, setIsAssigningMembership] = useState(false);
 
   // Edit customer state
   const [editFirstName, setEditFirstName] = useState("");
@@ -1220,6 +1224,30 @@ export default function AdminCustomers() {
 
   const visibleColumns = columns.filter(c => c.visible);
 
+  const assignComplimentaryMembership = async () => {
+    if (!complimentaryCustomer || !complimentaryTier || isAssigningMembership) return;
+    setIsAssigningMembership(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("assign-complimentary-membership", {
+        body: { user_id: complimentaryCustomer.user_id, tier: complimentaryTier },
+      });
+      if (error) {
+        const response = error.context;
+        const details = response instanceof Response ? await response.json().catch(() => null) : null;
+        throw new Error(details?.error || error.message);
+      }
+      if (!data?.success || !data.profile) throw new Error(data?.error || "Membership was not saved");
+      setCustomers(prev => prev.map(customer => customer.user_id === data.profile.user_id ? { ...customer, ...data.profile } : customer));
+      setSelectedCustomer(prev => prev?.user_id === data.profile.user_id ? { ...prev, ...data.profile } : prev);
+      toast({ title: "Complimentary membership assigned", description: `${complimentaryCustomer.first_name}'s membership is active. No payment collected.` });
+      setComplimentaryCustomer(null);
+    } catch (error) {
+      toast({ title: "Unable to assign membership", description: error instanceof Error ? error.message : "Please try again.", variant: "destructive" });
+    } finally {
+      setIsAssigningMembership(false);
+    }
+  };
+
   if (authLoading) {
     return (
       <AdminLayout>
@@ -1490,7 +1518,7 @@ export default function AdminCustomers() {
                       <TableCell onClick={(e) => e.stopPropagation()}>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Actions for ${customer.first_name} ${customer.last_name}`}>
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -1499,6 +1527,13 @@ export default function AdminCustomers() {
                               View Profile
                             </DropdownMenuItem>
                             <DropdownMenuItem>Edit Customer</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {
+                              setComplimentaryCustomer(customer);
+                              setComplimentaryTier(memberTiers.some(t => t.tier === customer.membership_tier) ? customer.membership_tier : "");
+                            }}>
+                              <Gift className="h-4 w-4 mr-2" />
+                              Assign Complimentary Membership
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => sendPasswordReset(customer)}>
                               <KeyRound className="h-4 w-4 mr-2" />
@@ -1558,6 +1593,29 @@ export default function AdminCustomers() {
             </Table>
           )}
         </div>
+
+        <Dialog open={!!complimentaryCustomer} onOpenChange={open => { if (!open && !isAssigningMembership) setComplimentaryCustomer(null); }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Assign complimentary membership</DialogTitle>
+              <DialogDescription>{complimentaryCustomer?.first_name} {complimentaryCustomer?.last_name} · No membership payment or recurring billing.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Label htmlFor="complimentary-tier">Membership tier</Label>
+              <Select value={complimentaryTier} onValueChange={setComplimentaryTier} disabled={isAssigningMembership}>
+                <SelectTrigger id="complimentary-tier"><SelectValue placeholder="Choose membership" /></SelectTrigger>
+                <SelectContent>{memberTiers.map(tier => <SelectItem key={tier.tier} value={tier.tier}>{tier.display_name}</SelectItem>)}</SelectContent>
+              </Select>
+              <p className="text-sm text-muted-foreground">Existing paid memberships must be cancelled first. Standard session charges still apply for the selected tier.</p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" disabled={isAssigningMembership} onClick={() => setComplimentaryCustomer(null)}>Cancel</Button>
+              <Button disabled={!complimentaryTier || isAssigningMembership} onClick={assignComplimentaryMembership}>
+                <Gift className="h-4 w-4 mr-2" />{isAssigningMembership ? "Assigning…" : "Assign Membership"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Remove Corporate Dialog */}
         <Dialog

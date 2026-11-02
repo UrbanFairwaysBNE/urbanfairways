@@ -36,6 +36,13 @@
       "when": 1793313600310,
       "tag": "0004_add_membership_verification_status",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793604117066,
+      "tag": "0005_protect_membership_assignment",
+      "breakpoints": true
     }
   ]
 }

@@ -14,3 +14,7 @@ test("stuck checkout over 10 minutes is red", () => {
 test("missing daily door code is red", () => {
   expect(doorVerdict({ revoked: 1 }).light).toBe("red");
 });
+test("unverified shutdown is amber, not a confirmed close failure", () => {
+  expect(bayVerdict({ bookings: 1, events: 50, close_unverified: 3, range_sessions: 1 }).light).toBe('amber');
+  expect(bayVerdict({ bookings: 1, events: 50, range_sessions: 1 }).light).toBe('green');
+});

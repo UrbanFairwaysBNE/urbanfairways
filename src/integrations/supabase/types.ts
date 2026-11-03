@@ -3821,10 +3821,20 @@ export type Database = {
     }
     Functions: {
       accept_terms: { Args: { _version: string }; Returns: boolean }
-      bay_log_health_metric: {
-        Args: { _level: string; _msg: string; _type: string }
-        Returns: string
-      }
+      bay_log_health_metric:
+        | {
+            Args: { _level: string; _msg: string; _type: string }
+            Returns: string
+          }
+        | {
+            Args: {
+              _details: Json
+              _level: string
+              _msg: string
+              _type: string
+            }
+            Returns: string
+          }
       claim_booking_notification: {
         Args: { _booking_id: string; _notification_type: string }
         Returns: Json

@@ -1,5 +1,5 @@
 const { test, expect } = require('bun:test');
-const { isProteeLabsTitle, killSimulatorTrees } = require('./simulator-processes.cjs');
+const { isProteeLabsTitle, killSimulatorTrees, checkSimulatorProcesses, shutdownVerification } = require('./simulator-processes.cjs');
 
 test('recognises ProTee window title without requiring Labs', () => {
   expect(isProteeLabsTitle('ProTee')).toBe(true);
@@ -19,4 +19,35 @@ test('records access denied rather than treating it as already closed', async ()
     throw Object.assign(new Error('Access is denied'), { code: 1 });
   });
   expect(results.every(result => result.status === 'failed')).toBe(true);
+});
+
+test('a failed kill command does not override independent confirmed shutdown', async () => {
+  const killed = await killSimulatorTrees(async () => { throw new Error('Process exited during kill'); });
+  expect(killed[0].status).toBe('failed');
+  expect(shutdownVerification({ success: true, processes: [] }, { success: true, processes: [] }).success).toBe(true);
+});
+
+test('empty process lists with failed verification are never clean', () => {
+  const result = shutdownVerification({ success: true, processes: [] }, { success: false, processes: [], error: 'Access denied' });
+  expect(result.success).toBe(false);
+  expect(result.verificationSucceeded).toBe(false);
+  expect(result.verificationErrors).toEqual(['Access denied']);
+});
+
+test('windowless simulator prevents clean shutdown', () => {
+  expect(shutdownVerification({ success: true, processes: [] }, { success: true, processes: [{ name: 'GSPro.exe', pid: 44 }] }).success).toBe(false);
+});
+
+test('process snapshot finds both simulator names without contradictory filters', async () => {
+  const result = await checkSimulatorProcesses(async (file, args) => {
+    expect(file).toBe('tasklist');
+    expect(args).toEqual(['/FO', 'CSV', '/NH']);
+    return { stdout: '"GSPro.exe","44","Console","1","100 K"\n"Protee labs.exe","45","Console","1","100 K"\n"explorer.exe","46","Console","1","100 K"' };
+  });
+  expect(result.processes.map(p => p.pid)).toEqual([44, 45]);
+});
+
+test('tasklist errors and malformed output are not an empty verified list', async () => {
+  expect((await checkSimulatorProcesses(async () => { throw new Error('Timeout'); })).success).toBe(false);
+  expect((await checkSimulatorProcesses(async () => ({ stdout: '' }))).success).toBe(false);
 });

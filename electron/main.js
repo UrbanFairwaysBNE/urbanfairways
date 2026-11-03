@@ -6,7 +6,7 @@ const { exec, execFile, spawn } = require('child_process');
 const { promisify } = require('util');
 const execAsync = promisify(exec);
 const execFileAsync = promisify(execFile);
-const { isProteeLabsTitle, killSimulatorTrees } = require('./simulator-processes.cjs');
+const { isProteeLabsTitle, killSimulatorTrees, checkSimulatorProcesses, shutdownVerification } = require('./simulator-processes.cjs');
 
 // The controller loads the live app (webviews, booking data, extend links) from
 // this origin. Override with the HUB_ORIGIN env var while the domain is pending.
@@ -2040,27 +2040,7 @@ async function checkAndCorrectWindowPositions(gsproDisplay, proteeDisplay) {
 
 // Check which simulator processes are currently running
 async function checkProcesses() {
-  try {
-    const { stdout } = await execAsync(
-      'tasklist /FO CSV /NH /FI "IMAGENAME eq GSPro.exe" /FI "IMAGENAME eq GSPRO.exe" /FI "IMAGENAME eq ProteeLabs.exe" /FI "IMAGENAME eq Protee Labs.exe"',
-      { timeout: 5000 }
-    );
-    
-    const processes = [];
-    const lines = stdout.trim().split('\n').filter(l => l.trim().length > 0);
-    for (const line of lines) {
-      // CSV format: "name.exe","PID","Session","Session#","Mem"
-      const match = line.match(/"([^"]+)","(\d+)"/);
-      if (match && !line.toLowerCase().includes('info:')) {
-        processes.push({ name: match[1], pid: parseInt(match[2]) });
-      }
-    }
-    
-    return { success: true, processes };
-  } catch (error) {
-    // If no matching processes, tasklist returns exit code 1
-    return { success: true, processes: [] };
-  }
+  return checkSimulatorProcesses(execFileAsync);
 }
 
 // Close ALL user-facing apps (anything with a visible window) before powering off bay.
@@ -2122,6 +2102,7 @@ async function closeApps(appNames) {
     console.log(`Killed ${results.filter(r => r.status === 'closed').length} windowed app(s)`);
   } catch (error) {
     console.error('Bulk window-process kill failed:', error.message);
+    results.push({ app: 'Visible apps', status: 'failed', error: error.message });
   }
 
   // Belt-and-braces: also explicitly kill known simulator processes by name in case
@@ -2138,10 +2119,11 @@ async function closeApps(appNames) {
   await new Promise(resolve => setTimeout(resolve, 5000));
   let stillRunning = [];
   let verificationFailed = false;
+  let verificationError;
   try {
     const verifyScript = `
       $protected = @(${protectedList});
-      Get-Process |
+      Get-Process -ErrorAction Stop |
         Where-Object { $_.MainWindowHandle -ne 0 -and $_.MainWindowTitle -ne '' } |
         Where-Object { $protected -notcontains $_.ProcessName.ToLower() } |
         ForEach-Object { Write-Output ($_.ProcessName + "|" + $_.Id) }
@@ -2153,18 +2135,23 @@ async function closeApps(appNames) {
     });
   } catch (error) {
     verificationFailed = true;
+    verificationError = error.message;
     console.error('Post-kill verification failed:', error.message);
   }
 
+  const verified = shutdownVerification(
+    { success: !verificationFailed, processes: stillRunning, error: verificationError },
+    await checkProcesses(),
+  );
+  stillRunning = verified.stillRunning;
   if (stillRunning.length > 0) {
     console.warn(`STILL RUNNING after bulk kill: ${stillRunning.map(p => `${p.name} (PID ${p.pid})`).join(', ')}`);
   } else {
-    console.log(verificationFailed ? 'Could not verify simulator shutdown' : 'All user-facing apps confirmed closed');
+    console.log(!verified.verificationSucceeded ? 'Could not verify simulator shutdown' : 'All user-facing apps and named simulators confirmed closed');
   }
 
-  const allDead = !verificationFailed && stillRunning.length === 0 && !treeResults.some(result => result.status === 'failed');
-  console.log(`=== CLOSE APPS COMPLETE (${allDead ? 'CLEAN' : 'SOME STILL ALIVE'}) ===`);
-  return { success: allDead, results, stillRunning };
+  console.log(`=== CLOSE APPS COMPLETE (${verified.success ? 'CLEAN' : verified.verificationSucceeded ? 'STILL RUNNING' : 'UNVERIFIED'}) ===`);
+  return { ...verified, results };
 }
 
 // IPC Handlers - TAPO

@@ -71,6 +71,11 @@ behaviour caused customers to lose their settings.
 `taskkill /F /T` for known simulator executables, including `Protee labs.exe` and `GSPro.exe`.
 ProTee Labs exposes the window title `ProTee`, not `Labs`. Named-kill permission errors
 are logged, and failed verification is not treated as clean shutdown. Automatic plug-off
+uses a named-process snapshot, while close confirmation checks both visible windows and
+named simulators (including windowless processes). Kill-command errors remain diagnostic;
+successful independent verification overrides them. Legacy `success=false` plus an empty
+process list is unverified, not proof that apps remained open or that shutdown was clean.
+Health Check distinguishes these unknown events from confirmed close failures. Automatic plug-off
 has at most three close attempts with five-second settling after each attempt, then logs
 an error and switches off the assigned bay plugs even if apps remain/unverified. The total
 elapsed time also includes IPC/Windows command execution; this is not a 15-second deadline.

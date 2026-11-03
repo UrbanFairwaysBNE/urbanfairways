@@ -30,7 +30,6 @@ export function bayVerdict(m: Metrics): Verdict {
       [n(m, "plug_fail") > 0, `Smart plug didn't respond ${n(m, "plug_fail")} time(s)`],
       [n(m, "unexpected_close") > 0, `GSPro/ProTee closed unexpectedly ${n(m, "unexpected_close")} time(s)`],
       [n(m, "settings_upload_fail") > 0, `Customer settings failed to save (${n(m, "settings_upload_fail")})`],
-      [bookings >= 2 && n(m, "range_sessions") === 0, `No UF Lab sessions from ${bookings} bookings`],
     ],
     `${bookings} booking(s), ran smoothly`,
   );

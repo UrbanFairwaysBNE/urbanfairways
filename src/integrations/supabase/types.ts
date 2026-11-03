@@ -459,6 +459,33 @@ export type Database = {
         }
         Relationships: []
       }
+      bay_shutdown_health_reports: {
+        Row: {
+          bay_number: number
+          booking_id: string
+          kind: string
+          log_id: string
+          occurred_at: string
+          resolved: boolean
+        }
+        Insert: {
+          bay_number: number
+          booking_id: string
+          kind: string
+          log_id: string
+          occurred_at: string
+          resolved?: boolean
+        }
+        Update: {
+          bay_number?: number
+          booking_id?: string
+          kind?: string
+          log_id?: string
+          occurred_at?: string
+          resolved?: boolean
+        }
+        Relationships: []
+      }
       bays: {
         Row: {
           bay_number: number

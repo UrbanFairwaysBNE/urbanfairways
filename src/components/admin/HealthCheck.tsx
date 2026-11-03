@@ -1,0 +1,163 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { RefreshCw } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  Light, Metrics, Verdict, bayVerdict, bookingsVerdict, doorVerdict, emailsVerdict,
+  membershipsVerdict, packsVerdict, paymentsVerdict, worst,
+} from "@/lib/health-check";
+
+type Row = { day: string; category: string; subject: string; metric: string; value: number };
+const DAYS = 7;
+
+function brisbaneDays(count: number): string[] {
+  const today = new Date(Date.now() + 10 * 3600 * 1000); // Brisbane is UTC+10, no DST
+  return Array.from({ length: count }, (_, i) => {
+    const d = new Date(today);
+    d.setUTCDate(d.getUTCDate() - i);
+    return d.toISOString().slice(0, 10);
+  });
+}
+
+const dayLabel = (iso: string, i: number) =>
+  i === 0 ? "Today" : new Date(iso + "T00:00:00Z").toLocaleDateString("en-AU", { weekday: "short", day: "numeric", timeZone: "UTC" });
+
+const lightClass: Record<Light, string> = {
+  green: "bg-primary/80",
+  amber: "bg-accent",
+  red: "bg-destructive",
+  none: "bg-muted-foreground/20",
+};
+
+function Dot({ v, title, day }: { v: Verdict; title: string; day: string }) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          aria-label={`${title} ${day}: ${v.light}`}
+          className={cn("h-5 w-5 rounded-full mx-auto block", lightClass[v.light])}
+        />
+      </PopoverTrigger>
+      <PopoverContent className="w-72 text-sm">
+        <p className="font-semibold mb-1">{title} · {day}</p>
+        <ul className="list-disc pl-4 space-y-0.5">
+          {v.notes.map((t) => <li key={t}>{t}</li>)}
+        </ul>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+export function HealthCheck() {
+  const [rows, setRows] = useState<Row[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const days = useMemo(() => brisbaneDays(DAYS), []);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    const { data, error } = await supabase.rpc("platform_health" as never, { _days: DAYS } as never);
+    if (error) setError(error.message);
+    else setRows((data as unknown as Row[]) ?? []);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const metrics = useMemo(() => {
+    const map = new Map<string, Metrics>();
+    for (const r of rows ?? []) {
+      const key = `${r.category}|${r.subject}|${r.day}`;
+      const m = map.get(key) ?? {};
+      m[r.metric] = (m[r.metric] ?? 0) + Number(r.value);
+      map.set(key, m);
+    }
+    return (cat: string, subj: string, day: string) => map.get(`${cat}|${subj}|${day}`) ?? {};
+  }, [rows]);
+
+  const today = days[0];
+  const sections: { title: string; rows: { label: string; cells: Verdict[] }[] }[] = [
+    {
+      title: "Bay Controllers",
+      rows: Array.from({ length: 7 }, (_, i) => `Bay ${i + 1}`).map((b) => ({
+        label: b,
+        cells: days.map((d) => bayVerdict(metrics("bays", b, d))),
+      })),
+    },
+    {
+      title: "Platform",
+      rows: [
+        { label: "Bookings", cells: days.map((d) => bookingsVerdict(metrics("bookings", "all", d))) },
+        { label: "Payments", cells: days.map((d) => paymentsVerdict(metrics("payments", "all", d))) },
+        { label: "Booking emails", cells: days.map((d) => emailsVerdict(metrics("emails", "booking", d))) },
+        { label: "Door access", cells: days.map((d) => doorVerdict(metrics("door", "all", d))) },
+        {
+          label: "Memberships (now)",
+          cells: days.map((d) => d === today ? membershipsVerdict(metrics("memberships", "all", d)) : { light: "none", notes: ["Checked for today only"] }),
+        },
+        {
+          label: "Prepaid packs (now)",
+          cells: days.map((d) => d === today ? packsVerdict(metrics("packs", "all", d)) : { light: "none", notes: ["Checked for today only"] }),
+        },
+      ],
+    },
+  ];
+
+  const overall = worst(sections.flatMap((s) => s.rows.map((r) => r.cells[0].light)));
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
+        <div>
+          <CardTitle className="flex items-center gap-2">
+            Health Check
+            {rows && <span className={cn("h-3 w-3 rounded-full", lightClass[overall])} />}
+          </CardTitle>
+          <CardDescription>Daily traffic lights for the last 7 days (Brisbane time). Tap a light for details.</CardDescription>
+        </div>
+        <Button variant="outline" size="sm" onClick={load} disabled={loading}>
+          <RefreshCw className={cn("h-4 w-4 mr-2", loading && "animate-spin")} /> Refresh
+        </Button>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {error && <p className="text-sm text-destructive">{error}</p>}
+        {!rows && !error && <Skeleton className="h-64 w-full" />}
+        {rows && sections.map((s) => (
+          <div key={s.title} className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-muted-foreground">
+                  <th className="text-left font-semibold py-2 pr-4 text-foreground">{s.title}</th>
+                  {days.map((d, i) => <th key={d} className="font-normal px-2 whitespace-nowrap">{dayLabel(d, i)}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {s.rows.map((r) => (
+                  <tr key={r.label} className="border-t border-border">
+                    <td className="py-2 pr-4 whitespace-nowrap">{r.label}</td>
+                    {r.cells.map((v, i) => (
+                      <td key={days[i]} className="px-2 py-2"><Dot v={v} title={r.label} day={dayLabel(days[i], i)} /></td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
+        <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+          {(["green", "amber", "red", "none"] as Light[]).map((l) => (
+            <span key={l} className="flex items-center gap-1.5">
+              <span className={cn("h-3 w-3 rounded-full", lightClass[l])} />
+              {{ green: "Normal", amber: "Worth a look", red: "Problem", none: "No activity" }[l]}
+            </span>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

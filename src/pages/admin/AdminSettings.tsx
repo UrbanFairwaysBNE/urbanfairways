@@ -38,6 +38,8 @@ import { LoyaltyPromoSettings } from "@/components/admin/LoyaltyPromoSettings";
 import { PackProductsSettings } from "@/components/admin/PackProductsSettings";
 import { PricingRatesSettings } from "@/components/admin/PricingRatesSettings";
 import { POSCategoriesSettings } from "@/components/admin/POSCategoriesSettings";
+import { HealthCheck } from "@/components/admin/HealthCheck";
+import { Activity } from "lucide-react";
 
 
 
@@ -1128,7 +1130,7 @@ export default function AdminSettings() {
           onValueChange={(value) => setSearchParams({ tab: value }, { replace: true })}
           className="space-y-6"
         >
-          <TabsList className="grid w-full max-w-2xl grid-cols-5">
+          <TabsList className="grid w-full max-w-3xl grid-cols-6">
             <TabsTrigger value="general" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
               <span className="hidden sm:inline">General</span>
@@ -1149,7 +1151,15 @@ export default function AdminSettings() {
               <Bell className="h-4 w-4" />
               <span className="hidden sm:inline">Notifications</span>
             </TabsTrigger>
+            <TabsTrigger value="health" className="flex items-center gap-2">
+              <Activity className="h-4 w-4" />
+              <span className="hidden sm:inline">Health Check</span>
+            </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="health" className="space-y-4">
+            <HealthCheck />
+          </TabsContent>
 
           {/* General Settings */}
           <TabsContent value="general" className="space-y-4">

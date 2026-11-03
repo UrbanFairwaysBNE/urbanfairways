@@ -43,6 +43,20 @@
       "when": 1793604117066,
       "tag": "0005_protect_membership_assignment",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793664501421,
+      "tag": "0006_platform_health_check",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793664735913,
+      "tag": "0007_bay_health_daily_rollup",
+      "breakpoints": true
     }
   ]
 }

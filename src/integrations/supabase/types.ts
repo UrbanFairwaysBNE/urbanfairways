@@ -405,6 +405,27 @@ export type Database = {
           },
         ]
       }
+      bay_health_daily: {
+        Row: {
+          bay_number: number
+          day: string
+          metric: string
+          value: number
+        }
+        Insert: {
+          bay_number: number
+          day: string
+          metric: string
+          value?: number
+        }
+        Update: {
+          bay_number?: number
+          day?: string
+          metric?: string
+          value?: number
+        }
+        Relationships: []
+      }
       bay_orders: {
         Row: {
           bay_number: number
@@ -3800,6 +3821,10 @@ export type Database = {
     }
     Functions: {
       accept_terms: { Args: { _version: string }; Returns: boolean }
+      bay_log_health_metric: {
+        Args: { _level: string; _msg: string; _type: string }
+        Returns: string
+      }
       claim_booking_notification: {
         Args: { _booking_id: string; _notification_type: string }
         Returns: Json
@@ -3858,6 +3883,16 @@ export type Database = {
       }
       pack_hours_balance: { Args: { _user_id: string }; Returns: number }
       pack_wallet_owner: { Args: { _user_id: string }; Returns: string }
+      platform_health: {
+        Args: { _days?: number }
+        Returns: {
+          category: string
+          day: string
+          metric: string
+          subject: string
+          value: number
+        }[]
+      }
       redeem_pack_code: { Args: { _code: string }; Returns: Json }
       restore_pack_hours: {
         Args: {

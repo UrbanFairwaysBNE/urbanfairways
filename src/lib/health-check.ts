@@ -15,6 +15,7 @@ function verdict(reds: [boolean, string][], ambers: [boolean, string][], okNote 
 
 export function bayVerdict(m: Metrics): Verdict {
   const bookings = n(m, "bookings");
+  const unresolvedShutdowns = Math.max(0, n(m, "close_unverified") - n(m, "close_recovered"));
   if (!bookings && !n(m, "events")) return { light: "none", notes: ["No bookings or activity"] };
   return verdict(
     [
@@ -26,12 +27,14 @@ export function bayVerdict(m: Metrics): Verdict {
     ],
     [
       [n(m, "close_fail") > 0 && n(m, "close_fail") < 3, `Apps failed to close ${n(m, "close_fail")} time(s)`],
-      [n(m, "close_unverified") > 0, `Shutdown could not be verified ${n(m, "close_unverified")} time(s); this does not confirm apps stayed open`],
+      [unresolvedShutdowns > 0, `Shutdown could not be verified ${unresolvedShutdowns} time(s); this does not confirm apps stayed open`],
       [n(m, "plug_fail") > 0, `Smart plug didn't respond ${n(m, "plug_fail")} time(s)`],
       [n(m, "unexpected_close") > 0, `GSPro/ProTee closed unexpectedly ${n(m, "unexpected_close")} time(s)`],
       [n(m, "settings_upload_fail") > 0, `Customer settings failed to save (${n(m, "settings_upload_fail")})`],
     ],
-    `${bookings} booking(s), ran smoothly`,
+    n(m, "close_recovered") > 0
+      ? `${bookings} booking(s); closure reported immediately after ${n(m, "close_recovered")} ambiguous shutdown warning(s)`
+      : `${bookings} booking(s), ran smoothly`,
   );
 }
 

@@ -23,3 +23,13 @@ test("unverified shutdown is amber, not a confirmed close failure", () => {
   expect(bayVerdict({ bookings: 1, events: 50, close_unverified: 3, range_sessions: 1 }).light).toBe('amber');
   expect(bayVerdict({ bookings: 1, events: 50, range_sessions: 1 }).light).toBe('green');
 });
+test("immediate same-shutdown closure reports clear ambiguous warnings to green", () => {
+  expect(bayVerdict({ bookings: 1, events: 50, close_unverified: 1, close_recovered: 1 }).light).toBe('green');
+});
+test("recovered shutdown does not hide another unresolved warning", () => {
+  expect(bayVerdict({ bookings: 2, events: 50, close_unverified: 2, close_recovered: 1 }).light).toBe('amber');
+});
+test("recovery never clears confirmed running processes or forced power off", () => {
+  expect(bayVerdict({ events: 50, close_recovered: 1, close_fail: 1 }).light).toBe('amber');
+  expect(bayVerdict({ events: 50, close_recovered: 1, forced_off: 1 }).light).toBe('red');
+});

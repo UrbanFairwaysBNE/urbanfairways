@@ -405,6 +405,27 @@ export type Database = {
           },
         ]
       }
+      bay_health_daily: {
+        Row: {
+          bay_number: number
+          day: string
+          metric: string
+          value: number
+        }
+        Insert: {
+          bay_number: number
+          day: string
+          metric: string
+          value?: number
+        }
+        Update: {
+          bay_number?: number
+          day?: string
+          metric?: string
+          value?: number
+        }
+        Relationships: []
+      }
       bay_orders: {
         Row: {
           bay_number: number
@@ -3800,6 +3821,10 @@ export type Database = {
     }
     Functions: {
       accept_terms: { Args: { _version: string }; Returns: boolean }
+      bay_log_health_metric: {
+        Args: { _level: string; _msg: string; _type: string }
+        Returns: string
+      }
       claim_booking_notification: {
         Args: { _booking_id: string; _notification_type: string }
         Returns: Json

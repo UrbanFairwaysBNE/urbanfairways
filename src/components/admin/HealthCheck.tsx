@@ -27,8 +27,8 @@ const dayLabel = (iso: string, i: number) =>
   i === 0 ? "Today" : new Date(iso + "T00:00:00Z").toLocaleDateString("en-AU", { weekday: "short", day: "numeric", timeZone: "UTC" });
 
 const lightClass: Record<Light, string> = {
-  green: "bg-primary/80",
-  amber: "bg-accent",
+  green: "bg-status-ok",
+  amber: "bg-status-warn",
   red: "bg-destructive",
   none: "bg-muted-foreground/20",
 };

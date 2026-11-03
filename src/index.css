@@ -39,6 +39,8 @@
 
     /* Destructive */
     --destructive: 0 72% 45%;
+    --status-ok: 142 55% 38%;
+    --status-warn: 38 92% 50%;
     --destructive-foreground: 0 0% 100%;
 
     /* Borders */
@@ -97,6 +99,8 @@
     --accent-foreground: 218 13% 9%;
 
     --destructive: 0 62% 40%;
+    --status-ok: 142 50% 42%;
+    --status-warn: 38 85% 52%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 218 10% 24%;

@@ -3858,6 +3858,16 @@ export type Database = {
       }
       pack_hours_balance: { Args: { _user_id: string }; Returns: number }
       pack_wallet_owner: { Args: { _user_id: string }; Returns: string }
+      platform_health: {
+        Args: { _days?: number }
+        Returns: {
+          category: string
+          day: string
+          metric: string
+          subject: string
+          value: number
+        }[]
+      }
       redeem_pack_code: { Args: { _code: string }; Returns: Json }
       restore_pack_hours: {
         Args: {

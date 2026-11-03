@@ -26,4 +26,38 @@ async function killSimulatorTrees(execFileAsync) {
   }));
 }
 
-module.exports = { SIMULATOR_EXECUTABLES, isProteeLabsTitle, killSimulatorTrees };
+// One snapshot, then match names locally: multiple tasklist /FI filters are ANDed.
+async function checkSimulatorProcesses(execFileAsync) {
+  try {
+    const { stdout } = await execFileAsync('tasklist', ['/FO', 'CSV', '/NH'], { timeout: 5000 });
+    const names = new Set(SIMULATOR_EXECUTABLES.map(name => name.toLowerCase()));
+    const processes = [];
+    for (const line of stdout.split('\n')) {
+      const match = line.trim().match(/^"([^"]+)","(\d+)"/);
+      if (match && names.has(match[1].toLowerCase())) {
+        processes.push({ name: match[1], pid: Number(match[2]) });
+      }
+    }
+    // An empty/malformed command response is not evidence of a clean process list.
+    if (!stdout.split('\n').some(line => /^"[^"]+","\d+"/.test(line.trim()))) {
+      return { success: false, processes: [], error: 'Unrecognised tasklist response' };
+    }
+    return { success: true, processes };
+  } catch (error) {
+    return { success: false, processes: [], error: String(error.stderr || error.message || error) };
+  }
+}
+
+function shutdownVerification(visible, named) {
+  const processes = [...visible.processes, ...named.processes];
+  const stillRunning = [...new Map(processes.map(process => [process.pid, process])).values()];
+  const verificationSucceeded = visible.success && named.success;
+  return {
+    success: verificationSucceeded && stillRunning.length === 0,
+    verificationSucceeded,
+    stillRunning,
+    verificationErrors: [visible.error, named.error].filter(Boolean),
+  };
+}
+
+module.exports = { SIMULATOR_EXECUTABLES, isProteeLabsTitle, killSimulatorTrees, checkSimulatorProcesses, shutdownVerification };

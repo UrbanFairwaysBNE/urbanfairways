@@ -57,6 +57,13 @@
       "when": 1793664735913,
       "tag": "0007_bay_health_daily_rollup",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793670283710,
+      "tag": "0008_distinguish_shutdown_verification",
+      "breakpoints": true
     }
   ]
 }

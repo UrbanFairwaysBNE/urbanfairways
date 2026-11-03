@@ -375,7 +375,7 @@ interface BayBooking {
   } | null;
 }
 
-const SETTINGS_TABS = ["general", "reporting", "pricing", "pos", "notifications"] as const;
+const SETTINGS_TABS = ["general", "reporting", "pricing", "pos", "notifications", "health"] as const;
 
 export default function AdminSettings() {
   const { isAdmin, isLoading: authLoading } = useAdminAuth();

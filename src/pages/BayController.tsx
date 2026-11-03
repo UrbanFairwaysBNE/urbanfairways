@@ -18,6 +18,7 @@ import { AppRestoreSettings } from "@/components/bay-controller/AppRestoreSettin
 import { ControllerPasswordSettings } from "@/components/bay-controller/ControllerPasswordSettings";
 import { verifyControllerPassword } from "@/lib/bay-controller-password";
 import { prepareBayPowerOff, SIMULATOR_EXECUTABLES } from "@/lib/bay-shutdown";
+import { shutdownOutcome } from "@/lib/shutdown-report";
 
 interface Booking {
   id: string;
@@ -1959,12 +1960,18 @@ export default function BayController() {
                   details: { stillRunning: closeResult.stillRunning },
                   bookingId: activeBooking.id,
                 });
-              } else {
+              } else if (shutdownOutcome(closeResult) === 'clean') {
                 bayLogger.sendLog('process_detection', '[Changeover Step 2] Post-close: all processes confirmed dead', {
                   bookingId: activeBooking.id,
                 });
+              } else {
+                bayLogger.sendLog('error', 'Simulator shutdown verification unavailable', {
+                  level: 'warning', details: closeResult, bookingId: activeBooking.id, immediate: true,
+                });
               }
-              
+              if (shutdownOutcome(closeResult) !== 'clean') {
+                throw new Error('Changeover paused: previous apps are running or shutdown could not be verified');
+              }
               setAppsRunning(false);
               setAppLaunchStatus(null);
               bayLogger.logAppClose('GSPro', 'scheduled', activeBooking.id);
@@ -3027,8 +3034,9 @@ export default function BayController() {
         const result = await prepareBayPowerOff({
           shouldKeepPower,
           checkApps: async () => {
-            const [gspro, protee] = await Promise.all([api.findWindow("GSPro"), api.findWindow("ProTee")]);
-            return Boolean(gspro?.hwnd || protee?.hwnd);
+            const state = await api.checkProcesses();
+            if (!state.success) throw new Error('Cannot verify simulator processes');
+            return state.processes.length > 0;
           },
           closeApps: async () => {
             intentionalCloseInProgressRef.current = true;
@@ -3509,41 +3517,41 @@ export default function BayController() {
       intentionalCloseInProgressRef.current = true;
       lastIntentionalAppCloseAtRef.current = Date.now();
       const result = await window.electronAPI.closeApps(SIMULATOR_EXECUTABLES);
+      const outcome = shutdownOutcome(result);
       
       // Log post-close process verification
       if (result.stillRunning && result.stillRunning.length > 0) {
         const stillAlive = result.stillRunning.map(p => `${p.name} (PID ${p.pid})`).join(', ');
         bayLogger.sendLog('process_detection', `Post-close verification: STILL RUNNING - ${stillAlive}`, {
           level: 'warning',
-          details: { stillRunning: result.stillRunning },
+          details: result,
           bookingId: activeBooking?.id,
         });
-      } else {
+      } else if (outcome === 'clean') {
         bayLogger.sendLog('process_detection', 'Post-close verification: all processes confirmed dead', {
           bookingId: activeBooking?.id,
+          details: result,
         });
       }
       
-      if (result.success) {
+      if (outcome === 'clean') {
         setAppsRunning(false);
         setAppLaunchStatus(null);
         bayLogger.logAppClose('GSPro', closeReason, activeBooking?.id);
         bayLogger.logAppClose('Protee Labs', closeReason, activeBooking?.id);
         toast.info("Apps closed");
       } else {
-        bayLogger.sendLog('error', `closeApps returned success=false, some processes may still be alive`, {
-          level: 'error',
-          details: { stillRunning: result.stillRunning },
+        bayLogger.sendLog('error', outcome === 'running' ? 'Simulator shutdown failed: processes still running' : 'Simulator shutdown verification unavailable', {
+          level: outcome === 'running' ? 'error' : 'warning',
+          details: result,
           bookingId: activeBooking?.id,
           immediate: true,
         });
-        // Still mark as not running from our perspective
-        setAppsRunning(false);
-        setAppLaunchStatus(null);
+        setAppLaunchStatus(outcome === 'running' ? 'Apps still running' : 'Shutdown not verified');
       }
       // Clear flag after a short delay to allow GSPro close event to be processed
       setTimeout(() => { intentionalCloseInProgressRef.current = false; }, 2000);
-      return result.success;
+      return outcome === 'clean';
     } catch (error) {
       intentionalCloseInProgressRef.current = false;
       bayLogger.logError('Failed to close apps', error, activeBooking?.id);

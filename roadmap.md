@@ -1,4 +1,5 @@
 # Switchover preparation
+- [ ] Correct contradictory shutdown reporting, verify named processes independently of kill-command results, and distinguish unverified legacy events in Health Check.
 - [x] Add complimentary membership assignment to the Customers three-dot menu; admin-only function deployed, four rule tests passed, signed-in assignment saved/read back, paid checkout blocked, and admin test account restored.
 - [x] Harden Bay Controller shutdown: correct ProTee executable/window targeting, tree-kill, bounded retries, booking rechecks; nine tests passed and browser simulation confirmed forced shutdown after three attempts.
 - [ ] Windows release delivery and real-PC shutdown verification: blocked on updated sources reaching the controller release repository and a Windows installer reaching a bay PC; no GitHub connection available here. This checkout's release target is urbanfairways, while project memory names UF-Bay-Controller, so the correct release destination must be reconciled before delivery.

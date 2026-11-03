@@ -1,4 +1,5 @@
 # Switchover preparation
+- [x] Resolve ambiguous shutdown warnings when the same shutdown immediately reports closure; 13 tests passed, six SQL matching cases passed, and Bay 2 checked green signed-in. Unresolved and confirmed-running failures remain visible.
 - [x] Correct contradictory shutdown reporting and independently verify visible/named processes; 23 tests and 3 live classifier checks passed. Today’s Bay 4/6 events now read as unverified, not confirmed close failures; signed-in warning checked. Windows changes await release and real-PC verification as below.
 - [x] Add complimentary membership assignment to the Customers three-dot menu; admin-only function deployed, four rule tests passed, signed-in assignment saved/read back, paid checkout blocked, and admin test account restored.
 - [x] Harden Bay Controller shutdown: correct ProTee executable/window targeting, tree-kill, bounded retries, booking rechecks; nine tests passed and browser simulation confirmed forced shutdown after three attempts.

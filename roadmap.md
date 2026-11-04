@@ -1,5 +1,5 @@
 # Switchover preparation
-- [ ] Correct Windows shutdown-check quoting that leaves Launch Apps blocked despite closed simulators; validate commands and retain unknown-state safety.
+- [x] Correct Windows shutdown-check quoting that leaves Launch Apps blocked despite closed simulators; Bay 7 logs confirmed cmd.exe splitting the quoted pipe. Source repaired; 20 tests and syntax check passed. Installer delivery and real-PC confirmation remain blocked under Windows release delivery below.
 - [x] Resolve ambiguous shutdown warnings when the same shutdown immediately reports closure; 13 tests passed, six SQL matching cases passed, and Bay 2 checked green signed-in. Unresolved and confirmed-running failures remain visible.
 - [x] Correct contradictory shutdown reporting and independently verify visible/named processes; 23 tests and 3 live classifier checks passed. Today’s Bay 4/6 events now read as unverified, not confirmed close failures; signed-in warning checked. Windows changes await release and real-PC verification as below.
 - [x] Add complimentary membership assignment to the Customers three-dot menu; admin-only function deployed, four rule tests passed, signed-in assignment saved/read back, paid checkout blocked, and admin test account restored.

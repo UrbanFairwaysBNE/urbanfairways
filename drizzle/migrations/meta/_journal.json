@@ -71,6 +71,13 @@
       "when": 1793677299988,
       "tag": "0009_reconcile_shutdown_health_reports",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793751202756,
+      "tag": "0010_allow_bay_7_logs",
+      "breakpoints": true
     }
   ]
 }

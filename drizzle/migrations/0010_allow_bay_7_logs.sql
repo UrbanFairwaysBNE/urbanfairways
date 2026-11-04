@@ -1,0 +1,2 @@
+ALTER TABLE public.bay_controller_logs DROP CONSTRAINT bay_controller_logs_bay_number_check;
+ALTER TABLE public.bay_controller_logs ADD CONSTRAINT bay_controller_logs_bay_number_check CHECK (bay_number >= 1 AND bay_number <= 7);

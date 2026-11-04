@@ -26,6 +26,15 @@ async function killSimulatorTrees(execFileAsync) {
   }));
 }
 
+// Do not send scripts through cmd.exe: quoted pipes can become shell operators.
+// PowerShell's encoded command accepts UTF-16LE without shell quote parsing.
+async function runSimulatorPowerShell(execFileAsync, script, timeout) {
+  return execFileAsync('powershell.exe', [
+    '-NoProfile', '-NonInteractive', '-EncodedCommand',
+    Buffer.from(script, 'utf16le').toString('base64'),
+  ], { timeout, windowsHide: true });
+}
+
 // One snapshot, then match names locally: multiple tasklist /FI filters are ANDed.
 async function checkSimulatorProcesses(execFileAsync) {
   try {
@@ -60,4 +69,4 @@ function shutdownVerification(visible, named) {
   };
 }
 
-module.exports = { SIMULATOR_EXECUTABLES, isProteeLabsTitle, killSimulatorTrees, checkSimulatorProcesses, shutdownVerification };
+module.exports = { SIMULATOR_EXECUTABLES, isProteeLabsTitle, killSimulatorTrees, runSimulatorPowerShell, checkSimulatorProcesses, shutdownVerification };

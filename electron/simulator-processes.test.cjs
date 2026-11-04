@@ -1,5 +1,24 @@
 const { test, expect } = require('bun:test');
-const { isProteeLabsTitle, killSimulatorTrees, checkSimulatorProcesses, shutdownVerification } = require('./simulator-processes.cjs');
+const { isProteeLabsTitle, killSimulatorTrees, runSimulatorPowerShell, checkSimulatorProcesses, shutdownVerification } = require('./simulator-processes.cjs');
+
+test('shutdown verification passes quoted pipes intact without a Windows command shell', async () => {
+  const script = 'Get-Process | ForEach-Object { Write-Output ($_.ProcessName + "|" + $_.Id) }';
+  const result = await runSimulatorPowerShell(async (file, args, options) => {
+    expect(file).toBe('powershell.exe');
+    expect(args.slice(0, 3)).toEqual(['-NoProfile', '-NonInteractive', '-EncodedCommand']);
+    expect(Buffer.from(args[3], 'base64').toString('utf16le')).toBe(script);
+    expect(options).toEqual({ timeout: 10000, windowsHide: true });
+    expect(options.shell).toBeUndefined();
+    return { stdout: '' };
+  }, script, 10000);
+  expect(result.stdout).toBe('');
+});
+
+test('encoded shutdown verification keeps Windows errors as failures', async () => {
+  await expect(runSimulatorPowerShell(async () => {
+    throw new Error('PowerShell timed out');
+  }, 'Get-Process', 10000)).rejects.toThrow('PowerShell timed out');
+});
 
 test('recognises ProTee window title without requiring Labs', () => {
   expect(isProteeLabsTitle('ProTee')).toBe(true);

@@ -6,7 +6,7 @@ const { exec, execFile, spawn } = require('child_process');
 const { promisify } = require('util');
 const execAsync = promisify(exec);
 const execFileAsync = promisify(execFile);
-const { isProteeLabsTitle, killSimulatorTrees, checkSimulatorProcesses, shutdownVerification } = require('./simulator-processes.cjs');
+const { isProteeLabsTitle, killSimulatorTrees, runSimulatorPowerShell, checkSimulatorProcesses, shutdownVerification } = require('./simulator-processes.cjs');
 
 // The controller loads the live app (webviews, booking data, extend links) from
 // this origin. Override with the HUB_ORIGIN env var while the domain is pending.
@@ -2092,7 +2092,7 @@ async function closeApps(appNames) {
   `.replace(/\s+/g, ' ').trim();
 
   try {
-    const { stdout } = await execAsync(`powershell -NoProfile -Command "${psScript.replace(/"/g, '\\"')}"`, { timeout: 10000 });
+    const { stdout } = await runSimulatorPowerShell(execFileAsync, psScript, 10000);
     const lines = stdout.split('\n').map(l => l.trim()).filter(Boolean);
     for (const line of lines) {
       console.log(`  ${line}`);
@@ -2128,7 +2128,7 @@ async function closeApps(appNames) {
         Where-Object { $protected -notcontains $_.ProcessName.ToLower() } |
         ForEach-Object { Write-Output ($_.ProcessName + "|" + $_.Id) }
     `.replace(/\s+/g, ' ').trim();
-    const { stdout } = await execAsync(`powershell -NoProfile -Command "${verifyScript.replace(/"/g, '\\"')}"`, { timeout: 5000 });
+    const { stdout } = await runSimulatorPowerShell(execFileAsync, verifyScript, 10000);
     stillRunning = stdout.split('\n').map(l => l.trim()).filter(Boolean).map(l => {
       const [name, pid] = l.split('|');
       return { name, pid: parseInt(pid) };

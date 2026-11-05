@@ -93,7 +93,18 @@ export function BayControllerLogs() {
         return;
       }
 
-      setLogs((data || []) as LogEntry[]);
+      // Controllers upload logs in batches, so created_at is the upload time.
+      // The real event time on the bay PC is stored in details.local_timestamp.
+      const withEventTime = ((data || []) as LogEntry[]).map((log) => {
+        const local = log.details?.local_timestamp;
+        return { ...log, local_timestamp: typeof local === "string" ? local : null };
+      });
+      withEventTime.sort(
+        (a, b) =>
+          new Date(b.local_timestamp || b.created_at).getTime() -
+          new Date(a.local_timestamp || a.created_at).getTime(),
+      );
+      setLogs(withEventTime);
     } catch (err) {
       console.error("Error fetching logs:", err);
     } finally {

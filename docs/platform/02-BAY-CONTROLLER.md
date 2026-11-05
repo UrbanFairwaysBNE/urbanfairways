@@ -145,6 +145,25 @@ booking tiles also show the lesson customer's name; booker IDs and GSPro setting
 
 ## Logging
 
+Simulator lifecycle monitoring records GSPro and ProTee Labs identities (PID plus Windows
+creation time), parent PID and available executable path. Shutdown first revalidates and
+tree-kills those individual identities, retaining named/visible-app cleanup and independent
+final verification. One main-process gate rejects overlapping launches/shutdowns and launch
+checks refuse to start over existing simulator processes or unavailable inventories.
+Process creation times come from Windows; exits are bracketed between observations, not
+claimed as exact OS exit timestamps. The serialized local observer runs every three seconds,
+but only changes and operation snapshots are logged, not every poll.
+
+Lifecycle and restart evidence survives renderer/app restarts in the bounded
+`process-lifecycle.json` journal under Electron userData. Existing log uploads and the
+existing 30-second heartbeat cadence drain it; events are removed only after successful
+server receipt. Retries are at-least-once, so `lifecycleEventId` identifies duplicates.
+An interrupted previous run is labelled unclean/interrupted, not assumed to be a crash.
+Settings → Health Check shows current version and last contact using existing bay_devices
+updates. A contact older than two minutes is not recently confirmed, not proof of a powered-off PC.
+No extra network presence polling is added. New Windows behavior requires release/install
+and a real bay test; preview source checks cannot establish installed behavior.
+
 Every scheduled action writes a high-precision `local_timestamp` entry to
 `bay_controller_logs`, viewable in Admin → Bay Controller Logs. Use these logs first when
 diagnosing any automation complaint.

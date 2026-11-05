@@ -62,3 +62,17 @@ test('journal retains unacknowledged events across restart and identifies interr
     expect(third.pending().at(-1).details.previousExit).toBe('clean');
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
+test('failed journal writes cannot acknowledge or publish non-durable events', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'controller-disk-'));
+  try {
+    let fail = false;
+    const disk = { ...fs, writeFileSync: (...args) => { if (fail) throw new Error('Disk full'); return fs.writeFileSync(...args); } };
+    const journal = createJournal(disk, path.join(dir, 'journal.json'), 'test');
+    const initial = journal.pending();
+    fail = true;
+    expect(() => journal.record('process_started', { process: labs })).toThrow('Disk full');
+    expect(journal.pending()).toEqual(initial);
+    expect(() => journal.acknowledge(initial.map(e => e.id))).toThrow('Disk full');
+    expect(journal.pending()).toEqual(initial);
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});

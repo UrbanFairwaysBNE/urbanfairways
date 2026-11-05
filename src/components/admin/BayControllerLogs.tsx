@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, parseISO, subDays } from "date-fns";
+import { formatBrisbane } from "@/lib/brisbane-time";
 
 interface LogEntry {
   id: string;
@@ -31,6 +32,7 @@ interface LogEntry {
   booking_id: string | null;
   app_version: string | null;
   created_at: string;
+  local_timestamp?: string | null;
 }
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
@@ -50,6 +52,7 @@ const EVENT_TYPE_LABELS: Record<string, string> = {
   controller_start: 'Controller Start',
   connection_lost: 'Connection Lost',
   connection_restored: 'Connection Restored',
+  process_detection: 'Process Evidence',
 };
 
 export function BayControllerLogs() {
@@ -167,7 +170,7 @@ export function BayControllerLogs() {
   const exportToCSV = () => {
     const headers = ["Timestamp", "Bay", "Level", "Event Type", "Message"];
     const rows = filteredLogs.map((log) => [
-      format(parseISO(log.created_at), "yyyy-MM-dd HH:mm:ss"),
+      formatBrisbane(log.local_timestamp || log.created_at),
       `Bay ${log.bay_number}`,
       log.event_level,
       log.event_type,
@@ -307,10 +310,14 @@ export function BayControllerLogs() {
                             </Badge>
                             <span className="text-xs text-muted-foreground flex items-center gap-1">
                               <Clock className="h-3 w-3" />
-                              {format(parseISO(log.created_at), "MMM d, h:mm:ss a")}
+                              {formatBrisbane(log.local_timestamp || log.created_at)}
                             </span>
                           </div>
                           <p className="text-sm mt-1">{log.message}</p>
+                          {log.details?.process && typeof log.details.process === 'object' && (() => {
+                            const process = log.details.process as { name?: string; pid?: number; createdAt?: string };
+                            return <p className="text-xs text-muted-foreground mt-1 break-words">{process.name} · PID {process.pid} · Started {formatBrisbane(process.createdAt)}</p>;
+                          })()}
                           
                           {/* Expandable details */}
                           {log.details && Object.keys(log.details).length > 0 && (

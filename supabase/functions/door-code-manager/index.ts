@@ -842,6 +842,31 @@ async function syncAll() {
 
 }
 
+const MAINTENANCE_ACTIONS = new Set(["daily_ensure", "sync"]);
+const LOCK_SECRET_FIELDS = ["adminPwd", "aesKeyStr", "lockKey", "noKeyPwd", "deletePwd"];
+
+async function isTrustedCaller(req: Request): Promise<boolean> {
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  const bearer = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
+  const apikey = req.headers.get("apikey") ?? "";
+  if (serviceKey && (bearer === serviceKey || apikey === serviceKey)) return true;
+  if (!bearer) return false;
+  const { data: auth } = await supabase.auth.getUser(bearer);
+  if (!auth?.user) return false;
+  const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: auth.user.id, _role: "admin" });
+  return isAdmin === true;
+}
+
+function stripLockSecrets(locks: Record<string, unknown>) {
+  const out: Record<string, unknown> = {};
+  for (const [id, v] of Object.entries(locks)) {
+    const copy = { ...(v as Record<string, unknown>) };
+    for (const f of LOCK_SECRET_FIELDS) delete copy[f];
+    out[id] = copy;
+  }
+  return out;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -849,6 +874,25 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const action = body.action || "sync";
     let result: unknown;
+
+    // Only trusted server callers or signed-in admins may read codes, issue,
+    // revoke or unlock. The scheduled job may only trigger maintenance and
+    // gets a bare success flag back, so nothing about the doors leaks.
+    const trusted = await isTrustedCaller(req);
+    if (!trusted) {
+      if (!MAINTENANCE_ACTIONS.has(action)) {
+        return new Response(JSON.stringify({ success: false, error: "Not authorised" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const r = action === "daily_ensure"
+        ? await ensureDailyCode() // never rotate: that would discard the code already emailed
+        : await syncAll();
+      return new Response(JSON.stringify({ success: (r as any)?.success !== false }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     switch (action) {
       case "issue":
@@ -921,7 +965,7 @@ Deno.serve(async (req) => {
           const c = getTTLockCredentials();
           if (!c) { result = { success: false, error: "TTLock credentials not configured" }; break; }
           const m = new TTLockMultiLock(c, ttlockIds(s));
-          result = { success: true, capabilities: { locks: await m.details() } };
+          result = { success: true, capabilities: { locks: stripLockSecrets(await m.details()) } };
           break;
         }
         const creds = getTuyaCredentials();

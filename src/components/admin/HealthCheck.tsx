@@ -6,6 +6,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatBrisbane } from "@/lib/brisbane-time";
+import { controllerPresence } from "@/lib/controller-presence";
 import {
   Light, Metrics, Verdict, bayVerdict, bookingsVerdict, doorVerdict, emailsVerdict,
   membershipsVerdict, packsVerdict, paymentsVerdict, worst,
@@ -53,6 +55,10 @@ function Dot({ v, title, day }: { v: Verdict; title: string; day: string }) {
 }
 
 export function HealthCheck() {
+  const [devices, setDevices] = useState<{ bay_id: string; last_seen: string | null; app_version: string | null }[]>([]);
+  const [bays, setBays] = useState<{ id: string; name: string }[]>([]);
+  const [now, setNow] = useState(Date.now());
+  const [presenceError, setPresenceError] = useState<string | null>(null);
   const [rows, setRows] = useState<Row[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -61,13 +67,33 @@ export function HealthCheck() {
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase.rpc("platform_health" as never, { _days: DAYS } as never);
+    const [{ data, error }, deviceResult, bayResult] = await Promise.all([
+      supabase.rpc("platform_health" as never, { _days: DAYS } as never),
+      supabase.from('bay_devices').select('bay_id,last_seen,app_version'),
+      supabase.from('bays').select('id,name').order('name'),
+    ]);
+    setPresenceError(deviceResult.error || bayResult.error ? 'Current controller status could not be checked.' : null);
+    setDevices(deviceResult.data || []);
+    setBays(bayResult.data || []);
+    setNow(Date.now());
     if (error) setError(error.message);
     else setRows((data as unknown as Row[]) ?? []);
     setLoading(false);
   }, []);
 
   useEffect(() => { load(); }, [load]);
+  // Update age labels locally. Realtime reuses existing device updates; no controller ping is added.
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 15000);
+    const channel = supabase.channel('health-check-controller-presence')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bay_devices' }, payload => {
+        const device = payload.new as { bay_id?: string; last_seen: string | null; app_version: string | null };
+        if (!device.bay_id) return;
+        const bayId = device.bay_id;
+        setDevices(previous => [...previous.filter(d => d.bay_id !== bayId), { ...device, bay_id: bayId }]);
+      }).subscribe();
+    return () => { clearInterval(timer); void supabase.removeChannel(channel); };
+  }, []);
 
   const metrics = useMemo(() => {
     const map = new Map<string, Metrics>();
@@ -125,6 +151,25 @@ export function HealthCheck() {
         </Button>
       </CardHeader>
       <CardContent className="space-y-6">
+        <section>
+          <h3 className="font-semibold mb-2">Controllers now</h3>
+          {presenceError && <p className="text-sm text-destructive">{presenceError}</p>}
+          <div className="grid gap-x-6 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
+            {bays.map(bay => {
+              const device = devices.find(d => d.bay_id === bay.id);
+              const presence = controllerPresence(device?.last_seen || null, now);
+              return <div key={bay.id} className="border-b border-border py-2 text-sm min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={cn('h-2 w-2 rounded-full', presence === 'online' ? 'bg-status-ok' : 'bg-status-warn')} />
+                  <span className="font-medium">{bay.name}</span>
+                  <span>{presence === 'online' ? 'Online' : 'Not recently confirmed'}</span>
+                  <span className="text-muted-foreground">{device?.app_version ? `v${device.app_version}` : 'Version unknown'}</span>
+                </div>
+                <p className="text-xs text-muted-foreground break-words">Last contact: {formatBrisbane(device?.last_seen)}</p>
+              </div>;
+            })}
+          </div>
+        </section>
         {error && <p className="text-sm text-destructive">{error}</p>}
         {!rows && !error && <Skeleton className="h-64 w-full" />}
         {rows && sections.map((s) => (

@@ -887,7 +887,7 @@ Deno.serve(async (req) => {
         });
       }
       const r = action === "daily_ensure"
-        ? await ensureDailyCode({ rotate: !!body.rotate })
+        ? await ensureDailyCode() // never rotate: that would discard the code already emailed
         : await syncAll();
       return new Response(JSON.stringify({ success: (r as any)?.success !== false }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

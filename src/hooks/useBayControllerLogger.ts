@@ -50,7 +50,7 @@ export function useBayControllerLogger({
   
   // Flush queued logs to the server with explicit action
   const flushLogs = useCallback(async () => {
-    if (!bayNumber || !enabled || logQueueRef.current.length === 0 || isFlushingRef.current) {
+    if (!bayNumber || !enabled || isFlushingRef.current) {
       return;
     }
     
@@ -59,8 +59,18 @@ export function useBayControllerLogger({
     logQueueRef.current = [];
     
     try {
+      const lifecycle = await window.electronAPI?.getLifecycleEvents?.() || [];
+      const lifecycleLogs: LogEntry[] = lifecycle.map(event => ({
+        event_type: event.kind === 'controller_started' ? 'controller_start' : 'process_detection',
+        event_level: /failed|unavailable|blocked|gap/.test(event.kind) ? 'warning' : 'info',
+        message: `[Lifecycle] ${event.kind}${typeof event.details.reason === 'string' ? `: ${event.details.reason}` : ''}`,
+        details: { ...event.details, lifecycleEventId: event.id, controllerInstanceId: event.controllerInstanceId, sourceAppVersion: event.appVersion },
+        booking_id: event.bookingId,
+        local_timestamp: event.observedAt,
+      }));
+      if (!logsToSend.length && !lifecycleLogs.length) return;
       const { error } = await supabase.functions.invoke("bay-controller-api", {
-        body: { logs: logsToSend },
+        body: { logs: [...logsToSend, ...lifecycleLogs] },
         headers: {
           "x-bay-number": bayNumber.toString(),
           "x-app-version": appVersion,
@@ -72,6 +82,8 @@ export function useBayControllerLogger({
         console.error("[BayLogger] Failed to send logs:", error);
         // Re-queue failed logs (up to 100 max)
         logQueueRef.current = [...logsToSend, ...logQueueRef.current].slice(0, 100);
+      } else if (lifecycle.length) {
+        await window.electronAPI?.acknowledgeLifecycleEvents?.(lifecycle.map(event => event.id));
       }
     } catch (err) {
       console.error("[BayLogger] Error sending logs:", err);
@@ -82,13 +94,13 @@ export function useBayControllerLogger({
     }
   }, [bayNumber, appVersion, enabled]);
   
-  // Flush logs on page unload/hide (minimize to tray, close, etc.)
+    // Unload flushing is best-effort; main-process evidence stays on disk until acknowledged.
   useEffect(() => {
     if (!enabled || !bayNumber) return;
     
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
-        // Use sendBeacon for reliable delivery during unload
+        // A normal authenticated flush may be interrupted by unload.
         flushLogs();
       }
     };

@@ -72,7 +72,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   closeWelcomeWindows: () => ipcRenderer.invoke('close-welcome-windows'),
   
   // Close apps by process name
-  closeApps: (appNames) => ipcRenderer.invoke('close-apps', { appNames }),
+  closeApps: (appNames, context) => ipcRenderer.invoke('close-apps', { appNames, context }),
+  getLifecycleEvents: () => ipcRenderer.invoke('lifecycle-pending'),
+  acknowledgeLifecycleEvents: (ids) => ipcRenderer.invoke('lifecycle-acknowledge', ids),
   
   // Check which simulator processes are currently running
   checkProcesses: () => ipcRenderer.invoke('check-processes'),

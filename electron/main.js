@@ -7,6 +7,24 @@ const { promisify } = require('util');
 const execAsync = promisify(exec);
 const execFileAsync = promisify(execFile);
 const { isProteeLabsTitle, killSimulatorTrees, runSimulatorPowerShell, checkSimulatorProcesses, shutdownVerification } = require('./simulator-processes.cjs');
+const { inventory, killInstance, transitions, createOperationGate, createJournal } = require('./process-lifecycle.cjs');
+const { randomUUID } = require('crypto');
+const simulatorOperation = createOperationGate();
+let lifecycleJournal;
+let lifecycleContext = {};
+let previousInventory = null;
+let processPollBusy = false;
+
+function recordLifecycle(kind, details = {}, context = lifecycleContext) {
+  try { lifecycleJournal?.record(kind, details, context); }
+  catch (error) { console.error('[Lifecycle] Could not persist evidence:', error.message); }
+}
+
+async function observeSimulatorProcesses(reason) {
+  const snapshot = await inventory(execFileAsync);
+  recordLifecycle('process_snapshot', { reason, ...snapshot });
+  return snapshot;
+}
 
 // The controller loads the live app (webviews, booking data, extend links) from
 // this origin. Override with the HUB_ORIGIN env var while the domain is pending.
@@ -222,6 +240,7 @@ function safeSerialize(value) {
 }
 
 function logProcessIssue(scope, payload) {
+  recordLifecycle('controller_diagnostic', { scope, payload });
   try {
     const timestamp = new Date().toISOString();
     const logLine = `[${timestamp}] [${scope}] ${safeSerialize(payload)}\n`;
@@ -446,6 +465,35 @@ async function ensureWatchdogTask() {
 }
 
 app.whenReady().then(() => {
+  if (gotTheLock) {
+    try {
+      lifecycleJournal = createJournal(fs, path.join(app.getPath('userData'), 'process-lifecycle.json'), app.getVersion());
+    } catch (error) {
+      logProcessIssue('lifecycle_journal_unavailable', error.message);
+    }
+    setInterval(async () => {
+      if (processPollBusy) return;
+      processPollBusy = true;
+      try {
+        const snapshot = await inventory(execFileAsync);
+        if (!snapshot.success) {
+          if (previousInventory?.success !== false) recordLifecycle('process_check_unavailable', snapshot);
+          previousInventory = { ...snapshot, processes: previousInventory?.processes || [] };
+          return;
+        }
+        if (!previousInventory) recordLifecycle('process_snapshot', { reason: 'controller_startup', ...snapshot });
+        else {
+          const changes = transitions(previousInventory.processes, snapshot.processes);
+          for (const process of changes.started) recordLifecycle('process_started', { process, observedAt: snapshot.observedAt, timing: 'first observation; creation time is Windows-reported' });
+          for (const process of changes.exited) recordLifecycle('process_exit_observed', { process, lastSeenAt: previousInventory.observedAt, observedAt: snapshot.observedAt, timing: 'exit occurred within this observation interval' });
+          if (!previousInventory.success) recordLifecycle('process_check_restored', snapshot);
+        }
+        previousInventory = snapshot;
+      } catch (error) { console.error('[Lifecycle] Monitor error:', error.message); }
+      finally { processPollBusy = false; }
+    }, 3000);
+    app.on('before-quit', () => { try { lifecycleJournal?.close(); } catch (error) { logProcessIssue('lifecycle_clean_exit_write_failed', error.message); } });
+  }
   createWindow();
   createTray();
   ensureWatchdogTask();
@@ -1150,10 +1198,12 @@ function launchApp(exePath) {
     const command = `cmd /c start "" "${trimmedPath}"`;
     console.log(`Executing: ${command}`);
     
-    // exec but don't wait for callback - fire and forget
+    recordLifecycle('launch_command_requested', { executablePath: trimmedPath });
+    // Command completion is not proof of process creation; inventory records that separately.
     exec(command, (error, stdout, stderr) => {
       // This callback fires later but we don't wait for it
       if (error) {
+        recordLifecycle('launch_command_failed', { executablePath: trimmedPath, error: error.message });
         console.error(`Background exec error for ${trimmedPath}:`, error.message);
       } else {
         console.log(`Background exec completed for ${trimmedPath}`);
@@ -1387,6 +1437,7 @@ let appLaunchCancelled = false;
 // Cancel the app launch sequence
 function cancelAppLaunch() {
   appLaunchCancelled = true;
+  recordLifecycle('launch_cancel_requested');
   console.log('App launch sequence cancelled by user');
 }
 
@@ -1531,6 +1582,11 @@ async function verifyAppsReady(gsproDisplayIndex, proteeDisplayIndex) {
 // Run the full app launch sequence with welcome windows
 // Uses a simple 35-second timer to ensure apps have time to load
 async function runAppLaunchSequence(config) {
+  const before = await observeSimulatorProcesses('before_launch_sequence');
+  if (!before.success || before.processes.length > 0) {
+    recordLifecycle('launch_blocked', { reason: before.success ? 'Existing simulator processes must be closed first' : 'Process inventory unavailable', ...before });
+    return { success: false, error: before.success ? 'Simulator processes already running; close apps before relaunching' : 'Cannot verify existing simulator processes' };
+  }
   const {
     gsproPath,
     proteeLabsPath,
@@ -1704,8 +1760,12 @@ async function runAppLaunchSequence(config) {
     }
     
     console.log('=== APP LAUNCH SEQUENCE COMPLETE ===');
+    const after = await observeSimulatorProcesses('after_launch_sequence');
+    recordLifecycle('launch_sequence_finished', { success: true, processes: after.processes, verificationSucceeded: after.success });
     return { success: true, results, displaySnapshot };
   } catch (error) {
+    recordLifecycle('launch_sequence_failed', { error: error.message });
+    await observeSimulatorProcesses('after_launch_failure');
     console.error('App launch sequence failed:', error.message);
     await closeWelcomeWindows();
     return { success: false, error: error.message, results };
@@ -2047,6 +2107,15 @@ async function checkProcesses() {
 // Whitelists Bay Controller itself + core Windows shell/system processes so the PC stays usable.
 async function closeApps(appNames) {
   const results = [];
+  const before = await observeSimulatorProcesses('before_shutdown');
+  if (before.success) {
+    for (const process of before.processes) {
+      recordLifecycle('kill_requested', { process });
+      const result = await killInstance(execFileAsync, process);
+      results.push(result);
+      recordLifecycle('kill_command_result', result);
+    }
+  }
 
   console.log('=== CLOSING ALL USER APPS ===');
 
@@ -2144,6 +2213,21 @@ async function closeApps(appNames) {
     await checkProcesses(),
   );
   stillRunning = verified.stillRunning;
+  const after = await observeSimulatorProcesses('after_shutdown');
+  if (!after.success) {
+    verified.success = false;
+    verified.verificationSucceeded = false;
+    verified.verificationErrors.push(after.error);
+  } else if (after.processes.length) {
+    verified.success = false;
+    verified.stillRunning = [...new Map([...stillRunning, ...after.processes].map(p => [p.pid, p])).values()];
+  }
+  if (before.success && after.success) {
+    const changes = transitions(before.processes, after.processes);
+    for (const process of changes.exited) recordLifecycle('process_exit_confirmed', { process, lastSeenAt: before.observedAt, observedAt: after.observedAt });
+  }
+  recordLifecycle('shutdown_finished', { ...verified, before, after });
+  stillRunning = verified.stillRunning;
   if (stillRunning.length > 0) {
     console.warn(`STILL RUNNING after bulk kill: ${stillRunning.map(p => `${p.name} (PID ${p.pid})`).join(', ')}`);
   } else {
@@ -2204,7 +2288,25 @@ ipcMain.handle('get-displays', async () => {
 });
 
 ipcMain.handle('launch-app', async (event, { exePath }) => {
-  return await launchApp(exePath);
+  return simulatorOperation(async () => {
+    lifecycleContext = { operationId: randomUUID(), reason: 'direct_launch' };
+    const before = await observeSimulatorProcesses('before_direct_launch');
+    if (!before.success || before.processes.length) return { success: false, error: 'Close existing simulator processes before launching' };
+    const result = await launchApp(exePath);
+    // Keep the shared gate while Windows starts the requested independent process.
+    const expectedName = path.basename(exePath).toLowerCase();
+    const deadline = Date.now() + 15000;
+    while (result.success && Date.now() < deadline) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const after = await inventory(execFileAsync);
+      if (!after.success) return { success: false, error: 'Launch requested but process verification unavailable' };
+      if (after.processes.some(p => p.name.toLowerCase() === expectedName)) {
+        recordLifecycle('process_snapshot', { reason: 'after_direct_launch', ...after });
+        return result;
+      }
+    }
+    return { success: false, error: result.error || 'Launch requested but process start was not confirmed; inspect apps before retrying' };
+  });
 });
 
 ipcMain.handle('find-window', async (event, { titlePattern }) => {
@@ -2224,7 +2326,11 @@ ipcMain.handle('focus-window', async (event, { hwnd }) => {
 });
 
 ipcMain.handle('run-app-sequence', async (event, config) => {
-  return await runAppLaunchSequence(config);
+  return simulatorOperation(async () => {
+    lifecycleContext = { operationId: randomUUID(), bookingId: config.bookingId, reason: config.reason || 'unspecified_launch' };
+    recordLifecycle('launch_sequence_requested');
+    return runAppLaunchSequence(config);
+  });
 });
 
 ipcMain.handle('cancel-app-sequence', async () => {
@@ -2232,8 +2338,17 @@ ipcMain.handle('cancel-app-sequence', async () => {
   return { success: true };
 });
 
-ipcMain.handle('close-apps', async (event, { appNames }) => {
-  return await closeApps(appNames);
+ipcMain.handle('close-apps', async (event, { appNames, context }) => {
+  return simulatorOperation(async () => {
+    lifecycleContext = { operationId: randomUUID(), bookingId: context?.bookingId, reason: context?.reason || 'unspecified_shutdown' };
+    return closeApps(appNames);
+  });
+});
+
+ipcMain.handle('lifecycle-pending', () => lifecycleJournal?.pending() || []);
+ipcMain.handle('lifecycle-acknowledge', (_event, ids) => {
+  if (!Array.isArray(ids) || ids.some(id => typeof id !== 'string')) throw new Error('Invalid acknowledgement');
+  lifecycleJournal?.acknowledge(ids);
 });
 
 ipcMain.handle('check-processes', async () => {
@@ -3479,8 +3594,8 @@ async function isGsproRunning() {
   try {
     const { stdout } = await execAsync('tasklist /FI "IMAGENAME eq GSPro.exe" /NH', { timeout: 5000 });
     return stdout.toLowerCase().includes('gspro.exe');
-  } catch {
-    return false;
+  } catch (error) {
+    throw new Error(`GSPro process lookup unavailable: ${error.message}`);
   }
 }
 
@@ -3618,7 +3733,11 @@ function startGsproWatcher() {
   
   console.log('Starting GSPro process watcher...');
   
+  let busy = false;
   gsproWatchInterval = setInterval(async () => {
+    if (busy) return;
+    busy = true;
+    try {
     const isRunning = await isGsproRunning();
     
     // Detect when GSPro stops running
@@ -3635,6 +3754,8 @@ function startGsproWatcher() {
     }
 
     gsproWasRunning = isRunning;
+    } catch (error) { console.warn('[GSPro watcher] State unknown:', error.message); }
+    finally { busy = false; }
   }, 3000); // Check every 3 seconds
 }
 

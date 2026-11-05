@@ -79,9 +79,11 @@ declare global {
       moveWindow: (hwnd: number, displayIndex: number, fullscreen?: boolean) => Promise<{ success: boolean; error?: string }>;
       minimizeWindow: (hwnd: number) => Promise<{ success: boolean; error?: string }>;
       focusWindow: (hwnd: number) => Promise<{ success: boolean; error?: string }>;
-      runAppSequence: (config: { gsproPath: string; proteeLabsPath: string; gsproDisplay: number; proteeDisplay: number; gsproDisplayLabel?: string; proteeDisplayLabel?: string; postLaunchDelay?: number; firstName?: string; language?: string }) => Promise<{ success: boolean; cancelled?: boolean; results?: any[]; displaySnapshot?: any[]; error?: string }>;
+      runAppSequence: (config: { gsproPath: string; proteeLabsPath: string; gsproDisplay: number; proteeDisplay: number; gsproDisplayLabel?: string; proteeDisplayLabel?: string; postLaunchDelay?: number; firstName?: string; language?: string; bookingId?: string; reason?: string }) => Promise<{ success: boolean; cancelled?: boolean; results?: any[]; displaySnapshot?: any[]; error?: string }>;
       cancelAppSequence: () => Promise<{ success: boolean }>;
-      closeApps: (appNames: string[]) => Promise<{ success: boolean; verificationSucceeded?: boolean; verificationErrors?: string[]; results?: any[]; stillRunning?: { name: string; pid: number }[]; error?: string }>;
+      closeApps: (appNames: string[], context?: { bookingId?: string; reason?: string }) => Promise<{ success: boolean; verificationSucceeded?: boolean; verificationErrors?: string[]; results?: any[]; stillRunning?: { name: string; pid: number }[]; error?: string }>;
+      getLifecycleEvents?: () => Promise<Array<{ id: string; kind: string; observedAt: string; bookingId?: string; controllerInstanceId: string; appVersion: string; details: Record<string, unknown> }>>;
+      acknowledgeLifecycleEvents?: (ids: string[]) => Promise<void>;
       checkProcesses: () => Promise<{ success: boolean; processes: { name: string; pid: number }[] }>;
       // Welcome window system
       showWelcomeWindows: (firstName: string, language?: string) => Promise<{ success: boolean; windowCount?: number; error?: string }>;

@@ -963,6 +963,8 @@ export default function BayController() {
   // Send lightweight heartbeat with explicit action
   const sendHeartbeat = useCallback(async () => {
     if (!selectedBay) return;
+    // Drain durable main-process events on the existing cadence; no new network polling loop.
+    void bayLogger.flushLogs();
     
     try {
       const { data, error } = await supabase.functions.invoke("bay-controller-api", {
@@ -1001,7 +1003,7 @@ export default function BayController() {
       console.error("Heartbeat failed:", error);
       setConnectionStatus("disconnected");
     }
-  }, [selectedBay, manualOverride, bayLogger]);
+  }, [selectedBay, manualOverride, bayLogger, appVersion]);
 
   // Fetch and sync control mode from database
   const fetchControlMode = useCallback(async () => {
@@ -1950,7 +1952,7 @@ export default function BayController() {
               // Set flag to prevent "unexpected close" log from onGsproClosed listener
               intentionalCloseInProgressRef.current = true;
               lastIntentionalAppCloseAtRef.current = Date.now();
-              const closeResult = await window.electronAPI.closeApps(SIMULATOR_EXECUTABLES);
+              const closeResult = await window.electronAPI.closeApps(SIMULATOR_EXECUTABLES, { bookingId: activeBooking.id, reason: 'changeover' });
               
               // Log post-close verification
               if (closeResult.stillRunning && closeResult.stillRunning.length > 0) {
@@ -2062,6 +2064,8 @@ export default function BayController() {
                     gsproDisplayLabel: appLaunchConfig.gsproDisplayLabel,
                     proteeDisplayLabel: appLaunchConfig.proteeDisplayLabel,
                     postLaunchDelay: 3000,
+                    bookingId: nextBooking.id,
+                    reason: 'changeover',
                     firstName: firstName,
                     language: nextBooking.preferred_language,
                   });
@@ -3042,7 +3046,7 @@ export default function BayController() {
             intentionalCloseInProgressRef.current = true;
             lastIntentionalAppCloseAtRef.current = Date.now();
             try {
-              return await api.closeApps(SIMULATOR_EXECUTABLES);
+              return await api.closeApps(SIMULATOR_EXECUTABLES, { bookingId: activeBookingRef.current?.id, reason: 'pre_power_off' });
             } finally {
               setTimeout(() => { intentionalCloseInProgressRef.current = false; }, 5000);
             }
@@ -3350,6 +3354,8 @@ export default function BayController() {
         gsproDisplayLabel: appLaunchConfig.gsproDisplayLabel,
         proteeDisplayLabel: appLaunchConfig.proteeDisplayLabel,
         postLaunchDelay: 3000,
+        bookingId: activeBooking?.id,
+        reason: manualOverride ? 'staff_launch' : 'booking_launch',
         firstName: activeBooking?.customer_name?.split(' ')[0] || 'Guest',
         language: activeBooking?.preferred_language || 'en'
       };
@@ -3516,7 +3522,7 @@ export default function BayController() {
       // Set flag to prevent "unexpected close" log from onGsproClosed listener
       intentionalCloseInProgressRef.current = true;
       lastIntentionalAppCloseAtRef.current = Date.now();
-      const result = await window.electronAPI.closeApps(SIMULATOR_EXECUTABLES);
+      const result = await window.electronAPI.closeApps(SIMULATOR_EXECUTABLES, { bookingId: activeBooking?.id, reason: closeReason });
       const outcome = shutdownOutcome(result);
       
       // Log post-close process verification

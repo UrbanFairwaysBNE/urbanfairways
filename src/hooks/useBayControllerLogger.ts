@@ -61,7 +61,7 @@ export function useBayControllerLogger({
     try {
       const lifecycle = await window.electronAPI?.getLifecycleEvents?.() || [];
       const lifecycleLogs: LogEntry[] = lifecycle.map(event => ({
-        event_type: event.kind.startsWith('controller_') ? 'controller_start' : 'process_detection',
+        event_type: event.kind === 'controller_started' ? 'controller_start' : 'process_detection',
         event_level: /failed|unavailable|blocked|gap/.test(event.kind) ? 'warning' : 'info',
         message: `[Lifecycle] ${event.kind}${typeof event.details.reason === 'string' ? `: ${event.details.reason}` : ''}`,
         details: { ...event.details, lifecycleEventId: event.id, controllerInstanceId: event.controllerInstanceId, sourceAppVersion: event.appVersion },
@@ -94,13 +94,13 @@ export function useBayControllerLogger({
     }
   }, [bayNumber, appVersion, enabled]);
   
-  // Flush logs on page unload/hide (minimize to tray, close, etc.)
+    // Unload flushing is best-effort; main-process evidence stays on disk until acknowledged.
   useEffect(() => {
     if (!enabled || !bayNumber) return;
     
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
-        // Use sendBeacon for reliable delivery during unload
+        // A normal authenticated flush may be interrupted by unload.
         flushLogs();
       }
     };

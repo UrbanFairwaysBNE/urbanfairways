@@ -466,7 +466,11 @@ async function ensureWatchdogTask() {
 
 app.whenReady().then(() => {
   if (gotTheLock) {
-    lifecycleJournal = createJournal(fs, path.join(app.getPath('userData'), 'process-lifecycle.json'), app.getVersion());
+    try {
+      lifecycleJournal = createJournal(fs, path.join(app.getPath('userData'), 'process-lifecycle.json'), app.getVersion());
+    } catch (error) {
+      logProcessIssue('lifecycle_journal_unavailable', error.message);
+    }
     setInterval(async () => {
       if (processPollBusy) return;
       processPollBusy = true;
@@ -488,7 +492,7 @@ app.whenReady().then(() => {
       } catch (error) { console.error('[Lifecycle] Monitor error:', error.message); }
       finally { processPollBusy = false; }
     }, 3000);
-    app.on('before-quit', () => { try { lifecycleJournal?.close(); } catch {} });
+    app.on('before-quit', () => { try { lifecycleJournal?.close(); } catch (error) { logProcessIssue('lifecycle_clean_exit_write_failed', error.message); } });
   }
   createWindow();
   createTray();
@@ -1433,6 +1437,7 @@ let appLaunchCancelled = false;
 // Cancel the app launch sequence
 function cancelAppLaunch() {
   appLaunchCancelled = true;
+  recordLifecycle('launch_cancel_requested');
   console.log('App launch sequence cancelled by user');
 }
 
@@ -2287,7 +2292,20 @@ ipcMain.handle('launch-app', async (event, { exePath }) => {
     lifecycleContext = { operationId: randomUUID(), reason: 'direct_launch' };
     const before = await observeSimulatorProcesses('before_direct_launch');
     if (!before.success || before.processes.length) return { success: false, error: 'Close existing simulator processes before launching' };
-    return launchApp(exePath);
+    const result = await launchApp(exePath);
+    // Keep the shared gate while Windows starts the requested independent process.
+    const expectedName = path.basename(exePath).toLowerCase();
+    const deadline = Date.now() + 15000;
+    while (result.success && Date.now() < deadline) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const after = await inventory(execFileAsync);
+      if (!after.success) return { success: false, error: 'Launch requested but process verification unavailable' };
+      if (after.processes.some(p => p.name.toLowerCase() === expectedName)) {
+        recordLifecycle('process_snapshot', { reason: 'after_direct_launch', ...after });
+        return result;
+      }
+    }
+    return { success: false, error: result.error || 'Launch requested but process start was not confirmed; inspect apps before retrying' };
   });
 });
 

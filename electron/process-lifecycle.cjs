@@ -62,20 +62,21 @@ function createJournal(fs, file, version) {
   if (!Array.isArray(state.events)) state.events = [];
   const prior = state.session;
   const instanceId = randomUUID();
-  const persist = () => {
+  const persist = (next = state) => {
     const temporary = `${file}.tmp`;
-    fs.writeFileSync(temporary, JSON.stringify(state));
+    fs.writeFileSync(temporary, JSON.stringify(next));
     fs.renameSync(temporary, file);
+    state = next;
   };
   const record = (kind, details = {}, context = {}) => {
     const event = { id: randomUUID(), kind, observedAt: new Date().toISOString(), controllerInstanceId: instanceId, appVersion: version, ...context, details };
-    state.events.push(event);
+    const next = { ...state, events: [...state.events, event] };
     // Disk journal bounded at 10k lifecycle events, not noisy routine polls.
-    if (state.events.length > 10000) {
-      state.events.splice(0, state.events.length - 9999);
-      state.events.push({ ...event, id: randomUUID(), kind: 'telemetry_gap', details: { reason: 'Journal capacity exceeded' } });
+    if (next.events.length > 10000) {
+      next.events.splice(0, next.events.length - 9999);
+      next.events.push({ ...event, id: randomUUID(), kind: 'telemetry_gap', details: { reason: 'Journal capacity exceeded' } });
     }
-    persist();
+    persist(next);
     return event;
   };
   state.session = { instanceId, startedAt: new Date().toISOString(), cleanExit: false };
@@ -83,8 +84,8 @@ function createJournal(fs, file, version) {
   return {
     instanceId, record,
     pending: () => state.events.slice(0, 100),
-    acknowledge: ids => { const acknowledged = new Set(ids); state.events = state.events.filter(e => !acknowledged.has(e.id)); persist(); },
-    close: () => { record('controller_stopping'); state.session.cleanExit = true; persist(); },
+    acknowledge: ids => { const acknowledged = new Set(ids); persist({ ...state, events: state.events.filter(e => !acknowledged.has(e.id)) }); },
+    close: () => { record('controller_stopping'); persist({ ...state, session: { ...state.session, cleanExit: true } }); },
   };
 }
 

@@ -62,7 +62,7 @@ export function useBayControllerLogger({
       const lifecycle = await window.electronAPI?.getLifecycleEvents?.() || [];
       const lifecycleLogs: LogEntry[] = lifecycle.map(event => ({
         event_type: event.kind === 'controller_started' ? 'controller_start' : 'process_detection',
-        event_level: /failed|unavailable|blocked|gap/.test(event.kind) ? 'warning' : 'info',
+        event_level: /failed|unavailable|blocked|gap|crash/.test(event.kind) ? 'warning' : 'info',
         message: `[Lifecycle] ${event.kind}${typeof event.details.reason === 'string' ? `: ${event.details.reason}` : ''}`,
         details: { ...event.details, lifecycleEventId: event.id, controllerInstanceId: event.controllerInstanceId, sourceAppVersion: event.appVersion },
         booking_id: event.bookingId,

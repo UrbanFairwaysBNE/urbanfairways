@@ -19,6 +19,7 @@ import { ControllerPasswordSettings } from "@/components/bay-controller/Controll
 import { verifyControllerPassword } from "@/lib/bay-controller-password";
 import { prepareBayPowerOff, SIMULATOR_EXECUTABLES } from "@/lib/bay-shutdown";
 import { shutdownOutcome } from "@/lib/shutdown-report";
+import { createShutdownCoordinator, canRunRegularAutomation } from "@/lib/controller-operations";
 
 interface Booking {
   id: string;
@@ -304,6 +305,8 @@ export default function BayController() {
   
   // Guard against re-entrant launchApps calls and cooldown after failed launches
   const launchInProgressRef = useRef(false);
+  const shutdownCoordinatorRef = useRef(createShutdownCoordinator<Awaited<ReturnType<NonNullable<typeof window.electronAPI>['closeApps']>>>());
+  const intentionalCloseTokenRef = useRef(0);
   const plugOffInProgressRef = useRef(false);
   const launchFailedCooldownUntilRef = useRef<number>(0);
   
@@ -330,6 +333,23 @@ export default function BayController() {
     appVersion: appVersion,
     enabled: isElectron, // Only log when running in Electron desktop app
   });
+
+  // Every renderer shutdown path joins the same request and waits for its real verification.
+  const requestSimulatorShutdown = (bookingId: string | undefined, reason: string) =>
+    shutdownCoordinatorRef.current.run(async () => {
+      const api = window.electronAPI;
+      if (!api) throw new Error('Desktop app unavailable');
+      const token = ++intentionalCloseTokenRef.current;
+      intentionalCloseInProgressRef.current = true;
+      lastIntentionalAppCloseAtRef.current = Date.now();
+      try {
+        return await api.closeApps(SIMULATOR_EXECUTABLES, { bookingId, reason });
+      } finally {
+        setTimeout(() => {
+          if (intentionalCloseTokenRef.current === token) intentionalCloseInProgressRef.current = false;
+        }, 5000);
+      }
+    });
   
   // Fetch real version from Electron at startup
   useEffect(() => {
@@ -1920,6 +1940,8 @@ export default function BayController() {
           console.log(`[Changeover] Already in progress, skipping`);
           return;
         }
+        // Do not begin restoring another customer's files during an existing operation.
+        if (launchInProgressRef.current || shutdownCoordinatorRef.current.isClosing) return;
         
         changeoverInProgressRef.current = changeoverKey;
         setShownChangeoverWelcomes(prev => new Set([...prev, changeoverKey]));
@@ -1950,9 +1972,7 @@ export default function BayController() {
               console.log(`[Changeover] Step 2: Closing apps to trigger baseline reset`);
               bayLogger.sendLog('automation_decision', '[Changeover Step 2] Closing apps for baseline reset', { bookingId: activeBooking.id });
               // Set flag to prevent "unexpected close" log from onGsproClosed listener
-              intentionalCloseInProgressRef.current = true;
-              lastIntentionalAppCloseAtRef.current = Date.now();
-              const closeResult = await window.electronAPI.closeApps(SIMULATOR_EXECUTABLES, { bookingId: activeBooking.id, reason: 'changeover' });
+              const closeResult = await requestSimulatorShutdown(activeBooking.id, 'changeover');
               
               // Log post-close verification
               if (closeResult.stillRunning && closeResult.stillRunning.length > 0) {
@@ -1979,7 +1999,6 @@ export default function BayController() {
               bayLogger.logAppClose('GSPro', 'scheduled', activeBooking.id);
               bayLogger.logAppClose('Protee Labs', 'scheduled', activeBooking.id);
               // Clear flag after a short delay to allow GSPro close event to be processed
-              setTimeout(() => { intentionalCloseInProgressRef.current = false; }, 2000);
             } else {
               console.log(`[Changeover] Step 2: Apps not running, skipping close`);
             }
@@ -1990,10 +2009,16 @@ export default function BayController() {
 
             // Step 3: Wait a moment for close to settle, then relaunch apps
             setTimeout(async () => {
+              const incomingStillValid = bookingsRef.current.some(b => b.id === nextBooking.id && (b.status === 'confirmed' || b.status === 'pending'));
+              if (changeoverInProgressRef.current !== changeoverKey || manualOverrideRef.current || !incomingStillValid) {
+                if (changeoverInProgressRef.current === changeoverKey) changeoverInProgressRef.current = null;
+                return;
+              }
               console.log(`[Changeover] Step 3: Relaunching apps behind welcome screen`);
               bayLogger.sendLog('automation_decision', '[Changeover Step 3] Relaunching apps', { bookingId: activeBooking.id });
               // Apps will launch using the standard sequence
               if (appLaunchConfig.enabled && window.electronAPI) {
+                launchInProgressRef.current = true;
                 setIsLaunchingApps(true);
                 setAppLaunchStatus("Relaunching apps for new session...");
                 
@@ -2085,15 +2110,18 @@ export default function BayController() {
                     console.log(`[Changeover] Step 3: Apps relaunched successfully`);
                     bayLogger.sendLog('automation_decision', '[Changeover Step 3] Apps relaunched successfully', { bookingId: activeBooking.id });
                   } else {
+                    launchFailedCooldownUntilRef.current = Math.max(Date.now() + 60000, nextStartTime.getTime());
                     console.error(`[Changeover] Step 3: App relaunch failed:`, result.error);
                     setAppLaunchStatus(`Relaunch failed: ${result.error} (will auto-retry)`);
                     bayLogger.sendLog('automation_decision', `[Changeover Step 3 FAILED] App relaunch error: ${result.error}`, { bookingId: activeBooking.id });
                     bayLogger.logError(`[Changeover Step 3] App relaunch failed: ${result.error}`, undefined, activeBooking.id);
                   }
                 } catch (err) {
+                  launchFailedCooldownUntilRef.current = Math.max(Date.now() + 60000, nextStartTime.getTime());
                   console.error(`[Changeover] Step 3: App relaunch error:`, err);
                   bayLogger.logError(`[Changeover Step 3] App relaunch exception`, err, activeBooking.id);
                 } finally {
+                  launchInProgressRef.current = false;
                   setIsLaunchingApps(false);
                 }
               } else {
@@ -2109,12 +2137,13 @@ export default function BayController() {
               console.log(`[Changeover] Step 4: Closing welcome screen after ${closeWelcomeDelay}ms`);
               bayLogger.sendLog('automation_decision', '[Changeover Step 4] Closing welcome screen', { bookingId: activeBooking.id });
               await window.electronAPI?.closeWelcomeWindows();
-              changeoverInProgressRef.current = null;
+              if (changeoverInProgressRef.current === changeoverKey && !launchInProgressRef.current) changeoverInProgressRef.current = null;
             }, closeWelcomeDelay);
             
           } catch (err) {
             console.error(`[Changeover] Error during changeover sequence:`, err);
             bayLogger.logError(`[Changeover] Sequence error`, err, activeBooking.id);
+            launchFailedCooldownUntilRef.current = Math.max(Date.now() + 60000, nextStartTime.getTime());
             changeoverInProgressRef.current = null;
           }
         } else {
@@ -2381,10 +2410,7 @@ export default function BayController() {
                 bookingId: booking.id,
                 immediate: true,
               });
-              intentionalCloseInProgressRef.current = true;
-              lastIntentionalAppCloseAtRef.current = Date.now();
               await closeApps('scheduled');
-              setTimeout(() => { intentionalCloseInProgressRef.current = false; }, 2000);
             }
             scheduledTimeoutsRef.current.delete(appCloseKey);
           }, msUntilAppClose);
@@ -3025,7 +3051,7 @@ export default function BayController() {
       const api = window.electronAPI;
       const shouldKeepPower = () => {
         if (isManual) return false;
-        if (manualOverrideRef.current || launchInProgressRef.current) return true;
+        if (manualOverrideRef.current || launchInProgressRef.current || changeoverInProgressRef.current) return true;
         const now = Date.now();
         return bookingsRef.current.some(booking => {
           if (booking.status !== 'confirmed' && booking.status !== 'pending') return false;
@@ -3042,15 +3068,7 @@ export default function BayController() {
             if (!state.success) throw new Error('Cannot verify simulator processes');
             return state.processes.length > 0;
           },
-          closeApps: async () => {
-            intentionalCloseInProgressRef.current = true;
-            lastIntentionalAppCloseAtRef.current = Date.now();
-            try {
-              return await api.closeApps(SIMULATOR_EXECUTABLES, { bookingId: activeBookingRef.current?.id, reason: 'pre_power_off' });
-            } finally {
-              setTimeout(() => { intentionalCloseInProgressRef.current = false; }, 5000);
-            }
-          },
+          closeApps: () => requestSimulatorShutdown(activeBookingRef.current?.id, 'pre_power_off'),
           wait: milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds)),
           log: message => {
             addLog(message, 'error');
@@ -3219,7 +3237,7 @@ export default function BayController() {
     }
 
     // Re-entrancy guard: prevent multiple parallel launchApps calls
-    if (launchInProgressRef.current) {
+    if (!canRunRegularAutomation({ changeoverInProgress: !!changeoverInProgressRef.current, launchInProgress: launchInProgressRef.current, shutdownInProgress: shutdownCoordinatorRef.current.isClosing })) {
       console.log('[BayController] launchApps already in progress, skipping');
       return;
     }
@@ -3520,9 +3538,7 @@ export default function BayController() {
 
     try {
       // Set flag to prevent "unexpected close" log from onGsproClosed listener
-      intentionalCloseInProgressRef.current = true;
-      lastIntentionalAppCloseAtRef.current = Date.now();
-      const result = await window.electronAPI.closeApps(SIMULATOR_EXECUTABLES, { bookingId: activeBooking?.id, reason: closeReason });
+      const result = await requestSimulatorShutdown(activeBooking?.id, closeReason);
       const outcome = shutdownOutcome(result);
       
       // Log post-close process verification
@@ -3556,10 +3572,8 @@ export default function BayController() {
         setAppLaunchStatus(outcome === 'running' ? 'Apps still running' : 'Shutdown not verified');
       }
       // Clear flag after a short delay to allow GSPro close event to be processed
-      setTimeout(() => { intentionalCloseInProgressRef.current = false; }, 2000);
       return outcome === 'clean';
     } catch (error) {
-      intentionalCloseInProgressRef.current = false;
       bayLogger.logError('Failed to close apps', error, activeBooking?.id);
       toast.error("Failed to close apps");
       return false;
@@ -3632,6 +3646,7 @@ export default function BayController() {
     }
 
     const changeoverInProgress = !!changeoverInProgressRef.current;
+    if (!canRunRegularAutomation({ changeoverInProgress, launchInProgress: launchInProgressRef.current, shutdownInProgress: shutdownCoordinatorRef.current.isClosing })) return;
     const msSinceIntentionalClose = lastIntentionalAppCloseAtRef.current
       ? now.getTime() - lastIntentionalAppCloseAtRef.current
       : null;

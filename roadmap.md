@@ -1,4 +1,5 @@
 # Switchover preparation
+- [x] Remove overlapping shutdown requests and give different-customer back-to-back changeovers exclusive launch/settings ownership; 43 regression tests passed and preview opens without page errors. Release/install and real Windows booking verification remain under Windows delivery below.
 - [x] Add durable GSPro/ProTee process identities, PID-targeted shutdown, shared launch protection, and controller restart evidence using existing reporting; source tests passed and seven-bay current status verified signed-in on desktop/phone. Windows execution and installer delivery remain blocked below.
 - [x] Correct Windows shutdown-check quoting that leaves Launch Apps blocked despite closed simulators; Bay 7 logs confirmed cmd.exe splitting the quoted pipe. Source repaired; 20 tests and syntax check passed. Installer delivery and real-PC confirmation remain blocked under Windows release delivery below.
 - [x] Resolve ambiguous shutdown warnings when the same shutdown immediately reports closure; 13 tests passed, six SQL matching cases passed, and Bay 2 checked green signed-in. Unresolved and confirmed-running failures remain visible.

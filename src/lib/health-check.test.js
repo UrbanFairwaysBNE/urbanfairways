@@ -33,3 +33,7 @@ test("recovery never clears confirmed running processes or forced power off", ()
   expect(bayVerdict({ events: 50, close_recovered: 1, close_fail: 1 }).light).toBe('amber');
   expect(bayVerdict({ events: 50, close_recovered: 1, forced_off: 1 }).light).toBe('red');
 });
+test("a controller crash is red even when everything else is clean", () => {
+  expect(bayVerdict({ bookings: 2, events: 50, controller_crash: 1 }).light).toBe('red');
+  expect(bayVerdict({ bookings: 2, events: 50 }).light).toBe('green');
+});

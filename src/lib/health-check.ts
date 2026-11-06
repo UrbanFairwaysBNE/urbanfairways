@@ -24,6 +24,7 @@ export function bayVerdict(m: Metrics): Verdict {
       [n(m, "forced_off") > 0, `Power forced off with apps still open (${n(m, "forced_off")})`],
       [n(m, "close_fail") >= 3, `Apps failed to close ${n(m, "close_fail")} times`],
       [n(m, "display_fail") > 0, `Launch blocked by screen check ${n(m, "display_fail")} time(s)`],
+      [n(m, "controller_crash") > 0, `Controller crashed ${n(m, "controller_crash")} time(s)`],
     ],
     [
       [n(m, "close_fail") > 0 && n(m, "close_fail") < 3, `Apps failed to close ${n(m, "close_fail")} time(s)`],

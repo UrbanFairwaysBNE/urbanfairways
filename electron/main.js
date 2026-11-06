@@ -35,6 +35,20 @@ const HUB_ORIGIN = process.env.HUB_ORIGIN || "https://urbanfairways.com.au";
 const VENUE_NAME = process.env.VENUE_NAME || "Urban Fairways";
 
 // =====================================================
+// NATIVE CRASH CAPTURE
+// Hard crashes (e.g. the 0xc000041d display-callback crash seen on Bay 5)
+// kill the process before any JS error handler runs. crashReporter writes a
+// local minidump so the next launch can self-report it into the bay logs.
+// Dumps stay on the bay PC (no upload server) for RDP retrieval.
+// =====================================================
+crashReporter.start({
+  productName: 'UF Bay Controller',
+  companyName: 'Urban Fairways',
+  uploadToServer: false,
+  compress: true,
+});
+
+// =====================================================
 // SINGLE INSTANCE LOCK - Prevent multiple instances
 // =====================================================
 const gotTheLock = app.requestSingleInstanceLock();
@@ -471,6 +485,23 @@ app.whenReady().then(() => {
     } catch (error) {
       logProcessIssue('lifecycle_journal_unavailable', error.message);
     }
+    // Self-report the most recent native crash exactly once, so hard crashes
+    // surface in the bay logs instead of only in Windows Event Viewer.
+    try {
+      const crashStateFile = path.join(app.getPath('userData'), 'crash-report-state.json');
+      let reportedCrashId = null;
+      try { reportedCrashId = JSON.parse(fs.readFileSync(crashStateFile, 'utf8')).lastCrashId; } catch { /* first run */ }
+      const lastCrash = crashReporter.getLastCrashReport();
+      if (lastCrash && lastCrash.id && lastCrash.id !== reportedCrashId) {
+        recordLifecycle('controller_crash_detected', {
+          crashId: lastCrash.id,
+          crashedAt: lastCrash.date ? new Date(lastCrash.date).toISOString() : null,
+        });
+        fs.writeFileSync(crashStateFile, JSON.stringify({ lastCrashId: lastCrash.id }));
+      }
+    } catch (error) {
+      console.warn('[Crash] Could not check last crash report:', error?.message || error);
+    }
     setInterval(async () => {
       if (processPollBusy) return;
       processPollBusy = true;
@@ -502,12 +533,24 @@ app.whenReady().then(() => {
 
   // Re-apply kiosk taskbar hide when returning from lock/RDP/suspend.
   // A new Windows session (RDP) or explorer restart repaints Shell_TrayWnd.
+  // Displays waking from plug power-on fire a storm of display-* events;
+  // debounce to one trailing run and never overlap PowerShell spawns, so we
+  // do the minimum native work while Electron is inside display callbacks.
+  let rehideTimer = null;
+  let rehideInFlight = false;
   const rehideIfKiosk = (reason) => {
     if (!kioskModeEnabled) return;
     console.log('[Kiosk] Re-hiding taskbar after event:', reason);
+    if (rehideTimer) clearTimeout(rehideTimer);
     // Small delay so explorer/session finishes initializing first.
-    setTimeout(() => setTaskbarVisible(false).catch(() => {}), 1500);
-    setTimeout(() => setTaskbarVisible(false).catch(() => {}), 5000);
+    rehideTimer = setTimeout(async () => {
+      rehideTimer = null;
+      if (rehideInFlight || !kioskModeEnabled) return;
+      rehideInFlight = true;
+      try { await setTaskbarVisible(false); }
+      catch { /* best effort */ }
+      finally { rehideInFlight = false; }
+    }, 1500);
   };
   try {
     powerMonitor.on('unlock-screen', () => rehideIfKiosk('unlock-screen'));

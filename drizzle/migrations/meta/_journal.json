@@ -78,6 +78,13 @@
       "when": 1793751202756,
       "tag": "0010_allow_bay_7_logs",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793929223048,
+      "tag": "0011_classify_controller_crashes_in_health_check",
+      "breakpoints": true
     }
   ]
 }

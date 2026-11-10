@@ -3612,6 +3612,25 @@ export default function BayController() {
     }
   }, [currentTime, bookings, appLaunchConfig.enabled, appLaunchConfig.appLaunchMinutes, appLaunchConfig.appCloseSeconds, appsRunning, isLaunchingApps, isElectron, manualOverride]);
 
+  // POWER-ON SETTINGS: for a standalone booking, write the customer's GSPro
+  // settings as soon as its power-on window opens (T-3m, with the plugs), so the
+  // files are in place well before the T-1m launch. Back-to-back follow-ons are
+  // left to the changeover (different customer) or the running apps (same customer).
+  const powerOnPrepAttemptRef = useRef<{ key: string; at: number } | null>(null);
+  useEffect(() => {
+    if (!isElectron || !window.electronAPI || manualOverride) return;
+    if (appsRunning || isLaunchingApps || launchInProgressRef.current || changeoverInProgressRef.current || shutdownCoordinatorRef.current.isClosing) return;
+    const now = currentTime;
+    const booking = findSessionBooking(bookings, now, format(now, "yyyy-MM-dd"), preStartMinutes);
+    if (!booking || hasPrecedingBooking(bookings, booking)) return;
+    const key = settingsKey(booking)!;
+    if (settingsPreparerRef.current.preparedKey === key) return;
+    const last = powerOnPrepAttemptRef.current;
+    if (last?.key === key && now.getTime() - last.at < 30000) return; // retry at most every 30s (e.g. GSPro still open)
+    powerOnPrepAttemptRef.current = { key, at: now.getTime() };
+    void prepareSessionSettings(booking, 'power-on');
+  }, [currentTime, bookings, preStartMinutes, appsRunning, isLaunchingApps, isElectron, manualOverride]);
+
   // Password screen
   if (!isAuthenticated) {
     return (

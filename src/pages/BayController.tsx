@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format, addMinutes, isBefore, isAfter, parseISO } from "date-fns";
 import { restoreUserGsproSettings, saveUserGsproSettings, uploadRangeCsv } from "@/lib/range-sync";
+import { createSettingsPreparer, findSessionBooking, hasPrecedingBooking, settingsKey, type SettingsPrepResult } from "@/lib/session-settings";
 import { PlugDiagnostics } from "@/components/bay-controller/PlugDiagnostics";
 import { AppRestoreSettings } from "@/components/bay-controller/AppRestoreSettings";
 import { ControllerPasswordSettings } from "@/components/bay-controller/ControllerPasswordSettings";
@@ -309,6 +310,7 @@ export default function BayController() {
   const intentionalCloseTokenRef = useRef(0);
   const plugOffInProgressRef = useRef(false);
   const launchFailedCooldownUntilRef = useRef<number>(0);
+  const settingsPreparerRef = useRef(createSettingsPreparer());
   
   // Timestamp of the last plug-on event, used to calculate timing gap at app launch
   const lastPlugOnTimeRef = useRef<number | null>(null);
@@ -3178,6 +3180,66 @@ export default function BayController() {
   const unassignedPlugs = discoveredPlugs.filter(p => !isPlugAssigned(p.id));
 
   // App Launch Functions
+
+  // Writes the booking's GSPro settings (customer snapshot, else baseline).
+  // Never writes while GSPro is open, because GSPro reads these files as it starts.
+  const applySessionSettings = async (booking: Booking | null, source: string): Promise<SettingsPrepResult> => {
+    const api = window.electronAPI;
+    const bookingId = booking?.id;
+    const tag = `[Settings ${source}]`;
+    const note = (msg: string, level: 'info' | 'warning' = 'info') => {
+      addLog(`${tag} ${msg}`, level === 'warning' ? 'error' : 'info');
+      bayLogger.sendLog('automation_decision', `${tag} ${msg}`, { bookingId, level });
+    };
+    if (!api) return { status: 'failed', files: [], detail: 'desktop app unavailable' };
+    try {
+      const cfg = await api.getBaselineConfig();
+      if (!cfg?.enabled) { note('App Restore disabled — leaving current files'); return { status: 'disabled', files: [] }; }
+      let running: boolean;
+      try { running = (await api.isGsproRunning()).isRunning; }
+      catch (e: any) { note(`Not applied — could not check whether GSPro is open (${e?.message ?? e})`, 'warning'); return { status: 'failed', files: [], detail: 'gspro_check_unavailable' }; }
+      if (running) { note('Not applied — GSPro is already open; files are never changed while it runs', 'warning'); return { status: 'skipped_running', files: [] }; }
+
+      if (booking?.user_id) {
+        try {
+          const restored = await restoreUserGsproSettings(booking.user_id, { bayNumber: selectedBay, bookingId: booking.id, appVersion });
+          if (restored.restored.length) {
+            note(`Applied ${booking.customer_name?.split(' ')[0] ?? 'customer'}'s saved settings: ${restored.restored.join(', ')}`);
+            return { status: 'applied', files: restored.restored };
+          }
+          note(`No saved settings${restored.error ? ` (error: ${restored.error})` : ''} — using baseline`, restored.error ? 'warning' : 'info');
+        } catch (e) {
+          bayLogger.logError(`${tag} Saved-settings restore failed — using baseline`, e, bookingId);
+        }
+      } else {
+        note(booking ? 'Booking has no customer — using baseline' : 'No booking — using baseline', booking ? 'warning' : 'info');
+      }
+
+      const baseline = await api.restoreBaselineNow();
+      if (!baseline?.success) { note(`Baseline not applied: ${baseline?.error ?? 'unknown'}`, 'warning'); return { status: 'failed', files: [], detail: baseline?.error }; }
+      const ok = (baseline.results || []).filter((r: any) => r.success).map((r: any) => r.file);
+      note(ok.length ? `Applied baseline: ${ok.join(', ')}` : 'Baseline returned no files');
+      // Attribute the end-of-session capture to THIS booking's customer.
+      if (ok.length && booking?.user_id && api.captureUserSettingsSnapshot) {
+        try { await api.captureUserSettingsSnapshot(booking.user_id); } catch (e) { console.error('[Settings] attribution marker failed:', e); }
+      }
+      return { status: 'baseline', files: ok };
+    } catch (e: any) {
+      bayLogger.logError(`${tag} Settings preparation failed`, e, bookingId);
+      return { status: 'failed', files: [], detail: e?.message ?? String(e) };
+    }
+  };
+
+  // One shared, serialised settings write per booking: power-on, launch and
+  // changeover all reuse it, so GSPro only ever starts after its files are written.
+  const prepareSessionSettings = (booking: Booking | null, source: string) => {
+    const key = settingsKey(booking);
+    if (!key) return applySessionSettings(booking, source);
+    if (settingsPreparerRef.current.preparedKey === key) {
+      bayLogger.sendLog('automation_decision', `[Settings ${source}] Already prepared for this booking — launching`, { bookingId: booking?.id });
+    }
+    return settingsPreparerRef.current.prepare(key, () => applySessionSettings(booking, source));
+  };
 
   const launchApps = async () => {
     if (!isElectron || !window.electronAPI) {

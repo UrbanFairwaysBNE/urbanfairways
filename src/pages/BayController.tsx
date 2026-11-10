@@ -3190,6 +3190,9 @@ export default function BayController() {
       console.log('[BayController] launchApps already in progress, skipping');
       return;
     }
+    // Resolve whose session this is from the booking list itself, so a booking
+    // created or changed moments ago is never launched as "no customer".
+    const sessionBooking = findSessionBooking(bookingsRef.current, new Date(), format(new Date(), "yyyy-MM-dd"), Math.max(preStartMinutesRef.current, appLaunchConfig.appLaunchMinutes)) ?? activeBooking;
     launchInProgressRef.current = true;
     setIsLaunchingApps(true);
 
@@ -3202,8 +3205,8 @@ export default function BayController() {
       'app_launch',
       `Pre-launch display check starting - plugs on ${secondsSincePlugOn !== null ? `${secondsSincePlugOn}s ago` : 'unknown'} (${isColdStart ? 'cold start' : 'warm'})`,
       {
-        bookingId: activeBooking?.id,
-        bookingWindow: activeBooking ? { start: activeBooking.start_time, end: activeBooking.end_time } : undefined,
+        bookingId: sessionBooking?.id,
+        bookingWindow: sessionBooking ? { start: activeBooking.start_time, end: activeBooking.end_time } : undefined,
         preStartMinutes,
         localTime: new Date().toISOString(),
         serverTimeOffset: secondsSincePlugOn,
@@ -3256,7 +3259,7 @@ export default function BayController() {
               secondsSincePlugOn,
               isColdStart,
             },
-            bookingId: activeBooking?.id,
+            bookingId: sessionBooking?.id,
           });
           addLog(`Display check passed (attempt ${attempt}/${MAX_DISPLAY_RETRIES}). Available: ${Array.from(currentLabels).join(', ')}`, 'success');
           displayCheckPassed = true;
@@ -3278,7 +3281,7 @@ export default function BayController() {
               secondsSincePlugOn,
               isColdStart,
             },
-            bookingId: activeBooking?.id,
+            bookingId: sessionBooking?.id,
           });
           addLog(`Display check attempt ${attempt}/${MAX_DISPLAY_RETRIES}: Missing ${missingDisplays.join(', ')} (detected: ${Array.from(currentLabels).join(', ') || 'none'})`, 'error');
           
@@ -3289,7 +3292,7 @@ export default function BayController() {
         }
       } catch (err) {
         console.error(`Failed to check displays (attempt ${attempt}):`, err);
-        bayLogger.logError(`Display guard attempt ${attempt}/${MAX_DISPLAY_RETRIES}: EXCEPTION`, err, activeBooking?.id);
+        bayLogger.logError(`Display guard attempt ${attempt}/${MAX_DISPLAY_RETRIES}: EXCEPTION`, err, sessionBooking?.id);
         
         if (attempt === MAX_DISPLAY_RETRIES) {
           toast.error("Failed to verify displays - launch cancelled");
@@ -3321,10 +3324,10 @@ export default function BayController() {
         gsproDisplayLabel: appLaunchConfig.gsproDisplayLabel,
         proteeDisplayLabel: appLaunchConfig.proteeDisplayLabel,
         postLaunchDelay: 3000,
-        bookingId: activeBooking?.id,
+        bookingId: sessionBooking?.id,
         reason: manualOverride ? 'staff_launch' : 'booking_launch',
-        firstName: activeBooking?.customer_name?.split(' ')[0] || 'Guest',
-        language: activeBooking?.preferred_language || 'en'
+        firstName: sessionBooking?.customer_name?.split(' ')[0] || 'Guest',
+        language: sessionBooking?.preferred_language || 'en'
       };
       
       addLog(`GSPRO Path: ${launchConfig.gsproPath}`, 'info');
@@ -3333,82 +3336,9 @@ export default function BayController() {
       addLog(`Protee Display: ${appLaunchConfig.proteeDisplayLabel || 'default'}`, 'info');
       addLog(`Customer: ${launchConfig.firstName}`, 'info');
 
-      // App Restore chain (gated by the master toggle in Bay Controller settings):
-      //   1. If the customer has a saved snapshot → restore it.
-      //   2. Otherwise (or no user_id) → apply the shared baseline files.
-      // Baseline is now a FALLBACK only — it never overwrites a good snapshot.
-      try {
-        const cfg = await window.electronAPI.getBaselineConfig();
-        if (!cfg?.enabled) {
-          addLog('[Settings] App Restore disabled — launching against current disk state', 'info');
-          bayLogger.sendLog('automation_decision', '[Settings] App Restore disabled — skipping snapshot + baseline', { bookingId: activeBooking?.id });
-        } else {
-          let restoredCount = 0;
-          if (activeBooking?.user_id) {
-            try {
-              bayLogger.sendLog('automation_decision', `[Settings] Restoring snapshot for user ${activeBooking.user_id} (booking ${activeBooking.id})`, { bookingId: activeBooking.id });
-              const restored = await restoreUserGsproSettings(activeBooking.user_id, {
-                bayNumber: selectedBay,
-                bookingId: activeBooking.id,
-                appVersion,
-              });
-              restoredCount = restored.restored.length;
-              if (restoredCount) {
-                const msg = `[Settings] Restored customer GSPro snapshot: ${restored.restored.join(', ')}`;
-                addLog(msg, 'info');
-                bayLogger.sendLog('automation_decision', msg, { bookingId: activeBooking.id });
-              } else {
-                const msg = `[Settings] No customer snapshot found${restored.error ? ` (error: ${restored.error})` : ''} — falling back to baseline`;
-                addLog(msg, 'info');
-                bayLogger.sendLog('automation_decision', msg, { bookingId: activeBooking.id, level: restored.error ? 'warning' : 'info' });
-              }
-            } catch (e) {
-              console.error('[BayController] restoreUserGsproSettings failed:', e);
-              bayLogger.logError('[Settings] Restore snapshot exception — will fall back to baseline', e, activeBooking.id);
-            }
-          } else {
-            addLog('[Settings] No user_id on active booking — using baseline', 'info');
-            bayLogger.sendLog('automation_decision', '[Settings] No user_id on active booking — using baseline', { bookingId: activeBooking?.id, level: 'warning' });
-          }
-
-          if (restoredCount === 0) {
-            try {
-              const baseline = await window.electronAPI.restoreBaselineNow();
-              if (baseline?.success) {
-                const ok = (baseline.results || []).filter((r: any) => r.success).map((r: any) => r.file);
-                const msg = ok.length
-                  ? `[Settings] Applied baseline fallback: ${ok.join(', ')}`
-                  : `[Settings] Baseline fallback returned no files`;
-                addLog(msg, 'info');
-                bayLogger.sendLog('automation_decision', msg, { bookingId: activeBooking?.id });
-
-                // CRITICAL: also refresh the attribution marker so the T-3m
-                // capture uploads under THIS booking's user, not whoever was
-                // restored last time the controller ran. Without this, a
-                // stale in-memory marker from a previous session (e.g.
-                // yesterday's customer) causes 403s from bay-controller-api.
-                if (ok.length && activeBooking?.user_id && window.electronAPI.captureUserSettingsSnapshot) {
-                  try {
-                    await window.electronAPI.captureUserSettingsSnapshot(activeBooking.user_id);
-                    bayLogger.sendLog('automation_decision', `[Settings] Attribution marker set to ${activeBooking.user_id} (baseline path)`, { bookingId: activeBooking.id });
-                  } catch (e) {
-                    console.error('[BayController] captureUserSettingsSnapshot (baseline) failed:', e);
-                  }
-                }
-              } else if (baseline?.error) {
-                addLog(`[Settings] Baseline fallback skipped: ${baseline.error}`, 'info');
-                bayLogger.sendLog('automation_decision', `[Settings] Baseline fallback skipped: ${baseline.error}`, { bookingId: activeBooking?.id, level: 'warning' });
-              }
-            } catch (e) {
-              console.error('[BayController] restoreBaselineNow (fallback) failed:', e);
-              bayLogger.logError('[Settings] Baseline fallback exception', e, activeBooking?.id);
-            }
-          }
-        }
-      } catch (e) {
-        console.error('[BayController] App Restore pre-launch chain failed:', e);
-        bayLogger.logError('[Settings] App Restore pre-launch chain exception', e, activeBooking?.id);
-      }
+      // Settings are normally already on disk from power-on (T-3m); this only
+      // writes them now if that was missed (e.g. a booking made at the last minute).
+      await prepareSessionSettings(sessionBooking, manualOverride ? 'staff_launch' : 'launch');
 
 
 
@@ -3428,12 +3358,12 @@ export default function BayController() {
           const displayLabels = result.displaySnapshot.map((d: any) => `${d.label} (${d.size.width}x${d.size.height})`).join(', ');
           bayLogger.sendLog('automation_decision', `App launch display snapshot: ${displayLabels}`, {
             details: { displays: result.displaySnapshot, gsproTarget: appLaunchConfig.gsproDisplayLabel, proteeTarget: appLaunchConfig.proteeDisplayLabel },
-            bookingId: activeBooking?.id,
+            bookingId: sessionBooking?.id,
           });
         }
         
-        bayLogger.logAppLaunch('GSPro', activeBooking?.id);
-        bayLogger.logAppLaunch('Protee Labs', activeBooking?.id);
+        bayLogger.logAppLaunch('GSPro', sessionBooking?.id);
+        bayLogger.logAppLaunch('Protee Labs', sessionBooking?.id);
         toast.success("Apps launched successfully");
         
         // Log results from the welcome window sequence
@@ -3444,7 +3374,7 @@ export default function BayController() {
       } else {
         setAppLaunchStatus(`Launch failed: ${result.error}`);
         addLog(`Launch failed: ${result.error}`, 'error');
-        bayLogger.logError(`App launch failed: ${result.error}`, undefined, activeBooking?.id);
+        bayLogger.logError(`App launch failed: ${result.error}`, undefined, sessionBooking?.id);
         result.results?.forEach(r => {
           addLog(`${r.step}: ${r.status || r.error || 'unknown'}`, 'error');
         });
@@ -3454,7 +3384,7 @@ export default function BayController() {
       const errorMsg = error instanceof Error ? error.message : "Unknown error";
       setAppLaunchStatus(`Error: ${errorMsg}`);
       addLog(`Exception: ${errorMsg}`, 'error');
-      bayLogger.logError('App launch exception', error, activeBooking?.id);
+      bayLogger.logError('App launch exception', error, sessionBooking?.id);
       toast.error(`Launch error: ${errorMsg}`);
     } finally {
       setIsLaunchingApps(false);

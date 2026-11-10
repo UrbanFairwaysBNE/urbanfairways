@@ -3206,7 +3206,7 @@ export default function BayController() {
       `Pre-launch display check starting - plugs on ${secondsSincePlugOn !== null ? `${secondsSincePlugOn}s ago` : 'unknown'} (${isColdStart ? 'cold start' : 'warm'})`,
       {
         bookingId: sessionBooking?.id,
-        bookingWindow: sessionBooking ? { start: activeBooking.start_time, end: activeBooking.end_time } : undefined,
+        bookingWindow: sessionBooking ? { start: sessionBooking.start_time, end: sessionBooking.end_time } : undefined,
         preStartMinutes,
         localTime: new Date().toISOString(),
         serverTimeOffset: secondsSincePlugOn,

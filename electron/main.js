@@ -3632,6 +3632,21 @@ function saveBaselineConfig() {
   }
 }
 
+// Write a settings file by writing a temporary copy beside it and swapping it in,
+// so a program reading the file never sees it empty or half-written.
+function writeFileAtomic(dest, data) {
+  const temp = `${dest}.uf-tmp`;
+  fs.writeFileSync(temp, data);
+  try { fs.renameSync(temp, dest); }
+  catch (error) { try { fs.unlinkSync(temp); } catch {} throw error; }
+}
+
+// GSPro reads its settings while starting; refuse writes unless it is confirmed closed.
+async function gsproWriteBlockReason() {
+  try { return (await isGsproRunning()) ? 'GSPro is running — settings files are not changed while it is open' : null; }
+  catch (error) { return `GSPro state unknown — settings not written (${error.message})`; }
+}
+
 // Check if GSPro is running
 async function isGsproRunning() {
   try {
@@ -3653,7 +3668,7 @@ async function restoreBaselineFiles() {
   const storedDpsPath = path.join(storagePath, 'dpsV2x3.gss');
   if (baselineConfig.dpsFilePath && fs.existsSync(storedDpsPath)) {
     try {
-      fs.copyFileSync(storedDpsPath, baselineConfig.dpsFilePath);
+      writeFileAtomic(baselineConfig.dpsFilePath, fs.readFileSync(storedDpsPath));
       console.log('Restored dpsV2x3.gss to:', baselineConfig.dpsFilePath);
       results.push({ file: 'dpsV2x3.gss', success: true });
     } catch (error) {
@@ -3669,7 +3684,7 @@ async function restoreBaselineFiles() {
   const storedSettingsPath = path.join(storagePath, 'Settings.vgs');
   if (baselineConfig.settingsFilePath && fs.existsSync(storedSettingsPath)) {
     try {
-      fs.copyFileSync(storedSettingsPath, baselineConfig.settingsFilePath);
+      writeFileAtomic(baselineConfig.settingsFilePath, fs.readFileSync(storedSettingsPath));
       console.log('Restored Settings.vgs to:', baselineConfig.settingsFilePath);
       results.push({ file: 'Settings.vgs', success: true });
     } catch (error) {
@@ -3694,7 +3709,7 @@ async function restoreBaselineFiles() {
           // Append if not found
           configContent += `\nCurrentStartupScreen=${baselineConfig.proteeScreenId}`;
         }
-        fs.writeFileSync(proteeConfigPath, configContent);
+        writeFileAtomic(proteeConfigPath, configContent);
         console.log('Restored Protee CurrentStartupScreen to:', baselineConfig.proteeScreenId);
         results.push({ file: 'Protee Config', success: true });
       } else {
@@ -4010,6 +4025,8 @@ ipcMain.handle('set-baseline-enabled', async (event, { enabled }) => {
 // IPC: Manually restore baseline files
 ipcMain.handle('restore-baseline-now', async () => {
   try {
+    const blocked = await gsproWriteBlockReason();
+    if (blocked) return { success: false, error: blocked };
     const results = await restoreBaselineFiles();
     return { success: true, results };
   } catch (error) {
@@ -4223,11 +4240,13 @@ ipcMain.handle('write-gspro-user-settings', async (_e, { files } = {}) => {
   try {
     if (!baselineConfig.gsproFolderPath) return { success: false, error: 'GSPro folder not configured' };
     if (!files || typeof files !== 'object') return { success: false, error: 'No files provided' };
+    const blocked = await gsproWriteBlockReason();
+    if (blocked) return { success: false, error: blocked };
     const written = [];
     for (const name of USER_SETTINGS_FILES) {
       if (typeof files[name] !== 'string') continue;
       const p = path.join(baselineConfig.gsproFolderPath, name);
-      fs.writeFileSync(p, Buffer.from(files[name], 'base64'));
+      writeFileAtomic(p, Buffer.from(files[name], 'base64'));
       written.push(name);
     }
     console.log('[Range] Wrote user GSPro settings:', written);

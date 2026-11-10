@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format, addMinutes, isBefore, isAfter, parseISO } from "date-fns";
 import { restoreUserGsproSettings, saveUserGsproSettings, uploadRangeCsv } from "@/lib/range-sync";
+import { createSettingsPreparer, findSessionBooking, hasPrecedingBooking, settingsKey, type SettingsPrepResult } from "@/lib/session-settings";
 import { PlugDiagnostics } from "@/components/bay-controller/PlugDiagnostics";
 import { AppRestoreSettings } from "@/components/bay-controller/AppRestoreSettings";
 import { ControllerPasswordSettings } from "@/components/bay-controller/ControllerPasswordSettings";
@@ -309,6 +310,7 @@ export default function BayController() {
   const intentionalCloseTokenRef = useRef(0);
   const plugOffInProgressRef = useRef(false);
   const launchFailedCooldownUntilRef = useRef<number>(0);
+  const settingsPreparerRef = useRef(createSettingsPreparer());
   
   // Timestamp of the last plug-on event, used to calculate timing gap at app launch
   const lastPlugOnTimeRef = useRef<number | null>(null);
@@ -2025,60 +2027,9 @@ export default function BayController() {
                 try {
                   console.log(`[Changeover] Launching apps with display labels: GSPro="${appLaunchConfig.gsproDisplayLabel}", Protee="${appLaunchConfig.proteeDisplayLabel}"`);
 
-                  // App Restore chain for INCOMING customer (gated by master toggle).
-                  // Snapshot first; fall back to baseline if none exists.
-                  try {
-                    const cfg = await window.electronAPI.getBaselineConfig();
-                    if (!cfg?.enabled) {
-                      addLog('[Changeover Settings] App Restore disabled — skipping', 'info');
-                      bayLogger.sendLog('automation_decision', '[Changeover Settings] App Restore disabled — skipping', { bookingId: nextBooking.id });
-                    } else {
-                      let restoredCount = 0;
-                      if (nextBooking.user_id) {
-                        try {
-                          bayLogger.sendLog('automation_decision', `[Changeover Settings] Restoring snapshot for user ${nextBooking.user_id}`, { bookingId: nextBooking.id });
-                          const restored = await restoreUserGsproSettings(nextBooking.user_id, {
-                            bayNumber: selectedBay,
-                            bookingId: nextBooking.id,
-                            appVersion,
-                          });
-                          restoredCount = restored.restored.length;
-                          if (restoredCount) {
-                            const msg = `[Changeover Settings] Restored ${firstName}'s GSPro snapshot: ${restored.restored.join(', ')}`;
-                            addLog(msg, 'info');
-                            bayLogger.sendLog('automation_decision', msg, { bookingId: nextBooking.id });
-                          } else {
-                            const msg = `[Changeover Settings] No snapshot for ${firstName}${restored.error ? ` (error: ${restored.error})` : ''} — falling back to baseline`;
-                            addLog(msg, 'info');
-                            bayLogger.sendLog('automation_decision', msg, { bookingId: nextBooking.id, level: restored.error ? 'warning' : 'info' });
-                          }
-                        } catch (e) {
-                          console.error('[Changeover] restoreUserGsproSettings failed:', e);
-                          bayLogger.logError('[Changeover Settings] Restore exception — will fall back to baseline', e, nextBooking.id);
-                        }
-                      }
-
-                      if (restoredCount === 0) {
-                        try {
-                          const baseline = await window.electronAPI.restoreBaselineNow();
-                          if (baseline?.success) {
-                            const ok = (baseline.results || []).filter((r: any) => r.success).map((r: any) => r.file);
-                            const msg = ok.length
-                              ? `[Changeover Settings] Applied baseline fallback: ${ok.join(', ')}`
-                              : `[Changeover Settings] Baseline fallback returned no files`;
-                            addLog(msg, 'info');
-                            bayLogger.sendLog('automation_decision', msg, { bookingId: nextBooking.id });
-                          }
-                        } catch (e) {
-                          console.error('[Changeover] baseline fallback failed:', e);
-                          bayLogger.logError('[Changeover Settings] Baseline fallback exception', e, nextBooking.id);
-                        }
-                      }
-                    }
-                  } catch (e) {
-                    console.error('[Changeover] App Restore chain failed:', e);
-                    bayLogger.logError('[Changeover Settings] App Restore chain exception', e, nextBooking.id);
-                  }
+                  // Outgoing apps are verified closed, so the incoming customer's
+                  // settings are written now — always before GSPro is started.
+                  await prepareSessionSettings(nextBooking, 'changeover');
 
 
                   const result = await window.electronAPI.runAppSequence({
@@ -3230,6 +3181,66 @@ export default function BayController() {
 
   // App Launch Functions
 
+  // Writes the booking's GSPro settings (customer snapshot, else baseline).
+  // Never writes while GSPro is open, because GSPro reads these files as it starts.
+  const applySessionSettings = async (booking: Booking | null, source: string): Promise<SettingsPrepResult> => {
+    const api = window.electronAPI;
+    const bookingId = booking?.id;
+    const tag = `[Settings ${source}]`;
+    const note = (msg: string, level: 'info' | 'warning' = 'info') => {
+      addLog(`${tag} ${msg}`, level === 'warning' ? 'error' : 'info');
+      bayLogger.sendLog('automation_decision', `${tag} ${msg}`, { bookingId, level });
+    };
+    if (!api) return { status: 'failed', files: [], detail: 'desktop app unavailable' };
+    try {
+      const cfg = await api.getBaselineConfig();
+      if (!cfg?.enabled) { note('App Restore disabled — leaving current files'); return { status: 'disabled', files: [] }; }
+      let running: boolean;
+      try { running = (await api.isGsproRunning()).isRunning; }
+      catch (e: any) { note(`Not applied — could not check whether GSPro is open (${e?.message ?? e})`, 'warning'); return { status: 'failed', files: [], detail: 'gspro_check_unavailable' }; }
+      if (running) { note('Not applied — GSPro is already open; files are never changed while it runs', 'warning'); return { status: 'skipped_running', files: [] }; }
+
+      if (booking?.user_id) {
+        try {
+          const restored = await restoreUserGsproSettings(booking.user_id, { bayNumber: selectedBay, bookingId: booking.id, appVersion });
+          if (restored.restored.length) {
+            note(`Applied ${booking.customer_name?.split(' ')[0] ?? 'customer'}'s saved settings: ${restored.restored.join(', ')}`);
+            return { status: 'applied', files: restored.restored };
+          }
+          note(`No saved settings${restored.error ? ` (error: ${restored.error})` : ''} — using baseline`, restored.error ? 'warning' : 'info');
+        } catch (e) {
+          bayLogger.logError(`${tag} Saved-settings restore failed — using baseline`, e, bookingId);
+        }
+      } else {
+        note(booking ? 'Booking has no customer — using baseline' : 'No booking — using baseline', booking ? 'warning' : 'info');
+      }
+
+      const baseline = await api.restoreBaselineNow();
+      if (!baseline?.success) { note(`Baseline not applied: ${baseline?.error ?? 'unknown'}`, 'warning'); return { status: 'failed', files: [], detail: baseline?.error }; }
+      const ok = (baseline.results || []).filter((r: any) => r.success).map((r: any) => r.file);
+      note(ok.length ? `Applied baseline: ${ok.join(', ')}` : 'Baseline returned no files');
+      // Attribute the end-of-session capture to THIS booking's customer.
+      if (ok.length && booking?.user_id && api.captureUserSettingsSnapshot) {
+        try { await api.captureUserSettingsSnapshot(booking.user_id); } catch (e) { console.error('[Settings] attribution marker failed:', e); }
+      }
+      return { status: 'baseline', files: ok };
+    } catch (e: any) {
+      bayLogger.logError(`${tag} Settings preparation failed`, e, bookingId);
+      return { status: 'failed', files: [], detail: e?.message ?? String(e) };
+    }
+  };
+
+  // One shared, serialised settings write per booking: power-on, launch and
+  // changeover all reuse it, so GSPro only ever starts after its files are written.
+  const prepareSessionSettings = (booking: Booking | null, source: string) => {
+    const key = settingsKey(booking);
+    if (!key) return applySessionSettings(booking, source);
+    if (settingsPreparerRef.current.preparedKey === key) {
+      bayLogger.sendLog('automation_decision', `[Settings ${source}] Already prepared for this booking — launching`, { bookingId: booking?.id });
+    }
+    return settingsPreparerRef.current.prepare(key, () => applySessionSettings(booking, source));
+  };
+
   const launchApps = async () => {
     if (!isElectron || !window.electronAPI) {
       toast.error("App launch requires desktop app");
@@ -3241,6 +3252,9 @@ export default function BayController() {
       console.log('[BayController] launchApps already in progress, skipping');
       return;
     }
+    // Resolve whose session this is from the booking list itself, so a booking
+    // created or changed moments ago is never launched as "no customer".
+    const sessionBooking = findSessionBooking(bookingsRef.current, new Date(), format(new Date(), "yyyy-MM-dd"), Math.max(preStartMinutesRef.current, appLaunchConfig.appLaunchMinutes)) ?? activeBooking;
     launchInProgressRef.current = true;
     setIsLaunchingApps(true);
 
@@ -3253,8 +3267,8 @@ export default function BayController() {
       'app_launch',
       `Pre-launch display check starting - plugs on ${secondsSincePlugOn !== null ? `${secondsSincePlugOn}s ago` : 'unknown'} (${isColdStart ? 'cold start' : 'warm'})`,
       {
-        bookingId: activeBooking?.id,
-        bookingWindow: activeBooking ? { start: activeBooking.start_time, end: activeBooking.end_time } : undefined,
+        bookingId: sessionBooking?.id,
+        bookingWindow: sessionBooking ? { start: sessionBooking.start_time, end: sessionBooking.end_time } : undefined,
         preStartMinutes,
         localTime: new Date().toISOString(),
         serverTimeOffset: secondsSincePlugOn,
@@ -3307,7 +3321,7 @@ export default function BayController() {
               secondsSincePlugOn,
               isColdStart,
             },
-            bookingId: activeBooking?.id,
+            bookingId: sessionBooking?.id,
           });
           addLog(`Display check passed (attempt ${attempt}/${MAX_DISPLAY_RETRIES}). Available: ${Array.from(currentLabels).join(', ')}`, 'success');
           displayCheckPassed = true;
@@ -3329,7 +3343,7 @@ export default function BayController() {
               secondsSincePlugOn,
               isColdStart,
             },
-            bookingId: activeBooking?.id,
+            bookingId: sessionBooking?.id,
           });
           addLog(`Display check attempt ${attempt}/${MAX_DISPLAY_RETRIES}: Missing ${missingDisplays.join(', ')} (detected: ${Array.from(currentLabels).join(', ') || 'none'})`, 'error');
           
@@ -3340,7 +3354,7 @@ export default function BayController() {
         }
       } catch (err) {
         console.error(`Failed to check displays (attempt ${attempt}):`, err);
-        bayLogger.logError(`Display guard attempt ${attempt}/${MAX_DISPLAY_RETRIES}: EXCEPTION`, err, activeBooking?.id);
+        bayLogger.logError(`Display guard attempt ${attempt}/${MAX_DISPLAY_RETRIES}: EXCEPTION`, err, sessionBooking?.id);
         
         if (attempt === MAX_DISPLAY_RETRIES) {
           toast.error("Failed to verify displays - launch cancelled");
@@ -3372,10 +3386,10 @@ export default function BayController() {
         gsproDisplayLabel: appLaunchConfig.gsproDisplayLabel,
         proteeDisplayLabel: appLaunchConfig.proteeDisplayLabel,
         postLaunchDelay: 3000,
-        bookingId: activeBooking?.id,
+        bookingId: sessionBooking?.id,
         reason: manualOverride ? 'staff_launch' : 'booking_launch',
-        firstName: activeBooking?.customer_name?.split(' ')[0] || 'Guest',
-        language: activeBooking?.preferred_language || 'en'
+        firstName: sessionBooking?.customer_name?.split(' ')[0] || 'Guest',
+        language: sessionBooking?.preferred_language || 'en'
       };
       
       addLog(`GSPRO Path: ${launchConfig.gsproPath}`, 'info');
@@ -3384,82 +3398,9 @@ export default function BayController() {
       addLog(`Protee Display: ${appLaunchConfig.proteeDisplayLabel || 'default'}`, 'info');
       addLog(`Customer: ${launchConfig.firstName}`, 'info');
 
-      // App Restore chain (gated by the master toggle in Bay Controller settings):
-      //   1. If the customer has a saved snapshot → restore it.
-      //   2. Otherwise (or no user_id) → apply the shared baseline files.
-      // Baseline is now a FALLBACK only — it never overwrites a good snapshot.
-      try {
-        const cfg = await window.electronAPI.getBaselineConfig();
-        if (!cfg?.enabled) {
-          addLog('[Settings] App Restore disabled — launching against current disk state', 'info');
-          bayLogger.sendLog('automation_decision', '[Settings] App Restore disabled — skipping snapshot + baseline', { bookingId: activeBooking?.id });
-        } else {
-          let restoredCount = 0;
-          if (activeBooking?.user_id) {
-            try {
-              bayLogger.sendLog('automation_decision', `[Settings] Restoring snapshot for user ${activeBooking.user_id} (booking ${activeBooking.id})`, { bookingId: activeBooking.id });
-              const restored = await restoreUserGsproSettings(activeBooking.user_id, {
-                bayNumber: selectedBay,
-                bookingId: activeBooking.id,
-                appVersion,
-              });
-              restoredCount = restored.restored.length;
-              if (restoredCount) {
-                const msg = `[Settings] Restored customer GSPro snapshot: ${restored.restored.join(', ')}`;
-                addLog(msg, 'info');
-                bayLogger.sendLog('automation_decision', msg, { bookingId: activeBooking.id });
-              } else {
-                const msg = `[Settings] No customer snapshot found${restored.error ? ` (error: ${restored.error})` : ''} — falling back to baseline`;
-                addLog(msg, 'info');
-                bayLogger.sendLog('automation_decision', msg, { bookingId: activeBooking.id, level: restored.error ? 'warning' : 'info' });
-              }
-            } catch (e) {
-              console.error('[BayController] restoreUserGsproSettings failed:', e);
-              bayLogger.logError('[Settings] Restore snapshot exception — will fall back to baseline', e, activeBooking.id);
-            }
-          } else {
-            addLog('[Settings] No user_id on active booking — using baseline', 'info');
-            bayLogger.sendLog('automation_decision', '[Settings] No user_id on active booking — using baseline', { bookingId: activeBooking?.id, level: 'warning' });
-          }
-
-          if (restoredCount === 0) {
-            try {
-              const baseline = await window.electronAPI.restoreBaselineNow();
-              if (baseline?.success) {
-                const ok = (baseline.results || []).filter((r: any) => r.success).map((r: any) => r.file);
-                const msg = ok.length
-                  ? `[Settings] Applied baseline fallback: ${ok.join(', ')}`
-                  : `[Settings] Baseline fallback returned no files`;
-                addLog(msg, 'info');
-                bayLogger.sendLog('automation_decision', msg, { bookingId: activeBooking?.id });
-
-                // CRITICAL: also refresh the attribution marker so the T-3m
-                // capture uploads under THIS booking's user, not whoever was
-                // restored last time the controller ran. Without this, a
-                // stale in-memory marker from a previous session (e.g.
-                // yesterday's customer) causes 403s from bay-controller-api.
-                if (ok.length && activeBooking?.user_id && window.electronAPI.captureUserSettingsSnapshot) {
-                  try {
-                    await window.electronAPI.captureUserSettingsSnapshot(activeBooking.user_id);
-                    bayLogger.sendLog('automation_decision', `[Settings] Attribution marker set to ${activeBooking.user_id} (baseline path)`, { bookingId: activeBooking.id });
-                  } catch (e) {
-                    console.error('[BayController] captureUserSettingsSnapshot (baseline) failed:', e);
-                  }
-                }
-              } else if (baseline?.error) {
-                addLog(`[Settings] Baseline fallback skipped: ${baseline.error}`, 'info');
-                bayLogger.sendLog('automation_decision', `[Settings] Baseline fallback skipped: ${baseline.error}`, { bookingId: activeBooking?.id, level: 'warning' });
-              }
-            } catch (e) {
-              console.error('[BayController] restoreBaselineNow (fallback) failed:', e);
-              bayLogger.logError('[Settings] Baseline fallback exception', e, activeBooking?.id);
-            }
-          }
-        }
-      } catch (e) {
-        console.error('[BayController] App Restore pre-launch chain failed:', e);
-        bayLogger.logError('[Settings] App Restore pre-launch chain exception', e, activeBooking?.id);
-      }
+      // Settings are normally already on disk from power-on (T-3m); this only
+      // writes them now if that was missed (e.g. a booking made at the last minute).
+      await prepareSessionSettings(sessionBooking, manualOverride ? 'staff_launch' : 'launch');
 
 
 
@@ -3479,12 +3420,12 @@ export default function BayController() {
           const displayLabels = result.displaySnapshot.map((d: any) => `${d.label} (${d.size.width}x${d.size.height})`).join(', ');
           bayLogger.sendLog('automation_decision', `App launch display snapshot: ${displayLabels}`, {
             details: { displays: result.displaySnapshot, gsproTarget: appLaunchConfig.gsproDisplayLabel, proteeTarget: appLaunchConfig.proteeDisplayLabel },
-            bookingId: activeBooking?.id,
+            bookingId: sessionBooking?.id,
           });
         }
         
-        bayLogger.logAppLaunch('GSPro', activeBooking?.id);
-        bayLogger.logAppLaunch('Protee Labs', activeBooking?.id);
+        bayLogger.logAppLaunch('GSPro', sessionBooking?.id);
+        bayLogger.logAppLaunch('Protee Labs', sessionBooking?.id);
         toast.success("Apps launched successfully");
         
         // Log results from the welcome window sequence
@@ -3495,7 +3436,7 @@ export default function BayController() {
       } else {
         setAppLaunchStatus(`Launch failed: ${result.error}`);
         addLog(`Launch failed: ${result.error}`, 'error');
-        bayLogger.logError(`App launch failed: ${result.error}`, undefined, activeBooking?.id);
+        bayLogger.logError(`App launch failed: ${result.error}`, undefined, sessionBooking?.id);
         result.results?.forEach(r => {
           addLog(`${r.step}: ${r.status || r.error || 'unknown'}`, 'error');
         });
@@ -3505,7 +3446,7 @@ export default function BayController() {
       const errorMsg = error instanceof Error ? error.message : "Unknown error";
       setAppLaunchStatus(`Error: ${errorMsg}`);
       addLog(`Exception: ${errorMsg}`, 'error');
-      bayLogger.logError('App launch exception', error, activeBooking?.id);
+      bayLogger.logError('App launch exception', error, sessionBooking?.id);
       toast.error(`Launch error: ${errorMsg}`);
     } finally {
       setIsLaunchingApps(false);
@@ -3670,6 +3611,25 @@ export default function BayController() {
       closeApps('scheduled');
     }
   }, [currentTime, bookings, appLaunchConfig.enabled, appLaunchConfig.appLaunchMinutes, appLaunchConfig.appCloseSeconds, appsRunning, isLaunchingApps, isElectron, manualOverride]);
+
+  // POWER-ON SETTINGS: for a standalone booking, write the customer's GSPro
+  // settings as soon as its power-on window opens (T-3m, with the plugs), so the
+  // files are in place well before the T-1m launch. Back-to-back follow-ons are
+  // left to the changeover (different customer) or the running apps (same customer).
+  const powerOnPrepAttemptRef = useRef<{ key: string; at: number } | null>(null);
+  useEffect(() => {
+    if (!isElectron || !window.electronAPI || manualOverride) return;
+    if (appsRunning || isLaunchingApps || launchInProgressRef.current || changeoverInProgressRef.current || shutdownCoordinatorRef.current.isClosing) return;
+    const now = currentTime;
+    const booking = findSessionBooking(bookings, now, format(now, "yyyy-MM-dd"), preStartMinutes);
+    if (!booking || hasPrecedingBooking(bookings, booking)) return;
+    const key = settingsKey(booking)!;
+    if (settingsPreparerRef.current.preparedKey === key) return;
+    const last = powerOnPrepAttemptRef.current;
+    if (last?.key === key && now.getTime() - last.at < 30000) return; // retry at most every 30s (e.g. GSPro still open)
+    powerOnPrepAttemptRef.current = { key, at: now.getTime() };
+    void prepareSessionSettings(booking, 'power-on');
+  }, [currentTime, bookings, preStartMinutes, appsRunning, isLaunchingApps, isElectron, manualOverride]);
 
   // Password screen
   if (!isAuthenticated) {

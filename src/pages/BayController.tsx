@@ -2025,60 +2025,9 @@ export default function BayController() {
                 try {
                   console.log(`[Changeover] Launching apps with display labels: GSPro="${appLaunchConfig.gsproDisplayLabel}", Protee="${appLaunchConfig.proteeDisplayLabel}"`);
 
-                  // App Restore chain for INCOMING customer (gated by master toggle).
-                  // Snapshot first; fall back to baseline if none exists.
-                  try {
-                    const cfg = await window.electronAPI.getBaselineConfig();
-                    if (!cfg?.enabled) {
-                      addLog('[Changeover Settings] App Restore disabled — skipping', 'info');
-                      bayLogger.sendLog('automation_decision', '[Changeover Settings] App Restore disabled — skipping', { bookingId: nextBooking.id });
-                    } else {
-                      let restoredCount = 0;
-                      if (nextBooking.user_id) {
-                        try {
-                          bayLogger.sendLog('automation_decision', `[Changeover Settings] Restoring snapshot for user ${nextBooking.user_id}`, { bookingId: nextBooking.id });
-                          const restored = await restoreUserGsproSettings(nextBooking.user_id, {
-                            bayNumber: selectedBay,
-                            bookingId: nextBooking.id,
-                            appVersion,
-                          });
-                          restoredCount = restored.restored.length;
-                          if (restoredCount) {
-                            const msg = `[Changeover Settings] Restored ${firstName}'s GSPro snapshot: ${restored.restored.join(', ')}`;
-                            addLog(msg, 'info');
-                            bayLogger.sendLog('automation_decision', msg, { bookingId: nextBooking.id });
-                          } else {
-                            const msg = `[Changeover Settings] No snapshot for ${firstName}${restored.error ? ` (error: ${restored.error})` : ''} — falling back to baseline`;
-                            addLog(msg, 'info');
-                            bayLogger.sendLog('automation_decision', msg, { bookingId: nextBooking.id, level: restored.error ? 'warning' : 'info' });
-                          }
-                        } catch (e) {
-                          console.error('[Changeover] restoreUserGsproSettings failed:', e);
-                          bayLogger.logError('[Changeover Settings] Restore exception — will fall back to baseline', e, nextBooking.id);
-                        }
-                      }
-
-                      if (restoredCount === 0) {
-                        try {
-                          const baseline = await window.electronAPI.restoreBaselineNow();
-                          if (baseline?.success) {
-                            const ok = (baseline.results || []).filter((r: any) => r.success).map((r: any) => r.file);
-                            const msg = ok.length
-                              ? `[Changeover Settings] Applied baseline fallback: ${ok.join(', ')}`
-                              : `[Changeover Settings] Baseline fallback returned no files`;
-                            addLog(msg, 'info');
-                            bayLogger.sendLog('automation_decision', msg, { bookingId: nextBooking.id });
-                          }
-                        } catch (e) {
-                          console.error('[Changeover] baseline fallback failed:', e);
-                          bayLogger.logError('[Changeover Settings] Baseline fallback exception', e, nextBooking.id);
-                        }
-                      }
-                    }
-                  } catch (e) {
-                    console.error('[Changeover] App Restore chain failed:', e);
-                    bayLogger.logError('[Changeover Settings] App Restore chain exception', e, nextBooking.id);
-                  }
+                  // Outgoing apps are verified closed, so the incoming customer's
+                  // settings are written now — always before GSPro is started.
+                  await prepareSessionSettings(nextBooking, 'changeover');
 
 
                   const result = await window.electronAPI.runAppSequence({

@@ -57,8 +57,17 @@ async function checkSimulatorProcesses(execFileAsync) {
   }
 }
 
+// Only GSPro and ProTee matter for a session handover. Other windowed apps
+// (NVIDIA Overlay, on-screen keyboard, browsers) are tidied up best-effort but
+// must never fail a shutdown or block a changeover.
+function isSimulatorProcess(name) {
+  if (typeof name !== 'string') return false;
+  const normalized = name.trim().toLowerCase().replace(/\.exe$/, '');
+  return SIMULATOR_EXECUTABLES.some(exe => exe.toLowerCase().replace(/\.exe$/, '') === normalized);
+}
+
 function shutdownVerification(visible, named) {
-  const processes = [...visible.processes, ...named.processes];
+  const processes = [...visible.processes.filter(p => isSimulatorProcess(p.name)), ...named.processes];
   const stillRunning = [...new Map(processes.map(process => [process.pid, process])).values()];
   const verificationSucceeded = visible.success && named.success;
   return {
@@ -69,4 +78,4 @@ function shutdownVerification(visible, named) {
   };
 }
 
-module.exports = { SIMULATOR_EXECUTABLES, isProteeLabsTitle, killSimulatorTrees, runSimulatorPowerShell, checkSimulatorProcesses, shutdownVerification };
+module.exports = { SIMULATOR_EXECUTABLES, isSimulatorProcess, isProteeLabsTitle, killSimulatorTrees, runSimulatorPowerShell, checkSimulatorProcesses, shutdownVerification };

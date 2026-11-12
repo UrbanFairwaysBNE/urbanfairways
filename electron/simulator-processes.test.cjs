@@ -70,3 +70,16 @@ test('tasklist errors and malformed output are not an empty verified list', asyn
   expect((await checkSimulatorProcesses(async () => { throw new Error('Timeout'); })).success).toBe(false);
   expect((await checkSimulatorProcesses(async () => ({ stdout: '' }))).success).toBe(false);
 });
+test('non-simulator windows like NVIDIA Overlay never fail a shutdown', () => {
+  const result = shutdownVerification(
+    { success: true, processes: [{ name: 'NVIDIA Overlay', pid: 19960 }, { name: 'TabTip', pid: 12 }, { name: 'chrome', pid: 13 }] },
+    { success: true, processes: [] },
+  );
+  expect(result.success).toBe(true);
+  expect(result.stillRunning).toEqual([]);
+});
+
+test('a visible GSPro or ProTee Labs window still fails a shutdown', () => {
+  expect(shutdownVerification({ success: true, processes: [{ name: 'GSPro', pid: 44 }] }, { success: true, processes: [] }).success).toBe(false);
+  expect(shutdownVerification({ success: true, processes: [{ name: 'ProTee Labs', pid: 45 }] }, { success: true, processes: [] }).success).toBe(false);
+});

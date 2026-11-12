@@ -2227,7 +2227,8 @@ async function closeApps(appNames) {
     }
   }
 
-  // POST-KILL VERIFICATION: confirm no user-facing windows remain (besides Bay Controller).
+  // POST-KILL VERIFICATION: only GSPro/ProTee processes count (filtered in shutdownVerification);
+  // other leftover windows are logged but never fail a shutdown or block a changeover.
   await new Promise(resolve => setTimeout(resolve, 5000));
   let stillRunning = [];
   let verificationFailed = false;

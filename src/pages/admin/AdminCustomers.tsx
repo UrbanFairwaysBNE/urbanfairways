@@ -2299,6 +2299,85 @@ export default function AdminCustomers() {
           </DialogContent>
         </Dialog>
 
+        {/* Amend Credits Dialog */}
+        <Dialog open={!!amendCustomer} onOpenChange={(open) => { if (!open && !isAmending) setAmendCustomer(null); }}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="font-display text-xl uppercase tracking-wide">
+                Amend Credits
+              </DialogTitle>
+              <DialogDescription>
+                {amendCustomer?.first_name} {amendCustomer?.last_name} · Current balance: ${Number(amendCustomer?.deposit_balance || 0).toFixed(2)}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                {(["add", "remove", "set"] as const).map((mode) => (
+                  <Button
+                    key={mode}
+                    type="button"
+                    variant={amendMode === mode ? "default" : "outline"}
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => setAmendMode(mode)}
+                    disabled={isAmending}
+                  >
+                    {mode === "add" ? "Add" : mode === "remove" ? "Remove" : "Set balance"}
+                  </Button>
+                ))}
+              </div>
+
+              <div className="space-y-2">
+                <Label>{amendMode === "set" ? "New balance ($)" : "Amount ($)"}</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={amendAmount}
+                  onChange={(e) => setAmendAmount(e.target.value)}
+                  placeholder="0.00"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Reason (optional)</Label>
+                <Input
+                  value={amendReason}
+                  onChange={(e) => setAmendReason(e.target.value)}
+                  placeholder="e.g. Goodwill for disrupted session"
+                  maxLength={200}
+                />
+              </div>
+
+              {amendMode === "remove" && amendAmount && !isNaN(parseFloat(amendAmount)) && (
+                <p className="text-sm text-muted-foreground">
+                  New balance: ${Math.max(0, Number(amendCustomer?.deposit_balance || 0) - parseFloat(amendAmount)).toFixed(2)}
+                </p>
+              )}
+
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setAmendCustomer(null)}
+                  disabled={isAmending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1"
+                  onClick={amendCredits}
+                  disabled={isAmending || !amendAmount}
+                >
+                  <Wallet className="h-4 w-4 mr-2" />
+                  {isAmending ? "Updating..." : "Update Balance"}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* Bulk Add Credit Dialog */}
         <Dialog open={showBulkDepositDialog} onOpenChange={setShowBulkDepositDialog}>
           <DialogContent className="max-w-xs">

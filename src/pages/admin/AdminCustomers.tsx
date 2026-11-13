@@ -404,7 +404,7 @@ export default function AdminCustomers() {
     } catch (error: any) {
       toast({
         title: "Error creating customer",
-        description: error.message || "Failed to create customer.",
+        description: await getInvokeErrorMessage(error),
         variant: "destructive",
         duration: 4000,
       });

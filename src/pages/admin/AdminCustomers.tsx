@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { usePricing } from "@/hooks/usePricing";
 import { needsMembershipReview } from "@/lib/membership-verification";
+import { getInvokeErrorMessage } from "@/lib/edge-function-error";
 import { tierBadgeClass } from "@/lib/tier-config";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -404,7 +405,7 @@ export default function AdminCustomers() {
     } catch (error: any) {
       toast({
         title: "Error creating customer",
-        description: error.message || "Failed to create customer.",
+        description: await getInvokeErrorMessage(error),
         variant: "destructive",
         duration: 4000,
       });

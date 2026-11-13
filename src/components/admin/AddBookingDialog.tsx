@@ -28,6 +28,7 @@ import { Badge } from "@/components/ui/badge";
 import { calculateHourlyRate, isOffPeakTime, getPricingLabel } from "@/lib/pricing-utils";
 import { TierConfig, TIER_SELECT, findTier, isDefaultTier, normaliseTier, tierLabel } from "@/lib/tier-config";
 import { BLOCK_DURATION_OPTIONS, blockEndTime, allDaySpan } from "@/lib/bay-block-utils";
+import { getInvokeErrorMessage } from "@/lib/edge-function-error";
 import { useOperatingHours } from "@/hooks/useOperatingHours";
 
 interface Bay {
@@ -358,7 +359,7 @@ export function AddBookingDialog({
     } catch (error: any) {
       toast({
         title: "Error creating customer",
-        description: error.message || "Failed to create customer.",
+        description: await getInvokeErrorMessage(error),
         variant: "destructive",
         duration: 4000,
       });

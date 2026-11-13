@@ -69,6 +69,7 @@ import {
   X,
   UserX,
   Gift,
+  Wallet,
   FileText,
   Users,
   Shield,
@@ -173,6 +174,11 @@ export default function AdminCustomers() {
   const [showDepositDialog, setShowDepositDialog] = useState(false);
   const [depositAmount, setDepositAmount] = useState("");
   const [isAddingDeposit, setIsAddingDeposit] = useState(false);
+  const [amendCustomer, setAmendCustomer] = useState<Customer | null>(null);
+  const [amendMode, setAmendMode] = useState<"add" | "remove" | "set">("add");
+  const [amendAmount, setAmendAmount] = useState("");
+  const [amendReason, setAmendReason] = useState("");
+  const [isAmending, setIsAmending] = useState(false);
 
   // Bulk actions state
   const [showBulkDepositDialog, setShowBulkDepositDialog] = useState(false);

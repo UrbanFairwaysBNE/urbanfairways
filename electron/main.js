@@ -6,7 +6,7 @@ const { exec, execFile, spawn } = require('child_process');
 const { promisify } = require('util');
 const execAsync = promisify(exec);
 const execFileAsync = promisify(execFile);
-const { isProteeLabsTitle, killSimulatorTrees, runSimulatorPowerShell, checkSimulatorProcesses, shutdownVerification } = require('./simulator-processes.cjs');
+const { isProteeLabsTitle, killSimulatorTrees, runSimulatorPowerShell, checkSimulatorProcesses, shutdownVerification, launchPlan, retryDeniedWithElevation } = require('./simulator-processes.cjs');
 const { inventory, killInstance, transitions, createOperationGate, createJournal } = require('./process-lifecycle.cjs');
 const { randomUUID } = require('crypto');
 const simulatorOperation = createOperationGate();
@@ -1626,10 +1626,21 @@ async function verifyAppsReady(gsproDisplayIndex, proteeDisplayIndex) {
 // Uses a simple 35-second timer to ensure apps have time to load
 async function runAppLaunchSequence(config) {
   const before = await observeSimulatorProcesses('before_launch_sequence');
-  if (!before.success || before.processes.length > 0) {
-    recordLifecycle('launch_blocked', { reason: before.success ? 'Existing simulator processes must be closed first' : 'Process inventory unavailable', ...before });
-    return { success: false, error: before.success ? 'Simulator processes already running; close apps before relaunching' : 'Cannot verify existing simulator processes' };
+  if (!before.success) {
+    recordLifecycle('launch_blocked', { reason: 'Process inventory unavailable', ...before });
+    return { success: false, error: 'Cannot verify existing simulator processes' };
   }
+  // GSPro and ProTee Labs are checked separately: a leftover/stuck Labs must
+  // never stop GSPro opening (and vice versa). Only what is missing is launched.
+  const plan = launchPlan(before.processes, !!(config.proteeLabsPath && config.proteeLabsPath.trim()));
+  if (plan.nothingToLaunch) {
+    recordLifecycle('launch_blocked', { reason: 'GSPro and ProTee Labs already running', ...before });
+    return { success: false, alreadyRunning: true, error: 'GSPro and ProTee Labs are already running' };
+  }
+  if (plan.running.gspro || plan.running.labs) {
+    recordLifecycle('launch_partial', { launchGspro: plan.launchGspro, launchLabs: plan.launchLabs, processes: before.processes });
+  }
+  const launched = { gspro: plan.launchGspro, labs: plan.launchLabs };
   const {
     gsproPath,
     proteeLabsPath,
@@ -1672,11 +1683,18 @@ async function runAppLaunchSequence(config) {
   
   try {
     // Step 0: Show welcome windows on ALL displays
-    console.log('Step 0: Showing welcome windows on all displays...');
-    const customerFirstName = firstName && firstName.trim() !== '' ? firstName.trim() : 'Guest';
-    console.log('Using customer name:', customerFirstName);
-    await showWelcomeWindows(customerFirstName, language);
-    results.push({ step: 'show_welcome', success: true });
+    // Skipped when one app is already open (e.g. relaunching GSPro mid-session),
+    // so the customer's working screen is not covered.
+    const fullLaunch = !plan.running.gspro && !plan.running.labs;
+    if (fullLaunch) {
+      console.log('Step 0: Showing welcome windows on all displays...');
+      const customerFirstName = firstName && firstName.trim() !== '' ? firstName.trim() : 'Guest';
+      console.log('Using customer name:', customerFirstName);
+      await showWelcomeWindows(customerFirstName, language);
+      results.push({ step: 'show_welcome', success: true });
+    } else {
+      results.push({ step: 'show_welcome', skipped: true });
+    }
     
     if (appLaunchCancelled) {
       await closeWelcomeWindows();
@@ -1684,18 +1702,22 @@ async function runAppLaunchSequence(config) {
     }
     
     // Step 1: Launch GSPRO immediately
-    console.log('Step 1: Launching GSPRO...');
-    const gsproLaunch = await launchApp(gsproPath);
-    console.log('GSPRO launch result:', JSON.stringify(gsproLaunch));
-    results.push({ step: 'launch_gspro', ...gsproLaunch });
-    if (gsproLaunch.success) {
-      global.__gsproLaunchTs = Date.now();
-      console.log('[Range] Recorded GSPro launch timestamp:', new Date(global.__gsproLaunchTs).toISOString());
-    }
-    
-    if (!gsproLaunch.success) {
-      await closeWelcomeWindows();
-      return { success: false, error: 'Failed to launch GSPRO: ' + gsproLaunch.error, results };
+    if (plan.launchGspro) {
+      console.log('Step 1: Launching GSPRO...');
+      const gsproLaunch = await launchApp(gsproPath);
+      console.log('GSPRO launch result:', JSON.stringify(gsproLaunch));
+      results.push({ step: 'launch_gspro', ...gsproLaunch });
+      if (gsproLaunch.success) {
+        global.__gsproLaunchTs = Date.now();
+        console.log('[Range] Recorded GSPro launch timestamp:', new Date(global.__gsproLaunchTs).toISOString());
+      }
+      if (!gsproLaunch.success) {
+        await closeWelcomeWindows();
+        return { success: false, error: 'Failed to launch GSPRO: ' + gsproLaunch.error, results, launched };
+      }
+    } else {
+      console.log('Step 1: GSPRO already running - not relaunching');
+      results.push({ step: 'launch_gspro', skipped: true, reason: 'already_running' });
     }
     
     // Wait for ProTee United VX window to appear before launching Protee Labs
@@ -1705,7 +1727,7 @@ async function runAppLaunchSequence(config) {
     const apiWaitStartTime = Date.now();
     let apiWindowFound = false;
     
-    while (Date.now() - apiWaitStartTime < maxWaitForApiWindow) {
+    while (plan.launchGspro && Date.now() - apiWaitStartTime < maxWaitForApiWindow) {
       if (appLaunchCancelled) {
         await closeWelcomeWindows();
         return { success: false, cancelled: true, results };
@@ -1740,7 +1762,10 @@ async function runAppLaunchSequence(config) {
     
     // Step 3: Launch Protee Labs (NOW that API window is ready)
     console.log('Step 3: Launching Protee Labs...');
-    if (proteeLabsPath && proteeLabsPath.trim() !== '') {
+    if (!plan.launchLabs && plan.running.labs) {
+      console.log('Protee Labs already running - not relaunching');
+      results.push({ step: 'launch_protee_labs', skipped: true, reason: 'already_running' });
+    } else if (proteeLabsPath && proteeLabsPath.trim() !== '') {
       const proteeLaunch = await launchApp(proteeLabsPath);
       console.log('Protee Labs launch result:', JSON.stringify(proteeLaunch));
       results.push({ step: 'launch_protee_labs', ...proteeLaunch });
@@ -1756,7 +1781,7 @@ async function runAppLaunchSequence(config) {
     
     // Step 4: Wait 20 more seconds for Protee Labs to fully load
     // (API window wait already provided loading time for GSPRO)
-    const PROTEE_LOAD_TIME = 20000;
+    const PROTEE_LOAD_TIME = plan.launchLabs ? 20000 : 5000;
     console.log(`Step 4: Waiting ${PROTEE_LOAD_TIME / 1000} seconds for Protee Labs to load...`);
     
     // Check for cancellation every 5 seconds during the wait
@@ -1804,8 +1829,8 @@ async function runAppLaunchSequence(config) {
     
     console.log('=== APP LAUNCH SEQUENCE COMPLETE ===');
     const after = await observeSimulatorProcesses('after_launch_sequence');
-    recordLifecycle('launch_sequence_finished', { success: true, processes: after.processes, verificationSucceeded: after.success });
-    return { success: true, results, displaySnapshot };
+    recordLifecycle('launch_sequence_finished', { success: true, launched, processes: after.processes, verificationSucceeded: after.success });
+    return { success: true, results, displaySnapshot, launched };
   } catch (error) {
     recordLifecycle('launch_sequence_failed', { error: error.message });
     await observeSimulatorProcesses('after_launch_failure');
@@ -2224,6 +2249,20 @@ async function closeApps(appNames) {
   for (const result of treeResults) {
     if (result.status === 'failed') {
       console.error(`Tree-kill failed for ${result.app}: ${result.error}. Check controller Windows privileges.`);
+    }
+  }
+
+  // "Access is denied" = the app is running with admin rights (e.g. ProTee Labs
+  // relaunched by its updater). Retry once with admin rights, but only when
+  // Windows allows it silently (UAC "Never notify") - never a prompt on screen.
+  const elevated = await retryDeniedWithElevation(execFileAsync, [...results, ...treeResults]);
+  if (elevated.names.length) {
+    recordLifecycle(elevated.attempted ? 'elevated_kill_attempted' : 'elevated_kill_unavailable', elevated);
+    if (elevated.attempted) {
+      console.log(`Elevated close for ${elevated.names.join(', ')}: ${elevated.success ? 'OK' : `failed (${elevated.error || `exit ${elevated.exitCode}`})`}`);
+      results.push({ app: `Elevated close: ${elevated.names.join(', ')}`, status: elevated.success ? 'closed' : 'failed', error: elevated.error });
+    } else {
+      console.warn(`Access denied closing ${elevated.names.join(', ')}; admin retry unavailable (${elevated.plan || 'unknown'}). Set UAC to "Never notify" on this bay PC.`);
     }
   }
 

@@ -4218,7 +4218,7 @@ export default function BayController() {
               </Button>
             ) : (
               <Button 
-                onClick={launchApps} 
+                onClick={() => launchApps()} 
                 disabled={appsRunning || !isElectron}
                 className="flex-1"
               >

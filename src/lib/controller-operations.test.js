@@ -40,3 +40,31 @@ describe('controller operation ownership', () => {
     expect(await coordinator.run(async () => 'retry')).toBe('retry');
   });
 });
+import { simulatorAppsRunning, gsproRecoveryDecision, GSPRO_RECOVERY } from './controller-operations';
+
+describe('GSPro recovery independent of ProTee Labs', () => {
+  const start = Date.parse('2026-11-15T10:00:00+10:00');
+  const end = start + 60 * 60000;
+  const base = { startMs: start, endMs: end, misses: 0, attempts: 0, lastAttemptAt: 0 };
+  const mid = start + 10 * 60000;
+
+  test('a running ProTee Labs does not count as GSPro running', () => {
+    expect(simulatorAppsRunning([{ name: 'Protee labs.exe' }])).toEqual({ gspro: false, labs: true });
+  });
+
+  test('relaunches GSPro after two consecutive missing checks mid-session', () => {
+    const first = gsproRecoveryDecision({ ...base, nowMs: mid, gsproRunning: false });
+    expect(first.action).toBe('wait');
+    expect(gsproRecoveryDecision({ ...base, misses: first.misses, nowMs: mid + 15000, gsproRunning: false }).action).toBe('launch');
+  });
+
+  test('leaves the normal launch alone in the first 90 seconds and never reopens in the last 3 minutes', () => {
+    expect(gsproRecoveryDecision({ ...base, misses: 5, nowMs: start + 60000, gsproRunning: false }).action).toBe('wait');
+    expect(gsproRecoveryDecision({ ...base, misses: 5, nowMs: end - 120000, gsproRunning: false }).action).toBe('wait');
+  });
+
+  test('stops after 3 attempts per booking, 2 minutes apart', () => {
+    expect(gsproRecoveryDecision({ ...base, misses: 1, attempts: 1, lastAttemptAt: mid - 60000, nowMs: mid, gsproRunning: false }).action).toBe('wait');
+    expect(gsproRecoveryDecision({ ...base, misses: 1, attempts: GSPRO_RECOVERY.maxAttempts, nowMs: mid, gsproRunning: false }).action).toBe('exhausted');
+  });
+});

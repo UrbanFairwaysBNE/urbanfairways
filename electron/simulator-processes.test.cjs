@@ -83,3 +83,61 @@ test('a visible GSPro or ProTee Labs window still fails a shutdown', () => {
   expect(shutdownVerification({ success: true, processes: [{ name: 'GSPro', pid: 44 }] }, { success: true, processes: [] }).success).toBe(false);
   expect(shutdownVerification({ success: true, processes: [{ name: 'ProTee Labs', pid: 45 }] }, { success: true, processes: [] }).success).toBe(false);
 });
+
+const { launchPlan, elevationPlan, deniedSimulatorNames, retryDeniedWithElevation } = require('./simulator-processes.cjs');
+
+test('a leftover ProTee Labs never stops GSPro launching', () => {
+  const plan = launchPlan([{ name: 'Protee labs.exe', pid: 4176 }], true);
+  expect(plan.launchGspro).toBe(true);
+  expect(plan.launchLabs).toBe(false);
+  expect(plan.nothingToLaunch).toBe(false);
+});
+
+test('GSPro already open launches only ProTee Labs', () => {
+  const plan = launchPlan([{ name: 'GSPro.exe', pid: 10 }], true);
+  expect(plan.launchGspro).toBe(false);
+  expect(plan.launchLabs).toBe(true);
+});
+
+test('both apps open means nothing to launch', () => {
+  expect(launchPlan([{ name: 'GSPro.exe', pid: 1 }, { name: 'ProteeLabs.exe', pid: 2 }], true).nothingToLaunch).toBe(true);
+});
+
+test('admin retry is silent only when UAC is set to never notify', () => {
+  expect(elevationPlan({ isAdmin: true, isElevated: false, consentPromptAdmin: 0 })).toBe('silent');
+  expect(elevationPlan({ isAdmin: true, isElevated: false, consentPromptAdmin: 5 })).toBe('would_prompt');
+  expect(elevationPlan({ isAdmin: false, isElevated: false, consentPromptAdmin: 0 })).toBe('not_admin');
+  expect(elevationPlan({ error: 'reg failed' })).toBe('unknown');
+});
+
+test('only access-denied simulator executables are retried with admin rights', () => {
+  expect(deniedSimulatorNames([
+    { app: 'Protee labs.exe', status: 'failed', error: 'ERROR: Access is denied.' },
+    { app: 'GSPro.exe', status: 'not_running' },
+    { app: 'notepad.exe', status: 'failed', error: 'Access is denied' },
+  ])).toEqual(['Protee labs.exe']);
+});
+
+test('never shows a UAC prompt: no admin retry when Windows would ask', async () => {
+  const calls = [];
+  const result = await retryDeniedWithElevation(async (file, args) => {
+    calls.push(Buffer.from(args[3], 'base64').toString('utf16le'));
+    return { stdout: 'UAC|1|5|True|False' };
+  }, [{ app: 'Protee labs.exe', status: 'failed', error: 'Access is denied' }]);
+  expect(result.attempted).toBe(false);
+  expect(result.plan).toBe('would_prompt');
+  expect(calls.some(script => script.includes('RunAs'))).toBe(false);
+});
+
+test('silent admin retry targets only the denied simulator', async () => {
+  const scripts = [];
+  const result = await retryDeniedWithElevation(async (file, args) => {
+    const script = Buffer.from(args[3], 'base64').toString('utf16le');
+    scripts.push(script);
+    return { stdout: script.includes('RunAs') ? 'EXIT|0' : 'UAC|1|0|True|False' };
+  }, [{ app: 'Protee labs.exe', status: 'failed', error: 'Access is denied' }]);
+  expect(result.success).toBe(true);
+  const kill = scripts.find(script => script.includes('RunAs'));
+  expect(kill).toContain('/IM "Protee labs.exe"');
+  expect(kill).not.toContain('GSPro.exe');
+});

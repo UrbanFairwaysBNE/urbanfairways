@@ -20,7 +20,7 @@ import { ControllerPasswordSettings } from "@/components/bay-controller/Controll
 import { verifyControllerPassword } from "@/lib/bay-controller-password";
 import { prepareBayPowerOff, SIMULATOR_EXECUTABLES } from "@/lib/bay-shutdown";
 import { shutdownOutcome } from "@/lib/shutdown-report";
-import { createShutdownCoordinator, canRunRegularAutomation } from "@/lib/controller-operations";
+import { createShutdownCoordinator, canRunRegularAutomation, simulatorAppsRunning, gsproRecoveryDecision, GSPRO_RECOVERY, type GsproRecoveryState } from "@/lib/controller-operations";
 
 interface Booking {
   id: string;
@@ -3241,7 +3241,7 @@ export default function BayController() {
     return settingsPreparerRef.current.prepare(key, () => applySessionSettings(booking, source));
   };
 
-  const launchApps = async () => {
+  const launchApps = async (launchReason?: 'gspro_recovery') => {
     if (!isElectron || !window.electronAPI) {
       toast.error("App launch requires desktop app");
       return;
@@ -3387,7 +3387,7 @@ export default function BayController() {
         proteeDisplayLabel: appLaunchConfig.proteeDisplayLabel,
         postLaunchDelay: 3000,
         bookingId: sessionBooking?.id,
-        reason: manualOverride ? 'staff_launch' : 'booking_launch',
+        reason: launchReason ?? (manualOverride ? 'staff_launch' : 'booking_launch'),
         firstName: sessionBooking?.customer_name?.split(' ')[0] || 'Guest',
         language: sessionBooking?.preferred_language || 'en'
       };
@@ -3410,10 +3410,18 @@ export default function BayController() {
         setAppLaunchStatus("Launch cancelled");
         addLog("Launch cancelled by user", 'info');
         toast.info("App launch cancelled");
-      } else if (result.success) {
+      } else if (result.alreadyRunning) {
+        // Both apps are already open (e.g. after a controller restart): track them, don't relaunch.
         setAppsRunning(true);
-        setAppLaunchStatus("All apps launched successfully");
-        addLog("All apps launched successfully!", 'success');
+        setAppLaunchStatus("Apps already running");
+        addLog("GSPro and Protee Labs already running — nothing to launch", 'info');
+      } else if (result.success) {
+        const launchedGspro = result.launched?.gspro ?? true;
+        const launchedLabs = result.launched?.labs ?? true;
+        const partial = !launchedGspro || !launchedLabs;
+        setAppsRunning(true);
+        setAppLaunchStatus(partial ? `Launched ${launchedGspro ? 'GSPro' : 'Protee Labs'} (other app already open)` : "All apps launched successfully");
+        addLog(partial ? `Launched ${launchedGspro ? 'GSPro' : 'Protee Labs'} only — the other app was already open` : "All apps launched successfully!", 'success');
         
         // Log display snapshot from electron for diagnostics
         if (result.displaySnapshot) {
@@ -3424,9 +3432,9 @@ export default function BayController() {
           });
         }
         
-        bayLogger.logAppLaunch('GSPro', sessionBooking?.id);
-        bayLogger.logAppLaunch('Protee Labs', sessionBooking?.id);
-        toast.success("Apps launched successfully");
+        if (launchedGspro) bayLogger.logAppLaunch('GSPro', sessionBooking?.id);
+        if (launchedLabs) bayLogger.logAppLaunch('Protee Labs', sessionBooking?.id);
+        toast.success(partial ? `${launchedGspro ? 'GSPro' : 'Protee Labs'} launched` : "Apps launched successfully");
         
         // Log results from the welcome window sequence
         result.results?.forEach(r => {
@@ -3630,6 +3638,52 @@ export default function BayController() {
     powerOnPrepAttemptRef.current = { key, at: now.getTime() };
     void prepareSessionSettings(booking, 'power-on');
   }, [currentTime, bookings, preStartMinutes, appsRunning, isLaunchingApps, isElectron, manualOverride]);
+
+  // GSPRO RECOVERY: GSPro and Labs are tracked separately. If GSPro is missing
+  // during a live session (e.g. a stuck/leftover Labs made the controller think
+  // "apps running"), relaunch GSPro on its own. Bounded per booking; an
+  // unavailable process check is never treated as "missing".
+  const launchAppsRef = useRef(launchApps);
+  launchAppsRef.current = launchApps;
+  const gsproRecoveryRef = useRef<GsproRecoveryState & { bookingId: string | null; exhaustedLogged: boolean }>({ bookingId: null, misses: 0, attempts: 0, lastAttemptAt: 0, exhaustedLogged: false });
+  useEffect(() => {
+    if (!isElectron || !window.electronAPI?.checkProcesses || !appLaunchConfig.enabled || !appLaunchConfig.gsproPath || manualOverride) return;
+    const busy = () => !canRunRegularAutomation({ changeoverInProgress: !!changeoverInProgressRef.current, launchInProgress: launchInProgressRef.current, shutdownInProgress: shutdownCoordinatorRef.current.isClosing })
+      || (lastIntentionalAppCloseAtRef.current !== null && Date.now() - lastIntentionalAppCloseAtRef.current < 5000)
+      || Date.now() < launchFailedCooldownUntilRef.current;
+    const timer = setInterval(async () => {
+      if (busy()) return;
+      const now = new Date();
+      const booking = findSessionBooking(bookingsRef.current, now, format(now, "yyyy-MM-dd"), 0);
+      const state = gsproRecoveryRef.current;
+      if (!booking) { state.bookingId = null; state.misses = 0; return; }
+      if (state.bookingId !== booking.id) Object.assign(state, { bookingId: booking.id, misses: 0, attempts: 0, lastAttemptAt: 0, exhaustedLogged: false });
+      let procs;
+      try { procs = await window.electronAPI!.checkProcesses(); } catch { return; }
+      if (!procs?.success || busy()) return;
+      const running = simulatorAppsRunning(procs.processes);
+      const decision = gsproRecoveryDecision({
+        ...state,
+        nowMs: now.getTime(),
+        startMs: new Date(`${booking.booking_date}T${booking.start_time}`).getTime(),
+        endMs: new Date(`${booking.booking_date}T${booking.end_time}`).getTime(),
+        gsproRunning: running.gspro,
+      });
+      state.misses = decision.misses;
+      if (decision.action === 'exhausted' && !state.exhaustedLogged) {
+        state.exhaustedLogged = true;
+        bayLogger.sendLog('error', `GSPro still not running after ${GSPRO_RECOVERY.maxAttempts} relaunch attempts — needs staff`, { level: 'error', bookingId: booking.id, details: { running }, immediate: true });
+        addLog('GSPro could not be reopened automatically — please check the bay', 'error');
+      }
+      if (decision.action !== 'launch') return;
+      state.attempts += 1;
+      state.lastAttemptAt = now.getTime();
+      bayLogger.sendLog('automation_decision', `GSPro not running mid-session (Protee Labs ${running.labs ? 'open' : 'not open'}) — relaunching GSPro (attempt ${state.attempts}/${GSPRO_RECOVERY.maxAttempts})`, { bookingId: booking.id, details: { running, processes: procs.processes } });
+      addLog(`GSPro not running — relaunching it (attempt ${state.attempts}/${GSPRO_RECOVERY.maxAttempts})`, 'info');
+      void launchAppsRef.current('gspro_recovery');
+    }, GSPRO_RECOVERY.pollMs);
+    return () => clearInterval(timer);
+  }, [isElectron, appLaunchConfig.enabled, appLaunchConfig.gsproPath, manualOverride, bayLogger, addLog]);
 
   // Password screen
   if (!isAuthenticated) {
@@ -4164,7 +4218,7 @@ export default function BayController() {
               </Button>
             ) : (
               <Button 
-                onClick={launchApps} 
+                onClick={() => launchApps()} 
                 disabled={appsRunning || !isElectron}
                 className="flex-1"
               >

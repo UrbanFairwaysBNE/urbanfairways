@@ -78,4 +78,83 @@ function shutdownVerification(visible, named) {
   };
 }
 
-module.exports = { SIMULATOR_EXECUTABLES, isSimulatorProcess, isProteeLabsTitle, killSimulatorTrees, runSimulatorPowerShell, checkSimulatorProcesses, shutdownVerification };
+// GSPro and ProTee Labs are launched independently: a leftover or stuck Labs
+// instance must never stop GSPro from opening for the next customer.
+const GSPRO_EXECUTABLES = ['gspro.exe', 'gsprolauncher.exe'];
+const LABS_EXECUTABLES = ['protee labs.exe', 'proteelabs.exe'];
+const exeName = (name) => String(name || '').trim().toLowerCase().replace(/(\.exe)?$/, '.exe');
+
+function runningSimulatorApps(processes) {
+  const names = (processes || []).map(p => exeName(p && p.name));
+  return {
+    gspro: names.some(n => GSPRO_EXECUTABLES.includes(n)),
+    labs: names.some(n => LABS_EXECUTABLES.includes(n)),
+  };
+}
+
+function launchPlan(processes, labsConfigured) {
+  const running = runningSimulatorApps(processes);
+  const launchGspro = !running.gspro;
+  const launchLabs = !!labsConfigured && !running.labs;
+  return { running, launchGspro, launchLabs, nothingToLaunch: !launchGspro && !launchLabs };
+}
+
+// "Access is denied" means the target runs with higher (admin) rights than the
+// controller, e.g. ProTee Labs relaunched by its own updater. Windows only lets
+// us retry with admin rights silently when UAC is set to "Never notify"; we never
+// trigger a UAC prompt in front of a customer.
+function elevationPlan(state) {
+  if (!state || state.error) return 'unknown';
+  if (state.isElevated) return 'already_elevated';
+  if (!state.isAdmin) return 'not_admin';
+  if (state.consentPromptAdmin === 0) return 'silent';
+  if (state.consentPromptAdmin === null || state.consentPromptAdmin === undefined) return 'unknown';
+  return 'would_prompt';
+}
+
+async function readElevationState(execFileAsync) {
+  const script = "$ErrorActionPreference='Stop'; $s=Get-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System'; $g=(whoami /groups) -join ' '; Write-Output ('UAC|' + $s.EnableLUA + '|' + $s.ConsentPromptBehaviorAdmin + '|' + ($g -match 'S-1-5-32-544') + '|' + ($g -match 'S-1-16-12288'))";
+  try {
+    const { stdout } = await runSimulatorPowerShell(execFileAsync, script, 10000);
+    const line = String(stdout).split('\n').map(l => l.trim()).find(l => l.startsWith('UAC|'));
+    if (!line) throw new Error('Unrecognised UAC response');
+    const [, lua, consent, admin, elevated] = line.split('|');
+    const num = (v) => (v === '' || v === undefined || !Number.isFinite(Number(v)) ? null : Number(v));
+    return { enableLua: num(lua), consentPromptAdmin: num(consent), isAdmin: admin === 'True', isElevated: elevated === 'True' };
+  } catch (error) {
+    return { error: String(error.stderr || error.message || error) };
+  }
+}
+
+function deniedSimulatorNames(killResults) {
+  const allowed = new Map(SIMULATOR_EXECUTABLES.map(n => [n.toLowerCase(), n]));
+  const names = new Set();
+  for (const r of killResults || []) {
+    if (!r || r.status !== 'failed' || !/access.*denied/i.test(String(r.error || ''))) continue;
+    const exe = allowed.get(exeName(r.app || r.name));
+    if (exe) names.add(exe);
+  }
+  return [...names];
+}
+
+// One silent admin-level taskkill for the denied simulator executables only
+// (fixed allow-list, so nothing else can ever be closed this way).
+async function retryDeniedWithElevation(execFileAsync, killResults) {
+  const names = deniedSimulatorNames(killResults);
+  if (!names.length) return { attempted: false, names };
+  const state = await readElevationState(execFileAsync);
+  const plan = elevationPlan(state);
+  if (plan !== 'silent') return { attempted: false, names, plan, state };
+  const args = ['/F', '/T', ...names.flatMap(n => ['/IM', `"${n}"`])].join(' ');
+  const script = `$ErrorActionPreference='Stop'; $p=Start-Process -FilePath (Join-Path $env:SystemRoot 'System32\\taskkill.exe') -ArgumentList '${args}' -Verb RunAs -WindowStyle Hidden -PassThru -Wait; Write-Output ('EXIT|' + $p.ExitCode)`;
+  try {
+    const { stdout } = await runSimulatorPowerShell(execFileAsync, script, 20000);
+    const match = String(stdout).match(/EXIT\|(-?\d+)/);
+    const exitCode = match ? Number(match[1]) : null;
+    return { attempted: true, names, plan, exitCode, success: exitCode === 0 };
+  } catch (error) {
+    return { attempted: true, names, plan, success: false, error: String(error.stderr || error.message || error) };
+  }
+}
+
+module.exports = { SIMULATOR_EXECUTABLES, isSimulatorProcess, isProteeLabsTitle, killSimulatorTrees, runSimulatorPowerShell, checkSimulatorProcesses, shutdownVerification, runningSimulatorApps, launchPlan, elevationPlan, readElevationState, deniedSimulatorNames, retryDeniedWithElevation };

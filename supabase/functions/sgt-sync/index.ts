@@ -298,15 +298,20 @@ serve(async (req) => {
     const toursResponse = await sgtRequest("/tours/list", apiKey);
     const tours = extractArray(toursResponse, ['tours', 'results']);
     
+    // A tour whose end date has passed is no longer the running league, even if
+    // SGT still flags it active, so the app never has two "active" tours.
+    const todayForTours = new Date(Date.now() + 10 * 60 * 60 * 1000).toISOString().split('T')[0];
     for (const tour of tours) {
       const t = tour as { tourId: number; name: string; start_date?: string; end_date?: string; teamTour?: number; active?: number };
+      const tourEnd = (t.end_date || '').substring(0, 10);
+      const ended = Boolean(tourEnd) && tourEnd < todayForTours;
       await supabase.from("sgt_tours").upsert({
         tour_id: t.tourId,
         name: t.name,
         start_date: t.start_date,
         end_date: t.end_date,
         team_tour: t.teamTour ?? 0,
-        active: t.active ?? 1,
+        active: (t.active ?? 1) === 1 && !ended ? 1 : 0,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'tour_id' });
       totalRecords++;

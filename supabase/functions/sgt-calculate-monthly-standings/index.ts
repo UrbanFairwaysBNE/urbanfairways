@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { authenticateCronRequest } from "../_shared/cron-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -94,6 +95,10 @@ Deno.serve(async (req) => {
 
   let authorized = false;
   if (expectedSecret && syncSecret === expectedSecret) authorized = true;
+  if (!authorized && authenticateCronRequest(req) === null) {
+    authorized = true;
+    console.log("[MONTHLY-STANDINGS] Authorized via managed schedule");
+  }
   if (!authorized && token && token === supabaseKey) {
     authorized = true;
     console.log("[MONTHLY-STANDINGS] Authorized via service role key");

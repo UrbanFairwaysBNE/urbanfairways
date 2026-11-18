@@ -9,6 +9,7 @@ const corsHeaders = {
 
 const SGT_BASE_URL = "https://simulatorgolftour.com/sgt-api/club-admin";
 import { getClubUrl } from "../_shared/sgt-config.ts";
+import { authenticateCronRequest } from "../_shared/cron-auth.ts";
 import { getTenant, tenantHubUrl } from "../_shared/tenant.ts";
 import { renderBrandedEmail } from "../_shared/email-wrapper.ts";
 
@@ -130,6 +131,12 @@ serve(async (req) => {
     authorized = true;
   }
   
+  // 1b. Managed scheduled run (Bearer LOVABLE_CRON_SECRET)
+  if (!authorized && authenticateCronRequest(req) === null) {
+    authorized = true;
+    console.log("[SGT-SYNC] Authorized via managed schedule");
+  }
+
   // 2. Check if Bearer token is the service role key (cron jobs)
   if (!authorized && token && token === serviceRoleKey) {
     authorized = true;
@@ -550,7 +557,7 @@ serve(async (req) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-sync-secret": expectedSecret || "",
+          "Authorization": `Bearer ${serviceRoleKey}`,
         },
         body: JSON.stringify({}),
       });
